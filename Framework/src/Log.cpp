@@ -1,7 +1,5 @@
-#include "Log.h"
-
-#include "stdafx.h"
-#include "Log.h"
+#include <GameFramework/Log.h>
+#include <GameFramework/stdafx.h>
 
 #define LOGNAME "log.txt"
 

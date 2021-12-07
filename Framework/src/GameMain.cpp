@@ -1,5 +1,5 @@
-#include "GameMain.h"
-#include "macros.h"
+#include <GameFramework/GameMain.h>
+#include <GameFramework/macros.h>
 
 namespace GameFramework {
 

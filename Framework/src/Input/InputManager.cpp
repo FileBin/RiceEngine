@@ -1,5 +1,5 @@
-#include "InputManager.h"
-#include "macros.h"
+#include <GameFramework/InputManager.h>
+#include <GameFramework/macros.h>
 
 namespace GameFramework {
 

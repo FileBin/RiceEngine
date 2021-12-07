@@ -1,9 +1,9 @@
 #pragma once
-#include <Render.h>
-#include <macros.h>
+#include <GameFramework/Render.h>
+#include <GameFramework/macros.h>
 #include <vector>
 #include <xnamath.h>
-#include <Input/InputManager.h>
+#include <GameFramework/InputManager.h>
 
 using namespace GameFramework;
 

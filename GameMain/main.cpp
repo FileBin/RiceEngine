@@ -1,4 +1,4 @@
-#include <GameMain.h>
+#include <GameFramework/GameMain.h>
 #include <MyRender.h>
 
 using namespace GameFramework;

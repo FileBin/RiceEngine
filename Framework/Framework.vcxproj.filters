@@ -15,37 +15,40 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\stdafx.h">
+    <ClInclude Include="include\GameFramework\stdafx.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\macros.h">
+    <ClInclude Include="include\GameFramework\macros.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Log.h">
+    <ClInclude Include="include\GameFramework\Log.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Input\InputButtons.h">
+    <ClInclude Include="include\GameFramework\InputButtons.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Input\InputManager.h">
+    <ClInclude Include="include\GameFramework\InputManager.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Input\Events.h">
+    <ClInclude Include="include\GameFramework\InputEvents.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Math\Vectors.h">
+    <ClInclude Include="include\GameFramework\Vectors.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Math\Math.h">
+    <ClInclude Include="include\GameFramework\Math.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Window.h">
+    <ClInclude Include="include\GameFramework\Window.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameMain.h">
+    <ClInclude Include="include\GameFramework\GameMain.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render.h">
+    <ClInclude Include="include\GameFramework\Render.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameFramework\version.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

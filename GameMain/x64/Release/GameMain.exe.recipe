@@ -2,10 +2,17 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\FileBinsLapTop\source\repos\GameMain\x64\Release\GameMain.exe</FullPath>
+      <FullPath>C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Release\GameMain.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
-  <ContentFiles />
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Release\PixelShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Release\VertexShader.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />
 </Project>

@@ -81,11 +81,13 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_debug</TargetName>
+    <IncludePath>include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
+    <IncludePath>include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -152,17 +154,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Render.h" />
-    <ClInclude Include="src\GameMain.h" />
-    <ClInclude Include="src\Input\Events.h" />
-    <ClInclude Include="src\Input\InputButtons.h" />
-    <ClInclude Include="src\Input\InputManager.h" />
-    <ClInclude Include="src\Log.h" />
-    <ClInclude Include="src\macros.h" />
-    <ClInclude Include="src\Math\Math.h" />
-    <ClInclude Include="src\stdafx.h" />
-    <ClInclude Include="src\Math\Vectors.h" />
-    <ClInclude Include="src\Window.h" />
+    <ClInclude Include="include\GameFramework\Render.h" />
+    <ClInclude Include="include\GameFramework\GameMain.h" />
+    <ClInclude Include="include\GameFramework\InputEvents.h" />
+    <ClInclude Include="include\GameFramework\InputButtons.h" />
+    <ClInclude Include="include\GameFramework\InputManager.h" />
+    <ClInclude Include="include\GameFramework\Log.h" />
+    <ClInclude Include="include\GameFramework\macros.h" />
+    <ClInclude Include="include\GameFramework\Math.h" />
+    <ClInclude Include="include\GameFramework\version.h" />
+    <ClInclude Include="include\GameFramework\stdafx.h" />
+    <ClInclude Include="include\GameFramework\Vectors.h" />
+    <ClInclude Include="include\GameFramework\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameMain.cpp" />

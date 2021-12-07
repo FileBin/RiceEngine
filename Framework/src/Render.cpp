@@ -1,6 +1,6 @@
-#include "Render.h"
-#include "stdafx.h"
-#include "macros.h"
+#include <GameFramework/Render.h>
+#include <GameFramework/stdafx.h>
+#include <GameFramework/macros.h>
 
 namespace GameFramework {
 	Render::Render() {
