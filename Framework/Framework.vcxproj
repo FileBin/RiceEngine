@@ -160,6 +160,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\GameFramework\Device.h" />
     <ClInclude Include="include\GameFramework\Render.h" />
     <ClInclude Include="include\GameFramework\GameMain.h" />
     <ClInclude Include="include\GameFramework\InputEvents.h" />
@@ -168,17 +169,20 @@
     <ClInclude Include="include\GameFramework\Log.h" />
     <ClInclude Include="include\GameFramework\macros.h" />
     <ClInclude Include="include\GameFramework\Math.h" />
+    <ClInclude Include="include\GameFramework\Util.h" />
     <ClInclude Include="include\GameFramework\version.h" />
     <ClInclude Include="include\GameFramework\stdafx.h" />
     <ClInclude Include="include\GameFramework\Vectors.h" />
     <ClInclude Include="include\GameFramework\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DX\Device.cpp" />
     <ClCompile Include="src\GameMain.cpp" />
-    <ClCompile Include="src\Render.cpp" />
+    <ClCompile Include="src\3D\Render.cpp" />
     <ClCompile Include="src\Input\InputManager.cpp" />
     <ClCompile Include="src\Log.cpp" />
     <ClCompile Include="src\Math\Vectors.cpp" />
+    <ClCompile Include="src\Util\Util.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

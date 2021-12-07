@@ -1,5 +1,5 @@
 ﻿#pragma once
-#pragma warning( disable : 4005 4838 )
+#pragma warning( disable : 4005 4838 26812 26461 )
 
 #include <clocale>
 #include <ctime>
@@ -8,6 +8,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 #include <map>
 
 #define WIN32_LEAN_AND_MEAN

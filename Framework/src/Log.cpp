@@ -5,7 +5,6 @@
 #define LOGNAME "log.txt"
 
 namespace GameFramework {
-	//------------------------------------------------------------------
 
 	Log* Log::instance = nullptr;
 
@@ -14,7 +13,7 @@ namespace GameFramework {
 			instance = new Log();
 
 		} else
-			Err(L"Log уже был создан");
+			Err(L"Log has been already created!");
 	}
 
 	Log::Log() {
@@ -41,7 +40,7 @@ namespace GameFramework {
 			_wstrdate_s(date, 9);
 			file << std::format(L"Log created: %s %s.\n---------------------------------------\n\n", date, timer);
 		} else {
-			wprintf(L"Ошибка при создании файла лога...\n");
+			wprintf(L"Log creation error...\n");
 		}
 	}
 
@@ -99,12 +98,7 @@ namespace GameFramework {
 		auto str = std::format(L"{}::{}: {}{}\n", timer, cl, levtext, text);
 
 		wprintf(str.c_str());
-
 		file << str;
 		file.flush();
-		//_fwprintf_p(file, L"%s::%d: %s%s\n", timer, cl, levtext, text);
-		//fflush(file);
 	}
-
-	//------------------------------------------------------------------
 }

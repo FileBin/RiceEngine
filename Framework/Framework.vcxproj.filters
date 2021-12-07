@@ -51,6 +51,12 @@
     <ClInclude Include="include\GameFramework\version.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameFramework\Device.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameFramework\Util.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Log.cpp">
@@ -65,10 +71,16 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render.cpp">
+    <ClCompile Include="src\3D\Render.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\GameMain.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DX\Device.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Util\Util.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

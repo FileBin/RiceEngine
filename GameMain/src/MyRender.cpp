@@ -116,7 +116,6 @@ bool MyRender::Init(HWND hwnd) {
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 	m_pImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
-
 	
 	UINT indices[] =
 	{
