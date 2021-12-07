@@ -1,0 +1,62 @@
+﻿  main.cpp
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(12,1): warning C4005: DXGI_STATUS_OCCLUDED: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55460): message : см. предыдущее определение "DXGI_STATUS_OCCLUDED"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(13,1): warning C4005: DXGI_STATUS_CLIPPED: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55469): message : см. предыдущее определение "DXGI_STATUS_CLIPPED"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(14,1): warning C4005: DXGI_STATUS_NO_REDIRECTION: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55478): message : см. предыдущее определение "DXGI_STATUS_NO_REDIRECTION"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(15,1): warning C4005: DXGI_STATUS_NO_DESKTOP_ACCESS: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55487): message : см. предыдущее определение "DXGI_STATUS_NO_DESKTOP_ACCESS"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(16,1): warning C4005: DXGI_STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55496): message : см. предыдущее определение "DXGI_STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(17,1): warning C4005: DXGI_STATUS_MODE_CHANGED: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55505): message : см. предыдущее определение "DXGI_STATUS_MODE_CHANGED"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(18,1): warning C4005: DXGI_STATUS_MODE_CHANGE_IN_PROGRESS: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55514): message : см. предыдущее определение "DXGI_STATUS_MODE_CHANGE_IN_PROGRESS"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(21,1): warning C4005: DXGI_ERROR_INVALID_CALL: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55529): message : см. предыдущее определение "DXGI_ERROR_INVALID_CALL"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(22,1): warning C4005: DXGI_ERROR_NOT_FOUND: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55538): message : см. предыдущее определение "DXGI_ERROR_NOT_FOUND"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(23,1): warning C4005: DXGI_ERROR_MORE_DATA: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55547): message : см. предыдущее определение "DXGI_ERROR_MORE_DATA"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(24,1): warning C4005: DXGI_ERROR_UNSUPPORTED: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55556): message : см. предыдущее определение "DXGI_ERROR_UNSUPPORTED"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(25,1): warning C4005: DXGI_ERROR_DEVICE_REMOVED: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55565): message : см. предыдущее определение "DXGI_ERROR_DEVICE_REMOVED"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(26,1): warning C4005: DXGI_ERROR_DEVICE_HUNG: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55574): message : см. предыдущее определение "DXGI_ERROR_DEVICE_HUNG"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(27,1): warning C4005: DXGI_ERROR_DEVICE_RESET: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55584): message : см. предыдущее определение "DXGI_ERROR_DEVICE_RESET"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(28,1): warning C4005: DXGI_ERROR_WAS_STILL_DRAWING: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55593): message : см. предыдущее определение "DXGI_ERROR_WAS_STILL_DRAWING"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(29,1): warning C4005: DXGI_ERROR_FRAME_STATISTICS_DISJOINT: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55603): message : см. предыдущее определение "DXGI_ERROR_FRAME_STATISTICS_DISJOINT"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(30,1): warning C4005: DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55612): message : см. предыдущее определение "DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(31,1): warning C4005: DXGI_ERROR_DRIVER_INTERNAL_ERROR: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55622): message : см. предыдущее определение "DXGI_ERROR_DRIVER_INTERNAL_ERROR"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(32,1): warning C4005: DXGI_ERROR_NONEXCLUSIVE: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55631): message : см. предыдущее определение "DXGI_ERROR_NONEXCLUSIVE"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(33,1): warning C4005: DXGI_ERROR_NOT_CURRENTLY_AVAILABLE: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55640): message : см. предыдущее определение "DXGI_ERROR_NOT_CURRENTLY_AVAILABLE"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(34,1): warning C4005: DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55650): message : см. предыдущее определение "DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\dxgitype.h(35,1): warning C4005: DXGI_ERROR_REMOTE_OUTOFMEMORY: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55659): message : см. предыдущее определение "DXGI_ERROR_REMOTE_OUTOFMEMORY"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\d3d11.h(917,1): warning C4005: D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55923): message : см. предыдущее определение "D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\d3d11.h(918,1): warning C4005: D3D11_ERROR_FILE_NOT_FOUND: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55932): message : см. предыдущее определение "D3D11_ERROR_FILE_NOT_FOUND"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\d3d11.h(919,1): warning C4005: D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55942): message : см. предыдущее определение "D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\d3d11.h(920,1): warning C4005: D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55951): message : см. предыдущее определение "D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\d3d10.h(608,1): warning C4005: D3D10_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55899): message : см. предыдущее определение "D3D10_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS"
+C:\Program Files\Microsoft SDKs\DirectX11\Include\d3d10.h(609,1): warning C4005: D3D10_ERROR_FILE_NOT_FOUND: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h(55908): message : см. предыдущее определение "D3D10_ERROR_FILE_NOT_FOUND"
+  Создание кода
+  Previous IPDB not found, fall back to full compilation.
+  All 143 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  GameMain.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\x64\Release\GameMain.exe
