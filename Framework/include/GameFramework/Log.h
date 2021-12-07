@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <fstream>
 namespace GameFramework {
 	class Log {
 	public:
@@ -10,13 +11,13 @@ namespace GameFramework {
 		static void Close();
 		~Log();
 	private:
-		//static Log* instance;
+		static Log* instance;
 		Log();
 		void init();
 		void close();
 		void print(const wchar_t* levtext, const wchar_t* text);
 
-		FILE* file;
+		std::wfstream file;
 	};
 }
 

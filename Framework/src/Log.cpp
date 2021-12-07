@@ -1,12 +1,13 @@
 #include <GameFramework/Log.h>
-#include <GameFramework/stdafx.h>
+#include <ios>
+#include <locale.h>
 
 #define LOGNAME "log.txt"
 
 namespace GameFramework {
 	//------------------------------------------------------------------
 
-	Log* instance = nullptr;
+	Log* Log::instance = nullptr;
 
 	void Log::Init() {
 		if (!instance) {
@@ -17,7 +18,6 @@ namespace GameFramework {
 	}
 
 	Log::Log() {
-		file = nullptr;
 		init();
 	}
 
@@ -31,16 +31,17 @@ namespace GameFramework {
 	}
 
 	void Log::init() {
-		if (fopen_s(&file, LOGNAME, "w") == 0) {
+		file.open(LOGNAME, std::wfstream::out | std::wfstream::trunc);
+		std::locale utf8("en_US.UTF-8");
+		file.imbue(utf8);
+		if (file.is_open()) {
 			wchar_t timer[9];
 			_wstrtime_s(timer, 9);
 			wchar_t date[9];
 			_wstrdate_s(date, 9);
-			_fwprintf_p(file, L"Log created: %s %s.\n---------------------------------------\n\n", date, timer);
-			//_fwprintf_p(file, L"---------------------------------------\n\n");
+			file << std::format(L"Log created: %s %s.\n---------------------------------------\n\n", date, timer);
 		} else {
 			wprintf(L"Ошибка при создании файла лога...\n");
-			file = nullptr;
 		}
 	}
 
@@ -52,8 +53,8 @@ namespace GameFramework {
 		_wstrtime_s(timer, 9);
 		wchar_t date[9];
 		_wstrdate_s(date, 9);
-		_fwprintf_p(file, L"\n---------------------------------------\nEnd of Log: %s %s.", date, timer);
-		fclose(file);
+		file << std::format(L"\n---------------------------------------\nLog End: {} {}", date, timer);
+		file.close();
 	}
 
 	void Log::Print(const wchar_t* message, ...) {
@@ -95,11 +96,14 @@ namespace GameFramework {
 		_wstrtime_s(timer, 9);
 		clock_t cl = clock();
 
-		wprintf(L"%s::%d: %s%s\n", timer, cl, levtext, text);
-		if (file) {
-			_fwprintf_p(file, L"%s::%d: %s%s\n", timer, cl, levtext, text);
-			fflush(file);
-		}
+		auto str = std::format(L"{}::{}: {}{}\n", timer, cl, levtext, text);
+
+		wprintf(str.c_str());
+
+		file << str;
+		file.flush();
+		//_fwprintf_p(file, L"%s::%d: %s%s\n", timer, cl, levtext, text);
+		//fflush(file);
 	}
 
 	//------------------------------------------------------------------

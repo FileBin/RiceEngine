@@ -1,8 +1,10 @@
 ﻿#pragma once
+#pragma warning( disable : 4005 4838 )
 
 #include <clocale>
 #include <ctime>
 #include <stdexcept>
+#include <format>
 
 #include <string>
 #include <list>
