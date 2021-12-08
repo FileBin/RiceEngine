@@ -1,13 +1,2 @@
-﻿  Device.cpp
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(92,32): warning C4267: =: преобразование из "size_t" в "UINT"; возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(132,19): warning C4244: =: преобразование "double" в "FLOAT", возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(133,20): warning C4244: =: преобразование "double" в "FLOAT", возможна потеря данных
-  GameMain.cpp
-  Render.cpp
-  InputManager.cpp
-  Log.cpp
-  Vectors.cpp
-  Window.cpp
-  Создание кода...
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(84): warning C4715: GameFramework::Device::init: значение возвращается не при всех путях выполнения
+﻿  GameMain.cpp
   Framework.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Debug\lib\Framework_debug.lib

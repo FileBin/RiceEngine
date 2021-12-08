@@ -1,28 +1,32 @@
 #pragma once
 #include "stdafx.h"
+#include "Device.h"
 
-namespace GameFramework {
+namespace GameEngine {
 	class Render {
 	public:
 		Render();
 		virtual ~Render();
 
-		bool CreateDevice(HWND hwnd);
-		void BeginFrame();
+		virtual void BeginFrame() = 0;
 		void EndFrame();
 		void Shutdown();
+		void SetDevice(Device* device);
 
-		virtual bool Init(HWND hwnd) = 0;
+		void* operator new(size_t i) {
+			return _aligned_malloc(i, 16);
+		}
+
+		void operator delete(void* p) {
+			_aligned_free(p);
+		}
+
+		virtual bool Init() = 0;
 		virtual bool Draw() = 0;
 		virtual void Close() = 0;
 
 	protected:
-		D3D_DRIVER_TYPE m_driverType;
-		D3D_FEATURE_LEVEL m_featureLevel;
-		ID3D11Device* m_pd3dDevice;
-		ID3D11DeviceContext* m_pImmediateContext;
-		IDXGISwapChain* m_pSwapChain;
-		ID3D11RenderTargetView* m_pRenderTargetView;
+		Device* device;
 	};
 }
 

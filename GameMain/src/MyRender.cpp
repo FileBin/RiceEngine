@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <GameFramework/Log.h>
-using namespace GameFramework;
+using namespace GameEngine;
 
 struct SimpleVertex {
 	XMFLOAT3 pos;
@@ -19,9 +19,7 @@ struct ConstantBuffer {
 };
 
 MyRender::MyRender() {
-	m_pVertexShader = nullptr;
-	m_pPixelShader = nullptr;
-	m_pVertexLayout = nullptr;
+	shader = nullptr;
 	m_pVertexBuffer = nullptr;
 }
 
@@ -32,47 +30,50 @@ HRESULT MyRender::loadPixelShaderFromFile(std::wstring FileName) {
 	std::ifstream infile(FileName, std::ios_base::binary);
 	auto buffer = std::vector<char>(std::istreambuf_iterator<char>(infile),
 		std::istreambuf_iterator<char>());
+	auto n = buffer.size();
 
-	res = m_pd3dDevice->CreatePixelShader(&buffer[0], buffer.size(), nullptr, &PS);
-	if (FAILED(res))
-		return res;
-	m_pImmediateContext->PSSetShader(PS, 0, 0);
+	auto data = std::vector<byte>(n);
+
+	for (size_t i = 0; i < n; i++) {
+		data[i] = static_cast<byte>(buffer[i]);
+	}
+
+	shader->LoadPixelShader(data);
+
 	return S_OK;
 }
 
-HRESULT MyRender::loadVertexShaderFromFile(std::wstring FileName) {
+HRESULT MyRender::loadVertexShaderFromFile(std::wstring FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout) {
 	HRESULT res;
 	ID3D11VertexShader* VS;
 
 	std::ifstream infile(FileName, std::ios_base::binary);
 	auto buffer = std::vector<char>(std::istreambuf_iterator<char>(infile),
 		std::istreambuf_iterator<char>());
+	auto n = buffer.size();
 
-	res = m_pd3dDevice->CreateVertexShader(&buffer[0], buffer.size(), nullptr, &VS);
-	if (FAILED(res))
-		return res;
+	auto data = std::vector<byte>(n);
 
-	res = m_pd3dDevice->CreateInputLayout(m_inputLayout.data(), m_inputLayout.size(), &buffer[0], buffer.size(), &m_pVertexLayout);
+	for (size_t i = 0; i < n; i++) {
+		data[i] = static_cast<byte>(buffer[i]);
+	}
 
-	if (FAILED(res))
-		return res;
+	shader->LoadVertexShader(data, layout);
 
-	// установка входного формата
-	m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
-
-	m_pImmediateContext->VSSetShader(VS, 0, 0);
 	return S_OK;
 }
 
-bool MyRender::Init(HWND hwnd) {
+bool MyRender::Init() {
 	HRESULT hr = S_OK;
+
+	shader = new Shader(device);
 
 	m_inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	hr = loadVertexShaderFromFile(L"VertexShader.cso");
+	hr = loadVertexShaderFromFile(L"VertexShader.cso", m_inputLayout);
 	if (FAILED(hr)) {
 		Log::Err(L"Невозможно скомпилировать файл \"%s\". Пожалуйста, запустите данную программу из папки, содержащей этот файл", L"VertexShader.cso");
 		return false;
@@ -84,7 +85,7 @@ bool MyRender::Init(HWND hwnd) {
 		return false;
 	}
 
-	SimpleVertex vertices[] =
+	std::vector<SimpleVertex> vertices =
 	{
 		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
@@ -96,28 +97,12 @@ bool MyRender::Init(HWND hwnd) {
 		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) }
 	};
 
-
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(SimpleVertex) * 8;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA Data;
-	ZeroMemory(&Data, sizeof(Data));
-	Data.pSysMem = vertices;
-
-	hr = m_pd3dDevice->CreateBuffer(&bd, &Data, &m_pVertexBuffer);
-	if (FAILED(hr))
-		return false;
+	m_pVertexBuffer = device->CreateBuffer(vertices, D3D11_BIND_VERTEX_BUFFER);
 
 	// Установка вершинного буфера
-	UINT stride = sizeof(SimpleVertex);
-	UINT offset = 0;
-	m_pImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
+	device->SetActiveVertexBuffer<SimpleVertex>(m_pVertexBuffer);
 	
-	UINT indices[] =
+	std::vector<UINT> indices =
 	{
 		3,1,0,
 		2,1,3,
@@ -138,28 +123,15 @@ bool MyRender::Init(HWND hwnd) {
 		7,4,6,
 	};
 
-	D3D11_SUBRESOURCE_DATA IndexData;
-	ZeroMemory(&IndexData, sizeof(IndexData));
 
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(UINT) * 36;
-	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	IndexData.pSysMem = indices;
-	hr = m_pd3dDevice->CreateBuffer(&bd, &IndexData, &m_pIndexBuffer);
-	if (FAILED(hr))
-		return false;
+	m_pIndexBuffer = device->CreateBuffer<UINT>(indices, D3D11_BIND_INDEX_BUFFER);
 
-	m_pImmediateContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	device->SetActiveIndexBuffer(m_pIndexBuffer);
 
 	// установка топологии примитива
-	m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	device->SetPrimitiveTopology();
 
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(ConstantBuffer);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	hr = m_pd3dDevice->CreateBuffer(&bd, nullptr, &m_pConstantBuffer);
+	m_pConstantBuffer = device->CreateBuffer<ConstantBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
 
 	m_World = XMMatrixIdentity();
 
@@ -168,14 +140,19 @@ bool MyRender::Init(HWND hwnd) {
 	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	m_View = XMMatrixIdentity();
+	//m_View = XMMatrixIdentity();
 	m_View = XMMatrixLookAtLH(Eye, At, Up);
 
 	float width = 640.0f;
 	float height = 480.0f;
+	//m_Projection = XMMatrixIdentity();
 	m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, width / height, 0.01f, 10000.0f);
 
 	return true;
+}
+
+void MyRender::BeginFrame() {
+	device->ClearFrame(Color(.03, .1, .2, 1));
 }
 
 bool MyRender::Draw() {
@@ -184,10 +161,15 @@ bool MyRender::Draw() {
 	cb.mWorld = XMMatrixTranspose(m_World * XMMatrixRotationY(.001 * clock()));
 	cb.mView = XMMatrixTranspose(m_View);
 	cb.mProjection = XMMatrixTranspose(m_Projection);
-	m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+	device->LoadBufferSubresource(m_pConstantBuffer, cb);
 
-	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
-	m_pImmediateContext->DrawIndexed(36, 0, 0);
+	device->SetActiveConstantBuffer(m_pConstantBuffer);
+
+	device->SetActiveShader(*shader);
+
+	//m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
+	device->Draw();
+	//m_pImmediateContext->DrawIndexed(36, 0, 0);
 
 	return true;
 }
@@ -196,7 +178,4 @@ void MyRender::Close() {
 	_RELEASE(m_pConstantBuffer);
 	_RELEASE(m_pVertexBuffer);
 	_RELEASE(m_pIndexBuffer);
-	_RELEASE(m_pVertexLayout);
-	_RELEASE(m_pVertexShader);
-	_RELEASE(m_pPixelShader);
 }

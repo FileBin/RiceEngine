@@ -5,7 +5,7 @@
 #include "Log.h"
 #include "Window.h"
 
-namespace GameFramework {
+namespace GameEngine {
 
 	class GameMain {
 	public:
@@ -23,6 +23,7 @@ namespace GameFramework {
 
 		Window* wnd;
 		Render* render;
+		Device* device;
 		bool init;
 	};
 }

@@ -1,6 +1,6 @@
 #include <GameFramework/Util.h>
 
-namespace GameFramework {
+namespace GameEngine {
 	void ThrowIfFailed(HRESULT hr) {
 		if (FAILED(hr))
 			throw hr;

@@ -1,7 +1,7 @@
 #include <GameFramework/Window.h>
 #include <GameFramework/Log.h>
 
-namespace GameFramework {
+namespace GameEngine {
 
 	Window* Window::wndthis = nullptr;
 

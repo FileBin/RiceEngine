@@ -1,9 +1,10 @@
 #include <GameFramework/GameMain.h>
 #include <GameFramework/macros.h>
+#include <GameFramework/Device.h>
 
-namespace GameFramework {
+namespace GameEngine {
 
-	GameMain::GameMain(): wnd(nullptr), render(nullptr), init(false) {}
+	GameMain::GameMain(): wnd(nullptr), render(nullptr), init(false), device(nullptr) {}
 	GameMain::~GameMain() {
 		
 	}
@@ -16,14 +17,23 @@ namespace GameFramework {
 			return false;
 		}
 
-		// —оздаем значени€ настроек по умолчанию. ¬ одном из будущих уроков мы вернемс€ к этому
 		DescWindow desc;
 		if (!wnd->Create(desc)) {
 			Log::Err(L"Ќе удалось создать окно");
 			return false;
 		}
 
-		if (!render->CreateDevice(wnd->GetHWND())) {
+		device = new Device();
+		auto hwnd = wnd->GetHWND();
+
+		if (FAILED(device->Init(hwnd))) {
+			Log::Err(L"Can't init device!");
+			return false;
+		}
+
+		render->SetDevice(device);
+
+		if (!render->Init()) {
 			Log::Err(L"Ќе удалось создать рендер");
 			return false;
 		}
@@ -54,7 +64,9 @@ namespace GameFramework {
 			return false;
 
 		// если окно изменило размер
-		if (wnd->IsResize()) {}
+		if (wnd->IsResize()) {
+			//device->Resize();
+		}
 		render->BeginFrame();
 		if (!render->Draw())
 			return false;

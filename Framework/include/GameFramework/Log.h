@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include <fstream>
-namespace GameFramework {
+namespace GameEngine {
 	class Log {
 	public:
 		static void Init();

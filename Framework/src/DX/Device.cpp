@@ -3,9 +3,10 @@
 #include <GameFramework/Vectors.h>
 #include <GameFramework/Util.h>
 
-namespace GameFramework {
+namespace GameEngine {
 
-	Device::Device() {}
+	Device::Device() {
+	}
 	Device::~Device() {
 		_RELEASE(renderTarget);
 		_RELEASE(context);
@@ -14,7 +15,7 @@ namespace GameFramework {
 	}
 
 #pragma region Initialize
-	HRESULT Device::init(HWND hwnd) {
+	HRESULT Device::Init(HWND hwnd) {
 		HRESULT hr = S_OK;
 
 		RECT rc;
@@ -87,36 +88,46 @@ namespace GameFramework {
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
 		context->RSSetViewports(1, &vp);
+
+		return hr;
 	}
 #pragma endregion
 
-	HRESULT Device::_createBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer*& buf, D3D11_USAGE usage, UINT flags) {
+	HRESULT Device::_createBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer** buf, D3D11_USAGE usage, UINT flags) {
 		auto hr = S_OK;
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = stride * nData;
+		if (pData == nullptr) {
+			bd.ByteWidth = stride;
+		} else {
+			bd.ByteWidth = stride * nData;
+		}
 		bd.BindFlags = flags;
 		bd.CPUAccessFlags = 0;
 
-		D3D11_SUBRESOURCE_DATA Data;
-		ZeroMemory(&Data, sizeof(Data));
-		Data.pSysMem = pData;
+		if (pData != nullptr) {
+			D3D11_SUBRESOURCE_DATA Data;
+			ZeroMemory(&Data, sizeof(Data));
+			Data.pSysMem = pData;
 
-		ThrowIfFailed(device->CreateBuffer(&bd, &Data, &buf));
+			ThrowIfFailed(device->CreateBuffer(&bd, &Data, buf));
+		} else {
+			ThrowIfFailed(device->CreateBuffer(&bd, nullptr, buf));
+		}
 
 		return S_OK;
 	}
 
-	HRESULT Device::_loadVertexBuffer(ID3D11Buffer*& pBuffer, size_t stride) {
+	HRESULT Device::_loadVertexBuffer(ID3D11Buffer** pBuffer, size_t stride) {
 		UINT offset = 0;
-		context->IASetVertexBuffers(0, 1, &pBuffer, (UINT*)&stride, &offset);
+		context->IASetVertexBuffers(0, 1, pBuffer, (UINT*)&stride, &offset);
 		return S_OK;
 	}
 
-	void Device::LoadIndexBuffer(ID3D11Buffer &buffer, DXGI_FORMAT format) {
+	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format) {
 		D3D11_BUFFER_DESC desc;
-		buffer.GetDesc(&desc);
+		(*buffer).GetDesc(&desc);
 
 		UINT stride = 0;
 
@@ -139,16 +150,29 @@ namespace GameFramework {
 		}
 
 		indexCount = desc.ByteWidth / stride;
-		context->IASetIndexBuffer(&buffer, format, 0);
+		context->IASetIndexBuffer(buffer, format, 0);
 	}
 
-	void GameFramework::Device::LoadConstantBuffer(ID3D11Buffer &buffer, size_t index) {
-		ID3D11Buffer* arr[] = { &buffer };
+	void GameEngine::Device::SetActiveConstantBuffer(ID3D11Buffer* buffer, size_t index) {
+		ID3D11Buffer* arr[] = { buffer };
 		context->VSSetConstantBuffers(index, 1, arr);
 	}
 
 	void Device::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology) {
 		context->IASetPrimitiveTopology(topology);
+	}
+
+	void Device::SetActiveShader(Shader &shader) {
+		context->VSSetShader(shader.vertexShader, nullptr, 0);
+		context->IASetInputLayout(shader.layout);
+		context->PSSetShader(shader.pixelShader, nullptr, 0);
+	}
+
+
+	ID3D11PixelShader* Device::CreatePixelShader(std::vector<byte> shaderData) {
+		ID3D11PixelShader* shader;
+		ThrowIfFailed(device->CreatePixelShader(&shaderData[0], shaderData.size(), nullptr, &shader));
+		return shader;
 	}
 
 	ID3D11VertexShader* Device::CreateVertexShader(std::vector<byte> shaderData) {
@@ -157,18 +181,10 @@ namespace GameFramework {
 		return shader;
 	}
 
-	ID3D11PixelShader* Device::CreatePixelShader(std::vector<byte> shaderData) {
-		ID3D11PixelShader* shader;
-		ThrowIfFailed(device->CreatePixelShader(&shaderData[0], shaderData.size(), nullptr, &shader));
-		return shader;
-	}
-
-	void Device::SetActiveVertexShader(ID3D11VertexShader& shader) {
-		context->VSSetShader(&shader, nullptr, 0);
-	}
-
-	void Device::SetActivePixelShader(ID3D11PixelShader& shader) {
-		context->PSSetShader(&shader, nullptr, 0);
+	ID3D11InputLayout* Device::CreateInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> layout, std::vector<byte> shaderData) {
+		ID3D11InputLayout* l;
+		ThrowIfFailed(device->CreateInputLayout(layout.data(), layout.size(), shaderData.data(), shaderData.size(), &l));
+		return l;
 	}
 
 	void Device::Draw() {
@@ -186,8 +202,8 @@ namespace GameFramework {
 
 	void Device::Resize() {
 		// Очистка контекста, связанного с размером предыдущего окна.
-		ID3D11RenderTargetView* nullViews[] = { nullptr };
-		context->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+		context->OMSetRenderTargets(0, 0, 0);
+		renderTarget->Release();
 		renderTarget = nullptr;
 
 		Vector2 size;

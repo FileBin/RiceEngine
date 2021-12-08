@@ -1,7 +1,7 @@
 #include <GameFramework/GameMain.h>
 #include <MyRender.h>
 
-using namespace GameFramework;
+using namespace GameEngine;
 
 int main() {
 	ShowWindow(GetConsoleWindow(), 0);

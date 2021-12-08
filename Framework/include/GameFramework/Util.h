@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-namespace GameFramework {
+namespace GameEngine {
 	void ThrowIfFailed(HRESULT hr);
 
 	struct Color {

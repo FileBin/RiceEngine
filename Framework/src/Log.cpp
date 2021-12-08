@@ -4,7 +4,7 @@
 
 #define LOGNAME "log.txt"
 
-namespace GameFramework {
+namespace GameEngine {
 
 	Log* Log::instance = nullptr;
 

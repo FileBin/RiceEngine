@@ -2,7 +2,7 @@
 
 #include "InputButtons.h"
 
-namespace GameFramework {
+namespace GameEngine {
 	class MouseEvent {
 		MouseEvent(int nx, int ny) : x(nx), y(ny) {}
 

@@ -5,31 +5,22 @@
 #include <xnamath.h>
 #include <GameFramework/InputManager.h>
 
-using namespace GameFramework;
+using namespace GameEngine;
 
 class MyRender : public Render {
 public:
 	MyRender();
-	bool Init(HWND hwnd);
+	bool Init();
+	virtual void BeginFrame();
 	bool Draw();
 	void Close();
 
-	void* operator new(size_t i) {
-		return _aligned_malloc(i, 16);
-	}
-
-	void operator delete(void* p) {
-		_aligned_free(p);
-	}
-
 private:
 	HRESULT loadPixelShaderFromFile(std::wstring FileName);
-	HRESULT loadVertexShaderFromFile(std::wstring FileName);
+	HRESULT loadVertexShaderFromFile(std::wstring FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
 
 	ID3D11Buffer* m_pVertexBuffer;
-	ID3D11InputLayout* m_pVertexLayout;
-	ID3D11VertexShader* m_pVertexShader;
-	ID3D11PixelShader* m_pPixelShader;
+	Shader* shader;
 	std::vector<D3D11_INPUT_ELEMENT_DESC> m_inputLayout;
 
 	XMMATRIX m_World;

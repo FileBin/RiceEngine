@@ -1,10 +1,1 @@
-﻿  main.cpp
-  The contents of <format> are available only in c++latest mode with concepts support;
-  see https://github.com/microsoft/STL/issues/1814 for details.
-  MyRender.cpp
-  The contents of <format> are available only in c++latest mode with concepts support;
-  see https://github.com/microsoft/STL/issues/1814 for details.
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(55,127): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(185,65): warning C4244: аргумент: преобразование "double" в "FLOAT", возможна потеря данных
-  Создание кода...
-  GameMain.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Debug\GameMain.exe
+﻿  GameMain.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Debug\GameMain.exe

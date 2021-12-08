@@ -169,6 +169,7 @@
     <ClInclude Include="include\GameFramework\Log.h" />
     <ClInclude Include="include\GameFramework\macros.h" />
     <ClInclude Include="include\GameFramework\Math.h" />
+    <ClInclude Include="include\GameFramework\Shader.h" />
     <ClInclude Include="include\GameFramework\Util.h" />
     <ClInclude Include="include\GameFramework\version.h" />
     <ClInclude Include="include\GameFramework\stdafx.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="include\GameFramework\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3D\Shader.cpp" />
     <ClCompile Include="src\DX\Device.cpp" />
     <ClCompile Include="src\GameMain.cpp" />
     <ClCompile Include="src\3D\Render.cpp" />

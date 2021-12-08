@@ -1,6 +1,6 @@
 #pragma once
 
-namespace GameFramework {
+namespace GameEngine {
 	#define _DELETE(p)		{ if(p){delete (p); (p)=nullptr;} }
 	#define _DELETE_ARRAY(p){ if(p){delete[] (p); (p)=nullptr;} }
 	#define _RELEASE(p)		{ if(p){(p)->Release(); (p)=nullptr;} }
