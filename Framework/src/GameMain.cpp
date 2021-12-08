@@ -65,7 +65,8 @@ namespace GameEngine {
 
 		// если окно изменило размер
 		if (wnd->IsResize()) {
-			//device->Resize();
+			device->Resize();
+			render->Resize();
 		}
 		render->BeginFrame();
 		if (!render->Draw())

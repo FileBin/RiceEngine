@@ -128,7 +128,6 @@ bool MyRender::Init() {
 
 	device->SetActiveIndexBuffer(m_pIndexBuffer);
 
-	// установка топологии примитива
 	device->SetPrimitiveTopology();
 
 	m_pConstantBuffer = device->CreateBuffer<ConstantBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
@@ -140,13 +139,9 @@ bool MyRender::Init() {
 	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	//m_View = XMMatrixIdentity();
 	m_View = XMMatrixLookAtLH(Eye, At, Up);
 
-	float width = 640.0f;
-	float height = 480.0f;
-	//m_Projection = XMMatrixIdentity();
-	m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, width / height, 0.01f, 10000.0f);
+	m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, GetAspectRatio(), 0.01f, 10000.0f);
 
 	return true;
 }
@@ -156,7 +151,6 @@ void MyRender::BeginFrame() {
 }
 
 bool MyRender::Draw() {
-	//m_View = XMMatrixTranslation(-1, sin(clock() * .001), .5);
 	ConstantBuffer cb;
 	cb.mWorld = XMMatrixTranspose(m_World * XMMatrixRotationY(.001 * clock()));
 	cb.mView = XMMatrixTranspose(m_View);
@@ -167,11 +161,13 @@ bool MyRender::Draw() {
 
 	device->SetActiveShader(*shader);
 
-	//m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pConstantBuffer);
 	device->Draw();
-	//m_pImmediateContext->DrawIndexed(36, 0, 0);
 
 	return true;
+}
+
+void MyRender::Resize() {
+	m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, GetAspectRatio(), 0.01f, 10000.0f);
 }
 
 void MyRender::Close() {

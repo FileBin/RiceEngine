@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Device.h"
+#include "Math.h"
 
 namespace GameEngine {
 	class Render {
@@ -13,6 +14,10 @@ namespace GameEngine {
 		void Shutdown();
 		void SetDevice(Device* device);
 
+		Vector2 GetViewportSize();
+
+		double GetAspectRatio();
+
 		void* operator new(size_t i) {
 			return _aligned_malloc(i, 16);
 		}
@@ -24,6 +29,7 @@ namespace GameEngine {
 		virtual bool Init() = 0;
 		virtual bool Draw() = 0;
 		virtual void Close() = 0;
+		virtual void Resize() = 0;
 
 	protected:
 		Device* device;

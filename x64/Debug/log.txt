@@ -1,8 +1,8 @@
 Log created: %s %s.
 ---------------------------------------
 
-19:35:11::242: DEBUG: Window Create
-19:35:13::2766: DEBUG: Window Close
+20:01:22::201: DEBUG: Window Create
+20:01:38::16206: DEBUG: Window Close
 
 ---------------------------------------
-Log End: 12/08/21 19:35:13
+Log End: 12/08/21 20:01:38

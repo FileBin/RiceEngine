@@ -16,6 +16,7 @@ namespace GameEngine {
 
 #pragma region Initialize
 	HRESULT Device::Init(HWND hwnd) {
+		this->hwnd = hwnd;
 		HRESULT hr = S_OK;
 
 		RECT rc;

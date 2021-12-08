@@ -48,6 +48,8 @@ namespace GameEngine {
 		void SwapBuffers();
 
 		void Resize();
+
+		HWND GetHWND() { return hwnd; }
 	private:
 		bool initialized = false;
 		HWND hwnd = 0;

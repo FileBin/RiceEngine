@@ -14,6 +14,7 @@ public:
 	virtual void BeginFrame();
 	bool Draw();
 	void Close();
+	void Resize();
 
 private:
 	HRESULT loadPixelShaderFromFile(std::wstring FileName);

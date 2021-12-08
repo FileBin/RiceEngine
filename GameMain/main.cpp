@@ -4,6 +4,7 @@
 using namespace GameEngine;
 
 int main() {
+	SetProcessDPIAware();
 	ShowWindow(GetConsoleWindow(), 0);
 
 	GameMain framework;
