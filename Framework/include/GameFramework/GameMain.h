@@ -17,6 +17,7 @@ namespace GameEngine {
 		void Close();
 
 		void SetRender(Render* render) { this->render = render; }
+		void SetFps(double fps) { this->fps = fps; }
 
 	private:
 		bool frame();
@@ -25,5 +26,6 @@ namespace GameEngine {
 		Render* render;
 		Device* device;
 		bool init;
+		double fps = 60.;
 	};
 }

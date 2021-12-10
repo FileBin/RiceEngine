@@ -1,6 +1,10 @@
 #include <GameFramework/GameMain.h>
 #include <GameFramework/macros.h>
 #include <GameFramework/Device.h>
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono;
 
 namespace GameEngine {
 
@@ -42,8 +46,14 @@ namespace GameEngine {
 		return true;
 	}
 	void GameMain::Run() {
-		if (init)
-			while (frame());
+		if (init) {
+			auto fixedDeltaTime = (long long)(1000. / fps);
+			auto time = steady_clock::now();
+			do {
+				std::this_thread::sleep_until(time);
+				time = steady_clock::now() + milliseconds(fixedDeltaTime);
+			} while (frame());
+		}
 	}
 	void GameMain::Close() {
 		init = false;
@@ -68,6 +78,7 @@ namespace GameEngine {
 			device->Resize();
 			render->Resize();
 		}
+
 		render->BeginFrame();
 		if (!render->Draw())
 			return false;

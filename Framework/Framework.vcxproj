@@ -81,13 +81,13 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_debug</TargetName>
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Cpp-Libs\RapidJSON\include;include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)\</IntDir>
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Cpp-Libs\RapidJSON\include;include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

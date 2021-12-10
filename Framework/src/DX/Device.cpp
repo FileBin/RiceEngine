@@ -2,6 +2,7 @@
 #include <GameFramework/macros.h>
 #include <GameFramework/Vectors.h>
 #include <GameFramework/Util.h>
+#include <GameFramework/Log.h>
 
 namespace GameEngine {
 
@@ -15,27 +16,13 @@ namespace GameEngine {
 	}
 
 #pragma region Initialize
-	HRESULT Device::Init(HWND hwnd) {
-		this->hwnd = hwnd;
-		HRESULT hr = S_OK;
-
-		RECT rc;
-		GetClientRect(hwnd, &rc);
-		UINT width = rc.right - rc.left;
-		UINT height = rc.bottom - rc.top;
+	HRESULT Device::_init(DXGI_SWAP_CHAIN_DESC desc, size_t adapterIdx) {
+		HRESULT hr = S_OK;		
 
 		UINT createDeviceFlags = 0;
 #ifdef _DEBUG
 		createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-
-		D3D_DRIVER_TYPE driverTypes[] =
-		{
-			D3D_DRIVER_TYPE_HARDWARE,
-			D3D_DRIVER_TYPE_WARP,
-			D3D_DRIVER_TYPE_REFERENCE,
-		};
-		UINT numDriverTypes = ARRAYSIZE(driverTypes);
 
 		D3D_FEATURE_LEVEL featureLevels[] =
 		{
@@ -45,29 +32,20 @@ namespace GameEngine {
 		};
 		UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
-		DXGI_SWAP_CHAIN_DESC sd;
-		ZeroMemory(&sd, sizeof(sd));
-		sd.BufferCount = 1;
-		sd.BufferDesc.Width = width;
-		sd.BufferDesc.Height = height;
-		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		sd.BufferDesc.RefreshRate.Numerator = 60;
-		sd.BufferDesc.RefreshRate.Denominator = 1;
-		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sd.OutputWindow = hwnd;
-		sd.SampleDesc.Count = 1;
-		sd.SampleDesc.Quality = 0;
-		sd.Windowed = TRUE;
+		ThrowIfFailed(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory));
+		ThrowIfFailed(factory->EnumAdapters(adapterIdx, &adapter));
 
-		for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++) {
-			driverType = driverTypes[driverTypeIndex];
-			hr = D3D11CreateDeviceAndSwapChain(nullptr, driverType, nullptr, createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION,
-				&sd, &swapChain, &device, &featureLvl, &context);
-			if (SUCCEEDED(hr))
-				break;
-		}
-		if (FAILED(hr))
-			return hr;
+#ifdef _DEBUG
+		DXGI_ADAPTER_DESC adapterDesc;
+		adapter->GetDesc(&adapterDesc);
+		Log::Debug(L"AdapterInfo:\n\n Description: {}\n VideoMemory {}M", adapterDesc.Description, adapterDesc.DedicatedVideoMemory / 0x100000);
+#endif
+
+		hr = D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
+			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context);
+		ThrowIfFailed(hr);
+
+		ThrowIfFailed(factory->CreateSwapChain(device, &desc, &swapChain));
 
 		ID3D11Texture2D* pBackBuffer = NULL;
 		hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
@@ -82,8 +60,8 @@ namespace GameEngine {
 		context->OMSetRenderTargets(1, &renderTarget, NULL);
 
 		D3D11_VIEWPORT vp;
-		vp.Width = (FLOAT)width;
-		vp.Height = (FLOAT)height;
+		vp.Width = (FLOAT)desc.BufferDesc.Width;
+		vp.Height = (FLOAT)desc.BufferDesc.Height;
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0;
@@ -91,6 +69,33 @@ namespace GameEngine {
 		context->RSSetViewports(1, &vp);
 
 		return hr;
+	}
+
+	HRESULT Device::Init(HWND hwnd) {
+		this->hwnd = hwnd;
+
+		RECT rc;
+		GetClientRect(hwnd, &rc);
+		UINT width = rc.right - rc.left;
+		UINT height = rc.bottom - rc.top;
+
+		DXGI_SWAP_CHAIN_DESC sd;
+		ZeroMemory(&sd, sizeof(sd));
+		sd.BufferCount = 1;
+		sd.BufferDesc.Width = width;
+		sd.BufferDesc.Height = height;
+		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.BufferDesc.RefreshRate.Numerator = 60;
+		sd.BufferDesc.RefreshRate.Denominator = 1;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.OutputWindow = hwnd;
+
+		//4x mulisampling
+		sd.SampleDesc.Count = 4;
+		sd.SampleDesc.Quality = 0;
+		sd.Windowed = true;
+		
+		return _init(sd);
 	}
 #pragma endregion
 
@@ -154,9 +159,14 @@ namespace GameEngine {
 		context->IASetIndexBuffer(buffer, format, 0);
 	}
 
-	void GameEngine::Device::SetActiveConstantBuffer(ID3D11Buffer* buffer, size_t index) {
+	void GameEngine::Device::SetActiveVSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
 		ID3D11Buffer* arr[] = { buffer };
 		context->VSSetConstantBuffers(index, 1, arr);
+	}
+
+	void GameEngine::Device::SetActivePSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
+		ID3D11Buffer* arr[] = { buffer };
+		context->PSSetConstantBuffers(index, 1, arr);
 	}
 
 	void Device::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology) {
@@ -170,19 +180,19 @@ namespace GameEngine {
 	}
 
 
-	ID3D11PixelShader* Device::CreatePixelShader(std::vector<byte> shaderData) {
+	ID3D11PixelShader* Device::CreatePixelShader(data_t shaderData) {
 		ID3D11PixelShader* shader;
-		ThrowIfFailed(device->CreatePixelShader(&shaderData[0], shaderData.size(), nullptr, &shader));
+		ThrowIfFailed(device->CreatePixelShader(shaderData.data(), shaderData.size(), nullptr, &shader));
 		return shader;
 	}
 
-	ID3D11VertexShader* Device::CreateVertexShader(std::vector<byte> shaderData) {
+	ID3D11VertexShader* Device::CreateVertexShader(data_t shaderData) {
 		ID3D11VertexShader* shader;
-		ThrowIfFailed(device->CreateVertexShader(&shaderData[0], shaderData.size(), nullptr, &shader));
+		ThrowIfFailed(device->CreateVertexShader(shaderData.data(), shaderData.size(), nullptr, &shader));
 		return shader;
 	}
 
-	ID3D11InputLayout* Device::CreateInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> layout, std::vector<byte> shaderData) {
+	ID3D11InputLayout* Device::CreateInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> layout, data_t shaderData) {
 		ID3D11InputLayout* l;
 		ThrowIfFailed(device->CreateInputLayout(layout.data(), layout.size(), shaderData.data(), shaderData.size(), &l));
 		return l;
@@ -237,6 +247,10 @@ namespace GameEngine {
 			if (FAILED(hr))
 				throw hr;
 		}
+	}
+
+	void Device::SetMSAA(int level) {
+		throw E_NOTIMPL;
 	}
 
 }

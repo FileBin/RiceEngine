@@ -1,8 +1,12 @@
-Log created: %s %s.
+Log Created: 12/10/21 18:42:15.
 ---------------------------------------
 
-20:01:22::201: DEBUG: Window Create
-20:01:38::16206: DEBUG: Window Close
+18:42:15::83: DEBUG:Window Create
+18:42:15::163: DEBUG:AdapterInfo:
+
+ Description: Intel(R) UHD Graphics
+ VideoMemory 128M
+18:42:18::2843: DEBUG:Window Close
 
 ---------------------------------------
-Log End: 12/08/21 20:01:38
+Log End: 12/10/21 18:42:18

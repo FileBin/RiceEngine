@@ -9,8 +9,9 @@ int main() {
 
 	GameMain framework;
 
-	MyRender* render = new MyRender();
+	Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
 
+	MyRender* render = new MyRender();
 	framework.SetRender(render);
 	framework.Init();
 	framework.Run();

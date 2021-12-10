@@ -17,8 +17,8 @@ public:
 	void Resize();
 
 private:
-	HRESULT loadPixelShaderFromFile(std::wstring FileName);
-	HRESULT loadVertexShaderFromFile(std::wstring FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
+	void loadPixelShaderFromFile(String FileName);
+	void loadVertexShaderFromFile(String FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
 
 	ID3D11Buffer* m_pVertexBuffer;
 	Shader* shader;
@@ -29,6 +29,7 @@ private:
 	XMMATRIX m_Projection;
 
 	ID3D11Buffer* m_pIndexBuffer;
-	ID3D11Buffer* m_pConstantBuffer;
+	ID3D11Buffer* VSConstantBuffer;
+	ID3D11Buffer* PSConstantBuffer;
 };
 

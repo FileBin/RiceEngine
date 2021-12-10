@@ -1,7 +1,19 @@
-﻿  GameMain.cpp
-  Render.cpp
+﻿  Render.cpp
+  Shader.cpp
+  Device.cpp
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(36,59): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(108,25): warning C4267: =: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(110,33): warning C4267: =: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(164,46): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(169,46): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(197,113): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(202,40): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(239,19): warning C4244: =: преобразование "double" в "FLOAT", возможна потеря данных
+C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\src\DX\Device.cpp(240,20): warning C4244: =: преобразование "double" в "FLOAT", возможна потеря данных
+  GameMain.cpp
   InputManager.cpp
   Log.cpp
   Vectors.cpp
+  Util.cpp
   Window.cpp
   Framework.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Release\lib\Framework.lib

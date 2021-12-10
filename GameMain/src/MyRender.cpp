@@ -10,6 +10,7 @@ using namespace GameEngine;
 struct SimpleVertex {
 	XMFLOAT3 pos;
 	XMFLOAT4 color;
+	//XMFLOAT3 normal;
 };
 
 struct ConstantBuffer {
@@ -18,49 +19,21 @@ struct ConstantBuffer {
 	XMMATRIX mProjection;
 };
 
+struct PixelConstantBuffer {
+	XMFLOAT4 time;
+};
+
 MyRender::MyRender() {
 	shader = nullptr;
 	m_pVertexBuffer = nullptr;
 }
 
-HRESULT MyRender::loadPixelShaderFromFile(std::wstring FileName) {
-	HRESULT res;
-	ID3D11PixelShader* PS;
-
-	std::ifstream infile(FileName, std::ios_base::binary);
-	auto buffer = std::vector<char>(std::istreambuf_iterator<char>(infile),
-		std::istreambuf_iterator<char>());
-	auto n = buffer.size();
-
-	auto data = std::vector<byte>(n);
-
-	for (size_t i = 0; i < n; i++) {
-		data[i] = static_cast<byte>(buffer[i]);
-	}
-
-	shader->LoadPixelShader(data);
-
-	return S_OK;
+void MyRender::loadPixelShaderFromFile(String FileName) {
+	shader->LoadPixelShader(Util::ReadFile(FileName));
 }
 
-HRESULT MyRender::loadVertexShaderFromFile(std::wstring FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout) {
-	HRESULT res;
-	ID3D11VertexShader* VS;
-
-	std::ifstream infile(FileName, std::ios_base::binary);
-	auto buffer = std::vector<char>(std::istreambuf_iterator<char>(infile),
-		std::istreambuf_iterator<char>());
-	auto n = buffer.size();
-
-	auto data = std::vector<byte>(n);
-
-	for (size_t i = 0; i < n; i++) {
-		data[i] = static_cast<byte>(buffer[i]);
-	}
-
-	shader->LoadVertexShader(data, layout);
-
-	return S_OK;
+void MyRender::loadVertexShaderFromFile(String FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout) {
+	shader->LoadVertexShader(Util::ReadFile(FileName), layout);
 }
 
 bool MyRender::Init() {
@@ -71,15 +44,23 @@ bool MyRender::Init() {
 	m_inputLayout = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		//{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12 + 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	hr = loadVertexShaderFromFile(L"VertexShader.cso", m_inputLayout);
+	try {
+		loadVertexShaderFromFile(L"VertexShader.cso", m_inputLayout);
+	} catch (HRESULT h) {
+		hr = h;
+	}
 	if (FAILED(hr)) {
 		Log::Err(L"Невозможно скомпилировать файл \"%s\". Пожалуйста, запустите данную программу из папки, содержащей этот файл", L"VertexShader.cso");
 		return false;
 	}
-
-	hr = loadPixelShaderFromFile(L"PixelShader.cso");
+	try {
+		loadPixelShaderFromFile(L"PixelShader.cso");
+	} catch (HRESULT h) {
+		hr = h;
+	}
 	if (FAILED(hr)) {
 		Log::Err(L"Невозможно скомпилировать файл \"%s\". Пожалуйста, запустите данную программу из папки, содержащей этот файл", L"PixelShader.cso");
 		return false;
@@ -130,7 +111,9 @@ bool MyRender::Init() {
 
 	device->SetPrimitiveTopology();
 
-	m_pConstantBuffer = device->CreateBuffer<ConstantBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
+	VSConstantBuffer = device->CreateBuffer<ConstantBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
+	PSConstantBuffer = device->CreateBuffer<PixelConstantBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
+
 
 	m_World = XMMatrixIdentity();
 
@@ -147,17 +130,24 @@ bool MyRender::Init() {
 }
 
 void MyRender::BeginFrame() {
-	device->ClearFrame(Color(.03, .1, .2, 1));
+	device->ClearFrame(Util::Color(.03, .1, .2, 1));
 }
 
 bool MyRender::Draw() {
+	double time = .001 * clock();
+
 	ConstantBuffer cb;
-	cb.mWorld = XMMatrixTranspose(m_World * XMMatrixRotationY(.001 * clock()));
+	cb.mWorld = XMMatrixTranspose(m_World * XMMatrixRotationY(time));
 	cb.mView = XMMatrixTranspose(m_View);
 	cb.mProjection = XMMatrixTranspose(m_Projection);
-	device->LoadBufferSubresource(m_pConstantBuffer, cb);
+	device->LoadBufferSubresource(VSConstantBuffer, cb);
 
-	device->SetActiveConstantBuffer(m_pConstantBuffer);
+	PixelConstantBuffer pcb;
+	pcb.time.x = time;
+	device->LoadBufferSubresource(PSConstantBuffer, pcb);
+
+	device->SetActiveVSConstantBuffer(VSConstantBuffer);
+	device->SetActivePSConstantBuffer(PSConstantBuffer);
 
 	device->SetActiveShader(*shader);
 
@@ -171,7 +161,7 @@ void MyRender::Resize() {
 }
 
 void MyRender::Close() {
-	_RELEASE(m_pConstantBuffer);
+	_RELEASE(VSConstantBuffer);
 	_RELEASE(m_pVertexBuffer);
 	_RELEASE(m_pIndexBuffer);
 }
