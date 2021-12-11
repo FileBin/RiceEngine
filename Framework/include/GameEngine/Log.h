@@ -23,12 +23,16 @@ namespace GameEngine {
 			auto str = std::format(message, args...);
 			instance->print(L"", str);
 		}
-
+#ifdef _DEBUG
 		template<class... _Types>
 		static void Debug(String message, const _Types &...args) {
+
 			auto str = std::format(message, args...);
 			instance->print(L"DEBUG:", str);
 		}
+#else
+		static void Debug(String message, ...) {}
+#endif
 
 		template<class... _Types>
 		static void Err(String message, const _Types &...args) {

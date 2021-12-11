@@ -13,6 +13,10 @@ class MsaaTestScript : public ScriptBase {
 			engine.SetMsaaLevel(2);
 		} else if (InputManager::GetKey(KeyCode::Button3)) {
 			engine.SetMsaaLevel(4);
+		} else if (InputManager::GetKey(KeyCode::Button4)) {
+			engine.SetMsaaLevel(8);
+		} else if (InputManager::GetKey(KeyCode::Button5)) {
+			engine.SetMsaaLevel(16);
 		}
 	}
 };

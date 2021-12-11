@@ -121,6 +121,9 @@ namespace GameEngine {
 
 		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &depthStencilTex));
 
+		void* p = (void*)depthStencil;
+		_RELEASE(depthStencil);
+
 		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, nullptr, &depthStencil));
 		_RELEASE(depthStencilTex);
 	}
@@ -141,12 +144,16 @@ namespace GameEngine {
 		sd.SampleDesc.Quality = 0;
 		sd.Windowed = true;
 
-		swapChain = nullptr;
+		void* pp = (void*)swapChain;
+		_RELEASE(swapChain);
+
 		ThrowIfFailed(factory->CreateSwapChain(device, &sd, &swapChain));
 
 		ID3D11Texture2D* pBackBuffer = NULL;
 		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
 
+		pp = (void*)renderTarget;
+		_RELEASE(renderTarget);
 		ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget));
 		_RELEASE(pBackBuffer);
 
@@ -241,6 +248,7 @@ namespace GameEngine {
 		context->OMSetRenderTargets(0, 0, 0);
 		renderTarget->Release();
 		renderTarget = nullptr;
+		depthStencil->Release();
 		depthStencil = nullptr;
 
 		Vector2 size;
