@@ -1,1 +1,6 @@
 .vs/
+x64/
+obj/
+GameMain/x64/
+ModelConverter/x64/
+
