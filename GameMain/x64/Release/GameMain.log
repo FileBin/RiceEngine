@@ -1,9 +1,7 @@
 ﻿  main.cpp
-  MyRender.cpp
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(133,48): warning C4305: аргумент: усечение из "double" в "float"
   Создание кода
-  42 of 1786 functions ( 2.4%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    15 functions had inline decision re-evaluated but remain unchanged
+  3 of 1786 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    8 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   GameMain.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Release\GameMain.exe

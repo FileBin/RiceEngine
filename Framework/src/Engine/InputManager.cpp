@@ -14,7 +14,10 @@ namespace GameEngine {
 	}
 	InputManager::InputManager() {
 		windowRect = RECT();
-		keyStates = new bool[(size_t)KeyCode::Max];
+		size_t n = (size_t)KeyCode::Max;
+		keyStates = new bool[n];
+		ZeroMemory(keyStates, n);
+
 		mouseStates = new bool[10];
 	}
 
@@ -22,7 +25,7 @@ namespace GameEngine {
 		_DELETE_ARRAY(keyStates);
 	}
 
-	inline bool InputManager::GetKey(KeyCode key) {
+	bool InputManager::GetKey(KeyCode key) {
 		return instance->keyStates[(size_t)key];
 	}
 

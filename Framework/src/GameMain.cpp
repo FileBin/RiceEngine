@@ -1,17 +1,22 @@
 #include <GameEngine/GameMain.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
+#include <GameEngine/ScriptBase.h>
+#include <GameEngine\Engine.h>
+
 #include <chrono>
 #include <thread>
 
 using namespace std::chrono;
+using namespace std::this_thread;
 
 namespace GameEngine {
 
-	GameMain::GameMain(): wnd(nullptr), render(nullptr), init(false), device(nullptr) {}
+	GameMain::GameMain() {}
 
 	GameMain::~GameMain() {}
 	bool GameMain::Initialize() {
+		engine = new Engine(&device, this);
 		RunScripts(preInitScripts);
 		Log::Init();
 		wnd = new Window();
@@ -44,14 +49,19 @@ namespace GameEngine {
 	}
 	void GameMain::Run() {
 		if (init) {
-			auto fixedDeltaTime = (long long)(1000. / fps);
+			auto fixedDeltaTime = 1000. / fps;
+			auto interval = (long long)fixedDeltaTime;
+			auto deltaTime = fixedDeltaTime;
 			auto time = steady_clock::now();
 			auto b = false;
 			do {
 				b = frame();
 				RunScripts(updateScripts);
-				std::this_thread::sleep_until(time);
-				time = steady_clock::now() + milliseconds(fixedDeltaTime);
+				engine->PostUpdate();
+
+				sleep_until(time);
+				deltaTime = fixedDeltaTime + .000001*(steady_clock::now() - time).count();
+				time = steady_clock::now() + milliseconds(interval);
 			} while (b);
 		}
 	}
@@ -90,8 +100,14 @@ namespace GameEngine {
 		return true;
 	}
 
+	void GameMain::RunScripts(List<ScriptBase*>& scripts){
+		for (auto s : scripts) { s->Run(); }
+	}
+
+
 	void GameMain::AddScript(ScriptBase& script, Stage stage) {
-		script.Init(this, &render);
+		script.Init(&engine, &render);
+		script.Initialize();
 		switch (stage) {
 		case Stage::PreInit:
 			preInitScripts.push_back(&script);

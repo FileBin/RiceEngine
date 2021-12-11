@@ -5,20 +5,16 @@
 #include "Log.h"
 #include "Window.h"
 #include "ScriptBase.h"
+#include "Stage.h"
 
 namespace GameEngine {
 
+	class ScriptBase;
+	class Engine;
+
 	class GameMain {
 	public:
-		enum Stage {
-			PreInit = 0,
-			Init,
-			PostInit,
-			PreRender,
-			Render,
-			PostRender,
-			Update,
-		};
+
 
 		GameMain();
 		~GameMain();
@@ -34,13 +30,12 @@ namespace GameEngine {
 
 	private:
 		bool frame();
-		void RunScripts(List<ScriptBase*>& scripts) {
-			for (auto s : scripts) { s->Run(); }
-		}
+		void RunScripts(List<ScriptBase*>& scripts);
 
-		Window* wnd;
-		RenderBase* render;
-		Device* device;
+		Window* wnd = nullptr;
+		RenderBase* render = nullptr;
+		Device* device = nullptr;
+		Engine* engine = nullptr;
 		bool init;
 		double fps = 60.;
 		List<ScriptBase*> preInitScripts, initScripts, postInitScripts,

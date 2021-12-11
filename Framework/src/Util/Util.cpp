@@ -23,6 +23,17 @@ namespace GameEngine::Util {
 		MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
 		return wstrTo;
 	}
+
+	Vector2 GetWindowScreenSize(HWND hwnd) {
+		Vector2 size;
+		RECT rc;
+		GetClientRect(hwnd, &rc);
+		size.x = rc.right - rc.left;
+		size.y = rc.bottom - rc.top;
+		return size;
+	}
+
+
 	XMMATRIX Transform::GetTransformationMatrix() {
 		return XMMatrixAffineTransformation(XMVectorSet(scale.x, scale.y, scale.z, 0), 
 			XMVectorZero(),

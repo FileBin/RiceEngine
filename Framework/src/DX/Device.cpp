@@ -16,8 +16,8 @@ namespace GameEngine {
 	}
 
 #pragma region Initialize
-	void Device::_init(DXGI_SWAP_CHAIN_DESC desc, size_t adapterIdx) {
-		Vector2 size = Vector2(desc.BufferDesc.Width, desc.BufferDesc.Height);
+	void Device::_init(size_t adapterIdx) {
+		Vector2 size = Util::GetWindowScreenSize(hwnd);
 
 		UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -44,15 +44,9 @@ namespace GameEngine {
 		ThrowIfFailed(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
 			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context));
 
-		ThrowIfFailed(factory->CreateSwapChain(device, &desc, &swapChain));
+		ReCreateSwapChain();
 
-		ID3D11Texture2D* pBackBuffer = NULL;
-		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
-
-		ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget));
-		_RELEASE(pBackBuffer);
-
-		_createDepthStencil(size);
+		
 
 		D3D11_VIEWPORT vp;
 		vp.Width = size.x;
@@ -73,31 +67,9 @@ namespace GameEngine {
 		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
 	}
 
-	void Device::Initialize(HWND hwnd) {
-		this->hwnd = hwnd;
-
-		RECT rc;
-		GetClientRect(hwnd, &rc);
-		UINT width = rc.right - rc.left;
-		UINT height = rc.bottom - rc.top;
-
-		DXGI_SWAP_CHAIN_DESC sd;
-		ZeroMemory(&sd, sizeof(sd));
-		sd.BufferCount = 1;
-		sd.BufferDesc.Width = width;
-		sd.BufferDesc.Height = height;
-		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		sd.BufferDesc.RefreshRate.Numerator = 60;
-		sd.BufferDesc.RefreshRate.Denominator = 1;
-		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sd.OutputWindow = hwnd;
-
-		//4x mulisampling
-		sd.SampleDesc.Count = msaaLevel;
-		sd.SampleDesc.Quality = 0;
-		sd.Windowed = true;
-		
-		_init(sd);
+	void Device::Initialize(HWND hwnd, size_t idx) {
+		this->hwnd = hwnd;		
+		_init(idx);
 	}
 #pragma endregion
 
@@ -151,6 +123,34 @@ namespace GameEngine {
 
 		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, nullptr, &depthStencil));
 		_RELEASE(depthStencilTex);
+	}
+
+	void Device::ReCreateSwapChain(Vector2 screenSize) {
+		DXGI_SWAP_CHAIN_DESC sd;
+		ZeroMemory(&sd, sizeof(sd));
+		sd.BufferCount = 1;
+		sd.BufferDesc.Width = screenSize.x;
+		sd.BufferDesc.Height = screenSize.y;
+		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.BufferDesc.RefreshRate.Numerator = 60;
+		sd.BufferDesc.RefreshRate.Denominator = 1;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.OutputWindow = hwnd;
+
+		sd.SampleDesc.Count = msaaLevel;
+		sd.SampleDesc.Quality = 0;
+		sd.Windowed = true;
+
+		swapChain = nullptr;
+		ThrowIfFailed(factory->CreateSwapChain(device, &sd, &swapChain));
+
+		ID3D11Texture2D* pBackBuffer = NULL;
+		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
+
+		ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget));
+		_RELEASE(pBackBuffer);
+
+		_createDepthStencil(screenSize);
 	}
 
 	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format) {
@@ -273,10 +273,6 @@ namespace GameEngine {
 			if (FAILED(hr))
 				throw hr;
 		}
-	}
-
-	void Device::SetMSAA(int level) {
-		throw E_NOTIMPL;
 	}
 
 }

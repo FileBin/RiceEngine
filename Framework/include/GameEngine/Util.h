@@ -16,6 +16,7 @@ namespace GameEngine::Util {
 	void ThrowIfFailed(HRESULT hr);
 	data_t ReadFile(String filename);
 	String Utf8ToWstring(const std::string& str);
+	Vector2 GetWindowScreenSize(HWND hwnd);
 
 	struct Color {
 		float r, g, b, a;

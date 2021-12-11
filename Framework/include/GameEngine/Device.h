@@ -11,7 +11,7 @@ namespace GameEngine {
 		Device();
 		~Device();
 
-		void Initialize(HWND hwnd);
+		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
 
 		template<typename T>
 		ID3D11Buffer* CreateBuffer(std::vector<T> data = {}, UINT flags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE usage = D3D11_USAGE_DEFAULT) {
@@ -50,9 +50,12 @@ namespace GameEngine {
 		void SwapBuffers();
 
 		void Resize();
+		void ReCreateSwapChain() { ReCreateSwapChain(Util::GetWindowScreenSize(hwnd)); }
+		void ReCreateSwapChain(Vector2 screenSize);
 
 		HWND GetHWND() { return hwnd; }
-		void SetMSAA(int level);
+		void SetMsaa(int level) { msaaLevel = level; }
+		size_t GetMsaaLevel() const { return msaaLevel; }
 	private:
 		bool initialized = false;
 		HWND hwnd = 0;
@@ -73,7 +76,7 @@ namespace GameEngine {
 
 		HRESULT _createBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer** outbuf, D3D11_USAGE usage, UINT flags);
 		HRESULT _loadVertexBuffer(ID3D11Buffer** buffer, size_t stride);
-		void _init(DXGI_SWAP_CHAIN_DESC desc, size_t adapterIdx = 0);
+		void _init(size_t adapterIdx = 0);
 		void _createDepthStencil(Vector2 size);
 	};
 }

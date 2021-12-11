@@ -1,24 +1,26 @@
 #pragma once
+#include "Engine.h"
 #include "RenderBase.h"
 
 namespace GameEngine {
-	class GameMain;
+
+	class Engine;
 
 	class ScriptBase {
 	public:
 		ScriptBase() {}
-
-		void Init(GameMain* engine, RenderBase** render);
+		void Init(Engine** engine, RenderBase** render);
 
 		~ScriptBase() { Finalize(); }
 
+		virtual void Initialize() {}
 		virtual void Run() = 0;
-		virtual void Finalize() = 0;
+		virtual void Finalize() {}
 	protected:
-		const GameMain& GetEngine() const { return *engine; }
-		const RenderBase& GetRender() const { return **render; }
+		Engine& GetEngine() { return **engine; }
+		RenderBase& GetRender() { return **render; }
 	private:
-		GameMain* engine = nullptr;
+		Engine** engine = nullptr;
 		RenderBase** render = nullptr;
 	};
 }
