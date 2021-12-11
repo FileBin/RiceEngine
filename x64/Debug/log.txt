@@ -1,12 +1,8 @@
-Log Created: 12/10/21 18:42:15.
+Log Created: 12/11/21 14:38:19.
 ---------------------------------------
 
-18:42:15::83: DEBUG:Window Create
-18:42:15::163: DEBUG:AdapterInfo:
+14:38:19::73: DEBUG:Window Create
+14:38:19::189: DEBUG:AdapterInfo:
 
- Description: Intel(R) UHD Graphics
+ Description: Capture Adapter
  VideoMemory 128M
-18:42:18::2843: DEBUG:Window Close
-
----------------------------------------
-Log End: 12/10/21 18:42:18

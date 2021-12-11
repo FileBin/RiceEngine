@@ -4,7 +4,7 @@
 #include <ios>
 #include <filesystem>
 #include <fstream>
-#include <GameFramework/Log.h>
+#include <GameEngine/Log.h>
 using namespace GameEngine;
 
 struct SimpleVertex {
@@ -32,7 +32,7 @@ void MyRender::loadPixelShaderFromFile(String FileName) {
 	shader->LoadPixelShader(Util::ReadFile(FileName));
 }
 
-void MyRender::loadVertexShaderFromFile(String FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout) {
+void MyRender::loadVertexShaderFromFile(String FileName, VertexLayout layout) {
 	shader->LoadVertexShader(Util::ReadFile(FileName), layout);
 }
 
@@ -157,7 +157,7 @@ bool MyRender::Draw() {
 }
 
 void MyRender::Resize() {
-	m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, GetAspectRatio(), 0.01f, 10000.0f);
+	m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, GetAspectRatio(), 0.01f, 100.0f);
 }
 
 void MyRender::Close() {

@@ -1,5 +1,5 @@
 #include <codecvt>
-#include <GameFramework/Util.h>
+#include <GameEngine/Util.h>
 #include <stringapiset.h>
 
 namespace GameEngine::Util {
@@ -22,5 +22,11 @@ namespace GameEngine::Util {
 		std::wstring wstrTo(size_needed, 0);
 		MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
 		return wstrTo;
+	}
+	XMMATRIX Transform::GetTransformationMatrix() {
+		return XMMatrixAffineTransformation(XMVectorSet(scale.x, scale.y, scale.z, 0), 
+			XMVectorZero(),
+			XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w),
+			XMVectorSet(pos.x, pos.y, pos.z, 0));
 	}
 }

@@ -1,6 +1,6 @@
-#include <GameFramework/Shader.h>
-#include <GameFramework/macros.h>
-#include <GameFramework/Device.h>
+#include <GameEngine/Shader.h>
+#include <GameEngine/macros.h>
+#include <GameEngine/Device.h>
 
 namespace GameEngine {
 	Shader::Shader(Device* device) : device(device) {

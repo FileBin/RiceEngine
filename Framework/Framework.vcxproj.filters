@@ -15,57 +15,72 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\GameFramework\stdafx.h">
+    <ClInclude Include="include\GameEngine\stdafx.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\macros.h">
+    <ClInclude Include="include\GameEngine\macros.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Log.h">
+    <ClInclude Include="include\GameEngine\Log.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\InputButtons.h">
+    <ClInclude Include="include\GameEngine\InputButtons.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\InputManager.h">
+    <ClInclude Include="include\GameEngine\InputManager.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\InputEvents.h">
+    <ClInclude Include="include\GameEngine\InputEvents.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Vectors.h">
+    <ClInclude Include="include\GameEngine\Vectors.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Math.h">
+    <ClInclude Include="include\GameEngine\Math.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Window.h">
+    <ClInclude Include="include\GameEngine\Window.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\GameMain.h">
+    <ClInclude Include="include\GameEngine\GameMain.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Render.h">
+    <ClInclude Include="include\GameEngine\RenderBase.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\version.h">
+    <ClInclude Include="include\GameEngine\version.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Device.h">
+    <ClInclude Include="include\GameEngine\Device.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Util.h">
+    <ClInclude Include="include\GameEngine\Util.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameFramework\Shader.h">
+    <ClInclude Include="include\GameEngine\Shader.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Model.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Material.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\ModelRender.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\ScriptBase.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Camera.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Log.cpp">
+    <ClCompile Include="src\Engine\Log.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\Input\InputManager.cpp">
+    <ClCompile Include="src\Engine\InputManager.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\Math\Vectors.cpp">
@@ -74,7 +89,7 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\3D\Render.cpp">
+    <ClCompile Include="src\3D\RenderBase.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\GameMain.cpp">
@@ -87,6 +102,15 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\3D\Shader.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\ScriptBase.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3D\Model.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3D\ModelRender.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

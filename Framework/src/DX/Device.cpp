@@ -1,8 +1,8 @@
-#include <GameFramework/Device.h>
-#include <GameFramework/macros.h>
-#include <GameFramework/Vectors.h>
-#include <GameFramework/Util.h>
-#include <GameFramework/Log.h>
+#include <GameEngine/Device.h>
+#include <GameEngine/macros.h>
+#include <GameEngine/Vectors.h>
+#include <GameEngine/Util.h>
+#include <GameEngine/Log.h>
 
 namespace GameEngine {
 
@@ -16,8 +16,8 @@ namespace GameEngine {
 	}
 
 #pragma region Initialize
-	HRESULT Device::_init(DXGI_SWAP_CHAIN_DESC desc, size_t adapterIdx) {
-		HRESULT hr = S_OK;		
+	void Device::_init(DXGI_SWAP_CHAIN_DESC desc, size_t adapterIdx) {
+		Vector2 size = Vector2(desc.BufferDesc.Width, desc.BufferDesc.Height);
 
 		UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -41,37 +41,39 @@ namespace GameEngine {
 		Log::Debug(L"AdapterInfo:\n\n Description: {}\n VideoMemory {}M", adapterDesc.Description, adapterDesc.DedicatedVideoMemory / 0x100000);
 #endif
 
-		hr = D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
-			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context);
-		ThrowIfFailed(hr);
+		ThrowIfFailed(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
+			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context));
 
 		ThrowIfFailed(factory->CreateSwapChain(device, &desc, &swapChain));
 
 		ID3D11Texture2D* pBackBuffer = NULL;
-		hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-		if (FAILED(hr))
-			return hr;
+		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
 
-		hr = device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget);
+		ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget));
 		_RELEASE(pBackBuffer);
-		if (FAILED(hr))
-			return hr;
 
-		context->OMSetRenderTargets(1, &renderTarget, NULL);
+		_createDepthStencil(size);
 
 		D3D11_VIEWPORT vp;
-		vp.Width = (FLOAT)desc.BufferDesc.Width;
-		vp.Height = (FLOAT)desc.BufferDesc.Height;
+		vp.Width = size.x;
+		vp.Height = size.y;
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
 		context->RSSetViewports(1, &vp);
 
-		return hr;
+		D3D11_RASTERIZER_DESC rsdesc;
+
+		ZeroMemory(&rsdesc, sizeof(rsdesc));
+
+		rsdesc.CullMode = D3D11_CULL_BACK;
+		rsdesc.FillMode = D3D11_FILL_SOLID;
+		
+		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
 	}
 
-	HRESULT Device::Init(HWND hwnd) {
+	void Device::Initialize(HWND hwnd) {
 		this->hwnd = hwnd;
 
 		RECT rc;
@@ -91,11 +93,11 @@ namespace GameEngine {
 		sd.OutputWindow = hwnd;
 
 		//4x mulisampling
-		sd.SampleDesc.Count = 4;
+		sd.SampleDesc.Count = msaaLevel;
 		sd.SampleDesc.Quality = 0;
 		sd.Windowed = true;
 		
-		return _init(sd);
+		_init(sd);
 	}
 #pragma endregion
 
@@ -129,6 +131,26 @@ namespace GameEngine {
 		UINT offset = 0;
 		context->IASetVertexBuffers(0, 1, pBuffer, (UINT*)&stride, &offset);
 		return S_OK;
+	}
+
+	void Device::_createDepthStencil(Vector2 size) {
+		D3D11_TEXTURE2D_DESC dsDesc;
+		dsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		dsDesc.SampleDesc.Count = msaaLevel;
+		dsDesc.SampleDesc.Quality = 0;
+		dsDesc.MipLevels = 1;
+		dsDesc.ArraySize = 1;
+		dsDesc.Width = lround(size.x);
+		dsDesc.Height = lround(size.y);
+		dsDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		dsDesc.Usage = D3D11_USAGE_DEFAULT;
+		dsDesc.CPUAccessFlags = 0;
+		dsDesc.MiscFlags = 0;
+
+		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &depthStencilTex));
+
+		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, nullptr, &depthStencil));
+		_RELEASE(depthStencilTex);
 	}
 
 	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format) {
@@ -199,12 +221,15 @@ namespace GameEngine {
 	}
 
 	void Device::Draw() {
+		context->RSSetState(state);
 		context->DrawIndexed(indexCount, 0, 0);
 	}
 
 	void Device::ClearFrame(Color color) {
+		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 		float c[] = { color.r,color.g,color.b,color.a };
 		context->ClearRenderTargetView(renderTarget, c);
+		context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 	}
 
 	void Device::SwapBuffers() {
@@ -216,6 +241,7 @@ namespace GameEngine {
 		context->OMSetRenderTargets(0, 0, 0);
 		renderTarget->Release();
 		renderTarget = nullptr;
+		depthStencil = nullptr;
 
 		Vector2 size;
 		RECT rect;
@@ -233,7 +259,7 @@ namespace GameEngine {
 			hr = device->CreateRenderTargetView(pBuffer, nullptr, &renderTarget);
 			pBuffer->Release();
 
-			context->OMSetRenderTargets(1, &renderTarget, nullptr);
+			_createDepthStencil(size);
 
 			D3D11_VIEWPORT vp;
 			vp.Width = size.x;

@@ -1,4 +1,4 @@
-#include <GameFramework/GameMain.h>
+#include <GameEngine/GameMain.h>
 #include <MyRender.h>
 
 using namespace GameEngine;
@@ -7,14 +7,15 @@ int main() {
 	SetProcessDPIAware();
 	ShowWindow(GetConsoleWindow(), 0);
 
-	GameMain framework;
+	GameMain engine;
 
 	Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
-
 	MyRender* render = new MyRender();
-	framework.SetRender(render);
-	framework.Init();
-	framework.Run();
-	framework.Close();
+	engine.SetRender(render);
+
+	engine.Initialize();
+	engine.Run();
+	engine.Close();
+
 	return 0;
 }

@@ -1,5 +1,5 @@
-#include <GameFramework/Window.h>
-#include <GameFramework/Log.h>
+#include <GameEngine/Window.h>
+#include <GameEngine/Log.h>
 
 namespace GameEngine {
 

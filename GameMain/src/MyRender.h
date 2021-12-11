@@ -1,24 +1,24 @@
 #pragma once
-#include <GameFramework/Render.h>
-#include <GameFramework/macros.h>
+#include <GameEngine/RenderBase.h>
+#include <GameEngine/macros.h>
 #include <vector>
 #include <xnamath.h>
-#include <GameFramework/InputManager.h>
+#include <GameEngine/InputManager.h>
 
 using namespace GameEngine;
 
-class MyRender : public Render {
+class MyRender : public RenderBase {
 public:
 	MyRender();
 	bool Init();
-	virtual void BeginFrame();
+	void BeginFrame();
 	bool Draw();
 	void Close();
 	void Resize();
 
 private:
 	void loadPixelShaderFromFile(String FileName);
-	void loadVertexShaderFromFile(String FileName, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
+	void loadVertexShaderFromFile(String FileName, VertexLayout layout);
 
 	ID3D11Buffer* m_pVertexBuffer;
 	Shader* shader;

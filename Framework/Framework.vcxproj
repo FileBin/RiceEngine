@@ -24,6 +24,7 @@
     <ProjectGuid>{b341a52f-d64c-4738-8e34-e036670b024f}</ProjectGuid>
     <RootNamespace>Framework</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>GameEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -160,29 +161,37 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\GameFramework\Device.h" />
-    <ClInclude Include="include\GameFramework\Render.h" />
-    <ClInclude Include="include\GameFramework\GameMain.h" />
-    <ClInclude Include="include\GameFramework\InputEvents.h" />
-    <ClInclude Include="include\GameFramework\InputButtons.h" />
-    <ClInclude Include="include\GameFramework\InputManager.h" />
-    <ClInclude Include="include\GameFramework\Log.h" />
-    <ClInclude Include="include\GameFramework\macros.h" />
-    <ClInclude Include="include\GameFramework\Math.h" />
-    <ClInclude Include="include\GameFramework\Shader.h" />
-    <ClInclude Include="include\GameFramework\Util.h" />
-    <ClInclude Include="include\GameFramework\version.h" />
-    <ClInclude Include="include\GameFramework\stdafx.h" />
-    <ClInclude Include="include\GameFramework\Vectors.h" />
-    <ClInclude Include="include\GameFramework\Window.h" />
+    <ClInclude Include="include\GameEngine\Camera.h" />
+    <ClInclude Include="include\GameEngine\Device.h" />
+    <ClInclude Include="include\GameEngine\Material.h" />
+    <ClInclude Include="include\GameEngine\Model.h" />
+    <ClInclude Include="include\GameEngine\ModelRender.h" />
+    <ClInclude Include="include\GameEngine\RenderBase.h" />
+    <ClInclude Include="include\GameEngine\GameMain.h" />
+    <ClInclude Include="include\GameEngine\InputEvents.h" />
+    <ClInclude Include="include\GameEngine\InputButtons.h" />
+    <ClInclude Include="include\GameEngine\InputManager.h" />
+    <ClInclude Include="include\GameEngine\Log.h" />
+    <ClInclude Include="include\GameEngine\macros.h" />
+    <ClInclude Include="include\GameEngine\Math.h" />
+    <ClInclude Include="include\GameEngine\ScriptBase.h" />
+    <ClInclude Include="include\GameEngine\Shader.h" />
+    <ClInclude Include="include\GameEngine\Util.h" />
+    <ClInclude Include="include\GameEngine\version.h" />
+    <ClInclude Include="include\GameEngine\stdafx.h" />
+    <ClInclude Include="include\GameEngine\Vectors.h" />
+    <ClInclude Include="include\GameEngine\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3D\ModelRender.cpp" />
+    <ClCompile Include="src\3D\Model.cpp" />
     <ClCompile Include="src\3D\Shader.cpp" />
     <ClCompile Include="src\DX\Device.cpp" />
+    <ClCompile Include="src\Engine\ScriptBase.cpp" />
     <ClCompile Include="src\GameMain.cpp" />
-    <ClCompile Include="src\3D\Render.cpp" />
-    <ClCompile Include="src\Input\InputManager.cpp" />
-    <ClCompile Include="src\Log.cpp" />
+    <ClCompile Include="src\3D\RenderBase.cpp" />
+    <ClCompile Include="src\Engine\InputManager.cpp" />
+    <ClCompile Include="src\Engine\Log.cpp" />
     <ClCompile Include="src\Math\Vectors.cpp" />
     <ClCompile Include="src\Util\Util.cpp" />
     <ClCompile Include="src\Window.cpp" />

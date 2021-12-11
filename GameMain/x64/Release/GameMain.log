@@ -1,19 +1,9 @@
 ﻿  main.cpp
   MyRender.cpp
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(127,67): warning C4244: аргумент: преобразование "double" в "FLOAT", возможна потеря данных
 C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(133,48): warning C4305: аргумент: усечение из "double" в "float"
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(140,60): warning C4244: аргумент: преобразование "double" в "FLOAT", возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(146,15): warning C4244: =: преобразование "double" в "FLOAT", возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(160,67): warning C4244: аргумент: преобразование "double" в "FLOAT", возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\Framework\include\GameFramework\Device.h(25,1): warning C4267: аргумент: преобразование из "size_t" в "UINT"; возможна потеря данных
-C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\GameMain\src\MyRender.cpp(143): message : выполняется компиляция ссылки на экземпляр шаблон функции "void GameEngine::Device::LoadBufferSubresource<ConstantBuffer>(ID3D11Buffer *,T &,size_t)"
-          with
-          [
-              T=ConstantBuffer
-          ]
   Создание кода
-  1357 of 1757 functions (77.2%) were compiled, the rest were copied from previous compilation.
-    429 functions were new in current compilation
-    52 functions had inline decision re-evaluated but remain unchanged
+  42 of 1786 functions ( 2.4%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    15 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   GameMain.vcxproj -> C:\Users\FileBinsLapTop\source\repos\GameMain\DirectXGame\x64\Release\GameMain.exe
