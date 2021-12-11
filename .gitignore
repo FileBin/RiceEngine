@@ -1,6 +1,12 @@
 .vs/
-x64/
-obj/
-GameMain/x64/
-ModelConverter/x64/
+/x64/
+/obj/
+/GameMain/x64/
+/ModelConverter/x64/
 
+*.pdb
+*.lib
+*.exe
+*.obj
+x64/Release/log.txt
+x64/Debug/log.txt
