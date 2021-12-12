@@ -2,7 +2,7 @@
 #include <GameEngine/stdafx.h>
 #include <GameEngine/macros.h>
 
-namespace GameEngine {
+namespace Game {
 	RenderBase::RenderBase() : device(nullptr) {}
 
 	RenderBase::~RenderBase() {}

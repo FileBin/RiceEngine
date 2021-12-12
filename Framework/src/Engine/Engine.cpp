@@ -1,13 +1,14 @@
 #include <GameEngine\stdafx.h>
 #include <GameEngine\Engine.h>
-#include <GameEngine\GameMain.h>
+#include <GameEngine\Core.h>
 
-namespace GameEngine {
+namespace Game {
 
-	Engine::Engine(Device** d, GameMain* c) {
+	Engine::Engine(Device** d, Core* c, Stage* s) {
 		if (d != nullptr && c != nullptr) {
 			device = d;
 			core = c;
+			stage = s;
 		} else {
 			throw std::exception("Engine can't be created, because device reference is null!");
 		}
@@ -25,5 +26,13 @@ namespace GameEngine {
 		}
 	}
 
-	void Engine::RegisterScript(ScriptBase& script, Stage stage) { core->AddScript(script, stage); }
+	void Engine::SetMsaaLevel(size_t level) {
+		if (*stage == Stage::PreInit) {
+			(**device).SetMsaa(level);
+		}
+		msaaLevel = level;
+	}
+
+	void Engine::RegisterScript(ScriptBase* script, Stage stage) { core->AddScript(script, stage); }
+	void Engine::SetRender(RenderBase* render) { core->SetRender(render); }
 }

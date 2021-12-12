@@ -1,6 +1,6 @@
 #include <GameEngine/Model.h>
 
-namespace GameEngine {
+namespace Game {
 
 	void Model::SetMaterial(Material& mat, size_t idx) {
 		subMeshes[idx].material = mat;

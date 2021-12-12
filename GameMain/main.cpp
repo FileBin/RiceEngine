@@ -1,9 +1,9 @@
-#include <GameEngine/GameMain.h>
+#include <GameEngine/Core.h>
 #include <MyRender.h>
-#include <Scripts\MsaaTestScript.h>
+#include <Scripts\PreInitScript.h>
 
 
-using namespace GameEngine;
+using namespace Game;
 
 int main(int argc, char** argv[]) {
 #ifndef _DEBUG
@@ -14,7 +14,9 @@ int main(int argc, char** argv[]) {
 
 	SetProcessDPIAware();
 
-	GameMain engine;
+	Core::RunNew(new PreInitScript());
+
+	/*Core engine;
 
 	Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
 	MyRender* render = new MyRender();
@@ -25,7 +27,7 @@ int main(int argc, char** argv[]) {
 
 	engine.Initialize();
 	engine.Run();
-	engine.Close();
+	engine.Close();*/
 
 	return 0;
 }

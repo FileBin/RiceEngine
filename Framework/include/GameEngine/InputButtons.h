@@ -1,6 +1,6 @@
 #pragma once
 
-namespace GameEngine {
+namespace Game {
 	enum class MouseKey {
 		Left = 0,
 		Middle,

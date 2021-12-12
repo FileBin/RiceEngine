@@ -42,7 +42,7 @@
     <ClInclude Include="include\GameEngine\Window.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\GameMain.h">
+    <ClInclude Include="include\GameEngine\Core.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\GameEngine\RenderBase.h">
@@ -98,7 +98,7 @@
     <ClCompile Include="src\3D\RenderBase.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\GameMain.cpp">
+    <ClCompile Include="src\Core.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\DX\Device.cpp">

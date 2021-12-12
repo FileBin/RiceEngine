@@ -2,27 +2,31 @@
 #include "Device.h"
 #include "Stage.h"
 
-namespace GameEngine {
+namespace Game {
 
 	class ScriptBase;
-	class GameMain;
+	class Core;
+	class RenderBase;
 
 	class Engine
 	{
 	public:
-		Engine(Device** device, GameMain* Core);
+		Engine(Device** device, Core* Core, Stage* stage);
 		~Engine();
 
 		size_t GetMsaaLevel() const { return msaaLevel; }
-		void SetMsaaLevel(size_t level) { msaaLevel = level; }
+		void SetMsaaLevel(size_t level);
+
+		void SetRender(RenderBase* render);
 
 		void PostUpdate();
 
-		void RegisterScript(ScriptBase& script, Stage stage = Stage::Update);
+		void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
 
 	private:
 		Device** device = nullptr;
-		GameMain* core;
+		Core* core;
 		size_t msaaLevel = 1;
+		Stage* stage;
 	};
 }

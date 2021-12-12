@@ -3,7 +3,7 @@
 #include "Device.h"
 #include "Math.h"
 
-namespace GameEngine {
+namespace Game {
 	class RenderBase {
 	public:
 		RenderBase();

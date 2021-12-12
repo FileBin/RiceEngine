@@ -7,30 +7,31 @@
 #include "ScriptBase.h"
 #include "Stage.h"
 
-namespace GameEngine {
+namespace Game {
 
 	class ScriptBase;
 	class Engine;
 
-	class GameMain {
+	class Core {
 	public:
+		static void RunNew(ScriptBase* preInitScript);
 
+		void AddScript(ScriptBase* script, Stage s);
 
-		GameMain();
-		~GameMain();
+		void SetRender(RenderBase* render) { this->render = render; }
+		void SetFps(double fps) { this->fps = fps; }
+	private:
+		Core();
+		~Core();
 
 		bool Initialize();
 		void Run();
 		void Close();
 
-		void SetRender(RenderBase* render) { this->render = render; }
-		void SetFps(double fps) { this->fps = fps; }
-
-		void AddScript(ScriptBase& script, Stage s = Stage::Update);
-
-	private:
 		bool frame();
 		void RunScripts(List<ScriptBase*>& scripts);
+
+		Stage stage;
 
 		Window* wnd = nullptr;
 		RenderBase* render = nullptr;

@@ -164,6 +164,7 @@
     <ClInclude Include="src\MyRender.h" />
     <ClInclude Include="src\Scripts.h" />
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
+    <ClInclude Include="src\Scripts\PreInitScript.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\PixelShader.hlsl">

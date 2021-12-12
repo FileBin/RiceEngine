@@ -3,7 +3,7 @@
 #include <fstream>
 #include "Util.h"
 
-namespace GameEngine {
+namespace Game {
 	class Log {
 	public:
 		struct Localization {

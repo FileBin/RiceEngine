@@ -1,5 +1,5 @@
 #include <GameEngine/ModelRender.h>
-namespace GameEngine {
+namespace Game {
 	bool ModelRenderer::Init() {
 		auto n = model->GetSubMeshesCount();
 		indexBuffers.resize(n);

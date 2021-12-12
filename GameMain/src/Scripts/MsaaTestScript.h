@@ -1,8 +1,8 @@
 #pragma once
-#include <GameEngine\GameMain.h>
+#include <GameEngine\Core.h>
 #include <GameEngine\InputManager.h>
 
-using namespace GameEngine;
+using namespace Game;
 
 class MsaaTestScript : public ScriptBase {
 	void Run() {

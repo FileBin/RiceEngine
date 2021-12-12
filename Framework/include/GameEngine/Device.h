@@ -3,8 +3,8 @@
 #include "Util.h"
 #include "Shader.h"
 
-namespace GameEngine {
-	using namespace GameEngine::Util;
+namespace Game {
+	using namespace Game::Util;
 
 	class Device {
 	public:

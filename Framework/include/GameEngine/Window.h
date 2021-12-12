@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "InputManager.h"
 
-namespace GameEngine {
+namespace Game {
 	struct DescWindow {
 		DescWindow() :
 			caption(L"Game"),

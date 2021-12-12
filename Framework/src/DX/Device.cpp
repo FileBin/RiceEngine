@@ -4,7 +4,7 @@
 #include <GameEngine/Util.h>
 #include <GameEngine/Log.h>
 
-namespace GameEngine {
+namespace Game {
 
 	Device::Device() {
 	}
@@ -188,12 +188,12 @@ namespace GameEngine {
 		context->IASetIndexBuffer(buffer, format, 0);
 	}
 
-	void GameEngine::Device::SetActiveVSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
+	void Game::Device::SetActiveVSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
 		ID3D11Buffer* arr[] = { buffer };
 		context->VSSetConstantBuffers(index, 1, arr);
 	}
 
-	void GameEngine::Device::SetActivePSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
+	void Game::Device::SetActivePSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
 		ID3D11Buffer* arr[] = { buffer };
 		context->PSSetConstantBuffers(index, 1, arr);
 	}

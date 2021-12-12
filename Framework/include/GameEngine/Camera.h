@@ -1,7 +1,7 @@
 #pragma once
 #include "Util.h"
 
-namespace GameEngine {
+namespace Game {
 	using namespace Util;
 	class Camera {
 	public:

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Util.h"
 
-namespace GameEngine {
+namespace Game {
 	class Device;
 
 	class Shader {

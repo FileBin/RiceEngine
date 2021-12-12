@@ -11,7 +11,7 @@ typedef ID3D11Buffer Buffer;
 template<typename T> struct List : public std::vector<T> {};
 template<typename K, typename V> struct Map : public std::map<K, V> {};
 
-namespace GameEngine::Util {
+namespace Game::Util {
 
 	void ThrowIfFailed(HRESULT hr);
 	data_t ReadFile(String filename);

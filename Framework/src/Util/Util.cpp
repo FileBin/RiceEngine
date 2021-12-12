@@ -2,7 +2,7 @@
 #include <GameEngine/Util.h>
 #include <stringapiset.h>
 
-namespace GameEngine::Util {
+namespace Game::Util {
 	void ThrowIfFailed(HRESULT hr) {
 		if (FAILED(hr))
 			throw hr;

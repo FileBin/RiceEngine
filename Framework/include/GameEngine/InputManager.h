@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "InputButtons.h"
 #include "Math.h"
-namespace GameEngine {
+namespace Game {
 	class InputManager {
 	public:
 		static InputManager* Init();

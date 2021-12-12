@@ -5,7 +5,7 @@
 #include <xnamath.h>
 #include <GameEngine/InputManager.h>
 
-using namespace GameEngine;
+using namespace Game;
 
 class MyRender : public RenderBase {
 public:

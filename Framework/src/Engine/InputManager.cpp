@@ -1,7 +1,7 @@
 #include <GameEngine/InputManager.h>
 #include <GameEngine/macros.h>
 
-namespace GameEngine {
+namespace Game {
 
 	InputManager* instance = nullptr;
 

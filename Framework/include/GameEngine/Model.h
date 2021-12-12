@@ -5,7 +5,7 @@
 #include "Util.h"
 #include "Material.h"
 
-namespace GameEngine {
+namespace Game {
 	using namespace Util;
 
 	template<typename T>

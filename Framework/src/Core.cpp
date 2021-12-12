@@ -1,4 +1,4 @@
-#include <GameEngine/GameMain.h>
+#include <GameEngine/Core.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
 #include <GameEngine/ScriptBase.h>
@@ -10,13 +10,23 @@
 using namespace std::chrono;
 using namespace std::this_thread;
 
-namespace GameEngine {
+namespace Game {
 
-	GameMain::GameMain() {}
+	void Core::RunNew(ScriptBase* script) {
+		Core engine;
+		engine.AddScript(script, Stage::PreInit);
+		engine.Initialize();
+		engine.Run();
+		engine.Close();
+	}
 
-	GameMain::~GameMain() {}
-	bool GameMain::Initialize() {
-		engine = new Engine(&device, this);
+	Core::Core() {}
+
+	Core::~Core() {}
+	bool Core::Initialize() {
+		engine = new Engine(&device, this, &stage);
+		device = new Device();
+		stage = Stage::PreInit;
 		RunScripts(preInitScripts);
 		Log::Init();
 		wnd = new Window();
@@ -32,8 +42,8 @@ namespace GameEngine {
 			return false;
 		}
 
-		device = new Device();
 		auto hwnd = wnd->GetHWND();
+		stage = Stage::Init;
 		RunScripts(initScripts);
 
 		device->Initialize(hwnd);
@@ -44,10 +54,11 @@ namespace GameEngine {
 			return false;
 		}
 		init = true;
+		stage = Stage::PostInit;
 		RunScripts(postInitScripts);
 		return true;
 	}
-	void GameMain::Run() {
+	void Core::Run() {
 		if (init) {
 			auto fixedDeltaTime = 1000. / fps;
 			auto interval = (long long)fixedDeltaTime;
@@ -56,6 +67,7 @@ namespace GameEngine {
 			auto b = false;
 			do {
 				b = frame();
+				stage = Stage::Update;
 				RunScripts(updateScripts);
 				engine->PostUpdate();
 
@@ -66,7 +78,7 @@ namespace GameEngine {
 		}
 	}
 
-	void GameMain::Close() {
+	void Core::Close() {
 		init = false;
 		render->Shutdown();
 		_DELETE(render);
@@ -74,7 +86,7 @@ namespace GameEngine {
 		Log::Close();
 	}
 
-	bool GameMain::frame() {
+	bool Core::frame() {
 		wnd->RunEvent();
 
 #ifndef _DEBUG
@@ -89,46 +101,47 @@ namespace GameEngine {
 			device->Resize();
 			render->Resize();
 		}
-
+		stage = Stage::PreRender;
 		RunScripts(preRenderScripts);
 		render->BeginFrame();
+		stage = Stage::Render;
 		RunScripts(renderScripts);
 		if (!render->Draw())
 			return false;
 		render->EndFrame();
+		stage = Stage::PostRender;
 		RunScripts(postRenderScripts);
 		return true;
 	}
 
-	void GameMain::RunScripts(List<ScriptBase*>& scripts){
+	void Core::RunScripts(List<ScriptBase*>& scripts){
 		for (auto s : scripts) { s->Run(); }
 	}
 
-
-	void GameMain::AddScript(ScriptBase& script, Stage stage) {
-		script.Init(&engine, &render);
-		script.Initialize();
+	void Core::AddScript(ScriptBase* script, Stage stage) {
+		script->Init(&engine, &render);
+		script->Initialize();
 		switch (stage) {
 		case Stage::PreInit:
-			preInitScripts.push_back(&script);
+			preInitScripts.push_back(script);
 			break;
 		case Stage::Init:
-			initScripts.push_back(&script);
+			initScripts.push_back(script);
 			break;
 		case Stage::PostInit:
-			postInitScripts.push_back(&script);
+			postInitScripts.push_back(script);
 			break;
 		case Stage::PreRender:
-			preRenderScripts.push_back(&script);
+			preRenderScripts.push_back(script);
 			break;
 		case Stage::Render:
-			renderScripts.push_back(&script);
+			renderScripts.push_back(script);
 			break;
 		case Stage::PostRender:
-			postRenderScripts.push_back(&script);
+			postRenderScripts.push_back(script);
 			break;
 		case Stage::Update:
-			updateScripts.push_back(&script);
+			updateScripts.push_back(script);
 			break;
 		default:
 			ThrowIfFailed(E_INVALIDARG);

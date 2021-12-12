@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include "RenderBase.h"
 
-namespace GameEngine {
+namespace Game {
 
 	class Engine;
 

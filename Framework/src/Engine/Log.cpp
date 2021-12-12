@@ -6,7 +6,7 @@
 
 #define LOGNAME "log.txt"
 
-namespace GameEngine {
+namespace Game {
 
 	Log* Log::instance = nullptr;
 	Log::Localization Log::locale = {};

@@ -5,7 +5,7 @@
 #include "Model.h"
 #include "Camera.h"
 
-namespace GameEngine {
+namespace Game {
 	class ModelRenderer : public RenderBase {
 	public:
 		ModelRenderer() : RenderBase() {}

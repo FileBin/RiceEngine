@@ -2,7 +2,7 @@
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
 
-namespace GameEngine {
+namespace Game {
 	Shader::Shader(Device* device) : device(device) {
 		pixelShader = nullptr;
 		vertexShader = nullptr;

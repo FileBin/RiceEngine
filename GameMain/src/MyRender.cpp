@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <GameEngine/Log.h>
-using namespace GameEngine;
+using namespace Game;
 
 struct SimpleVertex {
 	XMFLOAT3 pos;
