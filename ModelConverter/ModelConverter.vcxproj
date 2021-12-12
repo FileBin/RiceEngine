@@ -79,14 +79,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\lib\vs2017\x64\debug;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)</OutDir>
+    <LibraryPath>$(SolutionDir)bin\$(Platform)\$(Configuration)\lib;C:\Program Files\Microsoft SDKs\DirectX11\Lib\x64;C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\lib\vs2017\x64\debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(ProjectName)</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\lib\vs2017\x64\release;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)</OutDir>
+    <LibraryPath>$(SolutionDir)bin\$(Platform)\$(Configuration)\lib;C:\Program Files\Microsoft SDKs\DirectX11\Lib\x64;C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\lib\vs2017\x64\release;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(ProjectName)</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,7 +129,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk.lib;GameEngine_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <DelayLoadDLLs>libfxsdk.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
@@ -146,7 +148,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk.lib;GameEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <DelayLoadDLLs>libfxsdk.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
