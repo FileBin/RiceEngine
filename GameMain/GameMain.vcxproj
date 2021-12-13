@@ -163,10 +163,19 @@
   <ItemGroup>
     <ClInclude Include="src\MyRender.h" />
     <ClInclude Include="src\Scripts.h" />
+    <ClInclude Include="src\Scripts\CameraMover.h" />
+    <ClInclude Include="src\Scripts\InitScript.h" />
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
+    <ClInclude Include="src\Scripts\PostInitScript.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="shaders\DiffuseShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

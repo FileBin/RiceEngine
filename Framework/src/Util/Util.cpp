@@ -1,5 +1,6 @@
 #include <codecvt>
 #include <GameEngine/Util.h>
+#include <GameEngine\Math.h>
 #include <stringapiset.h>
 
 namespace Game::Util {
@@ -34,10 +35,7 @@ namespace Game::Util {
 	}
 
 
-	XMMATRIX Transform::GetTransformationMatrix() {
-		return XMMatrixAffineTransformation(XMVectorSet(scale.x, scale.y, scale.z, 0), 
-			XMVectorZero(),
-			XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w),
-			XMVectorSet(pos.x, pos.y, pos.z, 0));
+	Matrix4x4 Transform::GetTransformationMatrix() {
+		return Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos) * Matrix4x4::Rotation(rotation);
 	}
 }

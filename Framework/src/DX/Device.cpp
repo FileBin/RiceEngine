@@ -38,7 +38,8 @@ namespace Game {
 #ifdef _DEBUG
 		DXGI_ADAPTER_DESC adapterDesc;
 		adapter->GetDesc(&adapterDesc);
-		Log::Debug(L"AdapterInfo:\n\n Description: {}\n VideoMemory {}M", adapterDesc.Description, adapterDesc.DedicatedVideoMemory / 0x100000);
+		Log::Debug(L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
+			adapterDesc.DedicatedVideoMemory / 0x100000);
 #endif
 
 		ThrowIfFailed(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
@@ -61,7 +62,7 @@ namespace Game {
 
 		ZeroMemory(&rsdesc, sizeof(rsdesc));
 
-		rsdesc.CullMode = D3D11_CULL_BACK;
+		rsdesc.CullMode = D3D11_CULL_NONE;
 		rsdesc.FillMode = D3D11_FILL_SOLID;
 		
 		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
@@ -70,10 +71,11 @@ namespace Game {
 	void Device::Initialize(HWND hwnd, size_t idx) {
 		this->hwnd = hwnd;		
 		_init(idx);
+		initialized = true;
 	}
 #pragma endregion
 
-	HRESULT Device::_createBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer** buf, D3D11_USAGE usage, UINT flags) {
+	HRESULT Device::_createBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer** buf, D3D11_USAGE usage, UINT bFlags, UINT cFlags) {
 		auto hr = S_OK;
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
@@ -83,8 +85,8 @@ namespace Game {
 		} else {
 			bd.ByteWidth = stride * nData;
 		}
-		bd.BindFlags = flags;
-		bd.CPUAccessFlags = 0;
+		bd.BindFlags = bFlags;
+		bd.CPUAccessFlags = cFlags;
 
 		if (pData != nullptr) {
 			D3D11_SUBRESOURCE_DATA Data;
@@ -96,6 +98,14 @@ namespace Game {
 			ThrowIfFailed(device->CreateBuffer(&bd, nullptr, buf));
 		}
 
+		return S_OK;
+	}
+
+	HRESULT Device::_updateBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer* buf) {
+		D3D11_MAPPED_SUBRESOURCE resource;
+		context->Map(buf, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		memcpy(resource.pData, pData, nData * stride);
+		context->Unmap(buf, 0);
 		return S_OK;
 	}
 
@@ -221,7 +231,7 @@ namespace Game {
 		return shader;
 	}
 
-	ID3D11InputLayout* Device::CreateInputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> layout, data_t shaderData) {
+	ID3D11InputLayout* Device::CreateInputLayout(VertexLayout layout, data_t shaderData) {
 		ID3D11InputLayout* l;
 		ThrowIfFailed(device->CreateInputLayout(layout.data(), layout.size(), shaderData.data(), shaderData.size(), &l));
 		return l;

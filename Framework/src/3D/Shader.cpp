@@ -16,12 +16,12 @@ namespace Game {
 		_RELEASE(layout);
 	}
 
-	void Shader::LoadVertexShader(std::vector<byte> shaderData, std::vector<D3D11_INPUT_ELEMENT_DESC> layout) {
+	void Shader::LoadVertexShader(data_t shaderData, VertexLayout layout) {
 		vertexShader = device->CreateVertexShader(shaderData);
 		this->layout = device->CreateInputLayout(layout, shaderData);
 	}
 
-	void Shader::LoadPixelShader(std::vector<byte> shaderData) {
+	void Shader::LoadPixelShader(data_t shaderData) {
 		pixelShader = device->CreatePixelShader(shaderData);
 	}
 }

@@ -165,6 +165,7 @@
     <ClInclude Include="include\GameEngine\Device.h" />
     <ClInclude Include="include\GameEngine\Engine.h" />
     <ClInclude Include="include\GameEngine\Material.h" />
+    <ClInclude Include="include\GameEngine\Matrixes.h" />
     <ClInclude Include="include\GameEngine\Model.h" />
     <ClInclude Include="include\GameEngine\ModelRender.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
@@ -185,6 +186,8 @@
     <ClInclude Include="include\GameEngine\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3D\Camera.cpp" />
+    <ClCompile Include="src\3D\Material.cpp" />
     <ClCompile Include="src\3D\ModelRender.cpp" />
     <ClCompile Include="src\3D\Model.cpp" />
     <ClCompile Include="src\3D\Shader.cpp" />
@@ -195,6 +198,8 @@
     <ClCompile Include="src\3D\RenderBase.cpp" />
     <ClCompile Include="src\Engine\InputManager.cpp" />
     <ClCompile Include="src\Engine\Log.cpp" />
+    <ClCompile Include="src\Math\Math.cpp" />
+    <ClCompile Include="src\Math\Matrixes.cpp" />
     <ClCompile Include="src\Math\Vectors.cpp" />
     <ClCompile Include="src\Util\Util.cpp" />
     <ClCompile Include="src\Window.cpp" />

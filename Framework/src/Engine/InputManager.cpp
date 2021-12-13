@@ -33,6 +33,11 @@ namespace Game {
 		return instance->mousePos;
 	}
 
+	void InputManager::SetMousePos(Vector2 pos) {
+		SetCursorPos(pos.x + instance->windowRect.left, pos.y + instance->windowRect.top);
+		instance->mousePos = pos;
+	}
+
 	void InputManager::SetRect(const RECT &winRect) {
 		windowRect.left = winRect.left;
 		windowRect.right = winRect.right;
@@ -42,7 +47,7 @@ namespace Game {
 
 	void InputManager::UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam) {
 		mouseScrollDelta = 0;
-		mouseDelta = Vector2::zero();
+		mouseDelta = Vector2::zero;
 		KeyCode KeyIndex;
 
 		eventCursor();// событие движения мыши
@@ -57,21 +62,27 @@ namespace Game {
 			break;
 		case WM_LBUTTONDOWN:
 			eventMouse(MouseKey::Left, true);
+			eventKey(KeyCode::MouseLeft, true);
 			break;
 		case WM_LBUTTONUP:
 			eventMouse(MouseKey::Left, false);
+			eventKey(KeyCode::MouseLeft, false);
 			break;
 		case WM_RBUTTONDOWN:
 			eventMouse(MouseKey::Right, true);
+			eventKey(KeyCode::MouseRight, true);
 			break;
 		case WM_RBUTTONUP:
 			eventMouse(MouseKey::Right, false);
+			eventKey(KeyCode::MouseRight, false);
 			break;
 		case WM_MBUTTONDOWN:
 			eventMouse(MouseKey::Middle, true);
+			eventKey(KeyCode::MouseMiddle, true);
 			break;
 		case WM_MBUTTONUP:
 			eventMouse(MouseKey::Middle, false);
+			eventKey(KeyCode::MouseMiddle, false);
 			break;
 		case WM_MOUSEWHEEL:
 			eventMouseWheel((short)GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);

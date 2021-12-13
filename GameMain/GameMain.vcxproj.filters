@@ -35,9 +35,19 @@
     <ClInclude Include="src\Scripts\PreInitScript.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scripts\InitScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\PostInitScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\CameraMover.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\PixelShader.hlsl" />
     <FxCompile Include="shaders\VertexShader.hlsl" />
+    <FxCompile Include="shaders\DiffuseShader.hlsl" />
   </ItemGroup>
 </Project>

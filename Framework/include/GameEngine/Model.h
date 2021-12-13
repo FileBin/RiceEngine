@@ -10,10 +10,10 @@ namespace Game {
 
 	template<typename T>
 	struct Mesh {
-		List<T> vertexBuffer = {};
-		List<UINT> indexBuffer = {};
+		std::vector<T> vertexBuffer = {};
+		std::vector<UINT> indexBuffer = {};
 		VertexLayout layout = {};
-		Material material = Material();
+		//Material material = Material();
 	};
 
 	class Model {
@@ -24,6 +24,6 @@ namespace Game {
 		void SetSubMesh(Mesh<Vertex> &subMesh, size_t idx);
 		Mesh<Vertex> GetSubMesh(size_t idx);
 	private:
-		List<Mesh<Vertex>> subMeshes = {};
+		std::vector<Mesh<Vertex>> subMeshes = {};
 	};
 }

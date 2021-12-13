@@ -1,6 +1,7 @@
 #include <GameEngine\stdafx.h>
 #include <GameEngine\Engine.h>
 #include <GameEngine\Core.h>
+#include <GameEngine\Material.h>
 
 namespace Game {
 
@@ -27,12 +28,24 @@ namespace Game {
 	}
 
 	void Engine::SetMsaaLevel(size_t level) {
-		if (*stage == Stage::PreInit) {
-			(**device).SetMsaa(level);
+		auto& d = **device;
+		if (!d.IsInitialized()) {
+			d.SetMsaa(level);
 		}
 		msaaLevel = level;
 	}
 
 	void Engine::RegisterScript(ScriptBase* script, Stage stage) { core->AddScript(script, stage); }
+
+	Material& Engine::CreateMaterial(Shader& sh) {
+		auto m = new Material({}, **device, sh);
+		return *m;
+	}
+
+	Shader& Engine::CreateShader() {
+		auto sh = new Shader(*device);
+		return *sh;
+	}
+
 	void Engine::SetRender(RenderBase* render) { core->SetRender(render); }
 }

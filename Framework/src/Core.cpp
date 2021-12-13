@@ -43,12 +43,12 @@ namespace Game {
 		}
 
 		auto hwnd = wnd->GetHWND();
+		device->Initialize(hwnd);
+
 		stage = Stage::Init;
 		RunScripts(initScripts);
 
-		device->Initialize(hwnd);
 		render->SetDevice(device);
-
 		if (!render->Init()) {
 			Log::Err(L"Не удалось создать рендер");
 			return false;
@@ -114,7 +114,7 @@ namespace Game {
 		return true;
 	}
 
-	void Core::RunScripts(List<ScriptBase*>& scripts){
+	void Core::RunScripts(std::vector<ScriptBase*>& scripts){
 		for (auto s : scripts) { s->Run(); }
 	}
 

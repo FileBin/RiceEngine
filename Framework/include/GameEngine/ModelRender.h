@@ -8,28 +8,28 @@
 namespace Game {
 	class ModelRenderer : public RenderBase {
 	public:
-		ModelRenderer() : RenderBase() {}
+		ModelRenderer() : RenderBase(), camera() {}
 		~ModelRenderer() {}
 
 		bool Init();
 		void BeginFrame();
 		bool Draw();
-		void Close();
+		void Close() {}
 		void Resize();
 
 		void SetClearColor(Color color);
-		void AddShader(String name, Shader*& sh);
+		void SetMaterial(size_t subMeshIdx, Material& material);
 		void SetModel(Model& model);
-		const Model* GetModel() const;
-		const Shader* GetShader(String name) const;
+		Model& GetModel() const;
+		Material& GetMaterial(size_t subMeshIdx) const;
 
 		Transform transform;
-		Camera* camera = nullptr;
+		Camera camera;
 	private:
 		Color clearColor = { 0.1f, 0.15f, 0.6f, 1.f };
-		Map<String, Shader*> shaders = {};
+		std::vector<Material*> materials;
 		Model* model = nullptr;
-		List<Buffer*> indexBuffers = {}, vertexBuffers = {};
+		std::vector<Buffer*> indexBuffers, vertexBuffers;
 		Buffer* constantBuffer = nullptr;
 	};
 }

@@ -11,6 +11,7 @@ namespace Game {
 
 		static bool GetKey(KeyCode key);
 		static const Vector2 GetMousePos();
+		static void SetMousePos(Vector2 pos);
 
 		void SetRect(const RECT &winRect);
 		void UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam);

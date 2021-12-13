@@ -10,11 +10,9 @@ namespace Game {
 		Shader(Device* device);
 		~Shader();
 
-
-
-		void LoadVertexShader(std::vector<byte> shaderData,
-			std::vector<D3D11_INPUT_ELEMENT_DESC> layout = Util::Vertex::GetLayout());
-		void LoadPixelShader(std::vector<byte> shaderData);
+		void LoadVertexShader(data_t shaderData,
+			VertexLayout layout = Util::Vertex::GetLayout());
+		void LoadPixelShader(data_t shaderData);
 
 		ID3D11VertexShader* vertexShader;
 		ID3D11PixelShader* pixelShader;

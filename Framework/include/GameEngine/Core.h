@@ -29,7 +29,7 @@ namespace Game {
 		void Close();
 
 		bool frame();
-		void RunScripts(List<ScriptBase*>& scripts);
+		void RunScripts(std::vector<ScriptBase*>& scripts);
 
 		Stage stage;
 
@@ -39,7 +39,7 @@ namespace Game {
 		Engine* engine = nullptr;
 		bool init;
 		double fps = 60.;
-		List<ScriptBase*> preInitScripts, initScripts, postInitScripts,
+		std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
 			preRenderScripts, renderScripts, postRenderScripts,
 			updateScripts;
 

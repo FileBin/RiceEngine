@@ -7,6 +7,7 @@ namespace Game {
 	class ScriptBase;
 	class Core;
 	class RenderBase;
+	class Material;
 
 	class Engine
 	{
@@ -15,6 +16,9 @@ namespace Game {
 		~Engine();
 
 		size_t GetMsaaLevel() const { return msaaLevel; }
+
+		HWND GetHWND() { return (**device).GetHWND(); }
+
 		void SetMsaaLevel(size_t level);
 
 		void SetRender(RenderBase* render);
@@ -22,6 +26,9 @@ namespace Game {
 		void PostUpdate();
 
 		void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
+
+		Material& CreateMaterial(Shader& sh);
+		Shader& CreateShader();
 
 	private:
 		Device** device = nullptr;

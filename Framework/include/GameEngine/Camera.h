@@ -1,14 +1,18 @@
 #pragma once
+
 #include "Util.h"
 
+struct Matrix4x4;
+
 namespace Game {
-	using namespace Util;
+
 	class Camera {
 	public:
 		Camera();
 		~Camera();
 
-		XMMATRIX GetProjectionMatrix();
+		Matrix4x4 GetProjectionMatrix();
+		Matrix4x4 GetTransformationMatrix();
 
 		void SetFov(double fov) { this->fov = fov; }
 		double GetFov() { return fov; }
@@ -21,18 +25,10 @@ namespace Game {
 			this->farPlane = farPlane;
 		}
 
-		Transform transform;
+		Util::Transform transform;
 	private:
 		double fov;
 		double aspectRatio;
-		double nearPlane = 0.01, farPlane = 10000.f;
+		double nearPlane = 0.01, farPlane = 1000.f;
 	};
-
-	Camera::Camera() {}
-
-	Camera::~Camera() {}
-
-	inline XMMATRIX Camera::GetProjectionMatrix() {
-		return XMMatrixPerspectiveFovRH(fov,aspectRatio, nearPlane, farPlane);
-	}
 }
