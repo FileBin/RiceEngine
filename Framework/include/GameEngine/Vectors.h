@@ -34,6 +34,10 @@ struct Vector3 {
 	static const Vector3 backward;
 };
 
+struct Vector3f {
+	float x, y, z;
+};
+
 struct Quaternion {
 	double x, y, z, w;
 

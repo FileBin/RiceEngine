@@ -3,7 +3,7 @@ struct PixelShaderInput {
     float4 color: COLOR0;
 };
 
-cbuffer ConstantBuffer {
+cbuffer ConstantBuffer : register(b0) {
     float time;
 }
 

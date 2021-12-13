@@ -18,14 +18,8 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\MyRender.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\MyRender.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="src\Scripts\MsaaTestScript.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
@@ -46,7 +40,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\PixelShader.hlsl" />
     <FxCompile Include="shaders\VertexShader.hlsl" />
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
   </ItemGroup>

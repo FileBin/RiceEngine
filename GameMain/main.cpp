@@ -13,21 +13,8 @@ int main(int argc, char** argv[]) {
 #endif
 
 	SetProcessDPIAware();
-
 	Core::RunNew(new PreInitScript());
-
-	/*Core engine;
-
-	Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
-	MyRender* render = new MyRender();
-	engine.SetRender(render);
-
-	MsaaTestScript script;
-	engine.AddScript(script);
-
-	engine.Initialize();
-	engine.Run();
-	engine.Close();*/
+	ShowWindow(GetConsoleWindow(), 0);
 
 	return 0;
 }

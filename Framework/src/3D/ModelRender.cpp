@@ -31,11 +31,12 @@ namespace Game {
 		auto n = model->GetSubMeshesCount();
 
 		ConstantBufferData cb = {};
-		cb.World = transform.GetTransformationMatrix();
-		cb.View = camera.GetTransformationMatrix();
+		cb.World = transform.GetTransformationMatrix();//XMMatrixTranspose(transform.GetTransformationMatrix());
+		cb.View = camera.GetTransformationMatrix();//XMMatrixTranspose(camera.transform.GetTransformationMatrix());
 		cb.Projection = camera.GetProjectionMatrix();
 
 		cb.World = XMMatrixIdentity();
+
 
 		device->LoadBufferSubresource(constantBuffer, cb);
 		device->SetActiveVSConstantBuffer(constantBuffer);

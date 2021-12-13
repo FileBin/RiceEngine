@@ -39,8 +39,8 @@ void MyRender::loadVertexShaderFromFile(String FileName, VertexLayout layout) {
 bool MyRender::Init() {
 	HRESULT hr = S_OK;
 
-	std::vector<Vertex> vertices = 
-	{
+	std::vector<Vertex> vertices = {};
+	/*{
 		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), },// XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)},
 		{ XMFLOAT3(1.0f, 1.0f, -1.0f), },// XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, 1.0f, 1.0f), },// XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
@@ -49,7 +49,7 @@ bool MyRender::Init() {
 		{ XMFLOAT3(1.0f, -1.0f, -1.0f), },// XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, -1.0f, 1.0f), },//XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
 		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), }, //XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) }
-	};
+	};*/
 
 	m_pVertexBuffer = device->CreateBuffer(vertices, D3D11_BIND_VERTEX_BUFFER);
 
