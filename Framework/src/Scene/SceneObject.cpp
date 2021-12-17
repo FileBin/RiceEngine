@@ -2,7 +2,7 @@
 #include <GameEngine\Scene\Component.h>
 
 namespace Game {
-	SceneObject::SceneObject() {}
+	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
 
 	SceneObject::~SceneObject() {}
 
@@ -43,11 +43,12 @@ namespace Game {
 	std::vector<SceneObject*> SceneObject::GetChildren() { return children; }
 
 	void SceneObject::AddComponent(Component* c) {
+		c->Init(this);
 		components.push_back(c);
 	}
 
 	SceneObject* SceneObject::Instaniate() {
-		auto o = new SceneObject();
+		auto o = new SceneObject(scene);
 		children.push_back(o);
 		return o;
 	}

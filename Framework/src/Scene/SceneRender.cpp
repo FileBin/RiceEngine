@@ -11,9 +11,22 @@ namespace Game {
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
 	}
 	bool SceneRender::Draw() {
+		device->SetPrimitiveTopology();
 		auto n = models.size();
 		for (size_t i = 0; i < n; i++) {
 			auto& model = models[i];
+
+			ConstantBufferData cb = {};
+
+			auto cam = cameras[activeCameraIdx];
+			cb.World = model->transform.GetTransformationMatrix();
+			cb.View = cam->GetTransformationMatrix();
+			cb.Projection = cam->GetProjectionMatrix();
+
+
+			device->LoadBufferSubresource(constantBuffers[i], cb);
+			device->SetActiveVSConstantBuffer(constantBuffers[i]);
+
 			auto m = model->GetSubMeshesCount();
 			for (size_t j = 0; j < m; j++) {
 				auto& mesh = model->GetSubMesh(j);
@@ -58,6 +71,8 @@ namespace Game {
 	}
 
 	void SceneRender::MapMaterial(Mesh* mesh, Material* mat) { materialMap.insert(materialMap.end(), {mesh, mat}); }
+
+	void SceneRender::AddCamera(Camera* cam) { cameras.push_back(cam); }
 
 	Material& SceneRender::CreateMaterial(Shader* sh) {
 		auto mat = new Material({}, *device, *sh);

@@ -10,7 +10,7 @@
 
 using namespace Game;
 
-class InitScript : public ScriptBase {
+class InitSceneScript : public ScriptBase {
 	void Run() {
 		auto& engine = GetEngine();
 

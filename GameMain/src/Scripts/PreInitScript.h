@@ -4,6 +4,7 @@
 #include <GameEngine\Log.h>
 
 #include "InitScript.h"
+#include "InitSceneScript.h"
 
 using namespace Game;
 
@@ -13,7 +14,7 @@ class PreInitScript : public ScriptBase {
 		Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
 		engine.SetMsaaLevel(4);
 
-		engine.RegisterScript(new InitScript(), Stage::Init);
+		engine.RegisterScript(new InitSceneScript(), Stage::Init);
 		//engine.RegisterScript(new MsaaTestScript());
 	}
 };

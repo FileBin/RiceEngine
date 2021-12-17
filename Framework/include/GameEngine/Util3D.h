@@ -32,9 +32,9 @@ namespace Game {
 	};
 
 	struct Transform {
-		Vector3 pos;
+		Vector3 pos = {0,0,0};
 		Quaternion rotation = Quaternion::identity;
-		Vector3 scale;
+		Vector3 scale = {1,1,1};
 
 		Matrix4x4 GetTransformationMatrix();
 	};

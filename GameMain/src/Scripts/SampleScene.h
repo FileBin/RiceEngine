@@ -74,7 +74,9 @@ class SampleScene : public Scene {
 		shader.LoadVertexShader(Util::ReadFile(L"VertexShader.cso"), Vertex::GetLayout());
 		shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-		auto& mat = GetRender().CreateMaterial(&shader);
+		auto& ren = GetRender();
+
+		auto& mat = ren.CreateMaterial(&shader);
 
 		auto model = new Model();
 		model->setSubMeshesCount(1);
@@ -82,5 +84,15 @@ class SampleScene : public Scene {
 
 		render->SetModel(model);
 		render->SetMaterial(&mat, 0);
+
+		auto cam = new Camera();
+
+		cam->SetFov(90);
+		cam->SetClippingPlanes(.001, 100.);
+		cam->transform.scale = { 1, 1, 1 };
+		cam->transform.rotation = Quaternion::identity;
+		cam->transform.pos = { 0, 2, -5 };
+		
+		ren.AddCamera(cam);
 	}
 };

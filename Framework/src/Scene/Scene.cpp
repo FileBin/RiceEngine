@@ -6,6 +6,8 @@ namespace Game {
 		preUpdateScript = new PreUpdateScript();
 		updateScript = new UpdateScript();
 		initScript->scene = preUpdateScript->scene = updateScript->scene = this;
+		root = new SceneObject(this);
+		render = new SceneRender();
 	}
 
 	SceneObject* Scene::Instaniate() { return root->Instaniate(); }
@@ -13,7 +15,7 @@ namespace Game {
 	Engine& Scene::GetEngine() { return *engine; }
 
 	void Scene::InitScript::Run() {
-		Initialize();
+		scene->Initialize();
 		for (auto obj : scene->root->GetChildren()) {
 			obj->Enable();
 		}

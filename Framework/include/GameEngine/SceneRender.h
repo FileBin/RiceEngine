@@ -8,7 +8,7 @@ namespace Game {
 	class Material;
 	class Model;
 	class Camera;
-	class Mesh;
+	struct Mesh;
 
 	class SceneRender : public RenderBase {
 	public:
@@ -21,6 +21,8 @@ namespace Game {
 
 		void AddModel(Model* model);
 		void MapMaterial(Mesh* mesh, Material* mat);
+
+		void AddCamera(Camera* cam);
 
 		Material& CreateMaterial(Shader* sh);
 	private:
