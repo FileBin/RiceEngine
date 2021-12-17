@@ -8,22 +8,21 @@
 namespace Game {
 	using namespace Util;
 
-	template<typename T>
 	struct Mesh {
-		std::vector<T> vertexBuffer = {};
+		std::vector<Vertex> vertexBuffer = {};
 		std::vector<UINT> indexBuffer = {};
 		VertexLayout layout = {};
-		//Material material = Material();
 	};
 
 	class Model {
 	public:
-		void SetMaterial(Material &mat, size_t idx);
 		size_t GetSubMeshesCount();
 		void setSubMeshesCount(size_t count);
-		void SetSubMesh(Mesh<Vertex> &subMesh, size_t idx);
-		Mesh<Vertex> GetSubMesh(size_t idx);
+		void SetSubMesh(Mesh &subMesh, size_t idx);
+		Mesh& GetSubMesh(size_t idx);
+
+		Transform transform;
 	private:
-		std::vector<Mesh<Vertex>> subMeshes = {};
+		std::vector<Mesh> subMeshes = {};
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "Util.h"
+#include "Util3D.h"
 
 namespace Game {
 	class Device;
@@ -10,8 +10,7 @@ namespace Game {
 		Shader(Device* device);
 		~Shader();
 
-		void LoadVertexShader(data_t shaderData,
-			VertexLayout layout = Util::Vertex::GetLayout());
+		void LoadVertexShader(data_t shaderData, VertexLayout layout = Vertex::GetLayout());
 		void LoadPixelShader(data_t shaderData);
 
 		ID3D11VertexShader* vertexShader;

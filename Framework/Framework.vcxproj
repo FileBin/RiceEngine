@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\GameEngine\Camera.h" />
+    <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Device.h" />
     <ClInclude Include="include\GameEngine\Engine.h" />
     <ClInclude Include="include\GameEngine\Material.h" />
@@ -176,19 +177,27 @@
     <ClInclude Include="include\GameEngine\Log.h" />
     <ClInclude Include="include\GameEngine\macros.h" />
     <ClInclude Include="include\GameEngine\Math.h" />
+    <ClInclude Include="include\GameEngine\SceneRender.h" />
+    <ClInclude Include="include\GameEngine\Scene\Component.h" />
+    <ClInclude Include="include\GameEngine\Scene\Scene.h" />
+    <ClInclude Include="include\GameEngine\Scene\SceneObject.h" />
+    <ClInclude Include="include\GameEngine\Scene\SceneScript.h" />
     <ClInclude Include="include\GameEngine\ScriptBase.h" />
     <ClInclude Include="include\GameEngine\Shader.h" />
     <ClInclude Include="include\GameEngine\Stage.h" />
     <ClInclude Include="include\GameEngine\Util.h" />
+    <ClInclude Include="include\GameEngine\Util3D.h" />
     <ClInclude Include="include\GameEngine\version.h" />
     <ClInclude Include="include\GameEngine\stdafx.h" />
     <ClInclude Include="include\GameEngine\Vectors.h" />
     <ClInclude Include="include\GameEngine\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Scene\SceneRender.cpp" />
+    <ClCompile Include="src\Scene\Component.cpp" />
     <ClCompile Include="src\3D\Camera.cpp" />
     <ClCompile Include="src\3D\Material.cpp" />
-    <ClCompile Include="src\3D\ModelRender.cpp" />
+    <ClCompile Include="src\3D\ModelRenderer.cpp" />
     <ClCompile Include="src\3D\Model.cpp" />
     <ClCompile Include="src\3D\Shader.cpp" />
     <ClCompile Include="src\DX\Device.cpp" />
@@ -201,6 +210,9 @@
     <ClCompile Include="src\Math\Math.cpp" />
     <ClCompile Include="src\Math\Matrixes.cpp" />
     <ClCompile Include="src\Math\Vectors.cpp" />
+    <ClCompile Include="src\Scene\Components\ModelRender.cpp" />
+    <ClCompile Include="src\Scene\Scene.cpp" />
+    <ClCompile Include="src\Scene\SceneObject.cpp" />
     <ClCompile Include="src\Util\Util.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>

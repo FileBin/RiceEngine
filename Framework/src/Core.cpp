@@ -24,6 +24,7 @@ namespace Game {
 
 	Core::~Core() {}
 	bool Core::Initialize() {
+		fps = 60;
 		engine = new Engine(&device, this, &stage);
 		device = new Device();
 		stage = Stage::PreInit;
@@ -66,14 +67,18 @@ namespace Game {
 			auto time = steady_clock::now();
 			auto b = false;
 			do {
-				b = frame();
 				stage = Stage::Update;
 				RunScripts(updateScripts);
+				wnd->inputmgr->Update();
+				b = frame();
 				engine->PostUpdate();
 
 				sleep_until(time);
 				deltaTime = fixedDeltaTime + .000001*(steady_clock::now() - time).count();
 				time = steady_clock::now() + milliseconds(interval);
+
+				this->deltaTime = deltaTime * .001;
+				this->fixedDeltaTime = fixedDeltaTime * .001;
 			} while (b);
 		}
 	}

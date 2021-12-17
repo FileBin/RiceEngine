@@ -1,12 +1,26 @@
 #pragma once
 
+struct Quaternion;
+
 struct Vector2 {
 	Vector2() {}
 	Vector2(double x, double y) : x(x), y(y) {}
 	double x = 0, y = 0;
 	static double Dot(Vector2 a, Vector2 b);
 
+	Vector2 operator-=(Vector2 v);
+	Vector2 operator+=(Vector2 v);
+	Vector2 operator*=(double v);
+	Vector2 operator/=(double v);
+
+	double Length();
+	double SqrLength() { return x * x + y * y; }
+
 	static const Vector2 zero;
+	static const Vector2 left;
+	static const Vector2 right;
+	static const Vector2 up;
+	static const Vector2 down;
 };
 
 struct Vector3 {
@@ -25,6 +39,13 @@ struct Vector3 {
 
 	Vector3 operator-();
 
+	Vector3 operator-=(Vector3 v);
+	Vector3 operator+=(Vector3 v);
+	Vector3 operator*=(double v);
+	Vector3 operator*=(Quaternion q);
+	Vector3 operator/=(double v);
+
+
 	static const Vector3 zero;
 	static const Vector3 left;
 	static const Vector3 right;
@@ -34,8 +55,16 @@ struct Vector3 {
 	static const Vector3 backward;
 };
 
+struct Vector2f {
+	float x, y;
+};
+
 struct Vector3f {
 	float x, y, z;
+};
+
+struct Vector4f {
+	float x, y, z, w;
 };
 
 struct Quaternion {

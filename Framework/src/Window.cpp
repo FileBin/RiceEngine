@@ -64,6 +64,19 @@ namespace Game {
 		ShowWindow(m_hwnd, SW_SHOW);
 		UpdateWindow(m_hwnd);
 
+		RAWINPUTDEVICE Rid[2];
+
+		Rid[0].usUsagePage = 0x01;          // HID_USAGE_PAGE_GENERIC
+		Rid[0].usUsage = 0x02;              // HID_USAGE_GENERIC_MOUSE
+		Rid[0].dwFlags = 0;    // adds mouse and also ignores legacy mouse messages
+		Rid[0].hwndTarget = m_hwnd;
+
+		if (RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE)
+		{
+			Log::Debug(L"Failed");
+		//registration failed. Call GetLastError for the cause of the error
+		}
+
 		return true;
 	}
 
@@ -126,6 +139,7 @@ namespace Game {
 			}
 			m_UpdateWindowState();
 			return 0;
+		case WM_INPUT:
 		case WM_MOUSEMOVE: case WM_LBUTTONUP: case WM_LBUTTONDOWN: case WM_MBUTTONUP: case WM_MBUTTONDOWN: case WM_RBUTTONUP: case WM_RBUTTONDOWN: case WM_MOUSEWHEEL: case WM_KEYDOWN: case WM_KEYUP:
 			if (inputmgr)
 				inputmgr->UpdateWindow(nMsg, wParam, lParam);

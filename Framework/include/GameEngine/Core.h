@@ -20,6 +20,9 @@ namespace Game {
 
 		void SetRender(RenderBase* render) { this->render = render; }
 		void SetFps(double fps) { this->fps = fps; }
+
+		double GetFixedDeltaTime() { return fixedDeltaTime; }
+		double GetDeltaTime() { return deltaTime; }
 	private:
 		Core();
 		~Core();
@@ -39,6 +42,7 @@ namespace Game {
 		Engine* engine = nullptr;
 		bool init;
 		double fps = 60.;
+		double fixedDeltaTime, deltaTime;
 		std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
 			preRenderScripts, renderScripts, postRenderScripts,
 			updateScripts;

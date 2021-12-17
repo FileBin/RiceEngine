@@ -12,13 +12,20 @@ const Vector3 Vector3::up = { 0,1,0 };
 const Vector3 Vector3::down = { 0,-1,0 };
 const Vector3 Vector3::forward = { 0,0,1 };
 const Vector3 Vector3::backward = { 0,0,-1 };
+
 const Vector2 Vector2::zero = { 0,0 };
+const Vector2 Vector2::left = { -1,0 };
+const Vector2 Vector2::right = { 1,0 };
+const Vector2 Vector2::up = { 0,1 };
+const Vector2 Vector2::down = { 0,-1 };
 
 const Quaternion Quaternion::identity = { 0,0,0,1 };
 
 double Vector2::Dot(Vector2 a, Vector2 b) {
     return a.x * b.x + a.y * b.y;
 }
+
+double Vector2::Length() { return sqrt(SqrLength()); }
 
 double Vector3::Length() {
     return sqrt(SqrLength());
@@ -89,8 +96,53 @@ Vector3 Vector3::Cross(Vector3 left, Vector3 right) {
         left.x * right.y - left.y * right.x };
 }
 
+Vector2 Vector2::operator+=(Vector2 v) {
+    *this = (*this) + v;
+    return *this;
+}
+
+Vector2 Vector2::operator-=(Vector2 v) {
+    *this = (*this) - v;
+    return *this;
+}
+
+Vector2 Vector2::operator*=(double x) {
+    *this = (*this) * x;
+    return *this;
+}
+
+Vector2 Vector2::operator/=(double x) {
+    *this = (*this) / x;
+    return *this;
+}
+
 Vector3 Vector3::operator-() {
     return { -x,-y,-z };
+}
+
+Vector3 Vector3::operator+=(Vector3 v) {
+    *this = *this + v;
+    return *this;
+}
+
+Vector3 Vector3::operator-=(Vector3 v) {
+    *this = *this - v;
+    return *this;
+}
+
+Vector3 Vector3::operator*=(double v) {
+    *this = *this * v;
+    return *this;
+}
+
+Vector3 Vector3::operator/=(double v) {
+    *this = *this / v;
+    return *this;
+}
+
+Vector3 Vector3::operator*=(Quaternion q) {
+    *this = q * (*this);
+    return *this;
 }
 
 Quaternion Quaternion::FromAxisAngle(Vector3 axis, double angle) {

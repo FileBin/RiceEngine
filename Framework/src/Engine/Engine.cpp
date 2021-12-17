@@ -2,6 +2,7 @@
 #include <GameEngine\Engine.h>
 #include <GameEngine\Core.h>
 #include <GameEngine\Material.h>
+#include <GameEngine\Scene\Scene.h>
 
 namespace Game {
 
@@ -35,6 +36,9 @@ namespace Game {
 		msaaLevel = level;
 	}
 
+	double Engine::GetDeltaTime() { return core->GetDeltaTime(); }
+	double Engine::GetFixedDeltaTime() { return core->GetFixedDeltaTime(); }
+
 	void Engine::RegisterScript(ScriptBase* script, Stage stage) { core->AddScript(script, stage); }
 
 	Material& Engine::CreateMaterial(Shader& sh) {
@@ -48,4 +52,13 @@ namespace Game {
 	}
 
 	void Engine::SetRender(RenderBase* render) { core->SetRender(render); }
+	void Engine::LoadScene(Scene* scene) {
+		auto& c = *core;
+		c.SetRender(&scene->GetRender());
+		scene->Init(this);
+		auto s = scene->GetScripts();
+		c.AddScript(s[0], Stage::PostInit);
+		c.AddScript(s[1], Stage::Update);
+		c.AddScript(s[2], Stage::Update);
+	}
 }

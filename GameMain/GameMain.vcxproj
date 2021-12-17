@@ -162,10 +162,12 @@
   <ItemGroup>
     <ClInclude Include="src\Scripts.h" />
     <ClInclude Include="src\Scripts\CameraMover.h" />
+    <ClInclude Include="src\Scripts\InitSceneScript.h" />
     <ClInclude Include="src\Scripts\InitScript.h" />
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
     <ClInclude Include="src\Scripts\PostInitScript.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
+    <ClInclude Include="src\Scripts\SampleScene.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl">

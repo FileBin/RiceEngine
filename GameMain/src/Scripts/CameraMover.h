@@ -28,11 +28,12 @@ public:
 		
 		auto fwd = cam.rotation * Vector3::forward;
 
-		auto center = Util::GetWindowScreenSize(hwnd) * .5;
+		auto rect = Util::GetWindowScreenSize(hwnd);
+		auto center = rect * .5;
 		center.x = lround(center.x);
 		center.y = lround(center.y);
 
-		Vector3 mv = {0,0,0};
+		Vector3 mv = { 0,0,0 };
 
 		if (InputManager::GetKey(KeyCode::Right)) {
 			mv.x += 1;
@@ -46,30 +47,40 @@ public:
 		if (InputManager::GetKey(KeyCode::Down)) {
 			mv.z -= 1;
 		}
+		if (InputManager::GetKey(KeyCode::Shift)) {
+			mv.y -= 1;
+		}
+		if (InputManager::GetKey(KeyCode::Space)) {
+			mv.y += 1;
+		}
 
 		mv = cam.rotation * mv;
-		mv = mv * .1;
+		mv *= en.GetDeltaTime() * 3.;
 
 		cam.pos = cam.pos + mv;
 
-		//Log::Debug(L"({0:0.4}; {1:0.4}; {2:0.4})", cam.pos.x, cam.pos.y, cam.pos.z);
-
 		if (lock) {
 			if (InputManager::GetKey(KeyCode::Escape)) {
+				ShowCursor(true);
 				lock = false;
 			}
+
+
+			auto delta = InputManager::GetMouseDelta();
 			InputManager::SetMousePos(center);
 
-			auto delta = mouse;
-			delta = delta - center;
+			//Log::Debug(L"{}, {}", delta.x, delta.y);
 
-			delta = delta * .05;
+			delta = delta * .2;
 			pos = pos + delta;
+			pos.y = min(max(pos.y, -90), 90);
+			pos.x = fmod(pos.x, 360);
 			auto yrot = Quaternion::FromAxisAngle(Vector3::up, pos.x);
-			cam.rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;//Quaternion::FromEulerAngles(pos.y, pos.x, 0);
+			cam.rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 
 		} else if (InputManager::GetKey(KeyCode::MouseLeft)) {
 			InputManager::SetMousePos(center);
+			ShowCursor(false);
 			lock = true;
 		}
 	}

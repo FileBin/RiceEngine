@@ -11,10 +11,13 @@ namespace Game {
 
 		static bool GetKey(KeyCode key);
 		static const Vector2 GetMousePos();
+		static Vector2 GetMouseDelta();
 		static void SetMousePos(Vector2 pos);
+
 
 		void SetRect(const RECT &winRect);
 		void UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam);
+		void Update();
 	private:
 		bool* keyStates;
 		bool* mouseStates;

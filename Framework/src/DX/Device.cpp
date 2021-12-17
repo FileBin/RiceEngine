@@ -30,24 +30,21 @@ namespace Game {
 			D3D_FEATURE_LEVEL_10_1,
 			D3D_FEATURE_LEVEL_10_0,
 		};
+
 		UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
 		ThrowIfFailed(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory));
 		ThrowIfFailed(factory->EnumAdapters(adapterIdx, &adapter));
 
-#ifdef _DEBUG
 		DXGI_ADAPTER_DESC adapterDesc;
 		adapter->GetDesc(&adapterDesc);
-		Log::Debug(L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
+		Log::Print(L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
 			adapterDesc.DedicatedVideoMemory / 0x100000);
-#endif
 
 		ThrowIfFailed(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
 			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context));
 
 		ReCreateSwapChain();
-
-		
 
 		D3D11_VIEWPORT vp;
 		vp.Width = size.x;
@@ -79,7 +76,11 @@ namespace Game {
 		auto hr = S_OK;
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
-		bd.Usage = D3D11_USAGE_DEFAULT;
+		if (cFlags == 0) {
+			bd.Usage = D3D11_USAGE_DEFAULT;
+		} else {
+			bd.Usage = D3D11_USAGE_DYNAMIC;
+		}
 		if (pData == nullptr) {
 			bd.ByteWidth = stride;
 		} else {

@@ -59,13 +59,13 @@ namespace Game {
 
 		// обработка событий
 		LRESULT WndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam);
+		InputManager* inputmgr;
 	private:
 		void m_UpdateWindowState();
 
 		static Window* wndthis;
 
 		DescWindow desc;	// описание окна
-		InputManager* inputmgr;
 		HWND m_hwnd;		// дескриптор окна	
 		bool m_isexit;		// флаг сообщающий о событии выхода	
 		bool m_active;		// окно активно?

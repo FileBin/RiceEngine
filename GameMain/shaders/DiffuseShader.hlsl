@@ -8,11 +8,11 @@ struct PixelShaderInput {
 	//float4 color: COLOR0;
 };
 
-float4 main(PixelShaderInput input) : SV_TARGET{
+static float emission = .3;
+static float glossines = 8.;
+static float specluar = .8;
 
-    float emission = .3;
-    float glossines = 8.;
-    float specluar = .8;
+float4 main(PixelShaderInput input) : SV_TARGET{
 
 
 	float3 n = input.norm.xyz;

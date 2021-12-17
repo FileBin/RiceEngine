@@ -8,6 +8,7 @@ namespace Game {
 	class Core;
 	class RenderBase;
 	class Material;
+	class Scene;
 
 	class Engine
 	{
@@ -23,7 +24,12 @@ namespace Game {
 
 		void SetRender(RenderBase* render);
 
+		void LoadScene(Scene* scene);
+
 		void PostUpdate();
+		
+		double GetFixedDeltaTime();
+		double GetDeltaTime();
 
 		void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
 

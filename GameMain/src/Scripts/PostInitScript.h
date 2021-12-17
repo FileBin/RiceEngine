@@ -25,7 +25,6 @@ public:
 		ren.camera.transform.pos.y = 2;
 		ren.camera.transform.pos.z = -5;
 		ren.camera.transform.scale = { 1,1,1 };
-		//ren.camera.transform.rotation = Quaternion::LookAt(ren.camera.transform.pos, Vector3::zero);
 		ren.transform.scale = { 1,1,1 };
 
 		auto s = new CameraMover();

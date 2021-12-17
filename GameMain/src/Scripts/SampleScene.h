@@ -1,21 +1,19 @@
 #pragma once
 
-#include <GameEngine\ScriptBase.h>
-#include <MyRender.h>
-#include <GameEngine\Log.h>
-#include <GameEngine\ModelRender.h>
-
-#include "MsaaTestScript.h"
-#include "InitScript.h"
-#include "PostInitScript.h"
+#include <GameEngine\Scene\Scene.h>
+#include <GameEngine\Components\ModelRender.h>
+#include <GameEngine\Model.h>
 
 using namespace Game;
 
-class InitScript : public ScriptBase {
-	void Run() {
-		auto& engine = GetEngine();
+class SampleScene : public Scene {
+	void Initialize() {
+		auto chunk = Instaniate();
+		chunk->SetName(L"Chunk");
 
-		auto model = new Model();
+		auto render = new ModelRender();
+		chunk->AddComponent(render);
+
 		auto mesh = Mesh();
 
 		mesh.layout = Vertex::GetLayout();
@@ -72,20 +70,17 @@ class InitScript : public ScriptBase {
 			23,20,22
 		};
 
+		auto& shader = GetEngine().CreateShader();
+		shader.LoadVertexShader(Util::ReadFile(L"VertexShader.cso"), Vertex::GetLayout());
+		shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+
+		auto& mat = GetRender().CreateMaterial(&shader);
+
+		auto model = new Model();
 		model->setSubMeshesCount(1);
 		model->SetSubMesh(mesh, 0);
 
-		auto* render = new ModelRenderer();
-
-		render->SetModel(*model);
-
-		engine.SetRender(render);
-		//engine.SetRender(new MyRender());
-
-		auto* postInit = new PostInitScript();
-		postInit->render = render;
-
-		engine.RegisterScript(postInit, Stage::PostInit);
-		engine.RegisterScript(new MsaaTestScript());
+		render->SetModel(model);
+		render->SetMaterial(&mat, 0);
 	}
 };

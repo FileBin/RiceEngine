@@ -1,5 +1,6 @@
 #include <GameEngine/InputManager.h>
 #include <GameEngine/macros.h>
+#include <GameEngine\Log.h>
 
 namespace Game {
 
@@ -33,6 +34,10 @@ namespace Game {
 		return instance->mousePos;
 	}
 
+	Vector2 InputManager::GetMouseDelta() {
+		return instance->mouseDelta;
+	}
+
 	void InputManager::SetMousePos(Vector2 pos) {
 		SetCursorPos(pos.x + instance->windowRect.left, pos.y + instance->windowRect.top);
 		instance->mousePos = pos;
@@ -47,11 +52,12 @@ namespace Game {
 
 	void InputManager::UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam) {
 		mouseScrollDelta = 0;
-		mouseDelta = Vector2::zero;
 		KeyCode KeyIndex;
-
-		eventCursor();// событие движения мыши
+		eventCursor();
+		// событие движения мыши
 		switch (msg) {
+		case WM_MOUSEMOVE:
+			break;
 		case WM_KEYDOWN:
 			KeyIndex = static_cast<KeyCode>(wParam);
 			eventKey(KeyIndex, true);
@@ -87,7 +93,26 @@ namespace Game {
 		case WM_MOUSEWHEEL:
 			eventMouseWheel((short)GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
 			break;
+		case WM_INPUT:
+		{
+			mouseDelta = Vector2::zero;
+			UINT size = 0;
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER));
+			LPBYTE buf = new BYTE[size];
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, buf, &size, sizeof(RAWINPUTHEADER));
+			PRAWINPUT raw = (RAWINPUT*)buf;
+			mouseDelta = { (double)raw->data.mouse.lLastX, (double)raw->data.mouse.lLastY };
+			mouseDelta = mouseDelta;
+			//Log::Debug(L"({}, {})", mouseDelta.x, mouseDelta.y);
+			delete[] buf;
+			buf = 0;
 		}
+		break;
+		}
+	}
+
+	void InputManager::Update(){
+		mouseDelta = { 0,0 };
 	}
 
 	void InputManager::eventKey(KeyCode key, bool state) {
@@ -100,13 +125,6 @@ namespace Game {
 
 		Position.x -= windowRect.left;
 		Position.y -= windowRect.top;
-
-		if (mousePos.x == Position.x && mousePos.y == Position.y)
-			return;
-		mouseDelta.x = Position.x;
-		mouseDelta.y = Position.y;
-
-		mouseDelta = mouseDelta - mousePos;
 
 		mousePos.x = Position.x;
 		mousePos.y = Position.y;

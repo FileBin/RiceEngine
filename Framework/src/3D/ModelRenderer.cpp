@@ -1,5 +1,7 @@
 #include <GameEngine/ModelRender.h>
 #include <GameEngine\Matrixes.h>
+#include "..\..\include\GameEngine\Components\ModelRender.h"
+#include <GameEngine\Util3D.h>
 
 namespace Game {
 
@@ -9,9 +11,9 @@ namespace Game {
 		indexBuffers.resize(n);
 		vertexBuffers.resize(n);
 		for (size_t i = 0; i < n; i++) {
-			auto mesh = model->GetSubMesh(i);
-			vertexBuffers[i] = device->CreateBuffer(mesh.vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
-			indexBuffers[i] = device->CreateBuffer(mesh.indexBuffer, D3D11_BIND_INDEX_BUFFER);
+			auto& mesh = model->GetSubMesh(i);
+			vertexBuffers[i] = device->CreateBuffer(mesh.vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			indexBuffers[i] = device->CreateBuffer(mesh.indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
 		}
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 		device->SetPrimitiveTopology();
@@ -31,11 +33,9 @@ namespace Game {
 		auto n = model->GetSubMeshesCount();
 
 		ConstantBufferData cb = {};
-		cb.World = transform.GetTransformationMatrix();//XMMatrixTranspose(transform.GetTransformationMatrix());
-		cb.View = camera.GetTransformationMatrix();//XMMatrixTranspose(camera.transform.GetTransformationMatrix());
+		cb.World = transform.GetTransformationMatrix();
+		cb.View = camera.GetTransformationMatrix();
 		cb.Projection = camera.GetProjectionMatrix();
-
-		cb.World = XMMatrixIdentity();
 
 
 		device->LoadBufferSubresource(constantBuffer, cb);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util.h"
+#include "Util3D.h"
 
 struct Matrix4x4;
 
@@ -25,7 +25,7 @@ namespace Game {
 			this->farPlane = farPlane;
 		}
 
-		Util::Transform transform;
+		Transform transform;
 	private:
 		double fov;
 		double aspectRatio;
