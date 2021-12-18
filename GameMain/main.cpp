@@ -1,5 +1,4 @@
 #include <GameEngine/Core.h>
-#include <MyRender.h>
 #include <Scripts\PreInitScript.h>
 
 

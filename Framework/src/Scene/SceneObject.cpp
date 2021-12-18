@@ -1,5 +1,6 @@
 #include <GameEngine\Scene\SceneObject.h>
 #include <GameEngine\Scene\Component.h>
+#include <GameEngine\stdafx.h>
 
 namespace Game {
 	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
@@ -12,6 +13,15 @@ namespace Game {
 		}
 		for (auto o : children) {
 			o->Enable();
+		}
+	}
+
+	void SceneObject::Start() {
+		for (auto c : components) {
+			c->Start();
+		}
+		for (auto o : children) {
+			o->Start();
 		}
 	}
 	void SceneObject::PreUpdate() {
@@ -41,6 +51,29 @@ namespace Game {
 
 	Scene& SceneObject::GetScene() { return *scene; }
 	std::vector<SceneObject*> SceneObject::GetChildren() { return children; }
+
+	SceneObject& SceneObject::GetObjectByName(String name) {
+		SceneObject* o = nullptr;
+		if (TryGetObjectByName(name, o)) {
+			return *o;
+		}
+		throw std::exception("Object not founded!");
+	}
+
+	bool SceneObject::TryGetObjectByName(String& name, SceneObject* &object) {
+		for (auto o : children) {
+			if (o->name == name) {
+				object = o;
+				return true;
+			}
+		}
+		for (auto ch : children) {
+			if (ch->TryGetObjectByName(name, object)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	void SceneObject::AddComponent(Component* c) {
 		c->Init(this);

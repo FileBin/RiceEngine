@@ -2,10 +2,10 @@
 
 #include "../Util.h"
 #include <vector>
+#include "Component.h"
 
 namespace Game {
 	class Scene;
-	class Component;
 
 	class SceneObject  {
 	public:
@@ -13,11 +13,27 @@ namespace Game {
 		~SceneObject ();
 
 		void Enable();
+		void Start();
 		void PreUpdate();
 		void Update();
 		void Disable(); 
 
 		std::vector<SceneObject*> GetChildren();
+
+		template<typename T>
+		std::vector<T*> GetComponents() {
+			std::vector<T*> vec = {};
+			for (auto c : components) {
+				auto o = static_cast<T*>(c);
+				if (o != nullptr) { 
+					vec.push_back(o);
+				}
+			}
+			return vec;
+		}
+
+		SceneObject& GetObjectByName(String name);
+		bool TryGetObjectByName(String& name, SceneObject* &object);
 
 		void AddComponent(Component* component);
 		SceneObject* Instaniate();

@@ -67,27 +67,27 @@ Vector3 operator*(Vector3 vec, Matrix4x4 mat) {
     };
 }
 
-Matrix4x4 operator*(Matrix4x4 a, Matrix4x4 b) {
+Matrix4x4 operator*(Matrix4x4 A, Matrix4x4 b) {
     return {
-        a.c11 * b.c11 + a.c21 * b.c12 + a.c31 * b.c13 + a.c41 * b.c14,
-        a.c12 * b.c11 + a.c22 * b.c12 + a.c32 * b.c13 + a.c42 * b.c14,
-        a.c13 * b.c11 + a.c23 * b.c12 + a.c33 * b.c13 + a.c43 * b.c14,
-        a.c14 * b.c11 + a.c24 * b.c12 + a.c34 * b.c13 + a.c44 * b.c14,
+        A.c11 * b.c11 + A.c21 * b.c12 + A.c31 * b.c13 + A.c41 * b.c14,
+        A.c12 * b.c11 + A.c22 * b.c12 + A.c32 * b.c13 + A.c42 * b.c14,
+        A.c13 * b.c11 + A.c23 * b.c12 + A.c33 * b.c13 + A.c43 * b.c14,
+        A.c14 * b.c11 + A.c24 * b.c12 + A.c34 * b.c13 + A.c44 * b.c14,
 
-        a.c11 * b.c21 + a.c21 * b.c22 + a.c31 * b.c23 + a.c41 * b.c24,
-        a.c12 * b.c21 + a.c22 * b.c22 + a.c32 * b.c23 + a.c42 * b.c24,
-        a.c13 * b.c21 + a.c23 * b.c22 + a.c33 * b.c23 + a.c43 * b.c24,
-        a.c14 * b.c21 + a.c24 * b.c22 + a.c34 * b.c23 + a.c44 * b.c24,
+        A.c11 * b.c21 + A.c21 * b.c22 + A.c31 * b.c23 + A.c41 * b.c24,
+        A.c12 * b.c21 + A.c22 * b.c22 + A.c32 * b.c23 + A.c42 * b.c24,
+        A.c13 * b.c21 + A.c23 * b.c22 + A.c33 * b.c23 + A.c43 * b.c24,
+        A.c14 * b.c21 + A.c24 * b.c22 + A.c34 * b.c23 + A.c44 * b.c24,
 
-        a.c11 * b.c31 + a.c21 * b.c32 + a.c31 * b.c33 + a.c41 * b.c34,
-        a.c12 * b.c31 + a.c22 * b.c32 + a.c32 * b.c33 + a.c42 * b.c34,
-        a.c13 * b.c31 + a.c23 * b.c32 + a.c33 * b.c33 + a.c43 * b.c34,
-        a.c14 * b.c31 + a.c24 * b.c32 + a.c34 * b.c33 + a.c44 * b.c34,
+        A.c11 * b.c31 + A.c21 * b.c32 + A.c31 * b.c33 + A.c41 * b.c34,
+        A.c12 * b.c31 + A.c22 * b.c32 + A.c32 * b.c33 + A.c42 * b.c34,
+        A.c13 * b.c31 + A.c23 * b.c32 + A.c33 * b.c33 + A.c43 * b.c34,
+        A.c14 * b.c31 + A.c24 * b.c32 + A.c34 * b.c33 + A.c44 * b.c34,
 
-        a.c11 * b.c41 + a.c21 * b.c42 + a.c31 * b.c43 + a.c41 * b.c44,
-        a.c12 * b.c41 + a.c22 * b.c42 + a.c32 * b.c43 + a.c42 * b.c44,
-        a.c13 * b.c41 + a.c23 * b.c42 + a.c33 * b.c43 + a.c43 * b.c44,
-        a.c14 * b.c41 + a.c24 * b.c42 + a.c34 * b.c43 + a.c44 * b.c44,
+        A.c11 * b.c41 + A.c21 * b.c42 + A.c31 * b.c43 + A.c41 * b.c44,
+        A.c12 * b.c41 + A.c22 * b.c42 + A.c32 * b.c43 + A.c42 * b.c44,
+        A.c13 * b.c41 + A.c23 * b.c42 + A.c33 * b.c43 + A.c43 * b.c44,
+        A.c14 * b.c41 + A.c24 * b.c42 + A.c34 * b.c43 + A.c44 * b.c44,
     };
 }
 

@@ -158,16 +158,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\constants.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scripts.h" />
-    <ClInclude Include="src\Scripts\CameraMover.h" />
+    <ClInclude Include="src\Scripts\CameraMoverScript.h" />
+    <ClInclude Include="src\Scripts\ChunkGenerator.h" />
     <ClInclude Include="src\Scripts\InitSceneScript.h" />
-    <ClInclude Include="src\Scripts\InitScript.h" />
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
-    <ClInclude Include="src\Scripts\PostInitScript.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SampleScene.h" />
+    <ClInclude Include="src\Scripts\World\Chunk.h" />
+    <ClInclude Include="src\Scripts\World\Voxel.h" />
+    <ClInclude Include="src\Scripts\World\World.h" />
+    <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl">

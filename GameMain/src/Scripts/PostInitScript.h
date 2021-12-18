@@ -4,8 +4,8 @@
 #include <GameEngine\Log.h>
 #include <GameEngine\ModelRender.h>
 
-#include "InitScript.h"
-#include "CameraMover.h"
+//#include "InitScript.h"
+//#include "CameraMover.h"
 
 using namespace Game;
 
@@ -14,7 +14,7 @@ public:
 	ModelRenderer* render;
 
 	void Run() {
-		auto& ren = *render;
+		/*auto& ren = *render;
 		auto& en = GetEngine();
 		auto& sh = en.CreateShader();
 		sh.LoadVertexShader(Util::ReadFile(L"VertexShader.cso"), Vertex::GetLayout());
@@ -30,6 +30,6 @@ public:
 		auto s = new CameraMover();
 		s->render = render;
 
-		en.RegisterScript(s);
+		en.RegisterScript(s);*/
 	}
 };

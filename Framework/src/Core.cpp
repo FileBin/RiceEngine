@@ -64,8 +64,11 @@ namespace Game {
 			auto fixedDeltaTime = 1000. / fps;
 			auto interval = (long long)fixedDeltaTime;
 			auto deltaTime = fixedDeltaTime;
-			auto time = steady_clock::now();
+			auto _time = steady_clock::now();
+			time = 0;
 			auto b = false;
+
+			time_point start = steady_clock::now();
 			do {
 				stage = Stage::Update;
 				RunScripts(updateScripts);
@@ -73,9 +76,10 @@ namespace Game {
 				b = frame();
 				engine->PostUpdate();
 
-				sleep_until(time);
-				deltaTime = fixedDeltaTime + .000001*(steady_clock::now() - time).count();
-				time = steady_clock::now() + milliseconds(interval);
+				sleep_until(_time);
+				time = (steady_clock::now() - start).count() * .000001 * .001;
+				deltaTime = fixedDeltaTime + .000001*(steady_clock::now() - _time).count();
+				_time = steady_clock::now() + milliseconds(interval);
 
 				this->deltaTime = deltaTime * .001;
 				this->fixedDeltaTime = fixedDeltaTime * .001;

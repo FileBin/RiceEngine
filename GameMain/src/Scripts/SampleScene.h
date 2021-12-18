@@ -4,6 +4,9 @@
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 
+#include "CameraMoverScript.h"
+#include "ChunkGenerator.h"
+
 using namespace Game;
 
 class SampleScene : public Scene {
@@ -79,7 +82,7 @@ class SampleScene : public Scene {
 		auto& mat = ren.CreateMaterial(&shader);
 
 		auto model = new Model();
-		model->setSubMeshesCount(1);
+		model->SetSubMeshesCount(1);
 		model->SetSubMesh(mesh, 0);
 
 		render->SetModel(model);
@@ -94,5 +97,8 @@ class SampleScene : public Scene {
 		cam->transform.pos = { 0, 2, -5 };
 		
 		ren.AddCamera(cam);
+
+		AddScript(new CameraMover());
+		chunk->AddComponent(new ChunkGenerator());
 	}
 };

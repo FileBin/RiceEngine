@@ -3,7 +3,7 @@
 #include <MyRender.h>
 #include <GameEngine\Log.h>
 
-#include "InitScript.h"
+//#include "InitScript.h"
 #include "InitSceneScript.h"
 
 using namespace Game;

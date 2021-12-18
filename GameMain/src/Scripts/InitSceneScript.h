@@ -3,6 +3,7 @@
 #include "PostInitScript.h"
 
 #include "SampleScene.h"
+#include "MsaaTestScript.h"
 
 #include <GameEngine\ScriptBase.h>
 #include <GameEngine\Model.h>

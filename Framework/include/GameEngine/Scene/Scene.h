@@ -5,6 +5,8 @@
 #include "../ScriptBase.h"
 
 namespace Game {
+	class MonoScript;
+
 	class Scene {
 	public:
 		Scene();
@@ -30,6 +32,10 @@ namespace Game {
 				updateScript,
 			};
 		}
+
+		void AddScript(MonoScript* script);
+
+		SceneObject& GetObjectByName(String name);
 
 		SceneObject* Instaniate();
 		Engine& GetEngine();

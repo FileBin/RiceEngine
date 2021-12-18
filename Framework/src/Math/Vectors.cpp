@@ -6,6 +6,7 @@
 using namespace Game;
  
 const Vector3 Vector3::zero = { 0,0,0 };
+const Vector3 Vector3::one = { 1,1,1 };
 const Vector3 Vector3::left = { -1,0,0 };
 const Vector3 Vector3::right = { 1,0,0 };
 const Vector3 Vector3::up = { 0,1,0 };
@@ -13,6 +14,7 @@ const Vector3 Vector3::down = { 0,-1,0 };
 const Vector3 Vector3::forward = { 0,0,1 };
 const Vector3 Vector3::backward = { 0,0,-1 };
 
+const Vector2 Vector2::one = { 1,1 };
 const Vector2 Vector2::zero = { 0,0 };
 const Vector2 Vector2::left = { -1,0 };
 const Vector2 Vector2::right = { 1,0 };
@@ -21,8 +23,21 @@ const Vector2 Vector2::down = { 0,-1 };
 
 const Quaternion Quaternion::identity = { 0,0,0,1 };
 
-double Vector2::Dot(Vector2 a, Vector2 b) {
-    return a.x * b.x + a.y * b.y;
+Vector3i::Vector3i(Vector3& v) {
+    x = v.x;
+    y = v.y;
+    z = v.z;
+}
+
+Vector3::Vector3(Vector3i& v) {
+    x = (double)v.x;
+    y = (double)v.y;
+    z = (double)v.z;
+}
+
+
+double Vector2::Dot(Vector2 A, Vector2 b) {
+    return A.x * b.x + A.y * b.y;
 }
 
 double Vector2::Length() { return sqrt(SqrLength()); }
@@ -40,40 +55,40 @@ Vector3 Vector3::Normalized() {
     return { x / l,y / l,z / l };
 }
 
-double Vector3::Dot(Vector3 a, Vector3 b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
+double Vector3::Dot(Vector3 A, Vector3 b) {
+    return A.x * b.x + A.y * b.y + A.z * b.z;
 }
 
-Vector2 operator+(Vector2 a, Vector2 b) {
-    return { a.x + b.x, a.y + b.y };
+Vector2 operator+(Vector2 A, Vector2 b) {
+    return { A.x + b.x, A.y + b.y };
 }
 
-Vector2 operator-(Vector2 a, Vector2 b) {
-    return { a.x - b.x, a.y - b.y };
+Vector2 operator-(Vector2 A, Vector2 b) {
+    return { A.x - b.x, A.y - b.y };
 }
 
-Vector2 operator*(Vector2 a, double b) {
-    return { a.x * b, a.y * b };
+Vector2 operator*(Vector2 A, double b) {
+    return { A.x * b, A.y * b };
 }
 
-Vector2 operator/(Vector2 a, double b) {
-    return { a.x / b, a.y / b };
+Vector2 operator/(Vector2 A, double b) {
+    return { A.x / b, A.y / b };
 }
 
-Vector3 operator+(Vector3 a, Vector3 b) {
-    return { a.x + b.x, a.y + b.y, a.z + b.z };
+Vector3 operator+(Vector3 A, Vector3 b) {
+    return { A.x + b.x, A.y + b.y, A.z + b.z };
 }
 
-Vector3 operator-(Vector3 a, Vector3 b) {
-    return { a.x - b.x, a.y - b.y, a.z - b.z };
+Vector3 operator-(Vector3 A, Vector3 b) {
+    return { A.x - b.x, A.y - b.y, A.z - b.z };
 }
 
-Vector3 operator*(Vector3 a, double b) {
-    return { a.x * b, a.y * b, a.z * b };
+Vector3 operator*(Vector3 A, double b) {
+    return { A.x * b, A.y * b, A.z * b };
 }
 
-Vector3 operator/(Vector3 a, double b) {
-    return { a.x / b, a.y / b, a.z / b };
+Vector3 operator/(Vector3 A, double b) {
+    return { A.x / b, A.y / b, A.z / b };
 }
 
 Vector3 operator*(Quaternion q, Vector3 v) {
@@ -89,12 +104,38 @@ Quaternion operator*(Quaternion q1, Quaternion q2) {
     };
 }
 
+Quaternion operator*(Quaternion A, double b) {
+    return { A.x * b, A.y * b, A.z * b, A.w * b };
+}
+
 Vector3 Vector3::Cross(Vector3 left, Vector3 right) {
     return { 
         left.y * right.z - left.z * right.y,
         left.z * right.x - left.x * right.z,
         left.x * right.y - left.y * right.x };
 }
+
+
+long long& Vector3i::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    if (idx == 2)
+        return z;
+    throw std::exception("Vector3i is out of range!");
+}
+
+double& Vector3::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    if (idx == 2)
+        return z;
+    throw std::exception("Vector3i is out of range!");
+}
+
 
 Vector2 Vector2::operator+=(Vector2 v) {
     *this = (*this) + v;
@@ -137,6 +178,13 @@ Vector3 Vector3::operator*=(double v) {
 
 Vector3 Vector3::operator/=(double v) {
     *this = *this / v;
+    return *this;
+}
+
+Vector3& Vector3::operator=(Vector3f& v) {
+    x = v.x;
+    y = v.y;
+    z = v.z;
     return *this;
 }
 
@@ -258,4 +306,18 @@ Vector3 Quaternion::ToAxisAngle() {
     } else {
         return Vector3::zero;
     }
+}
+
+Vector3f& Vector3f::operator=(Vector3& v) {
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    return *this;
+}
+
+Vector3f& Vector3f::operator+=(Vector3f& v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
+    return *this;
 }

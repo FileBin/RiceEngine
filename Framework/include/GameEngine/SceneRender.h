@@ -20,11 +20,15 @@ namespace Game {
 		void Resize();
 
 		void AddModel(Model* model);
+		void UpdateModel(Model* model);
 		void MapMaterial(Mesh* mesh, Material* mat);
+		void UpdateBuffer(Mesh* mesh);
 
 		void AddCamera(Camera* cam);
+		Camera& GetCamera(size_t idx = 0);
 
 		Material& CreateMaterial(Shader* sh);
+
 	private:
 		std::vector<Camera*> cameras;
 		std::vector<Material*> materials;

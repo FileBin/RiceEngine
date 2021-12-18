@@ -37,6 +37,7 @@ namespace Game {
 	}
 
 	double Engine::GetDeltaTime() { return core->GetDeltaTime(); }
+	double Engine::GetTime() {	return core->GetTime(); }
 	double Engine::GetFixedDeltaTime() { return core->GetFixedDeltaTime(); }
 
 	void Engine::RegisterScript(ScriptBase* script, Stage stage) { core->AddScript(script, stage); }

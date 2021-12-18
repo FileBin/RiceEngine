@@ -59,7 +59,7 @@ namespace Game {
 
 		ZeroMemory(&rsdesc, sizeof(rsdesc));
 
-		rsdesc.CullMode = D3D11_CULL_NONE;
+		rsdesc.CullMode = D3D11_CULL_BACK;
 		rsdesc.FillMode = D3D11_FILL_SOLID;
 		
 		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
@@ -245,7 +245,7 @@ namespace Game {
 
 	void Device::ClearFrame(Color color) {
 		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
-		float c[] = { color.r,color.g,color.b,color.a };
+		float c[] = { color.r,color.g,color.b,color.A };
 		context->ClearRenderTargetView(renderTarget, c);
 		context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 	}

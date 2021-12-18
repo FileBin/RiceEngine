@@ -30,6 +30,7 @@ namespace Game {
 		
 		double GetFixedDeltaTime();
 		double GetDeltaTime();
+		double GetTime();
 
 		void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
 

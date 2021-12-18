@@ -14,7 +14,7 @@ namespace Game {
 		void Enable();
 
 		void SetMaterial(Material* material, size_t subMeshIdx);
-		void SetModel(Model* model);
+		void SetModel(Model* model, bool updateBuffer = true);
 		Model& GetModel() const;
 		Material& GetMaterial(size_t subMeshIdx) const;
 

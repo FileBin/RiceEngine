@@ -6,9 +6,9 @@
 
 namespace Game {
 	struct Color {
-		float r, g, b, a;
-		Color(float red, float green, float blue) : r(red), g(green), b(blue), a(1) {}
-		Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), a(alpha) {}
+		float r, g, b, A;
+		Color(float red, float green, float blue) : r(red), g(green), b(blue), A(1) {}
+		Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), A(alpha) {}
 	};
 
 	struct Vertex {

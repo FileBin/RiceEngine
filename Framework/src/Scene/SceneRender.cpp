@@ -70,9 +70,44 @@ namespace Game {
 		constantBuffers.push_back(device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER));
 	}
 
+	void SceneRender::UpdateModel(Model* model) {
+
+		auto n = model->GetSubMeshesCount();
+
+		for (size_t i = 0; i < n; i++) {
+			auto& mesh = model->GetSubMesh(i);
+
+			auto vertexBuffer = device->CreateBuffer(mesh.vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto indexBuffer = device->CreateBuffer(mesh.indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto it = vertexBuffers.find(&mesh);
+			if (it != vertexBuffers.end()) {
+				it->second = vertexBuffer;
+			} else {
+				vertexBuffers.insert(vertexBuffers.end(), { &mesh, vertexBuffer });
+			}
+			it = indexBuffers.find(&mesh);
+			if (it != indexBuffers.end()) {
+				it->second = indexBuffer;
+			} else {
+				indexBuffers.insert(indexBuffers.end(), { &mesh, indexBuffer });
+			}
+		}
+	}
+
+
+
 	void SceneRender::MapMaterial(Mesh* mesh, Material* mat) { materialMap.insert(materialMap.end(), {mesh, mat}); }
 
+	void SceneRender::UpdateBuffer(Mesh* mesh) {
+		auto ib = indexBuffers.at(mesh);
+		device->UpdateBufferData(ib, mesh->indexBuffer);
+		auto vb = vertexBuffers.at(mesh);
+		device->UpdateBufferData(vb, mesh->vertexBuffer);
+	}
+
 	void SceneRender::AddCamera(Camera* cam) { cameras.push_back(cam); }
+
+	Camera& SceneRender::GetCamera(size_t idx) { return *cameras[idx]; }
 
 	Material& SceneRender::CreateMaterial(Shader* sh) {
 		auto mat = new Material({}, *device, *sh);

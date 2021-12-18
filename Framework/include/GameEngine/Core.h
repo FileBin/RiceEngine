@@ -23,6 +23,7 @@ namespace Game {
 
 		double GetFixedDeltaTime() { return fixedDeltaTime; }
 		double GetDeltaTime() { return deltaTime; }
+		double GetTime() { return time; }
 	private:
 		Core();
 		~Core();
@@ -42,7 +43,7 @@ namespace Game {
 		Engine* engine = nullptr;
 		bool init;
 		double fps = 60.;
-		double fixedDeltaTime, deltaTime;
+		double fixedDeltaTime, deltaTime, time;
 		std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
 			preRenderScripts, renderScripts, postRenderScripts,
 			updateScripts;

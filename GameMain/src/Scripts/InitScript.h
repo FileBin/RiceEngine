@@ -6,7 +6,6 @@
 #include <GameEngine\ModelRender.h>
 
 #include "MsaaTestScript.h"
-#include "InitScript.h"
 #include "PostInitScript.h"
 
 using namespace Game;
@@ -72,7 +71,7 @@ class InitScript : public ScriptBase {
 			23,20,22
 		};
 
-		model->setSubMeshesCount(1);
+		model->SetSubMeshesCount(1);
 		model->SetSubMesh(mesh, 0);
 
 		auto* render = new ModelRenderer();

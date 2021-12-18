@@ -58,7 +58,7 @@ namespace Game {
 		Button8 = 0x38,
 		Button9 = 0x39,
 
-		a = 0x41,
+		A = 0x41,
 		B = 0x42,
 		C = 0x43,
 		D = 0x44,
