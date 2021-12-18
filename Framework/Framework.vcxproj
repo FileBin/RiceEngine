@@ -188,6 +188,7 @@
     <ClInclude Include="include\GameEngine\Stage.h" />
     <ClInclude Include="include\GameEngine\Util.h" />
     <ClInclude Include="include\GameEngine\Util3D.h" />
+    <ClInclude Include="include\GameEngine\Vectors\Vector2i.h" />
     <ClInclude Include="include\GameEngine\Vectors\Vector3i.h" />
     <ClInclude Include="include\GameEngine\version.h" />
     <ClInclude Include="include\GameEngine\stdafx.h" />

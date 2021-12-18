@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util.h"
+
 struct Quaternion;
 struct Vector3f;
 struct Vector3i;
@@ -75,9 +77,9 @@ struct Vector3f {
 
 struct Vector3i {
 public:
-	long long x, y, z;
+	num x, y, z;
 	Vector3i() = default;
-	Vector3i(long long x, long long y, long long z) : x(x), y(y), z(z) {}
+	Vector3i(num x, num y, num z) : x(x), y(y), z(z) {}
 	Vector3i(Vector3& vec);
 	long long& operator[](size_t idx);
 };

@@ -4,35 +4,66 @@
 #include <functional>
 
 #include "Voxel.h"
+#include "WorldGenerator.h"
 
 using namespace Game;
 
-struct Chunk {
-	std::vector<Voxel> voxels = {};
-	static const int ChunkSize;
+class HeightMap;
+
+class Chunk {
+private:
+    Vector3i pos;
+    WorldGenerator* gen;
+    HeightMap* map;
+    Model* model;
+
+	std::vector<Voxel*> voxels = {};
+    void Generate(WorldGenerator& gen, Vector3i pos, HeightMap& map);
+
+public:
+    enum Status { Unloaded = -2, NotCreated, NotLoaded, Loading, Loaded } status;
+
+    static const int ChunkSize;
     Vector3i position{};
 
-	Chunk() {
+	Chunk(WorldGenerator* gen, Vector3i pos, HeightMap* map) {
 		voxels.resize((INT64)ChunkSize * ChunkSize * ChunkSize);
+        this->gen = gen;
+        this->pos = pos;
+        this->map = map;
 	}
 
     Voxel& GetVoxel(int x, int y, int z) {
-        return voxels[((INT64)x * ChunkSize + y) * ChunkSize + z];
+        auto idx = ((INT64)x * ChunkSize + y) * ChunkSize + z;
+        auto vox = voxels[idx];
+        if (vox == nullptr) {
+            Vector3i inChunkPos{x,y,z};
+            vox = &GenVoxel(inChunkPos);
+            SetVoxel(vox, inChunkPos);
+        }
+        return *vox;
     }
 
-    void SetVoxel(Voxel vox) {
-        auto x = vox.position.x;
-        auto y = vox.position.y;
-        auto z = vox.position.z;
+    Voxel& GenVoxel(Vector3i voxelPos, bool genNormals = false);
+
+    void SetVoxel(Voxel* vox, Vector3i chunkPos) {
+        auto x = chunkPos.x;
+        auto y = chunkPos.y;
+        auto z = chunkPos.z;
         voxels[(x * ChunkSize + y) * ChunkSize + z] = vox;
     }
 
     Voxel& GetVoxel(Vector3i pos) {
         return GetVoxel(pos.x, pos.y, pos.z);
     }
-
+    Model* GetModel() {
+        if (model == nullptr) {
+            model = GenerateModel();
+        }
+        return model;
+    }
 	Model* GenerateModel(){
-        Model* mod = new Model();
+        auto mod = new Model();
 
         auto mesh = new Mesh();
 

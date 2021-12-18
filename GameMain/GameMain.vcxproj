@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\constants.cpp" />
+    <ClCompile Include="src\Scripts\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scripts.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SampleScene.h" />
     <ClInclude Include="src\Scripts\World\Chunk.h" />
+    <ClInclude Include="src\Scripts\World\HeightMap.h" />
     <ClInclude Include="src\Scripts\World\Voxel.h" />
     <ClInclude Include="src\Scripts\World\World.h" />
     <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
