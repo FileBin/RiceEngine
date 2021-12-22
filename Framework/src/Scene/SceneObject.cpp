@@ -50,7 +50,7 @@ namespace Game {
 	}
 
 	Scene& SceneObject::GetScene() { return *scene; }
-	std::vector<SceneObject*> SceneObject::GetChildren() { return children; }
+	concurrent_vector<SceneObject*> SceneObject::GetChildren() { return children; }
 
 	SceneObject& SceneObject::GetObjectByName(String name) {
 		SceneObject* o = nullptr;

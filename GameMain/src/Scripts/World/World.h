@@ -15,9 +15,9 @@ public:
 	static Vector3i TransformToChunkPos(Vector3 worldPosition) {
 		auto n = Chunk::ChunkSize;
 		return {
-			 (int)floor(worldPosition.x / n),
-			 (int)floor(worldPosition.y / n),
-			 (int)floor(worldPosition.z / n),
+			 (num)floor(worldPosition.x / n),
+			 (num)floor(worldPosition.y / n),
+			 (num)floor(worldPosition.z / n),
 		};
 	}
 
@@ -25,16 +25,16 @@ public:
 		auto n = Chunk::ChunkSize;
 		return {
 			 chunkPosition.x,
-			 chunkPosition.y,
+			 chunkPosition.z,
 		};
 	}
 
 	static Vector3 TransformToWorldPos(Vector3i chunkPosition) {
 		auto n = Chunk::ChunkSize;
 		return {
-			 chunkPosition.x * n,
-			 chunkPosition.y * n,
-			 chunkPosition.z * n,
+			 (dbl)chunkPosition.x * n,
+			 (dbl)chunkPosition.y * n,
+			 (dbl)chunkPosition.z * n,
 		};
 	}
 #pragma endregion
@@ -51,16 +51,18 @@ public:
 	World(WorldGenerator* gen) : generator(*gen) {}
 
 	void UnloadChunk(Vector3i chunkPos) {
-		Chunk& chunk = chunkMap[chunkPos];
-		if (&chunk != nullptr) {
+		auto it = chunkMap.find(chunkPos);
+		if (it != chunkMap.end()) {
+			auto& chunk = it->second;
 			SaveChunk(chunk);
 			auto hmPos = ToTerrainPos(chunk.position);
 			auto n = GetChunks(hmPos).size();
 			chunkMap.unsafe_erase(chunkPos);
 
 			if (n == 0) {
-				HeightMap& hm = heightMaps[hmPos];
-				if (&hm != nullptr) {
+				auto hIt = heightMaps.find(hmPos);
+				if (hIt != heightMaps.end()) {
+					auto& hm = hIt->second;
 					SaveHeightMap(hm);
 					heightMaps.unsafe_erase(hmPos);
 				}
@@ -112,7 +114,7 @@ public:
 	}
 
 	void SetChunkStatus(Vector3i chunkPos, Chunk::Status status) {
-		auto chunk = GetChunk(chunkPos);
+		auto& chunk = GetChunk(chunkPos);
 		chunk.status = status;
 	}
 
@@ -122,15 +124,14 @@ public:
 			return it->second;
 		} else {
 			auto& ch = GenerateChunk(chunkPos);
-			chunkMap.insert(chunkMap.end(), ch);
+			chunkMap.insert(chunkMap.end(), { chunkPos, ch });
 			return ch;
 		}
 	}
 
 	Voxel& GetVoxel(Vector3i voxelPos) {
 		Vector3 vox = voxelPos;
-		auto pos = (vox / Chunk::ChunkSize);
-		Vector3 chunk{ floor(pos.x), floor(pos.y), floor(pos.z)};
+		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk).GetVoxel(vox);
 	}
@@ -139,7 +140,7 @@ public:
 private:
 	Chunk& GenerateChunk(Vector3i chunkPos) {
 		auto& hm = GetHeightMap(chunkPos);
-		auto chunk = new Chunk(&generator, chunkPos, &hm);
+		auto chunk = new Chunk(&generator, chunkPos, &hm, this);
 		return *chunk;
 	}
 
@@ -149,9 +150,9 @@ private:
 		if (it != heightMaps.end()) {
 			return it->second;
 		} else {
-			auto& ch = CreateHeightMap(pos);
-			chunkMap.insert(chunkMap.end(), ch);
-			return ch;
+			auto& hm = CreateHeightMap(pos);
+			heightMaps.insert(heightMaps.end(), { pos, hm });
+			return hm;
 		}
 	}
 

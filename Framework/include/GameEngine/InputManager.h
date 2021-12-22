@@ -1,7 +1,8 @@
 #pragma once
 #include "stdafx.h"
 #include "InputButtons.h"
-#include "Math.h"
+#include "Vectors/Vector2.h"
+
 namespace Game {
 	class InputManager {
 	public:

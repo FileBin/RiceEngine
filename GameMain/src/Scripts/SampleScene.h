@@ -90,11 +90,11 @@ class SampleScene : public Scene {
 
 		auto cam = new Camera();
 
-		cam->SetFov(90);
-		cam->SetClippingPlanes(.001, 100.);
+		cam->SetFov(50);
+		cam->SetClippingPlanes(.001, 1000.);
 		cam->transform.scale = { 1, 1, 1 };
 		cam->transform.rotation = Quaternion::identity;
-		cam->transform.pos = { 0, 2, -5 };
+		cam->transform.pos = { 0, 60, -5 };
 		
 		ren.AddCamera(cam);
 

@@ -18,12 +18,15 @@ class CameraMover : public MonoScript {
 
 	ModelRender* modelRender;
 
+	Vector3 speed = {0,0,0};
+
 	void Start() {
 		auto& scene = GetScene();
 		auto& en = GetEngine();
 		hwnd = en.GetHWND();
 		modelRender = scene.GetObjectByName(L"Chunk").GetComponents<ModelRender>()[0];
 	}
+
 
 	void Update() {
 		auto& ren = GetRender();
@@ -47,10 +50,23 @@ class CameraMover : public MonoScript {
 		if (InputManager::GetKey(KeyCode::Shift)) { mv.y -= 1; }
 		if (InputManager::GetKey(KeyCode::Space)) { mv.y += 1; }
 
+		mv = mv.Normalized();
 		mv *= cam.rotation;
-		mv *= en.GetDeltaTime() * 3.;
 
-		cam.pos = cam.pos + mv;
+		auto dt = en.GetDeltaTime();
+		
+		mv *= 20.;
+
+		speed += mv * dt;
+
+		Vector3 damp = speed.Normalized() * 15. * dt;
+
+		if(damp.SqrLength() > speed.SqrLength()){
+			damp = speed;
+		}
+		speed -= damp;
+
+		cam.pos = cam.pos + speed * dt;
 
 		if (lock) {
 			if (InputManager::GetKey(KeyCode::Escape)) {

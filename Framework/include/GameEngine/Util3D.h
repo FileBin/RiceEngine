@@ -3,6 +3,7 @@
 #include "Matrixes.h"
 #include "stdafx.h"
 #include "Util.h"
+#include "Vectors/Quaternion.h"
 
 namespace Game {
 	struct Color {
@@ -28,7 +29,7 @@ namespace Game {
 	};
 
 	struct ConstantBufferData {
-		Matrix4x4f World = Matrix4x4f::identity, View = Matrix4x4::identity, Projection = Matrix4x4f::identity;
+		Matrix4x4f World = Matrix4x4f::identity, View = Matrix4x4f::identity, Projection = Matrix4x4f::identity;
 	};
 
 	struct Transform {

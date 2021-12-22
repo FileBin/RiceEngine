@@ -2,9 +2,12 @@
 
 #include "../Util.h"
 #include <vector>
+#include <concurrent_vector.h>
 #include "Component.h"
 
 namespace Game {
+	using namespace concurrency;
+
 	class Scene;
 
 	class SceneObject  {
@@ -18,7 +21,7 @@ namespace Game {
 		void Update();
 		void Disable(); 
 
-		std::vector<SceneObject*> GetChildren();
+		concurrent_vector<SceneObject*> GetChildren();
 
 		template<typename T>
 		std::vector<T*> GetComponents() {
@@ -43,11 +46,10 @@ namespace Game {
 
 	private:
 		bool init = false;
-
 		Scene* scene = nullptr;
 		String name = L"";
-		std::vector<Component*> components = {};
-		std::vector<SceneObject*> children = {};
+		concurrent_vector<Component*> components{};
+		concurrent_vector<SceneObject*> children{};
 	};
 }
 

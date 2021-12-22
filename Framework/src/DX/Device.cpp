@@ -1,8 +1,8 @@
 #include <GameEngine/Device.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Vectors.h>
-#include <GameEngine/Util.h>
 #include <GameEngine/Log.h>
+#include <GameEngine/Util.h>
 
 namespace Game {
 
@@ -62,6 +62,9 @@ namespace Game {
 		rsdesc.CullMode = D3D11_CULL_BACK;
 		rsdesc.FillMode = D3D11_FILL_SOLID;
 		
+		rsdesc.AntialiasedLineEnable = true;
+
+
 		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
 	}
 
@@ -118,14 +121,14 @@ namespace Game {
 
 	void Device::_createDepthStencil(Vector2 size) {
 		D3D11_TEXTURE2D_DESC dsDesc;
-		dsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT;
 		dsDesc.SampleDesc.Count = msaaLevel;
 		dsDesc.SampleDesc.Quality = 0;
 		dsDesc.MipLevels = 1;
 		dsDesc.ArraySize = 1;
 		dsDesc.Width = lround(size.x);
 		dsDesc.Height = lround(size.y);
-		dsDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		dsDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
 		dsDesc.Usage = D3D11_USAGE_DEFAULT;
 		dsDesc.CPUAccessFlags = 0;
 		dsDesc.MiscFlags = 0;
@@ -137,6 +140,35 @@ namespace Game {
 
 		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, nullptr, &depthStencil));
 		_RELEASE(depthStencilTex);
+
+		D3D11_DEPTH_STENCIL_DESC Desc;
+
+		// Depth test parameters
+		Desc.DepthEnable = true;
+		Desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+		Desc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
+
+		// Stencil test parameters
+		Desc.StencilEnable = true;
+		Desc.StencilReadMask = 0xFF;
+		Desc.StencilWriteMask = 0xFF;
+
+		// Stencil operations if pixel is front-facing
+		Desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		Desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		Desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
+		Desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+
+		// Stencil operations if pixel is back-facing
+		Desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		Desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_INCR;
+		Desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
+		Desc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+
+		// Create depth stencil state
+		ID3D11DepthStencilState* pDSState;
+		device->CreateDepthStencilState(&Desc, &pDSState);
+		context->OMSetDepthStencilState(pDSState, 1);
 	}
 
 	void Device::ReCreateSwapChain(Vector2 screenSize) {

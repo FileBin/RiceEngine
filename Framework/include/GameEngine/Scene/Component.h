@@ -16,6 +16,7 @@ namespace Game {
 		virtual void Disable() {};
 
 	protected:
+		bool enabled = false;
 		SceneObject& GetSceneObject();
 	private:
 		SceneObject* obj = nullptr;

@@ -2,9 +2,11 @@
 
 #include "RenderBase.h"
 #include <vector>
-#include <map>
+#include <concurrent_unordered_map.h>
+#include <concurrent_vector.h>
 
 namespace Game {
+	using namespace concurrency;
 	class Material;
 	class Model;
 	class Camera;
@@ -30,13 +32,13 @@ namespace Game {
 		Material& CreateMaterial(Shader* sh);
 
 	private:
-		std::vector<Camera*> cameras;
-		std::vector<Material*> materials;
-		std::map<Mesh*, Material*> materialMap;
+		concurrent_vector<Camera*> cameras;
+		concurrent_vector<Material*> materials;
+		concurrent_unordered_map<Mesh*, Material*> materialMap;
 		size_t activeCameraIdx;
-		std::vector<Model*> models;
-		std::map<Mesh*, Buffer*> indexBuffers;
-		std::map<Mesh*, Buffer*> vertexBuffers;
-		std::vector<Buffer*> constantBuffers;
+		concurrent_vector<Model*> models;
+		concurrent_unordered_map<Mesh*, Buffer*> indexBuffers;
+		concurrent_unordered_map<Mesh*, Buffer*> vertexBuffers;
+		concurrent_vector<Buffer*> constantBuffers;
 	};
 }

@@ -55,7 +55,7 @@ namespace Game {
 	}
 
 	void SceneRender::AddModel(Model* model) {
-		models.push_back(model);
+		constantBuffers.push_back(device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER));
 
 		auto n = model->GetSubMeshesCount();
 
@@ -67,7 +67,7 @@ namespace Game {
 			vertexBuffers.insert(vertexBuffers.end(), { &mesh, vertexBuffer });
 			indexBuffers.insert(indexBuffers.end(), { &mesh, indexBuffer });
 		}
-		constantBuffers.push_back(device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER));
+		models.push_back(model);
 	}
 
 	void SceneRender::UpdateModel(Model* model) {

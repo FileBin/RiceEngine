@@ -54,7 +54,6 @@ namespace Game {
 		mouseScrollDelta = 0;
 		KeyCode KeyIndex;
 		eventCursor();
-		// событие движения мыши
 		switch (msg) {
 		case WM_MOUSEMOVE:
 			break;
@@ -121,7 +120,7 @@ namespace Game {
 
 	void InputManager::eventCursor() {
 		POINT Position;
-		GetCursorPos(&Position);	// получаем текущую позицию курсора
+		GetCursorPos(&Position);
 
 		Position.x -= windowRect.left;
 		Position.y -= windowRect.top;

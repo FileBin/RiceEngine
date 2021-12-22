@@ -4,8 +4,6 @@
 #include <GameEngine\Scene\Scene.h>
 
 namespace Game {
-	bool enabled = false;
-
 	void ModelRender::OnInit() { model = new Model(); }
 
 	void ModelRender::Enable() {
@@ -24,6 +22,7 @@ namespace Game {
 		auto n = model->GetSubMeshesCount();
 		materials.resize(n);
 		this->model->SetSubMeshesCount(n);
+		this->model->transform = model->transform;
 		for (size_t i = 0; i < n; i++) {
 			this->model->SetSubMesh(model->GetSubMesh(i), i);
 		}

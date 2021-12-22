@@ -2,8 +2,12 @@
 #include <GameEngine\Math.h>
 #include <GameEngine\Matrixes.h>
 #include <GameEngine\stdafx.h>
+#include <GameEngine/Vectors/Quaternion.h>
+#include <GameEngine\Vectors\Vector2i.h>
 
 using namespace Game;
+
+#pragma region Constants
  
 const Vector3 Vector3::zero = { 0,0,0 };
 const Vector3 Vector3::one = { 1,1,1 };
@@ -23,41 +27,14 @@ const Vector2 Vector2::down = { 0,-1 };
 
 const Quaternion Quaternion::identity = { 0,0,0,1 };
 
-Vector3i::Vector3i(Vector3& v) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-}
+#pragma endregion
 
-Vector3::Vector3(Vector3i& v) {
-    x = (double)v.x;
-    y = (double)v.y;
-    z = (double)v.z;
-}
-
-
-double Vector2::Dot(Vector2 A, Vector2 b) {
+#pragma region Vector2
+dbl Vector2::Dot(Vector2 A, Vector2 b) {
     return A.x * b.x + A.y * b.y;
 }
 
-double Vector2::Length() { return sqrt(SqrLength()); }
-
-double Vector3::Length() {
-    return sqrt(SqrLength());
-}
-
-double Vector3::SqrLength() {
-    return x*x + y*y + z*z;
-}
-
-Vector3 Vector3::Normalized() {
-    auto l = Length();
-    return { x / l,y / l,z / l };
-}
-
-double Vector3::Dot(Vector3 A, Vector3 b) {
-    return A.x * b.x + A.y * b.y + A.z * b.z;
-}
+dbl Vector2::Length() { return sqrt(SqrLength()); }
 
 Vector2 operator+(Vector2 A, Vector2 b) {
     return { A.x + b.x, A.y + b.y };
@@ -67,16 +44,73 @@ Vector2 operator-(Vector2 A, Vector2 b) {
     return { A.x - b.x, A.y - b.y };
 }
 
-Vector2 operator*(Vector2 A, double b) {
+Vector2 operator*(Vector2 A, dbl b) {
     return { A.x * b, A.y * b };
 }
 
-Vector2 operator/(Vector2 A, double b) {
+Vector2 operator/(Vector2 A, dbl b) {
     return { A.x / b, A.y / b };
 }
 
-Vector3 operator+(Vector3 A, Vector3 b) {
-    return { A.x + b.x, A.y + b.y, A.z + b.z };
+Vector2 Vector2::operator+=(Vector2 v) {
+    *this = (*this) + v;
+    return *this;
+}
+
+Vector2 Vector2::operator-=(Vector2 v) {
+    *this = (*this) - v;
+    return *this;
+}
+
+Vector2 Vector2::operator*=(dbl x) {
+    *this = (*this) * x;
+    return *this;
+}
+
+Vector2 Vector2::operator/=(dbl x) {
+    *this = (*this) / x;
+    return *this;
+}
+#pragma endregion
+
+#pragma region Vector2i
+bool operator==(Vector2i a, Vector2i b) {
+    return (a.x == b.x) && (a.y == b.y);
+}
+#pragma endregion
+
+#pragma region Vector3
+Vector3::Vector3(Vector3i& v) {
+    x = (double)v.x;
+    y = (double)v.y;
+    z = (double)v.z;
+}
+
+double& Vector3::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    if (idx == 2)
+        return z;
+    throw std::exception("Vector3i is out of range!");
+}
+
+double Vector3::Length() {
+    return sqrt(SqrLength());
+}
+
+double Vector3::SqrLength() {
+    return x * x + y * y + z * z;
+}
+
+Vector3 Vector3::Normalized() {
+    auto l = Math::Qrsqrt(SqrLength());
+    return { x * l, y * l, z * l };
+}
+
+double Vector3::Dot(Vector3 A, Vector3 b) {
+    return A.x * b.x + A.y * b.y + A.z * b.z;
 }
 
 Vector3 operator-(Vector3 A, Vector3 b) {
@@ -95,65 +129,22 @@ Vector3 operator*(Quaternion q, Vector3 v) {
     return v * Matrix4x4::Rotation(q);
 }
 
-Quaternion operator*(Quaternion q1, Quaternion q2) {
-    return {
-        q1.x * q2.w + q1.y * q2.z - q1.z * q2.y + q1.w * q2.x,
-        -q1.x * q2.z + q1.y * q2.w + q1.z * q2.x + q1.w * q2.y,
-        q1.x * q2.y - q1.y * q2.x + q1.z * q2.w + q1.w * q2.z,
-        -q1.x * q2.x - q1.y * q2.y - q1.z * q2.z + q1.w * q2.w,
-    };
-}
-
-Quaternion operator*(Quaternion A, double b) {
-    return { A.x * b, A.y * b, A.z * b, A.w * b };
-}
-
 Vector3 Vector3::Cross(Vector3 left, Vector3 right) {
-    return { 
+    return {
         left.y * right.z - left.z * right.y,
         left.z * right.x - left.x * right.z,
         left.x * right.y - left.y * right.x };
 }
 
-
-long long& Vector3i::operator[](size_t idx) {
-    if (idx == 0)
-        return x;
-    if (idx == 1)
-        return y;
-    if (idx == 2)
-        return z;
-    throw std::exception("Vector3i is out of range!");
-}
-
-double& Vector3::operator[](size_t idx) {
-    if (idx == 0)
-        return x;
-    if (idx == 1)
-        return y;
-    if (idx == 2)
-        return z;
-    throw std::exception("Vector3i is out of range!");
-}
-
-
-Vector2 Vector2::operator+=(Vector2 v) {
-    *this = (*this) + v;
+Vector3& Vector3::operator=(Vector3f& v) {
+    x = v.x;
+    y = v.y;
+    z = v.z;
     return *this;
 }
 
-Vector2 Vector2::operator-=(Vector2 v) {
-    *this = (*this) - v;
-    return *this;
-}
-
-Vector2 Vector2::operator*=(double x) {
-    *this = (*this) * x;
-    return *this;
-}
-
-Vector2 Vector2::operator/=(double x) {
-    *this = (*this) / x;
+Vector3 Vector3::operator*=(Quaternion q) {
+    *this = q * (*this);
     return *this;
 }
 
@@ -181,16 +172,61 @@ Vector3 Vector3::operator/=(double v) {
     return *this;
 }
 
-Vector3& Vector3::operator=(Vector3f& v) {
+Vector3 operator+(Vector3 A, Vector3 b) {
+    return { A.x + b.x, A.y + b.y, A.z + b.z };
+}
+#pragma endregion
+
+#pragma region Vector3i
+
+bool operator==(Vector3i a, Vector3i b) {
+    return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
+}
+
+Vector3i::Vector3i(const Vector3& v) {
+    x = floor(v.x);
+    y = floor(v.y);
+    z = floor(v.z);
+}
+
+long long& Vector3i::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    if (idx == 2)
+        return z;
+    throw std::exception("Vector3i is out of range!");
+}
+
+Vector3f& Vector3f::operator=(Vector3& v) {
     x = v.x;
     y = v.y;
     z = v.z;
     return *this;
 }
 
-Vector3 Vector3::operator*=(Quaternion q) {
-    *this = q * (*this);
+Vector3f& Vector3f::operator+=(Vector3f& v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
     return *this;
+}
+
+#pragma endregion
+
+#pragma region Quaternion
+Quaternion operator*(Quaternion A, double b) {
+    return { A.x * b, A.y * b, A.z * b, A.w * b };
+}
+
+Quaternion operator*(Quaternion q1, Quaternion q2) {
+    return {
+        q1.x * q2.w + q1.y * q2.z - q1.z * q2.y + q1.w * q2.x,
+        -q1.x * q2.z + q1.y * q2.w + q1.z * q2.x + q1.w * q2.y,
+        q1.x * q2.y - q1.y * q2.x + q1.z * q2.w + q1.w * q2.z,
+        -q1.x * q2.x - q1.y * q2.y - q1.z * q2.z + q1.w * q2.w,
+    };
 }
 
 Quaternion Quaternion::FromAxisAngle(Vector3 axis, double angle) {
@@ -206,18 +242,15 @@ Quaternion Quaternion::FromAxisAngle(Vector3 axis, double angle) {
     return q;
 }
 
-Quaternion Quaternion::LookAt(Vector3 sourcePoint, Vector3 destPoint)
-{
+Quaternion Quaternion::LookAt(Vector3 sourcePoint, Vector3 destPoint) {
     Vector3 forwardVector = (destPoint - sourcePoint).Normalized();
 
     auto dot = Vector3::Dot(Vector3::forward, forwardVector);
 
-    if (Math::Abs(dot + 1.0) < 0.000001)
-    {
+    if (Math::Abs(dot + 1.0) < 0.000001) {
         return { 0, 1, 0, 3.1415926535897932 };
     }
-    if (Math::Abs(dot - 1.0) < 0.000001)
-    {
+    if (Math::Abs(dot - 1.0) < 0.000001) {
         return { 0,0,0,0 }/*Quaternion::identity*/;
     }
 
@@ -244,7 +277,7 @@ Quaternion Quaternion::FromEulerAngles(double x, double y, double z) {
     return q;
 }
 
-double Quaternion::Magnitude(){
+double Quaternion::Magnitude() {
     auto l = w * w + x * x + y * y + z * z;
     return sqrt(l);
 }
@@ -267,9 +300,9 @@ Quaternion Quaternion::Opposite() {
 }
 
 Quaternion Quaternion::Normalized() {
-    auto l = w*w + x*x + y*y + z*z;
+    auto l = w * w + x * x + y * y + z * z;
     l = sqrt(l);
-    return { x/l, y/l, z/l, w/l };
+    return { x / l, y / l, z / l, w / l };
 }
 
 Vector3 Quaternion::ToEulerAngles() {
@@ -307,17 +340,4 @@ Vector3 Quaternion::ToAxisAngle() {
         return Vector3::zero;
     }
 }
-
-Vector3f& Vector3f::operator=(Vector3& v) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    return *this;
-}
-
-Vector3f& Vector3f::operator+=(Vector3f& v) {
-    x += v.x;
-    y += v.y;
-    z += v.z;
-    return *this;
-}
+#pragma endregion
