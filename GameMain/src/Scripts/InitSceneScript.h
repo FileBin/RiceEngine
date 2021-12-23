@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PostInitScript.h"
-
 #include "SampleScene.h"
 #include "MsaaTestScript.h"
 

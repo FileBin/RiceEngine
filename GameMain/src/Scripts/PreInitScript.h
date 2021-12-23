@@ -1,6 +1,5 @@
 #pragma once
 #include <GameEngine\ScriptBase.h>
-#include <MyRender.h>
 #include <GameEngine\Log.h>
 
 //#include "InitScript.h"
