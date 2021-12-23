@@ -1,4 +1,4 @@
-#include <GameEngine\SceneRender.h>
+﻿#include <GameEngine\SceneRender.h>
 #include <GameEngine\Material.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Camera.h>

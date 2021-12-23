@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include "InputButtons.h"
 #include "Vectors/Vector2.h"

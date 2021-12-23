@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Vectors.h"
 #include "Matrixes.h"
 #include "stdafx.h"

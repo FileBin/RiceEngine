@@ -1,4 +1,4 @@
-#include <GameEngine\Material.h>
+﻿#include <GameEngine\Material.h>
 #include <GameEngine\Device.h>
 
 namespace Game {

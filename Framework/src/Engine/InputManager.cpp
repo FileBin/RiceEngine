@@ -1,4 +1,4 @@
-#include <GameEngine/InputManager.h>
+﻿#include <GameEngine/InputManager.h>
 #include <GameEngine/macros.h>
 #include <GameEngine\Log.h>
 

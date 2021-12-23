@@ -1,4 +1,4 @@
-#include <GameEngine\Components\MonoScript.h>
+﻿#include <GameEngine\Components\MonoScript.h>
 #include <GameEngine\Scene\SceneObject.h>
 #include <GameEngine\Scene\Scene.h>
 

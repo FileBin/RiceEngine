@@ -1,4 +1,4 @@
-#include <GameEngine\stdafx.h>
+﻿#include <GameEngine\stdafx.h>
 #include <GameEngine\Engine.h>
 #include <GameEngine\Core.h>
 #include <GameEngine\Material.h>

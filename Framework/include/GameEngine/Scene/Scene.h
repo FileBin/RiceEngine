@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "SceneObject.h"
 #include "../SceneRender.h"
 #include <vector>

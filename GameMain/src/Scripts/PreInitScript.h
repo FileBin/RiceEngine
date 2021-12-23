@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <GameEngine\ScriptBase.h>
 #include <GameEngine\Log.h>
 

@@ -1,4 +1,4 @@
-#include <GameEngine/Window.h>
+п»ї#include <GameEngine/Window.h>
 #include <GameEngine/Log.h>
 
 namespace Game {
@@ -16,7 +16,7 @@ namespace Game {
 		if (!wndthis)
 			wndthis = this;
 		else
-			Log::Err(L"Window уже был создан");
+			Log::Err(L"Window пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
 	}
 
 	bool Window::Create(const DescWindow& desc) {
@@ -41,7 +41,7 @@ namespace Game {
 		wnd.cbSize = sizeof(WNDCLASSEX);
 
 		if (!RegisterClassEx(&wnd)) {
-			Log::Err(L"Не удалось зарегистрировать окно");
+			Log::Err(L"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ");
 			return false;
 		}
 
@@ -57,7 +57,7 @@ namespace Game {
 		m_hwnd = CreateWindowEx(NULL, L"D3D11F", desc.caption.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, lleft, ltop, lwidth, lheight, NULL, NULL, NULL, NULL);
 
 		if (!m_hwnd) {
-			Log::Err(L"Не удалось создать окно");
+			Log::Err(L"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ");
 			return false;
 		}
 
@@ -81,8 +81,8 @@ namespace Game {
 	}
 
 	void Window::RunEvent() {
-		MSG msg;			// события окна	
-		// просматриваем все поступившие события
+		MSG msg;			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ	
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

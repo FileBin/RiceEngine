@@ -1,4 +1,4 @@
-#include <GameEngine/Device.h>
+п»ї#include <GameEngine/Device.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Vectors.h>
 #include <GameEngine/Log.h>
@@ -287,7 +287,7 @@ namespace Game {
 	}
 
 	void Device::Resize() {
-		// Очистка контекста, связанного с размером предыдущего окна.
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.
 		context->OMSetRenderTargets(0, 0, 0);
 		renderTarget->Release();
 		renderTarget = nullptr;

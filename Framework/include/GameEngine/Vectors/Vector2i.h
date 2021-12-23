@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../Util.h"
 
 struct Vector2i {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace Game {
 	enum class MouseKey {

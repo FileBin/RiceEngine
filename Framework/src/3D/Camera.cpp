@@ -1,4 +1,4 @@
-#include <GameEngine\Camera.h>
+﻿#include <GameEngine\Camera.h>
 #include <GameEngine\Matrixes.h>
 
 namespace Game {

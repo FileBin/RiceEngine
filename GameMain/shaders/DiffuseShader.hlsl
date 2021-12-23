@@ -1,4 +1,4 @@
-struct PixelShaderInput {
+﻿struct PixelShaderInput {
 	float4 pos : SV_POSITION;
 	float3 norm : NORMAL;
 	float4 viewPos : POSITION0;

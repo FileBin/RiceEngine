@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <GameEngine\Components\MonoScript.h>
 #include <Scripts\World\Chunk.h>
@@ -92,6 +92,7 @@ class ChunkGenerator : public MonoScript {
 			wrld.SetChunkStatus(chunkPos, Chunk::Loading);
 			auto model = wrld.GetChunk(chunkPos).GetModel();
 			model->transform.pos = World::TransformToWorldPos(chunkPos);
+			//fix this shit -> pool of objects
 			auto& chunk = *o.Instaniate();
 			auto render = new ModelRender();
 			chunk.AddComponent(render);
@@ -101,4 +102,6 @@ class ChunkGenerator : public MonoScript {
 			wrld.SetChunkStatus(chunkPos, Chunk::Loaded);
 		}
 	}
+
+	//create destructors
 };

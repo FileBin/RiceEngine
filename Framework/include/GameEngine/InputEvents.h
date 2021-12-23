@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "InputButtons.h"
 
@@ -6,25 +6,25 @@ namespace Game {
 	class MouseEvent {
 		MouseEvent(int nx, int ny) : x(nx), y(ny) {}
 
-		// координаты мыши
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		int x;
 		int y;
 	};
 
-	// событие нажатия кнопки мыши
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	class MouseEventClick : public MouseEvent {
 		MouseEventClick(MouseKey b, int nx, int ny) : MouseEvent(nx, ny), btn(b) {}
-		const MouseKey btn;	// Клавиша
+		const MouseKey btn;	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	};
 
-	// событие прокрутки мыши
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	class MouseEventWheel : public MouseEvent {
 		MouseEventWheel(int nwheel, int nx, int ny) : MouseEvent(nx, ny), wheel(nwheel) {}
 
 		int wheel;
 	};
 
-	// событие клавиши
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	class KeyEvent {
 		KeyEvent(wchar_t c, KeyCode kc) : wc(c), code(kc) {}
 

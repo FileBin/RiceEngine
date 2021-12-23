@@ -1,4 +1,4 @@
-#include <GameEngine/Core.h>
+п»ї#include <GameEngine/Core.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
 #include <GameEngine/ScriptBase.h>
@@ -33,13 +33,13 @@ namespace Game {
 		wnd = new Window();
 
 		if (!wnd) {
-			Log::Err(L"Не удалось выделить память");
+			Log::Err(L"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
 			return false;
 		}
 
 		DescWindow desc;
 		if (!wnd->Create(desc)) {
-			Log::Err(L"Не удалось создать окно");
+			Log::Err(L"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ");
 			return false;
 		}
 
@@ -51,7 +51,7 @@ namespace Game {
 
 		render->SetDevice(device);
 		if (!render->Init()) {
-			Log::Err(L"Не удалось создать рендер");
+			Log::Err(L"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
 			return false;
 		}
 		init = true;

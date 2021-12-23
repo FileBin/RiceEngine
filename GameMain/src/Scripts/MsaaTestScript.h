@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <GameEngine\Core.h>
 #include <GameEngine\InputManager.h>
 

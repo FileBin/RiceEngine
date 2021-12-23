@@ -1,4 +1,4 @@
-#include <GameEngine\Scene\Scene.h>
+﻿#include <GameEngine\Scene\Scene.h>
 #include <GameEngine\Components\MonoScript.h>
 namespace Game {
 	Scene::Scene() {

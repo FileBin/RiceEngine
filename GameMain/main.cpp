@@ -1,4 +1,4 @@
-#include <GameEngine/Core.h>
+﻿#include <GameEngine/Core.h>
 #include <Scripts\PreInitScript.h>
 
 

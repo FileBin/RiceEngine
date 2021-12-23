@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <GameEngine\Scene\Scene.h>
 #include <GameEngine\Components\ModelRender.h>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../Scene/Component.h"
 
 namespace Game {

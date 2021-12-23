@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace Game {
 	#define _DELETE(p)		{ if(p){delete (p); (p)=nullptr;} }

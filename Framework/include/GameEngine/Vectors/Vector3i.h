@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <xkeycheck.h>
 
 struct Vector3i {

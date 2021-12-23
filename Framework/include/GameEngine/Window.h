@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include "stdafx.h"
 #include "InputManager.h"
 
@@ -14,9 +14,9 @@ namespace Game {
 
 		int posx;
 		int posy;
-		std::wstring caption;	///< заголовок окна
-		int width;				///< ширина клиентской части окна
-		int height;				///< высота клиентской части окна
+		std::wstring caption;	///< пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+		int width;				///< пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+		int height;				///< пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		bool resizing;
 	};
 
@@ -26,13 +26,13 @@ namespace Game {
 
 		static Window* Get() { return wndthis; }
 
-		// Создать окно
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		bool Create(const DescWindow& desc);
 
-		// Обработка событий окна
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		void RunEvent();
 
-		// Закрыть окно.
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.
 		void Close();
 
 		void SetInputMgr(InputManager* inputmgr);
@@ -42,22 +42,22 @@ namespace Game {
 		int GetTop() const { return desc.posy; }
 		int GetWidth() const { return desc.width; }
 		int GetHeight() const { return desc.height; }
-		// Вернуть заголовок окна
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		const std::wstring& GetCaption() const { return desc.caption; }
 
-		// сообщает, было ли сообщение о выходе
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		bool IsExit() const { return m_isexit; }
-		// сообщает об активности окна
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		bool IsActive() const { return m_active; }
-		// сообщает об изменении окна
-		// предупреждение: после вызова оповещает окно об обработке события
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		bool IsResize() {
 			bool ret = m_isresize;
 			m_isresize = false;
 			return ret;
 		}
 
-		// обработка событий
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		LRESULT WndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam);
 		InputManager* inputmgr;
 	private:
@@ -65,15 +65,15 @@ namespace Game {
 
 		static Window* wndthis;
 
-		DescWindow desc;	// описание окна
-		HWND m_hwnd;		// дескриптор окна	
-		bool m_isexit;		// флаг сообщающий о событии выхода	
-		bool m_active;		// окно активно?
+		DescWindow desc;	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+		HWND m_hwnd;		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ	
+		bool m_isexit;		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ	
+		bool m_active;		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ?
 		bool m_minimized;
 		bool m_maximized;
-		bool m_isresize;	// если окно изменило размер
+		bool m_isresize;	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	};
 
-	// обработка событий
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	static LRESULT CALLBACK StaticWndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam);
 }

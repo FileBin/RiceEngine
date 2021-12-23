@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cmath>
 #include <concurrent_unordered_map.h>
 #include "WorldGenerator.h"
