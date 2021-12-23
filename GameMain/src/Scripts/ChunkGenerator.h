@@ -51,26 +51,6 @@ class ChunkGenerator : public MonoScript {
 		for(auto t : threads){
 			t = new thread([this]() { ChunkLoaderThread(); });
 		}
-
-		/*chunk = new Chunk(nullptr, { 0,0,0 }, nullptr);
-		auto& scene = GetScene();
-		auto& modelRender = *scene.GetObjectByName(L"Chunk").GetComponents<ModelRender>()[0];
-		auto a = Chunk::ChunkSize;
-		for (int i = 0; i < a; i++) {
-			for (int j = 0; j < a; j++) {
-				for (int k = 0; k < a; k++) {
-					auto b = true;
-
-					if (i + (a-j-1) + k <= 15) {
-						b = (rand() % 2 == 0);
-					}
-					chunk->SetVoxel(new Voxel{ {i,j,k}, b}, {i,j,k});
-				}
-			}
-		}
-		auto model = chunk->GenerateModel();
-		modelRender.SetModel(model);*/
-
 	}
 
 	void Update() {
@@ -90,17 +70,22 @@ class ChunkGenerator : public MonoScript {
 
 		auto playerChunk = World::TransformToChunkPos(playerPos);
 
-		dbl loadedRadius = 0;
-		while(true) {
+		std::function<void(void)> checkPlayerChunk = [&]() {
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
 			if (newPlayerChunk != playerChunk) {
 				positions = this->positions;
 				playerChunk = newPlayerChunk;
 			}
+		};
+
+		while(true) {
+			checkPlayerChunk();
 			auto chunkPos = playerChunk;
 			while (wrld.GetChunkStatus(chunkPos) > 0) {
 				if (!positions.try_pop(chunkPos)) {
 					Sleep(100);
+					checkPlayerChunk();
+					continue;
 				}
 				chunkPos = chunkPos + playerChunk;
 			}

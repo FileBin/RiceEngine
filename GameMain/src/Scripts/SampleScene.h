@@ -17,11 +17,11 @@ class SampleScene : public Scene {
 		auto render = new ModelRender();
 		chunk->AddComponent(render);
 
-		auto mesh = Mesh();
+		auto mesh = new Mesh();
 
-		mesh.layout = Vertex::GetLayout();
+		mesh->layout = Vertex::GetLayout();
 
-		mesh.vertexBuffer = {
+		mesh->vertexBuffer = {
 			{ {-1.0f, 1.0f, -1.0f}, { 0.0f, 1.0f, 0.0f}, },
 			{ {1.0f, 1.0f, -1.0f}, { 0.0f, 1.0f, 0.0f}, },
 			{ {1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f, 0.0f}, },
@@ -53,7 +53,7 @@ class SampleScene : public Scene {
 			{ {-1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f, 1.0f }, },
 		};
 
-		mesh.indexBuffer = {
+		mesh->indexBuffer = {
 			3,1,0,
 			2,1,3,
 

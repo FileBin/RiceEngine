@@ -5,6 +5,7 @@
 
 namespace Game {
 	bool SceneRender::Init() {
+		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 		return true;
 	}
 	void SceneRender::BeginFrame() {
@@ -24,8 +25,8 @@ namespace Game {
 			cb.Projection = cam->GetProjectionMatrix();
 
 
-			device->LoadBufferSubresource(constantBuffers[i], cb);
-			device->SetActiveVSConstantBuffer(constantBuffers[i]);
+			device->LoadBufferSubresource(constantBuffer, cb);
+			device->SetActiveVSConstantBuffer(constantBuffer);
 
 			auto m = model->GetSubMeshesCount();
 			for (size_t j = 0; j < m; j++) {
@@ -55,8 +56,6 @@ namespace Game {
 	}
 
 	void SceneRender::AddModel(Model* model) {
-		constantBuffers.push_back(device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER));
-
 		auto n = model->GetSubMeshesCount();
 
 		for (size_t i = 0; i < n; i++) {

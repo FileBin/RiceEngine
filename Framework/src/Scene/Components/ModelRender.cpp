@@ -4,7 +4,7 @@
 #include <GameEngine\Scene\Scene.h>
 
 namespace Game {
-	void ModelRender::OnInit() { model = new Model(); }
+	void ModelRender::OnInit() { model = nullptr; }
 
 	void ModelRender::Enable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
@@ -21,11 +21,7 @@ namespace Game {
 	void ModelRender::SetModel(Model* model, bool updateBuffer) {
 		auto n = model->GetSubMeshesCount();
 		materials.resize(n);
-		this->model->SetSubMeshesCount(n);
-		this->model->transform = model->transform;
-		for (size_t i = 0; i < n; i++) {
-			this->model->SetSubMesh(model->GetSubMesh(i), i);
-		}
+		this->model = model;
 		if (enabled) {
 			auto& ren = GetSceneObject().GetScene().GetRender();
 			for (size_t i = 0; i < n; i++) {

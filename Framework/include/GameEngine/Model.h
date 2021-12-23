@@ -25,11 +25,11 @@ namespace Game {
 	public:
 		size_t GetSubMeshesCount();
 		void SetSubMeshesCount(size_t count);
-		void SetSubMesh(Mesh &subMesh, size_t idx);
+		void SetSubMesh(Mesh* subMesh, size_t idx);
 		Mesh& GetSubMesh(size_t idx);
 
 		Transform transform;
 	private:
-		std::vector<Mesh> subMeshes = {};
+		std::vector<Mesh*> subMeshes = {};
 	};
 }

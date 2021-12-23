@@ -18,13 +18,13 @@ namespace Game {
 
 		double GetAspectRatio();
 
-		void* operator new(size_t i) {
+		/*/void* operator new(size_t i) {
 			return _aligned_malloc(i, 16);
 		}
 
 		void operator delete(void* p) {
 			_aligned_free(p);
-		}
+		}*/
 
 		virtual bool Init() = 0;
 		virtual bool Draw() = 0;

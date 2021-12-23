@@ -41,7 +41,7 @@ void Chunk::Generate() {
 
 Voxel& Chunk::GenVoxel(Vector3i voxelPos, bool genNormals) {
     auto t = voxelPos + position * ChunkSize;
-    auto altitude = t.y - 50.;//map->Get(voxelPos.x, voxelPos.z);
+    auto altitude = t.y - map->Get(voxelPos.x, voxelPos.z);
     return gen->GetVoxel(t, altitude);
 }
 
@@ -122,6 +122,6 @@ Model* Chunk::GenerateModel() {
     }
 
     mod->SetSubMeshesCount(1);
-    mod->SetSubMesh(*mesh, 0);
+    mod->SetSubMesh(mesh, 0);
     return mod;
 }

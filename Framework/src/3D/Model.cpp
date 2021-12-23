@@ -64,14 +64,14 @@ namespace Game {
 	}
 
 	Mesh& Model::GetSubMesh(size_t idx){
-		return subMeshes[idx];
+		return *subMeshes[idx];
 	}
 
 	void Model::SetSubMeshesCount(size_t count) {
 		subMeshes.resize(count);
 	}
 
-	void Model::SetSubMesh(Mesh& subMesh, size_t idx) {
+	void Model::SetSubMesh(Mesh* subMesh, size_t idx) {
 		subMeshes[idx] = subMesh;
 	}
 }

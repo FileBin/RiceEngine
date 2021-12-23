@@ -20,25 +20,20 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL) {
     float3 light = float3(2, -5, -1);
     light = normalize(light);
 
-    float4x4 v = View;
-    v._14 = 0;
-    v._24 = 0;
-    v._34 = 0;
-
     output.pos = float4(pos.xyz, 1.0f);
     output.pos = mul(output.pos, World);
-    output.pos = mul(output.pos, v);
+    output.pos = mul(output.pos, View);
     output.pos = mul(output.pos, Projection);
 
     output.norm = mul(norm.xyz, World);
-    output.norm = mul(output.norm, v);
+    output.norm = mul(output.norm, View);
 
     output.light = mul(light, World);
-    output.light = mul(output.light, v);
+    output.light = mul(output.light, View);
     
     output.viewPos = float4(pos.xyz, 1.0f);
     output.viewPos = mul(output.viewPos, World);
-    output.viewPos = mul(output.viewPos, v);
+    output.viewPos = mul(output.viewPos, View);
 
     return output;
 }

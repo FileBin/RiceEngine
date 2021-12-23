@@ -39,6 +39,6 @@ namespace Game {
 		concurrent_vector<Model*> models;
 		concurrent_unordered_map<Mesh*, Buffer*> indexBuffers;
 		concurrent_unordered_map<Mesh*, Buffer*> vertexBuffers;
-		concurrent_vector<Buffer*> constantBuffers;
+		Buffer* constantBuffer;
 	};
 }
