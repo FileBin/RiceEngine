@@ -87,14 +87,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)RapidJSON\include;$(DXSDK_DIR)Include;src;$(SolutionDir)Framework\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)bin\x64\Debug\lib;C:\Program Files\Microsoft SDKs\DirectX11\Lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)bin\x64\Debug\lib;$(DXSDK_DIR)Lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)RapidJSON\include;$(DXSDK_DIR)Include;src;$(SolutionDir)Framework\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)bin\x64\Release\lib;C:\Program Files\Microsoft SDKs\DirectX11\Lib\x64;C:\Users\FileBinsLapTop\source\repos\GameMain\x64\Release\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)bin\x64\Release\lib;$(DXSDK_DIR)Lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
