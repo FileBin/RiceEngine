@@ -33,13 +33,13 @@ namespace Game {
 		wnd = new Window();
 
 		if (!wnd) {
-			Log::Err(L"�� ������� �������� ������");
+			Log::Err(L"Window could not been constructed");
 			return false;
 		}
 
 		DescWindow desc;
 		if (!wnd->Create(desc)) {
-			Log::Err(L"�� ������� ������� ����");
+			Log::Err(L"Window could not been created");
 			return false;
 		}
 
@@ -51,7 +51,7 @@ namespace Game {
 
 		render->SetDevice(device);
 		if (!render->Init()) {
-			Log::Err(L"�� ������� ������� ������");
+			Log::Err(L"Render device could not been initialized");
 			return false;
 		}
 		init = true;
