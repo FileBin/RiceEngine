@@ -16,7 +16,7 @@ namespace Game {
 		if (!wndthis)
 			wndthis = this;
 		else
-			Log::Err(L"Window ��� ��� ������");
+			Log::Err(L"Window construction error");
 	}
 
 	bool Window::Create(const DescWindow& desc) {
@@ -41,7 +41,7 @@ namespace Game {
 		wnd.cbSize = sizeof(WNDCLASSEX);
 
 		if (!RegisterClassEx(&wnd)) {
-			Log::Err(L"�� ������� ���������������� ����");
+			Log::Err(L"RegisterClassEx failed");
 			return false;
 		}
 
@@ -57,7 +57,7 @@ namespace Game {
 		m_hwnd = CreateWindowEx(NULL, L"D3D11F", desc.caption.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, lleft, ltop, lwidth, lheight, NULL, NULL, NULL, NULL);
 
 		if (!m_hwnd) {
-			Log::Err(L"�� ������� ������� ����");
+			Log::Err(L"CreateWindowEx failed");
 			return false;
 		}
 
