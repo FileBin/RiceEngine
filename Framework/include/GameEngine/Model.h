@@ -28,6 +28,8 @@ namespace Game {
 		void SetSubMesh(Mesh* subMesh, size_t idx);
 		Mesh& GetSubMesh(size_t idx);
 
+		~Model();
+
 		Transform transform;
 	private:
 		std::vector<Mesh*> subMeshes = {};

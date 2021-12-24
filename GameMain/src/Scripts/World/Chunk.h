@@ -35,6 +35,15 @@ public:
         this->world = world;
     }
 
+    ~Chunk() {
+        for (auto vox : voxels) {
+            if (vox != nullptr)
+                delete vox;
+        }
+        if(model != nullptr)
+            delete model;
+    }
+
     Voxel& GetVoxel(int x, int y, int z) {
         auto idx = ((INT64)x * ChunkSize + y) * ChunkSize + z;
         auto vox = voxels[idx];
@@ -61,6 +70,8 @@ public:
     Model* GetModel() {
         if (model == nullptr) {
             model = GenerateModel();
+        } else {
+            return model;
         }
         return model;
     }

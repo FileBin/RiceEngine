@@ -90,7 +90,7 @@ class SampleScene : public Scene {
 
 		auto cam = new Camera();
 
-		cam->SetFov(50);
+		cam->SetFov(90);
 		cam->SetClippingPlanes(.001, 1000.);
 		cam->transform.scale = { 1, 1, 1 };
 		cam->transform.rotation = Quaternion::identity;

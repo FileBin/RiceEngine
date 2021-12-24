@@ -40,8 +40,8 @@ public:
 #pragma endregion
 #pragma region Fields
 private:
-	concurrent_unordered_map<Vector3i, Chunk> chunkMap{};
-	concurrent_unordered_map<Vector2i, HeightMap> heightMaps{};
+	concurrent_unordered_map<Vector3i, Chunk*> chunkMap{};
+	concurrent_unordered_map<Vector2i, HeightMap*> heightMaps{};
 
 	WorldGenerator& generator;
 #pragma endregion
@@ -53,16 +53,17 @@ public:
 	void UnloadChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			auto& chunk = it->second;
+			auto& chunk = *it->second;
 			SaveChunk(chunk);
 			auto hmPos = ToTerrainPos(chunk.position);
 			auto n = GetChunks(hmPos).size();
+			delete &chunk;
 			chunkMap.unsafe_erase(chunkPos);
 
 			if (n == 0) {
 				auto hIt = heightMaps.find(hmPos);
 				if (hIt != heightMaps.end()) {
-					auto& hm = hIt->second;
+					auto& hm = *hIt->second;
 					SaveHeightMap(hm);
 					heightMaps.unsafe_erase(hmPos);
 				}
@@ -70,14 +71,14 @@ public:
 		}
 	}
 
-	void SaveChunk(Chunk chunk) {}
+	void SaveChunk(Chunk& chunk) {}
 
-	void SaveHeightMap(HeightMap hm) {}
+	void SaveHeightMap(HeightMap& hm) {}
 
-	std::vector<Chunk> GetChunks(Vector2i hmPos) {
-		std::vector<Chunk> chunks{};
+	std::vector<Chunk*> GetChunks(Vector2i hmPos) {
+		std::vector<Chunk*> chunks{};
 		for (auto ch = chunkMap.begin(); ch != chunkMap.end(); ch++) {
-			if (ToTerrainPos(ch->second.position) == hmPos) {
+			if (ToTerrainPos(ch->second->position) == hmPos) {
 				chunks.push_back(ch->second);
 			}
 		}
@@ -108,7 +109,7 @@ public:
 	Chunk::Status GetChunkStatus(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			return it->second.status;
+			return it->second->status;
 		}
 		return Chunk::NotCreated;
 	}
@@ -121,10 +122,10 @@ public:
 	Chunk& GetChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			return it->second;
+			return *it->second;
 		} else {
 			auto& ch = GenerateChunk(chunkPos);
-			chunkMap.insert(chunkMap.end(), { chunkPos, ch });
+			chunkMap.insert(chunkMap.end(), { chunkPos, &ch });
 			return ch;
 		}
 	}
@@ -148,10 +149,10 @@ private:
 		Vector2i pos{ chunkPos.x, chunkPos.z };
 		auto it = heightMaps.find(pos);
 		if (it != heightMaps.end()) {
-			return it->second;
+			return *it->second;
 		} else {
 			auto& hm = CreateHeightMap(pos);
-			heightMaps.insert(heightMaps.end(), { pos, hm });
+			heightMaps.insert(heightMaps.end(), { pos, &hm });
 			return hm;
 		}
 	}

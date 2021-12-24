@@ -21,6 +21,8 @@ namespace Game {
 		void Update();
 		void Disable(); 
 
+		bool isEnabled() { return enabled; }
+
 		concurrent_vector<SceneObject*> GetChildren();
 
 		template<typename T>
@@ -46,6 +48,7 @@ namespace Game {
 
 	private:
 		bool init = false;
+		bool enabled = false;
 		Scene* scene = nullptr;
 		String name = L"";
 		concurrent_vector<Component*> components{};

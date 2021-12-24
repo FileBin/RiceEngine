@@ -67,6 +67,12 @@ namespace Game {
 		return *subMeshes[idx];
 	}
 
+	Model::~Model() {
+		for (auto m : subMeshes) {
+			if (m) delete m;
+		}
+	}
+
 	void Model::SetSubMeshesCount(size_t count) {
 		subMeshes.resize(count);
 	}

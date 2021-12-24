@@ -22,8 +22,10 @@ namespace Game {
 		void Resize();
 
 		void AddModel(Model* model);
+		void RemoveModel(Model* model, bool erase = false);
 		void UpdateModel(Model* model);
 		void MapMaterial(Mesh* mesh, Material* mat);
+		void UnmapMaterial(Mesh* mesh);
 		void UpdateBuffer(Mesh* mesh);
 
 		void AddCamera(Camera* cam);
@@ -32,6 +34,8 @@ namespace Game {
 		Material& CreateMaterial(Shader* sh);
 
 	private:
+		bool isRendering = false;
+
 		concurrent_vector<Camera*> cameras;
 		concurrent_vector<Material*> materials;
 		concurrent_unordered_map<Mesh*, Material*> materialMap;

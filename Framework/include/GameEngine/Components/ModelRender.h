@@ -4,6 +4,8 @@
 #include <vector>
 
 namespace Game {
+	using std::vector;
+
 	class Model;
 	class Material;
 
@@ -12,6 +14,7 @@ namespace Game {
 		void OnInit();
 
 		void Enable();
+		void Disable();
 
 		void SetMaterial(Material* material, size_t subMeshIdx);
 		void SetModel(Model* model, bool updateBuffer = true);
@@ -19,7 +22,7 @@ namespace Game {
 		Material& GetMaterial(size_t subMeshIdx) const;
 
 	private:
-		Model* model;
-		std::vector<Material*> materials;
+		Model* model = nullptr;
+		vector<Material*> materials{};
 	};
 }

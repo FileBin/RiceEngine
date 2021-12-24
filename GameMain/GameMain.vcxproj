@@ -169,15 +169,18 @@
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SampleScene.h" />
+    <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />
     <ClInclude Include="src\Scripts\World\Chunk.h" />
     <ClInclude Include="src\Scripts\World\FlatGenerator.h" />
     <ClInclude Include="src\Scripts\World\HeightMap.h" />
+    <ClInclude Include="src\Scripts\World\StandartGenerator.h" />
     <ClInclude Include="src\Scripts\World\Voxel.h" />
     <ClInclude Include="src\Scripts\World\Voxels\Voxel.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelGrass.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelVoid.h" />
     <ClInclude Include="src\Scripts\World\World.h" />
     <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
+    <ClInclude Include="src\Scripts\World\WorldSeed.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl">

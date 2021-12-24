@@ -15,6 +15,8 @@ namespace Game {
 		virtual void Update() {};
 		virtual void Disable() {};
 
+		bool isEnabled() { return enabled; }
+
 	protected:
 		bool enabled = false;
 		SceneObject& GetSceneObject();
