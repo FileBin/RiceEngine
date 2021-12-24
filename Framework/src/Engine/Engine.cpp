@@ -24,7 +24,7 @@ namespace Game {
 		if (msaaLevel != d->GetMsaaLevel()) {
 			d->SetMsaa(msaaLevel);
 			d->ReCreateSwapChain();
-			Log::Debug(L"Msaa set to {}x", msaaLevel);
+			Log::log(Log::DEBUG, L"Msaa set to {}x", msaaLevel);
 		}
 	}
 

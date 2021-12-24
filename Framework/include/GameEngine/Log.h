@@ -4,6 +4,9 @@
 #include "Util.h"
 
 namespace Game {
+
+	static String logLevel_str[6] = { L"", L"INFO:", L"DEBUG:", L"WARNING:", L"ERROR:", L"CRITICAL_ERROR:" };
+
 	class Log {
 	public:
 		struct Localization {
@@ -18,26 +21,19 @@ namespace Game {
 		static void Init();
 		static void LoadLocalization(Localization locale);
 
+		enum LogLevel {NONE = 0, INFO = 1, DEBUG = 2, WARNING = 3, ERR = 4, CRITICAl = 5};
+		
 		template<class... _Types> 
-		static void Print(String message, const _Types &...args) {
+		static void log(LogLevel logLevel, String message, const _Types &...args) {
 			auto str = std::format(message, args...);
-			instance->print(L"", str);
-		}
+			if (logLevel == LogLevel::DEBUG) {
 #ifdef _DEBUG
-		template<class... _Types>
-		static void Debug(String message, const _Types &...args) {
-
-			auto str = std::format(message, args...);
-			instance->print(L"DEBUG:", str);
-		}
-#else
-		static void Debug(String message, ...) {}
+				instance->print(logLevel_str[(int)logLevel], str);
 #endif
-
-		template<class... _Types>
-		static void Err(String message, const _Types &...args) {
-			auto str = std::format(message, args...);
-			instance->print(L"ERROR:", str);
+			}
+			else {
+				instance->print(logLevel_str[(int)logLevel], str);
+			}
 		}
 
 		static void Close();
@@ -52,4 +48,3 @@ namespace Game {
 		std::wfstream file;
 	};
 }
-

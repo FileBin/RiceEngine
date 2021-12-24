@@ -38,7 +38,7 @@ namespace Game {
 
 		DXGI_ADAPTER_DESC adapterDesc;
 		adapter->GetDesc(&adapterDesc);
-		Log::Print(L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
+		Log::log(Log::NONE, L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
 			adapterDesc.DedicatedVideoMemory / 0x100000);
 
 		ThrowIfFailed(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,

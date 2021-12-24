@@ -15,7 +15,7 @@ namespace Game {
 		if (!instance) {
 			instance = new Log();
 		} else
-			Err(locale.log_is_already_created.c_str());
+			log(LogLevel::ERR, locale.log_is_already_created.c_str());
 	}
 
 	void Log::LoadLocalization(Localization locale) { Log::locale = locale; }
@@ -121,7 +121,7 @@ namespace Game {
 		try {
 			if (doc.HasParseError()) throw -1;
 
-			const char* values[] = { "log-begin", "log-end", "log-is-already-created", "log-creation-error" };
+			const char* values[] = { "log.begin", "log.end", "log.already_created", "log.creation_error" };
 			std::function<void(String)> functions[] = {
 				[&](String v) { loc.log_begin = v; },
 				[&](String v) { loc.log_end = v; },

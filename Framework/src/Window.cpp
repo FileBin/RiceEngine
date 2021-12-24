@@ -16,12 +16,12 @@ namespace Game {
 		if (!wndthis)
 			wndthis = this;
 		else
-			Log::Err(L"Window construction error");
+			Log::log(Log::ERR, L"Window construction error");
 	}
 
 	bool Window::Create(const DescWindow& desc) {
 		inputmgr = InputManager::Init();
-		Log::Debug(L"Window Create");
+		Log::log(Log::DEBUG, L"Window Create");
 		this->desc = desc;
 
 		WNDCLASSEXW wnd;
@@ -41,7 +41,7 @@ namespace Game {
 		wnd.cbSize = sizeof(WNDCLASSEX);
 
 		if (!RegisterClassEx(&wnd)) {
-			Log::Err(L"RegisterClassEx failed");
+			Log::log(Log::ERR, L"RegisterClassEx failed");
 			return false;
 		}
 
@@ -57,7 +57,7 @@ namespace Game {
 		m_hwnd = CreateWindowEx(NULL, L"D3D11F", desc.caption.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, lleft, ltop, lwidth, lheight, NULL, NULL, NULL, NULL);
 
 		if (!m_hwnd) {
-			Log::Err(L"CreateWindowEx failed");
+			Log::log(Log::ERR, L"CreateWindowEx failed");
 			return false;
 		}
 
@@ -73,7 +73,7 @@ namespace Game {
 
 		if (RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE)
 		{
-			Log::Debug(L"Failed");
+			Log::log(Log::ERR, L"Failed");
 		//registration failed. Call GetLastError for the cause of the error
 		}
 
@@ -93,7 +93,7 @@ namespace Game {
 		if (m_hwnd)
 			DestroyWindow(m_hwnd);
 		m_hwnd = nullptr;
-		Log::Debug(L"Window Close");
+		Log::log(Log::DEBUG, L"Window Close");
 	}
 
 	LRESULT Window::WndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam) {
