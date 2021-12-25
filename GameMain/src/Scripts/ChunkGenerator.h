@@ -61,7 +61,7 @@ class ChunkGenerator : public MonoScript {
 		}
 
 		auto n = positions.size();
-		chunksPool.resize(n);
+		chunksPool.resize(n*1.5);
 		n = chunksPool.size();
 		for (size_t i = 0; i < n; i++) {
 			auto o = scene.Instaniate();
@@ -112,7 +112,7 @@ class ChunkGenerator : public MonoScript {
 					return;
 				loading[idx] = false;
 				if (!loadingQueue.try_pop(chunkPos)) {
-					Sleep(200);
+					Sleep(500);
 					loading[idx] = true;
 					continue;
 				}
@@ -147,7 +147,7 @@ class ChunkGenerator : public MonoScript {
 			}
 			loading[idx] = false;
 			//more threads -> moreTimeout
-			Sleep(100);
+			Sleep(50);
 			while (unloading) { Sleep(1); loading[idx] = false; }
 			loading[idx] = true;
 		}

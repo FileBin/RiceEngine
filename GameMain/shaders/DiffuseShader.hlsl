@@ -22,7 +22,7 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 
 	float em = emission;
 
-	float3 col = float3(.8,0.5,0.2);
+	float3 col = input.color.xyz;
 	float dif = dot(-light, n);
 	float spec = max(dot(reflect(light, n), -eye), 0);
 	float shadow = 1;//shadowSoft(p, -LIGHT_DIR, .0625, MAX_DIST, MAX_DIST*.1);
