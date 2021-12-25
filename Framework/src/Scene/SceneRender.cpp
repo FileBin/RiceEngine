@@ -12,11 +12,13 @@ namespace Game {
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
 	}
 	bool SceneRender::Draw() {
+		while (isLoading)
+			Sleep(1);
+
 		isRendering = true;
 		device->SetPrimitiveTopology();
-		auto n = models.size();
-		for (size_t i = 0; i < n; i++) {
-			auto& model = models[i];
+		for (auto it = models.begin(); it != models.end(); it++) {
+			auto& model = it->first;
 
 			ConstantBufferData cb = {};
 
@@ -57,6 +59,15 @@ namespace Game {
 		return true;
 	}
 
+	void SceneRender::Close() {
+		for (auto c : cameras) delete c;
+		for (auto m : materials) { delete m.first; }
+		for (auto m : indexBuffers) { _RELEASE(m.second); }
+		for (auto m : vertexBuffers) { _RELEASE(m.second); }
+		for (auto m : models) { delete m.first; }
+		_RELEASE(constantBuffer);
+	}
+
 	void SceneRender::Resize() {
 		auto n = cameras.size();
 		auto ar = GetAspectRatio();
@@ -81,57 +92,35 @@ namespace Game {
 			indexBuffers.insert(indexBuffers.end(), { &mesh, indexBuffer });
 		}
 		if (b) {
-			models.push_back(model);
+			models.insert(models.end(), { model, true });
 		}
 	}
 
-	void SceneRender::RemoveModel(Model* _model, bool del) {
-		while (isRendering)
-			Sleep(1);
-
-		bool founded = false;
-
-		for (auto it = models.begin(); it != models.end(); it++) {
-			auto& model = *it;
-			if (!founded) {
-				if (model == _model) {
-					founded = true;
-					if (model != nullptr) {
-						auto n = model->GetSubMeshesCount();
-						for (size_t i = 0; i < n; i++) {
-							auto& mesh = model->GetSubMesh(i);
-							UnmapMaterial(&mesh);
-
-							auto vIt = vertexBuffers.find(&mesh);
-							if (vIt != vertexBuffers.end()) {
-								vIt->second->Release();
-								vertexBuffers.unsafe_erase(&mesh);
-							}
-							auto it = indexBuffers.find(&mesh);
-							if (it != indexBuffers.end()) {
-								it->second->Release();
-								indexBuffers.unsafe_erase(&mesh);
-							}
-						}
-
-						
-
-						if (del) {
-							delete model;
-						}
-						auto next = it + 1;
-						if (next != models.end())
-							model = *next;
-					}
+	bool SceneRender::RemoveModel(Model* model, bool del) {
+		auto it = models.find(model);
+		if (it != models.end()) {
+			//Wait();
+			//Lock();
+			auto& model = *it->first;
+			models.unsafe_erase(it);
+			auto n = model.GetSubMeshesCount();
+			for (size_t i = 0; i < n; i++) {
+				auto m = &model.GetSubMesh(i);
+				auto vIt = vertexBuffers.find(m);
+				if (vIt != vertexBuffers.end()) {
+					vIt->second->Release();
+					vertexBuffers.unsafe_erase(vIt);
 				}
-			} else {
-				auto next = it + 1;
-				if (next != models.end())
-					model = *next;
+				auto iIt = indexBuffers.find(m);
+				if (iIt != indexBuffers.end()) {
+					iIt->second->Release();
+					indexBuffers.unsafe_erase(iIt);
+				}
 			}
+			//Unlock();
+			return true;
 		}
-		if (founded)
-			models.resize(models.size() - 1);
+		return false;
 	}
 
 	void SceneRender::UpdateModel(Model* model) {
@@ -165,7 +154,6 @@ namespace Game {
 	void SceneRender::UnmapMaterial(Mesh* mesh) {
 		while (isRendering)
 			Sleep(1);
-
 		auto it = materialMap.find(mesh);
 		if (it != materialMap.end()) {
 			materialMap.unsafe_erase(it);
@@ -185,7 +173,7 @@ namespace Game {
 
 	Material& SceneRender::CreateMaterial(Shader* sh) {
 		auto mat = new Material({}, *device, *sh);
-		materials.push_back(mat);
+		materials.insert(materials.end(), { mat, true });
 		return *mat;
 	}
 }

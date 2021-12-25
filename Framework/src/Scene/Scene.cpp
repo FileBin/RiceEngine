@@ -5,7 +5,8 @@ namespace Game {
 		initScript = new InitScript();
 		preUpdateScript = new PreUpdateScript();
 		updateScript = new UpdateScript();
-		initScript->scene = preUpdateScript->scene = updateScript->scene = this;
+		closeScript = new CloseScript();
+		initScript->scene = preUpdateScript->scene = updateScript->scene = closeScript->scene = this;
 		root = new SceneObject(this);
 		render = new SceneRender();
 	}
@@ -32,5 +33,8 @@ namespace Game {
 
 	void Scene::UpdateScript::Run() {
 		scene->root->Update();
+	}
+	void Scene::CloseScript::Run() {
+		scene->Close();
 	}
 }

@@ -5,7 +5,10 @@
 namespace Game {
 	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
 
-	SceneObject::~SceneObject() {}
+	SceneObject::~SceneObject() {
+		for (auto c : components) delete c;
+		for (auto o : children) delete o;
+	}
 
 	void SceneObject::Enable() {
 		for (auto c : components) {

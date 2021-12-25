@@ -13,7 +13,7 @@ namespace Game {
 	class SceneObject  {
 	public:
 		SceneObject (Scene* scene);
-		~SceneObject ();
+		~SceneObject();
 
 		void Enable();
 		void Start();

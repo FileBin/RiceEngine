@@ -9,3 +9,4 @@ typedef ID3D11Buffer Buffer;
 
 typedef long long num;
 typedef double dbl;
+typedef unsigned int uint;

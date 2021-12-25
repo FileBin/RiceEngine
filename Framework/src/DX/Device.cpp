@@ -287,7 +287,6 @@ namespace Game {
 	}
 
 	void Device::Resize() {
-		// ������� ���������, ���������� � �������� ����������� ����.
 		context->OMSetRenderTargets(0, 0, 0);
 		renderTarget->Release();
 		renderTarget = nullptr;
@@ -299,7 +298,9 @@ namespace Game {
 		GetClientRect(hwnd, &rect);
 		size.x = rect.right - rect.left;
 		size.y = rect.bottom - rect.top;
-
+		if (size.SqrLength() < 1) {
+			size = { 640, 480 };
+		}
 		if (swapChain != nullptr) {
 			HRESULT hr = swapChain->ResizeBuffers(1, lround(size.x), lround(size.y), DXGI_FORMAT_B8G8R8A8_UNORM, 0);
 

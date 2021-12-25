@@ -62,7 +62,7 @@ namespace Game {
 	void Core::Run() {
 		if (init) {
 			auto fixedDeltaTime = 1000. / fps;
-			auto interval = (long long)fixedDeltaTime;
+			auto interval = (long long)fixedDeltaTime - 1;
 			auto deltaTime = fixedDeltaTime;
 			auto _time = steady_clock::now();
 			time = 0;
@@ -88,9 +88,11 @@ namespace Game {
 	}
 
 	void Core::Close() {
+		stage = Stage::Close;
+		RunScripts(closeScripts);
 		init = false;
 		render->Shutdown();
-		_DELETE(render);
+		//_DELETE(render);
 		_CLOSE(wnd);
 		Log::Close();
 	}
@@ -151,6 +153,9 @@ namespace Game {
 			break;
 		case Stage::Update:
 			updateScripts.push_back(script);
+			break;
+		case Stage::Close:
+			closeScripts.push_back(script);
 			break;
 		default:
 			ThrowIfFailed(E_INVALIDARG);

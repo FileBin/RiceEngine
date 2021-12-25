@@ -9,11 +9,13 @@ namespace Game {
 
 		virtual void OnInit() {};
 
-		virtual void Enable() {};
+		void Enable() { OnEnable(); enabled = true; };
+		virtual void OnEnable() {};
 		virtual void Start() {};
 		virtual void PreUpdate() {};
 		virtual void Update() {};
-		virtual void Disable() {};
+		void Disable() { OnDisable(); enabled = false; };
+		virtual void OnDisable() {};
 
 		bool isEnabled() { return enabled; }
 

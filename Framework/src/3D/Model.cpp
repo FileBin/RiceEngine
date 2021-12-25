@@ -68,9 +68,11 @@ namespace Game {
 	}
 
 	Model::~Model() {
-		for (auto m : subMeshes) {
+		for (auto& m : subMeshes) {
 			if (m) delete m;
+			m = nullptr;
 		}
+		subMeshes.clear();
 	}
 
 	void Model::SetSubMeshesCount(size_t count) {

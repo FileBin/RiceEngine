@@ -61,5 +61,6 @@ namespace Game {
 		c.AddScript(s[0], Stage::PostInit);
 		c.AddScript(s[1], Stage::Update);
 		c.AddScript(s[2], Stage::Update);
+		c.AddScript(s[3], Stage::Close);
 	}
 }

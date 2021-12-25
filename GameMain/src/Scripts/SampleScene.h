@@ -94,7 +94,7 @@ class SampleScene : public Scene {
 		cam->SetClippingPlanes(.001, 1000.);
 		cam->transform.scale = { 1, 1, 1 };
 		cam->transform.rotation = Quaternion::identity;
-		cam->transform.pos = { 0, 60, -5 };
+		cam->transform.pos = { 0, 30, -5 };
 		
 		ren.AddCamera(cam);
 

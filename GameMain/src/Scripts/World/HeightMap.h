@@ -11,6 +11,10 @@ private:
 public:
     HeightMap(WorldGenerator& worldGenerator, Vector2i pos, bool generateNormals = false);
 
+    ~HeightMap() {
+        map.clear();
+    }
+
     dbl Get(int x, int y);
 
     dbl Get(Vector2i pos) {

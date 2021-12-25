@@ -18,9 +18,8 @@ namespace Game {
 		SceneRender& GetRender() { return *render; }
 
 		void Close() {
-			for (auto o : root->GetChildren()) {
-				delete o;
-			}
+			root->Disable();
+			delete root;
 			render->Close();
 			delete render;
 		}
@@ -30,6 +29,7 @@ namespace Game {
 				initScript,
 				preUpdateScript,
 				updateScript,
+				closeScript
 			};
 		}
 
@@ -64,5 +64,12 @@ namespace Game {
 			Scene* scene = nullptr;
 			void Run();
 		} *updateScript;
+
+		class CloseScript : public ScriptBase {
+		public:
+			Scene* scene = nullptr;
+			bool init = false;
+			void Run();
+		} *closeScript;
 	};
 }

@@ -6,7 +6,7 @@
 namespace Game {
 	void ModelRender::OnInit() { model = nullptr; }
 
-	void ModelRender::Enable() {
+	void ModelRender::OnEnable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
 		if (model != nullptr) {
 			ren.AddModel(model);
@@ -19,25 +19,34 @@ namespace Game {
 		enabled = true;
 	}
 
-	void ModelRender::Disable() {
-		enabled = false;
+	void ModelRender::OnDisable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
 		if (model) {
-			ren.RemoveModel(model);
+			auto n = model->GetSubMeshesCount();
+			for (size_t i = 0; i < n; i++) {
+				auto& mesh = model->GetSubMesh(i);
+				ren.UnmapMaterial(&mesh);
+			}
+ 			ren.RemoveModel(model);
+			//delete model;
 			model = nullptr;
 		}
+		enabled = false;
 	}
 
 	void ModelRender::SetMaterial(Material* material, size_t i) { materials[i] = material; }
 
-	void ModelRender::SetModel(Model* model, bool updateBuffer) {
+	void ModelRender::SetModel(Model* _model, bool updateBuffer) {
 		auto& ren = GetSceneObject().GetScene().GetRender();
 
-		auto n = model->GetSubMeshesCount();
+		auto n = _model->GetSubMeshesCount();
 		materials.resize(n);
-		if (model)
+		if (model) {
 			ren.RemoveModel(model);
-		this->model = model;
+			//delete model;
+			//model = nullptr;
+		}
+		model = _model;
 		if (enabled) {
 			ren.AddModel(model);
 			for (size_t i = 0; i < n; i++) {

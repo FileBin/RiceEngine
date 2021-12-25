@@ -7,4 +7,10 @@ struct VoxelVoid : public Voxel {
         position = pos;
         isVoid = true;
     }
+    static bool IsVoid() { return true; }
+    static uint GetIdx() { return 0; }
+    VoxelData GetData() { return { GetIdx() }; }
+    static VoxelVoid* Build(VoxelData& data, Vector3i& pos) {
+        return new VoxelVoid(pos);
+    }
 };

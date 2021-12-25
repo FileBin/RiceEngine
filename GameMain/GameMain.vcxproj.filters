@@ -83,6 +83,9 @@
     <ClInclude Include="src\Scripts\Util\PerlinNoise.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelData.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\VertexShader.hlsl" />

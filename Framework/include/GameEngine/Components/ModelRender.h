@@ -13,8 +13,8 @@ namespace Game {
 	public:
 		void OnInit();
 
-		void Enable();
-		void Disable();
+		void OnEnable();
+		void OnDisable();
 
 		void SetMaterial(Material* material, size_t subMeshIdx);
 		void SetModel(Model* model, bool updateBuffer = true);

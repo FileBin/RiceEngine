@@ -14,13 +14,17 @@ public:
         dbl caveIntensity;
         dbl minHeight;
         dbl maxHeight;
+        dbl landsclapeScale;
+        dbl caveScale;
         WorldSeed seed;
     } params;
-    StandartGenerator(WorldSeed seed, dbl maxHeight = 120, dbl minHeight = 60, dbl caveIntensity = 0.4) {
+    StandartGenerator(WorldSeed seed, dbl maxHeight = 120, dbl minHeight = 60, dbl caveIntensity = 0.4, dbl landscapeScale = 1, dbl caveScale = 4) {
         params.caveIntensity = caveIntensity;
         params.maxHeight = maxHeight;
         params.minHeight = minHeight;
         params.seed = seed;
+        params.landsclapeScale = 1/landscapeScale;
+        params.caveScale = 1/caveScale;
     }
     dbl GetTerrainHeight(Vector2 pos) {
         using namespace Utilites;
@@ -30,7 +34,7 @@ public:
         dbl sy = params.maxHeight - params.minHeight;
         for (size_t k = 0; k < n; k++) {
             sy /= 2;
-            auto p = pos / s;
+            auto p = pos / s * params.landsclapeScale;
             dbl h = PerlinNoise(p, params.seed.heightMapSeeds[k]);
             h *= sy;
             terrainHeight += h;
@@ -73,7 +77,7 @@ private:
         for (size_t i = 0; i < n; i++) {
             h /= 2;
             s *= 2;
-            caveFactor += PerlinNoise(pos * s, seeds[i]) * h;
+            caveFactor += PerlinNoise(pos * s * params.caveScale, seeds[i]) * h;
         }
         return (caveFactor - 1 + params.caveIntensity);
     }

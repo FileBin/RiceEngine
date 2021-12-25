@@ -8,4 +8,5 @@ enum class Stage {
 	Render,
 	PostRender,
 	Update,
+	Close,
 };

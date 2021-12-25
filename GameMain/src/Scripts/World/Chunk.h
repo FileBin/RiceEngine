@@ -2,7 +2,7 @@
 #include <vector>
 #include <GameEngine\Model.h>
 #include <functional>
-
+#include <vector>
 #include "Voxels/Voxel.h"
 #include "WorldGenerator.h"
 
@@ -15,14 +15,16 @@ class Chunk {
 private:
     WorldGenerator* gen;
     HeightMap* map;
-    Model* model;
+    Model* model = nullptr;
     World* world;
 
-    std::vector<Voxel*> voxels = {};
+    bool lock = false;
+
+    std::vector<VoxelData> voxels{};
     void Generate();
 
 public:
-    enum Status { Unloaded = -2, NotCreated, NotLoaded, Loading, Loaded } status;
+    enum Status { Unloaded = -2, NotCreated, NotLoaded, Loading, Operating, Loaded } status = NotLoaded;
 
     static const int ChunkSize;
     Vector3i position{};
@@ -36,22 +38,46 @@ public:
     }
 
     ~Chunk() {
-        for (auto vox : voxels) {
-            if (vox != nullptr)
-                delete vox;
-        }
-        if(model != nullptr)
+        voxels.clear();
+        if (model != nullptr) {
             delete model;
+            model = nullptr;
+        }
     }
 
-    Voxel& GetVoxel(int x, int y, int z) {
-        auto idx = ((INT64)x * ChunkSize + y) * ChunkSize + z;
-        auto vox = voxels[idx];
-        if (vox == nullptr) {
-            Vector3i inChunkPos{ x,y,z };
-            vox = &GenVoxel(inChunkPos);
-            SetVoxel(vox, inChunkPos);
+    bool IsVoxelVoid(Vector3i voxelPos) {
+        return Voxel::IsVoid(GetData(voxelPos).index);
+    }
+
+    VoxelData GetData(Vector3i pos) {
+        auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
+        while (lock) Sleep(1);
+        lock = true;
+        auto& data = voxels[idx];
+        if (data.index == UINT32_MAX) {
+            auto vox = &GenVoxel(pos);
+            data = vox->GetData();
+            delete vox;
+            lock = false;
+            SetVoxelData(data, pos);
         }
+        lock = false;
+        return data;
+    }
+
+    Voxel& GetVoxel(Vector3i pos) {
+        auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
+        while (lock) Sleep(1);
+        lock = true;
+        Voxel* vox = nullptr;
+        if (voxels[idx].index == UINT32_MAX) {
+            vox = &GenVoxel(pos);
+            lock = false;
+            SetVoxel(vox, pos);
+        } else {
+            vox = Voxel::Build(voxels[idx], pos);
+        }
+        lock = false;
         return *vox;
     }
 
@@ -61,19 +87,34 @@ public:
         auto x = chunkPos.x;
         auto y = chunkPos.y;
         auto z = chunkPos.z;
-        voxels[(x * ChunkSize + y) * ChunkSize + z] = vox;
+
+        while (lock) Sleep(1);
+        lock = true;
+
+        voxels[(x * ChunkSize + y) * ChunkSize + z] = vox->GetData();
+
+        lock = false;
     }
 
-    Voxel& GetVoxel(Vector3i pos) {
-        return GetVoxel(pos.x, pos.y, pos.z);
+    void SetVoxelData(VoxelData data, Vector3i chunkPos) {
+        auto x = chunkPos.x;
+        auto y = chunkPos.y;
+        auto z = chunkPos.z;
+
+        while (lock) Sleep(1);
+        lock = true;
+
+        voxels[(x * ChunkSize + y) * ChunkSize + z] = data;
+
+        lock = false;
+    }
+
+    Voxel& GetVoxel(int x, int y, int z) {
+        return GetVoxel({ x, y, z });
     }
     Model* GetModel() {
-        if (model == nullptr) {
-            model = GenerateModel();
-        } else {
-            return model;
-        }
-        return model;
+        if (model) return model;
+        return model = GenerateModel();
     }
     Model* GenerateModel();
 };

@@ -21,7 +21,7 @@ namespace Game {
 	}
 
 	void RenderBase::Shutdown() {
-		Close();
+		//Close();
 	}
 
 	void RenderBase::SetDevice(Device* device) {

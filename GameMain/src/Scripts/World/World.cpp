@@ -53,15 +53,15 @@ Model* Chunk::GenerateModel() {
     mesh->layout = Vertex::GetLayout();
 
     std::function<void(int, int, int)> func = [&](int x, int y, int z) {
-        Voxel b1, b2;
+        bool v1, v2;
         Vector3i inChunkPos{ x,y,z };
         Vector3i offset = position * ChunkSize;
         Vector3i worldPos = inChunkPos + offset;
 
         if (x < 0 || y < 0 || z < 0) {
-            b1 = world->GetVoxel(worldPos);
+            v1 = world->IsVoxelVoid(worldPos);
         } else {
-            b1 = GetVoxel(inChunkPos);
+            v1 = IsVoxelVoid(inChunkPos);
         }
 
         for (int i = 0; i < 3; i++) {
@@ -70,27 +70,22 @@ Model* Chunk::GenerateModel() {
 
             if (pos[i] >= ChunkSize) {
                 Vector3i wp = pos + offset;
-                b2 = world->GetVoxel(wp);
+                v2 = world->IsVoxelVoid(wp);
             } else {
-                b2 = GetVoxel(pos);
+                v2 = IsVoxelVoid(pos);
             }
-            Voxel* empty, * full;
 
             auto o = Vector3::one * .5f;
 
             auto angle = -90.;
 
-            if (b1.isVoid) {
-                empty = &b1;
-                full = &b2;
+            if (v1) {
                 o[i] = 1.5f;
-                if (b2.isVoid) {
+                if (v2) {
                     continue;
                 }
-            } else if (b2.isVoid) {
+            } else if (v2) {
                 angle = 90;
-                empty = &b2;
-                full = &b1;
             } else {
                 continue;
             }
@@ -124,4 +119,18 @@ Model* Chunk::GenerateModel() {
     mod->SetSubMeshesCount(1);
     mod->SetSubMesh(mesh, 0);
     return mod;
+}
+
+#include "Voxels\VoxelVoid.h"
+#include "Voxels\VoxelGrass.h"
+
+concurrency::concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
+concurrency::concurrent_unordered_map <uint, bool> Voxel::voidMap{};
+
+void Voxel::Register() {
+    builders.insert({ VoxelVoid::GetIdx(), VoxelVoid::Build });
+    builders.insert({ VoxelGrass::GetIdx(), VoxelGrass::Build });
+
+    voidMap.insert({ VoxelVoid::GetIdx(), VoxelVoid::IsVoid() });
+    voidMap.insert({ VoxelGrass::GetIdx(), VoxelGrass::IsVoid() });
 }

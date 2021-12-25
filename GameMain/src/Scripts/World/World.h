@@ -48,7 +48,7 @@ private:
 
 #pragma region publicFunctions
 public:
-	World(WorldGenerator* gen) : generator(*gen) {}
+	World(WorldGenerator* gen) : generator(*gen) { Voxel::Register(); }
 
 	void UnloadChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);
@@ -66,6 +66,7 @@ public:
 					auto& hm = *hIt->second;
 					SaveHeightMap(hm);
 					heightMaps.unsafe_erase(hmPos);
+					delete &hm;
 				}
 			}
 		}
@@ -135,6 +136,13 @@ public:
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk).GetVoxel(vox);
+	}
+
+	bool IsVoxelVoid(Vector3i voxelPos) {
+		Vector3 vox = voxelPos;
+		auto chunk = TransformToChunkPos(voxelPos);
+		vox = vox - chunk * Chunk::ChunkSize;
+		return GetChunk(chunk).IsVoxelVoid(vox);
 	}
 #pragma endregion
 #pragma region PrivateFunctions

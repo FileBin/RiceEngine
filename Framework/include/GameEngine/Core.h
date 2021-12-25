@@ -46,7 +46,7 @@ namespace Game {
 		double fixedDeltaTime, deltaTime, time;
 		std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
 			preRenderScripts, renderScripts, postRenderScripts,
-			updateScripts;
+			updateScripts, closeScripts;
 
 	};
 }
