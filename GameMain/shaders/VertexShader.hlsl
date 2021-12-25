@@ -9,6 +9,7 @@ struct PixelShaderInput {
     float3 norm : NORMAL;
     float4 viewPos : POSITION0;
     float3 light : POSITION2;
+    float4 color: COLOR0;
     /*float4 tangent : TANGENT;
     float4 texCoord : TEXCOORD;*/
 	//float4 color: COLOR0;
@@ -22,6 +23,22 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL) {
 
     output.pos = float4(pos.xyz, 1.0f);
     output.pos = mul(output.pos, World);
+
+    float4 blockColor;
+    if (output.pos.y > 40) {
+        blockColor = float4(1, 1, 1, 1);
+    }
+    else if (output.pos.y > 10) {
+        blockColor = float4(0.3, 0.3, 0.3, 1);
+    }
+    else if (output.pos.y > 5) {
+        blockColor = float4(0.2, 0.1, 0, 1);
+    } else {
+        blockColor = float4(0, 0, 1, 1);
+    }
+
+    output.color = blockColor;
+
     output.pos = mul(output.pos, View);
     output.pos = mul(output.pos, Projection);
 

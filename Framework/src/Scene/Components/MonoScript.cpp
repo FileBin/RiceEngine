@@ -7,6 +7,7 @@ namespace Game {
 		scene = &GetSceneObject().GetScene();
 		Initialize();
 	}
+	MonoScript::~MonoScript() {};
 	Scene& MonoScript::GetScene() { return *scene; }
 	SceneRender& MonoScript::GetRender() { return GetScene().GetRender(); }
 	Engine& MonoScript::GetEngine() { return GetScene().GetEngine(); }

@@ -11,6 +11,8 @@ namespace Game {
 	public:
 		Scene();
 
+		virtual ~Scene() = 0;
+
 		void Init(Engine* en) { engine = en; }
 
 		virtual void Initialize() = 0;
@@ -51,18 +53,21 @@ namespace Game {
 			Scene* scene = nullptr;
 			bool init = false;
 			void Run();
+			virtual ~InitScript() {};
 		} *initScript;
 
 		class PreUpdateScript : public ScriptBase {
 		public:
 			Scene* scene = nullptr;
 			void Run();
+			virtual ~PreUpdateScript() {};
 		} *preUpdateScript;
 
 		class UpdateScript : public ScriptBase {
 		public:
 			Scene* scene = nullptr;
 			void Run();
+			virtual ~UpdateScript() {};
 		} *updateScript;
 
 		class CloseScript : public ScriptBase {

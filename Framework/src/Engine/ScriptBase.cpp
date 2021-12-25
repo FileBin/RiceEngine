@@ -5,4 +5,5 @@ namespace Game {
 		engine = _en;
 		render = _ren;
 	}
+	ScriptBase::~ScriptBase() { Finalize(); };
 }

@@ -11,7 +11,7 @@ namespace Game {
 		ScriptBase() {}
 		void Init(Engine** engine, RenderBase** render);
 
-		~ScriptBase() { Finalize(); }
+		virtual ~ScriptBase() = 0;
 
 		virtual void Initialize() {}
 		virtual void Run() = 0;

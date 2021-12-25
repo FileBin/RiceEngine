@@ -5,5 +5,6 @@ namespace Game {
 		obj = parent; 
 		OnInit();
 	}
+	Component::~Component() {};
 	SceneObject& Component::GetSceneObject() { return *obj; }
 }
