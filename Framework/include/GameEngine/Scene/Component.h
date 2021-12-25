@@ -7,6 +7,8 @@ namespace Game {
 	public:
 		void Init(SceneObject* parent);
 
+		virtual ~Component() = 0;
+
 		virtual void OnInit() {};
 
 		virtual void Enable() {};

@@ -2,6 +2,7 @@
 #include <GameEngine\Components\MonoScript.h>
 namespace Game {
 	Scene::Scene() {
+		engine = nullptr;
 		initScript = new InitScript();
 		preUpdateScript = new PreUpdateScript();
 		updateScript = new UpdateScript();
@@ -10,6 +11,8 @@ namespace Game {
 		render = new SceneRender();
 	}
 
+	Scene::~Scene() {};
+	
 	void Scene::AddScript(MonoScript* script) {
 		root->AddComponent(script);
 	}

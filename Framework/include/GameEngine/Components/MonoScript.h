@@ -7,8 +7,10 @@ namespace Game {
 	class Scene;
 
 	class MonoScript : public Component {
+	public:
 		void OnInit();
 		virtual void Initialize() {}
+		virtual ~MonoScript() = 0;
 	protected:
 		Scene& GetScene();
 		SceneRender& GetRender();
