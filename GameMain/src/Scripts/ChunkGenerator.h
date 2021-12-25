@@ -30,7 +30,7 @@ class ChunkGenerator : public MonoScript {
 	bool unloading = false;
 	vector<bool> loading{};
 	//Chunk* chunk;
-	int renderDistance = 8;
+	int renderDistance = 10;
 	World* world;
 	WorldGenerator* generator;
 
@@ -72,7 +72,7 @@ class ChunkGenerator : public MonoScript {
 		}
 		loadingQueue = positions;
 
-		auto nThreads = 4;
+		auto nThreads = 6;
 		threads.resize(nThreads);
 		loading.resize(nThreads);
 
@@ -83,11 +83,13 @@ class ChunkGenerator : public MonoScript {
 
 	void Update() {
 		auto newPos = GetRender().GetCamera(0).transform.pos;
-		if (World::TransformToChunkPos(newPos) != World::TransformToChunkPos(playerPos)) {
+		auto playerChunk = World::TransformToChunkPos(newPos);
+		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			if (!unloading) { // fix unloading
 				create_task([this]() { UnloadChunks(); });
 				loadingQueue = positions;
 			}
+			Log::log(Log::INFO, L"ChunkStatus: {}", (int)world->GetChunkStatus(playerChunk));
 		}
 		playerPos = newPos;
 	}
@@ -119,18 +121,28 @@ class ChunkGenerator : public MonoScript {
 				chunkPos = chunkPos + playerChunk;
 				loading[idx] = true;
 			}
+			if (wrld.GetChunkStatus(chunkPos) == Chunk::Loading) {
+				continue;
+			}
 			wrld.SetChunkStatus(chunkPos, Chunk::Loading);
-			auto& chunk = GetNextChunk(idx);
-			auto& model = *world->GetChunk(chunkPos).GetModel();
-			sRen.Wait();
+			auto& chunkObj = GetNextChunk(idx);
+			auto& chunk = world->GetChunk(chunkPos);
+			auto& model = *chunk.GetModel();
+			sRen.WaitRendering(enabled);
 			sRen.Lock();
-			auto render = chunk.GetComponents<ModelRender>()[0];
+			if (!enabled)
+				return;
+			auto render = chunkObj.GetComponents<ModelRender>()[0];
 			model.transform.pos = World::TransformToWorldPos(chunkPos);
 			render->SetModel(&model);
 			render->SetMaterial(mat, 0);
-			chunk.Enable();
+			chunkObj.Enable();
 			sRen.Unlock();
-			wrld.SetChunkStatus(chunkPos, Chunk::Loaded);
+			if (wrld.GetChunkStatus(chunkPos) != Chunk::Loaded) {
+				wrld.SetChunkStatus(chunkPos, Chunk::Loaded);
+			} else {
+				wrld.SetChunkStatus(chunkPos, Chunk::Invalid);
+			}
 			loading[idx] = false;
 		}
 	}
@@ -190,7 +202,7 @@ class ChunkGenerator : public MonoScript {
 		while (!queue.empty()) {
 			auto o = queue.front();
 			queue.pop();
-			sRen.WaitRendering();
+			sRen.WaitRendering(enabled);
 			sRen.Lock();
 			o.second->Disable();
 			sRen.Unlock();
@@ -201,6 +213,7 @@ class ChunkGenerator : public MonoScript {
 
 	void OnDisable() {
 		enabled = false;
+		world->Unlock();
 		for (auto t : threads) {
 			t->join();
 			delete t;

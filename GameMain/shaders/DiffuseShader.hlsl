@@ -21,11 +21,11 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 	float3 light = input.light;
 
 	float em = emission;
-
+	
 	float3 col = input.color.xyz;
 	float dif = dot(-light, n);
 	float spec = max(dot(reflect(light, n), -eye), 0);
-	float shadow = 1;//shadowSoft(p, -LIGHT_DIR, .0625, MAX_DIST, MAX_DIST*.1);
+	float shadow = 1;
 	dif *= .5;
 	dif += .5;
 	spec = pow(spec, glossines + 1);

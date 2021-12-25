@@ -5,7 +5,7 @@
 
 namespace Game {
 
-	static String logLevel_str[6] = { L"", L"INFO:", L"DEBUG:", L"WARNING:", L"ERROR:", L"CRITICAL_ERROR:" };
+	static String logLevel_str[6] = { L"", L"INFO", L"DEBUG", L"WARNING", L"ERROR", L"CRITICAL_ERROR" };
 
 	class Log {
 	public:

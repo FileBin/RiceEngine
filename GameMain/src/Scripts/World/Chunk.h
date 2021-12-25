@@ -24,7 +24,7 @@ private:
     void Generate();
 
 public:
-    enum Status { Unloaded = -2, NotCreated, NotLoaded, Loading, Operating, Loaded } status = NotLoaded;
+    enum Status { Invalid = -3, Unloaded, NotCreated, NotLoaded = 0, Loading, Operating, Loaded } status = NotLoaded;
 
     static const int ChunkSize;
     Vector3i position{};

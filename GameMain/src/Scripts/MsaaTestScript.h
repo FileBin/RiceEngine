@@ -18,5 +18,9 @@ class MsaaTestScript : public ScriptBase {
 		} else if (InputManager::GetKey(KeyCode::Button5)) {
 			engine.SetMsaaLevel(16);
 		}
+
+		if (InputManager::GetKey(KeyCode::Backspace)) {
+			ShowWindow(GetConsoleWindow(), 1);
+		}
 	}
 };

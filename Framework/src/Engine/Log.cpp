@@ -103,7 +103,7 @@ namespace Game {
 		_wstrtime_s(timer, 9);
 		clock_t cl = clock();
 
-		auto str = std::format(L"{}::{}: {}{}\n", timer, cl, levtext, text);
+		auto str = std::format(L"{}::{}: [{}] {}\n", timer, cl, levtext, text);
 
 		wprintf(str.c_str());
 		file << str;

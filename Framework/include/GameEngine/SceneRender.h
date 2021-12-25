@@ -25,8 +25,13 @@ namespace Game {
 		void Resize();
 
 		void Lock() { isLoading = true; }
-		void Wait() { while (isLoading || isRendering) Sleep(20); }
-		void WaitRendering() { while (isRendering) Sleep(20); }
+
+		void Wait(bool& livingFactor) { while (livingFactor && (isLoading || isRendering)) Sleep(1); }
+		void WaitRendering(bool& livingFactor) { while (livingFactor && isRendering) Sleep(1); }
+
+		void Wait() { while (isLoading || isRendering) Sleep(1); }
+		void WaitRendering() { while (isRendering) Sleep(1); }
+
 		void Unlock() { isLoading = false; }
 
 		void AddModel(Model* model);
