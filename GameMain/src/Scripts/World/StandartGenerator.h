@@ -5,6 +5,7 @@
 
 #include "Voxels\VoxelVoid.h"
 #include "Voxels\VoxelGrass.h"
+#include "Voxels\VoxelDirt.h"
 #include <Scripts\Util\PerlinNoise.h>
 
 class StandartGenerator : public WorldGenerator {
@@ -63,7 +64,7 @@ public:
         if (cd > 0) {
             return *(new VoxelVoid(pos));
         }
-        return *(new VoxelGrass(pos));
+        return *(new VoxelDirt(pos));
     }
 
 private:
