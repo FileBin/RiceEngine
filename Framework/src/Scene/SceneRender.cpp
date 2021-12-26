@@ -51,7 +51,7 @@ namespace Game {
 				auto& mat = matIt->second;
 				device->SetActivePSConstantBuffer(mat->GetBuffer());
 				device->SetActiveShader(mat->GetShader());
-
+				
 				device->Draw();
 			}
 		}

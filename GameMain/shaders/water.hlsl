@@ -27,8 +27,7 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
 	output.pos = float4(pos.xyz, 1.0f);
 	output.pos = mul(output.pos, World);
 
-	float col = (output.pos.y - 10) / 30.0;
-	output.color = float4(col, col, col, 1);
+	output.color = float4(0.3, 0.2, 0.7, 0.7);
 
 	output.pos = mul(output.pos, View);
 	output.pos = mul(output.pos, Projection);

@@ -184,17 +184,32 @@
     <ClInclude Include="src\Scripts\World\StandartGenerator.h" />
     <ClInclude Include="src\Scripts\World\Voxel.h" />
     <ClInclude Include="src\Scripts\World\Voxels\Voxel.h" />
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelDarkGrass.h" />
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelDarkStone.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelData.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelDirt.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelGrass.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelSnow.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelStone.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelVoid.h" />
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelWater.h" />
     <ClInclude Include="src\Scripts\World\World.h" />
     <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
     <ClInclude Include="src\Scripts\World\WorldSeed.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="shaders\dark_grass.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\dark_stone.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\DiffuseShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -220,6 +235,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\stone.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\water.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

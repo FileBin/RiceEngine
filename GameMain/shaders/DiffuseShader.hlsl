@@ -36,6 +36,6 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 	s *= spec;
 	col += s * shadow * specluar;
 
-	float4 color = float4(col, 1);
+	float4 color = float4(col, input.color.w);
 	return color;
 }

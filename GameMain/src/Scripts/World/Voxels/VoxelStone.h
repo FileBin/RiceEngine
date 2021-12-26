@@ -8,7 +8,7 @@ struct VoxelStone : public Voxel {
         isVoid = false;
     }
     static bool IsVoid() { return false; }
-    static uint GetIdx() { return 3; }
+    static uint GetIdx() { return VoxelTypeIndex::V_STONE; }
     VoxelData GetData() { return { GetIdx() }; }
     static VoxelStone* Build(VoxelData& data, Vector3i& pos) {
         return new VoxelStone(pos);

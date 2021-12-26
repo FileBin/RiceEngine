@@ -143,6 +143,9 @@ Model* Chunk::GenerateModel() {
 #include "Voxels\VoxelDirt.h"
 #include "Voxels\VoxelStone.h"
 #include "Voxels\VoxelSnow.h"
+#include "Voxels\VoxelDarkStone.h"
+#include "Voxels\VoxelDarkGrass.h"
+#include "Voxels\VoxelWater.h"
 
 concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
 concurrent_unordered_map <uint, bool> Voxel::voidMap{};
@@ -154,16 +157,25 @@ void Voxel::Register(Engine& en, SceneRender& ren) {
     builders.insert({ VoxelDirt::GetIdx(), VoxelDirt::Build });
     builders.insert({ VoxelStone::GetIdx(), VoxelStone::Build });
     builders.insert({ VoxelSnow::GetIdx(), VoxelSnow::Build });
+    builders.insert({ VoxelDarkStone::GetIdx(), VoxelDarkStone::Build });
+    builders.insert({ VoxelDarkGrass::GetIdx(), VoxelDarkGrass::Build });
+    builders.insert({ VoxelWater::GetIdx(), VoxelWater::Build });
 
     voidMap.insert({ VoxelVoid::GetIdx(), VoxelVoid::IsVoid() });
     voidMap.insert({ VoxelGrass::GetIdx(), VoxelGrass::IsVoid() });
     voidMap.insert({ VoxelDirt::GetIdx(), VoxelDirt::IsVoid() });
     voidMap.insert({ VoxelStone::GetIdx(), VoxelStone::IsVoid() });
     voidMap.insert({ VoxelSnow::GetIdx(), VoxelSnow::IsVoid() });
+    voidMap.insert({ VoxelDarkStone::GetIdx(), VoxelDarkStone::IsVoid() });
+    voidMap.insert({ VoxelDarkGrass::GetIdx(), VoxelDarkGrass::IsVoid() });
+    voidMap.insert({ VoxelWater::GetIdx(), VoxelWater::IsVoid() });
 
     materialMap.insert({ VoxelVoid::GetIdx(), nullptr });
     materialMap.insert({ VoxelGrass::GetIdx(), &VoxelGrass::CreateMaterial(en,ren) });
     materialMap.insert({ VoxelDirt::GetIdx(), &VoxelDirt::CreateMaterial(en,ren) });
     materialMap.insert({ VoxelStone::GetIdx(), &VoxelStone::CreateMaterial(en,ren) });
     materialMap.insert({ VoxelSnow::GetIdx(), &VoxelSnow::CreateMaterial(en,ren) });
+    materialMap.insert({ VoxelDarkStone::GetIdx(), &VoxelDarkStone::CreateMaterial(en,ren) });
+    materialMap.insert({ VoxelDarkGrass::GetIdx(), &VoxelDarkGrass::CreateMaterial(en,ren) });
+    materialMap.insert({ VoxelWater::GetIdx(), &VoxelWater::CreateMaterial(en,ren) });
 }

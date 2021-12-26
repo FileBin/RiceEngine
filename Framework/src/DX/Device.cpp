@@ -64,6 +64,22 @@ namespace Game {
 		
 		rsdesc.AntialiasedLineEnable = true;
 
+		//enable blending
+		ID3D11BlendState* d3dBlendState;
+		D3D11_BLEND_DESC omDesc;
+		ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
+		omDesc.RenderTarget[0].BlendEnable = true;
+
+		omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		omDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+		ThrowIfFailed(device->CreateBlendState(&omDesc, &d3dBlendState));
+		context->OMSetBlendState(d3dBlendState, 0, 0xffffffff);
 
 		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
 	}

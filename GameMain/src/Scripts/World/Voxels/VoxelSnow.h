@@ -8,7 +8,7 @@ struct VoxelSnow : public Voxel {
         isVoid = false;
     }
     static bool IsVoid() { return false; }
-    static uint GetIdx() { return 4; }
+    static uint GetIdx() { return VoxelTypeIndex::V_SNOW; }
     VoxelData GetData() { return { GetIdx() }; }
     static VoxelSnow* Build(VoxelData& data, Vector3i& pos) {
         return new VoxelSnow(pos);

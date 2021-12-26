@@ -8,7 +8,7 @@ struct VoxelDirt : public Voxel {
         isVoid = false;
     }
     static bool IsVoid() { return false; }
-    static uint GetIdx() { return 2; }
+    static uint GetIdx() { return VoxelTypeIndex::V_DIRT; }
     VoxelData GetData() { return { GetIdx() }; }
     static VoxelDirt* Build(VoxelData& data, Vector3i& pos) {
         return new VoxelDirt(pos);

@@ -8,6 +8,9 @@
 #include "Voxels\VoxelDirt.h"
 #include "Voxels\VoxelStone.h"
 #include "Voxels\VoxelSnow.h"
+#include "Voxels\VoxelDarkStone.h"
+#include "Voxels\VoxelDarkGrass.h"
+#include "Voxels\VoxelWater.h"
 #include <Scripts\Util\PerlinNoise.h>
 
 class StandartGenerator : public WorldGenerator {
@@ -48,16 +51,21 @@ public:
     Voxel& GetVoxel(Vector3 pos, dbl groundAltitude) {
         auto d = groundAltitude;
         if (groundAltitude > 0) {
-            return *(new VoxelVoid(pos));
+            if (pos.y == -7) {
+                return *(new VoxelWater(pos)); // lakes
+            }
+            else {
+                return *(new VoxelVoid(pos)); // sky
+            }
         }
         Vector3 n;
         auto cd = CaveDepth(pos) * 20.;
 
         if (d < -1.7 && cd < 1 && pos.y > -10) {
-            return *(new VoxelDirt(pos));
+            return *(new VoxelDirt(pos)); // partially underground layer
         }
         else if (d < -1.7 && cd < 1) {
-            return *(new VoxelStone(pos));
+            return *(new VoxelDarkStone(pos)); // fully underground
         }
 
         auto v = d - cd;
@@ -73,21 +81,26 @@ public:
 
         if (cd > -5) {
             if (pos.y > 30 - cd * 2) {
-                return *(new VoxelSnow(pos));
+                return *(new VoxelSnow(pos)); // mountain tops
             }
             else if (pos.y < 20 && cd > 0) {
-                return *(new VoxelVoid(pos));
+                return *(new VoxelVoid(pos)); // caves
             }
             else {
-                return *(new VoxelStone(pos));
+                return *(new VoxelStone(pos)); // middle mountains
             }
         }
         else {
-            if (pos.y < 20) {
-                return *(new VoxelGrass(pos));
+            if (pos.y < 20 - cd / 2.0) {
+                if (pos.y < - cd / 1.7) {
+                    return *(new VoxelDarkGrass(pos)); // grass bottom layer
+                }
+                else {
+                    return *(new VoxelGrass(pos)); // grass top layer
+                }
             }
             else {
-                return *(new VoxelStone(pos));
+                return *(new VoxelStone(pos)); // upper mountains
             }
         }
 
@@ -103,7 +116,7 @@ private:
         dbl h = 1.;
         for (size_t i = 0; i < n; i++) {
             h /= 2;
-            s *= 2;
+            s *= 1.7;
             caveFactor += PerlinNoise(pos * s * params.caveScale, seeds[i]) * h;
         }
         return (caveFactor - 1 + params.caveIntensity);
