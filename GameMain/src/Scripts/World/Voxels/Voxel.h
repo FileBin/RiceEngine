@@ -13,7 +13,7 @@ namespace Game {
 	class SceneRender;
 }
 
-static enum VoxelTypeIndex {V_VOID, V_GRASS, V_DARK_GRASS, V_STONE, V_DARK_STONE, V_DIRT, V_SNOW, V_WATER};
+enum VoxelTypeIndex { V_VOID, V_GRASS, V_DARK_GRASS, V_STONE, V_DARK_STONE, V_DIRT, V_SNOW, V_WATER };
 
 struct Voxel {
 public:

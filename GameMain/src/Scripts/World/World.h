@@ -5,6 +5,7 @@
 #include "Chunk.h"
 #include "HeightMap.h"
 #include <GameEngine\Vectors\Vector2i.h>
+#include <GameEngine\Vectors\Hasher.h>
 
 using namespace Game;
 using namespace concurrency;
@@ -143,21 +144,21 @@ public:
 	}
 
 	Voxel& GetVoxel(Vector3i voxelPos) {
-		Vector3 vox = voxelPos;
+		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk).GetVoxel(vox);
 	}
 
 	bool IsVoxelVoid(Vector3i voxelPos) {
-		Vector3 vox = voxelPos;
+		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk).IsVoxelVoid(vox);
 	}
 
 	VoxelData GetVoxelData(Vector3i voxelPos) {
-		Vector3 vox = voxelPos;
+		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk).GetData(vox);

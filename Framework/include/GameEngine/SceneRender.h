@@ -53,7 +53,8 @@ namespace Game {
 		concurrent_unordered_map<Material*, bool> materials;
 		concurrent_unordered_map<Mesh*, Material*> materialMap;
 		size_t activeCameraIdx;
-		concurrent_unordered_map<Model*, bool> models;
+		concurrent_unordered_map<Model*, bool> models; //that was a trick beacuse unordered_set doesn't work
+		concurrent_unordered_map<Mesh*, ConstantBufferData> transparentQ;
 		concurrent_unordered_map<Mesh*, Buffer*> indexBuffers;
 		concurrent_unordered_map<Mesh*, Buffer*> vertexBuffers;
 		Buffer* constantBuffer;

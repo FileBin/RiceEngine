@@ -2,8 +2,10 @@
 #include <GameEngine\Material.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Camera.h>
+#include <queue>
 
 namespace Game {
+	using std::queue;
 	bool SceneRender::Init() {
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 		return true;
@@ -34,6 +36,20 @@ namespace Game {
 			auto m = model->GetSubMeshesCount();
 			for (size_t j = 0; j < m; j++) {
 				auto& mesh = model->GetSubMesh(j);
+
+				auto matIt = materialMap.find(&mesh);
+				if (matIt == materialMap.end()) continue;
+				auto mat = matIt->second;
+
+				if (mat == nullptr) continue;
+
+				if (mat->renderType == RenderType::Transparent) {
+					auto i = transparentQ.find(&mesh);
+					if (i != transparentQ.end()) {
+						i->second = cb;
+					}
+					continue;
+				}
 				Buffer *ib, *vb;
 				auto iIt = indexBuffers.find(&mesh);
 				if (iIt != indexBuffers.end()) {
@@ -46,14 +62,38 @@ namespace Game {
 				device->SetActiveVertexBuffer<Vertex>(vb);
 				device->SetActiveIndexBuffer(ib);
 
-				auto matIt = materialMap.find(&mesh);
-				if (matIt == materialMap.end()) continue;
-				auto& mat = matIt->second;
 				device->SetActivePSConstantBuffer(mat->GetBuffer());
 				device->SetActiveShader(mat->GetShader());
 				
 				device->Draw();
 			}
+		}
+
+		for (auto pair = transparentQ.begin(); pair != transparentQ.end(); pair++) {
+			auto& m = *pair->first;
+
+			device->LoadBufferSubresource(constantBuffer, pair->second);
+			device->SetActiveVSConstantBuffer(constantBuffer);
+
+			Buffer* ib, * vb;
+			auto iIt = indexBuffers.find(&m);
+			if (iIt != indexBuffers.end()) {
+				ib = iIt->second;
+				vb = vertexBuffers.at(&m);
+			} else {
+				continue;
+			}
+
+			device->SetActiveVertexBuffer<Vertex>(vb);
+			device->SetActiveIndexBuffer(ib);
+
+			auto matIt = materialMap.find(&m);
+			if (matIt == materialMap.end()) continue;
+			auto& mat = matIt->second;
+			device->SetActivePSConstantBuffer(mat->GetBuffer());
+			device->SetActiveShader(mat->GetShader());
+
+			device->Draw();
 		}
 		isRendering = false;
 		return true;
@@ -149,13 +189,21 @@ namespace Game {
 
 
 
-	void SceneRender::MapMaterial(Mesh* mesh, Material* mat) { materialMap.insert(materialMap.end(), {mesh, mat}); }
+	void SceneRender::MapMaterial(Mesh* mesh, Material* mat) {
+		if (mat == nullptr)
+			return;
+		if (mat->renderType == RenderType::Transparent)
+			transparentQ.insert({ mesh, {} });
+		materialMap.insert(materialMap.end(), {mesh, mat}); 
+	}
 
 	void SceneRender::UnmapMaterial(Mesh* mesh) {
 		while (isRendering)
 			Sleep(1);
 		auto it = materialMap.find(mesh);
 		if (it != materialMap.end()) {
+			if (it->second->renderType == RenderType::Transparent)
+				transparentQ.unsafe_erase(mesh);
 			materialMap.unsafe_erase(it);
 		}
 	}

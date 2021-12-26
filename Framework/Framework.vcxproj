@@ -197,6 +197,7 @@
     <ClInclude Include="include\GameEngine\Util.h" />
     <ClInclude Include="include\GameEngine\Util3D.h" />
     <ClInclude Include="include\GameEngine\Util\defines.h" />
+    <ClInclude Include="include\GameEngine\Vectors\Hasher.h" />
     <ClInclude Include="include\GameEngine\Vectors\Quaternion.h" />
     <ClInclude Include="include\GameEngine\Vectors\Vector2.h" />
     <ClInclude Include="include\GameEngine\Vectors\Vector2i.h" />

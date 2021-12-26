@@ -7,7 +7,6 @@
 
 namespace Game {
 	using namespace Util;
-
 	struct Mesh {
 		std::vector<Vertex> vertexBuffer = {};
 		std::vector<UINT> indexBuffer = {};

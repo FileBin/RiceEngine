@@ -167,6 +167,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\constants.cpp" />
+    <ClCompile Include="src\Scripts\World\Generator.cpp" />
     <ClCompile Include="src\Scripts\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,6 +179,7 @@
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SampleScene.h" />
     <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />
+    <ClInclude Include="src\Scripts\Util\Tables.h" />
     <ClInclude Include="src\Scripts\World\Chunk.h" />
     <ClInclude Include="src\Scripts\World\FlatGenerator.h" />
     <ClInclude Include="src\Scripts\World\HeightMap.h" />

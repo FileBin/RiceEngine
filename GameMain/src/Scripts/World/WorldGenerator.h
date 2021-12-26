@@ -6,5 +6,5 @@
 class WorldGenerator {
 public:
 	virtual dbl GetTerrainHeight(Vector2 pos) = 0;
-	virtual Voxel& GetVoxel(Vector3 pos, dbl groundAltitude) = 0;
+	virtual VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude) = 0;
 };

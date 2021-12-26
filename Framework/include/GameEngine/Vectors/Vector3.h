@@ -8,7 +8,7 @@ struct Vector3 {
 	Vector3() = default;
 	Vector3(double x, double y) : x(x), y(y) {}
 	Vector3(double x, double y, double z) : x(x), y(y), z(z) {}
-	Vector3(Vector3i& vec);
+	Vector3(const Vector3i& vec);
 	double x = 0, y = 0, z = 0;
 
 	double Length();
@@ -16,8 +16,10 @@ struct Vector3 {
 
 	Vector3 Normalized();
 
-	static double Dot(Vector3 A, Vector3 b);
-	static Vector3 Cross(Vector3 A, Vector3 b);
+	static double Dot(Vector3 a, Vector3 b);
+	static Vector3 Cross(Vector3 a, Vector3 b);
+
+	static Vector3 Lerp(Vector3 a, Vector3 b, dbl t);
 
 	Vector3 operator-();
 

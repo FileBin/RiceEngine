@@ -2,7 +2,7 @@
 
 namespace Game {
 
-	const Mesh Mesh::quad = { 
+	const Mesh Mesh::quad = {
 		{
 			{ {-.5f, -.5f, 0 }, { 0,0,1 } },
 			{ {.5f, -.5f, 0 }, { 0,0,1 } },

@@ -13,9 +13,10 @@ public:
     dbl GetTerrainHeight(Vector2 pos){
         return terrainHeight;
     }
-    Voxel& GetVoxel(Vector3 pos, dbl groundAltitude){
+    VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude){
+        float d = (float)groundAltitude;
         if(groundAltitude > 0)
-            return *(new VoxelVoid(pos));
-        return *(new VoxelGrass(pos));
+            return { VoxelTypeIndex::V_VOID, d };
+        return { VoxelTypeIndex::V_GRASS, d };
     }
 };

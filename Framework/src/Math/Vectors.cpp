@@ -80,7 +80,7 @@ bool operator==(Vector2i a, Vector2i b) {
 #pragma endregion
 
 #pragma region Vector3
-Vector3::Vector3(Vector3i& v) {
+Vector3::Vector3(const Vector3i& v) {
     x = (double)v.x;
     y = (double)v.y;
     z = (double)v.z;
@@ -136,6 +136,10 @@ Vector3 Vector3::Cross(Vector3 left, Vector3 right) {
         left.x * right.y - left.y * right.x };
 }
 
+Vector3 Vector3::Lerp(Vector3 a, Vector3 b, dbl t) {
+    return a * (1 - t) + b * t;
+}
+
 Vector3& Vector3::operator=(Vector3f& v) {
     x = v.x;
     y = v.y;
@@ -183,13 +187,64 @@ bool operator==(Vector3i a, Vector3i b) {
     return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
 }
 
+Vector3i Vector3i::operator-() {
+    return { -x, -y, -z };
+}
+
+Vector3i operator+(Vector3i a, Vector3i b) {
+    return {
+        a.x + b.x,
+        a.y + b.y,
+        a.z + b.z
+    };
+}
+
+Vector3i operator-(Vector3i a, Vector3i b) {
+    return {
+        a.x - b.x,
+        a.y - b.y,
+        a.z - b.z
+    };
+}
+
+Vector3i operator*(Vector3i a, num b) {
+    return {
+        a.x * b,
+        a.y * b,
+        a.z * b
+    };
+}
+
+Vector3i operator/(Vector3i a, num b) {
+    return {
+        a.x / b,
+        a.y / b,
+        a.z / b
+    };
+}
+
+num Vector3i::SqrLength() {
+    return x * x + y * y + z * z;
+}
+
+num Vector3i::Dot(Vector3i a, Vector3i b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+Vector3i Vector3i::Cross(Vector3i left, Vector3i right) {
+    return {
+        left.y * right.z - left.z * right.y,
+        left.z * right.x - left.x * right.z,
+        left.x * right.y - left.y * right.x };
+}
+
 Vector3i::Vector3i(const Vector3& v) {
     x = floor(v.x);
     y = floor(v.y);
     z = floor(v.z);
 }
 
-long long& Vector3i::operator[](size_t idx) {
+num& Vector3i::operator[](size_t idx) {
     if (idx == 0)
         return x;
     if (idx == 1)

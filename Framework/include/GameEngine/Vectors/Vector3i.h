@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <xkeycheck.h>
+#include "../Util/defines.h"
 
 struct Vector3i {
 public:
@@ -7,19 +7,19 @@ public:
 	Vector3i() = default;
 	Vector3i(num x, num y, num z) : x(x), y(y), z(z) {}
 	Vector3i(const Vector3& vec);
-	long long& operator[](size_t idx);
+	num SqrLength();
+	
+	static num Dot(Vector3i a, Vector3i b);
+	static Vector3i Cross(Vector3i a, Vector3i b);
+
+	num& operator[](size_t idx);
+	Vector3i operator-();
 };
 
 bool operator==(Vector3i a, Vector3i b);
 
-template <> struct std::hash<Vector3i> {
-	size_t operator()(const Vector3i& a) const {
-		return hash<num>()(a.x) ^ hash<num>()(a.y) ^ hash<num>()(a.z);
-	}
-};
+Vector3i operator+(Vector3i a, Vector3i b);
+Vector3i operator-(Vector3i a, Vector3i b);
+Vector3i operator*(Vector3i a, num b);
+Vector3i operator/(Vector3i a, num b);
 
-template <> struct std::equal_to<Vector3i> {
-	bool operator()(const Vector3i& a, const Vector3i& b) const {
-		return a == b;
-	}
-};

@@ -24,6 +24,9 @@
     <ClCompile Include="src\Scripts\World\World.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scripts\World\Generator.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scripts\MsaaTestScript.h">
@@ -102,6 +105,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="src\Scripts\World\Voxels\VoxelWater.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\Util\Tables.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

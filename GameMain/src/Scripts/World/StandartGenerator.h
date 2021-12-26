@@ -48,59 +48,61 @@ public:
         }
         return terrainHeight;
     }
-    Voxel& GetVoxel(Vector3 pos, dbl groundAltitude) {
-        auto d = groundAltitude;
+    VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude) {
+        float d = (float)groundAltitude;
         if (groundAltitude > 0) {
             if (pos.y == -7) {
-                return *(new VoxelWater(pos)); // lakes
+                return { VoxelTypeIndex::V_WATER, d };//*(new VoxelWater(pos)); // lakes
             }
             else {
-                return *(new VoxelVoid(pos)); // sky
+                return { VoxelTypeIndex::V_VOID, d }; //*(new VoxelVoid(pos)); // sky
             }
         }
-        Vector3 n;
-        auto cd = CaveDepth(pos) * 20.;
+
+        //Vector3 n;
+
+        float cd = CaveDepth(pos) * 20.;
 
         if (d < -1.7 && cd < 1 && pos.y > -10) {
-            return *(new VoxelDirt(pos)); // partially underground layer
+            return { VoxelTypeIndex::V_DIRT, d };//*(new VoxelDirt(pos)); // partially underground layer
         }
         else if (d < -1.7 && cd < 1) {
-            return *(new VoxelDarkStone(pos)); // fully underground
+            return { VoxelTypeIndex::V_DARK_STONE, d };//*(new VoxelDarkStone(pos)); // fully underground
         }
 
-        auto v = d - cd;
+        float v = d - cd;
 
         //v *= 0.5f;
         v += 2.;
 
         v = min(max(v, 0), 1);
 
-        d = std::lerp(cd,d,v);
+        d = std::lerp(cd,d,v); //smoothing between caves and terrain
 
         d = max(cd, d);
 
         if (cd > -5) {
             if (pos.y > 30 - cd * 2) {
-                return *(new VoxelSnow(pos)); // mountain tops
+                return { VoxelTypeIndex::V_SNOW, d };//*(new VoxelSnow(pos)); // mountain tops
             }
             else if (pos.y < 20 && cd > 0) {
-                return *(new VoxelVoid(pos)); // caves
+                return { VoxelTypeIndex::V_VOID, d };//*(new VoxelVoid(pos)); // caves
             }
             else {
-                return *(new VoxelStone(pos)); // middle mountains
+                return { VoxelTypeIndex::V_STONE, d };//*(new VoxelStone(pos)); // middle mountains
             }
         }
         else {
             if (pos.y < 20 - cd / 2.0) {
                 if (pos.y < - cd / 1.7) {
-                    return *(new VoxelDarkGrass(pos)); // grass bottom layer
+                    return { VoxelTypeIndex::V_DARK_GRASS, d };//*(new VoxelDarkGrass(pos)); // grass bottom layer
                 }
                 else {
-                    return *(new VoxelGrass(pos)); // grass top layer
+                    return { VoxelTypeIndex::V_GRASS, d };//*(new VoxelGrass(pos)); // grass top layer
                 }
             }
             else {
-                return *(new VoxelStone(pos)); // upper mountains
+                return { VoxelTypeIndex::V_STONE, d };//*(new VoxelStone(pos)); // upper mountains
             }
         }
 

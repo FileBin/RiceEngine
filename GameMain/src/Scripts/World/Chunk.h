@@ -59,9 +59,9 @@ public:
         lock = true;
         auto& data = voxels[idx];
         if (data.index == UINT32_MAX) {
-            auto vox = &GenVoxel(pos);
-            data = vox->GetData();
-            delete vox;
+           // auto vox = &GenVoxel(pos);
+            data = GenVoxelData(pos);
+           // delete vox;
             lock = false;
             SetVoxelData(data, pos);
         }
@@ -75,7 +75,7 @@ public:
         lock = true;
         Voxel* vox = nullptr;
         if (voxels[idx].index == UINT32_MAX) {
-            vox = &GenVoxel(pos);
+            vox = Voxel::Build(GenVoxelData(pos), pos);
             lock = false;
             SetVoxel(vox, pos);
         } else {
@@ -85,7 +85,7 @@ public:
         return *vox;
     }
 
-    Voxel& GenVoxel(Vector3i voxelPos, bool genNormals = false);
+    VoxelData GenVoxelData(Vector3i voxelPos, bool genNormals = false);
 
     void SetVoxel(Voxel* vox, Vector3i chunkPos) {
         auto x = chunkPos.x;
@@ -118,7 +118,8 @@ public:
     }
     Model* GetModel() {
         if (model) return model;
-        return model = GenerateModel();
+        return model = GenerateSmoothModel();
     }
     Model* GenerateModel();
+    Model* GenerateSmoothModel();
 };

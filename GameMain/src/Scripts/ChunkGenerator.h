@@ -15,7 +15,7 @@
 #include <ppltasks.h>
 #include <queue>
 
-
+using namespace std::chrono;
 using namespace Game;
 using std::thread, std::vector, concurrency::concurrent_priority_queue, concurrency::task;
 
@@ -61,7 +61,7 @@ class ChunkGenerator : public MonoScript {
 		}
 
 		auto n = positions.size();
-		chunksPool.resize(n*1.5);
+		chunksPool.resize(n);
 		n = chunksPool.size();
 		for (size_t i = 0; i < n; i++) {
 			auto o = scene.Instaniate();
@@ -94,7 +94,7 @@ class ChunkGenerator : public MonoScript {
 		playerPos = newPos;
 	}
 
-	void ChunkLoaderThread(size_t idx){
+	void ChunkLoaderThread(size_t idx) {
 		auto& o = GetSceneObject();
 		auto& scene = GetScene();
 		auto& en = GetEngine();
@@ -104,7 +104,7 @@ class ChunkGenerator : public MonoScript {
 		auto& modelRender = *scene.GetObjectByName(L"Chunk").GetComponents<ModelRender>()[0];
 		//auto mat = &modelRender.GetMaterial(0);
 
-		while(enabled) {
+		while (enabled) {
 			auto playerChunk = World::TransformToChunkPos(playerPos);
 			auto chunkPos = playerChunk;
 			while (unloading) { Sleep(1); loading[idx] = false; };
@@ -114,15 +114,13 @@ class ChunkGenerator : public MonoScript {
 					return;
 				loading[idx] = false;
 				if (!loadingQueue.try_pop(chunkPos)) {
-					Sleep(500);
+					Sleep(20);
+					while (unloading) { Sleep(1); loading[idx] = false; };
 					loading[idx] = true;
 					continue;
 				}
 				chunkPos = chunkPos + playerChunk;
 				loading[idx] = true;
-			}
-			if (wrld.GetChunkStatus(chunkPos) == Chunk::Loading) {
-				continue;
 			}
 			wrld.SetChunkStatus(chunkPos, Chunk::Loading);
 			auto& chunkObj = GetNextChunk(idx);
@@ -178,7 +176,8 @@ class ChunkGenerator : public MonoScript {
 	void UnloadChunks() {
 		auto& sRen = GetScene().GetRender();
 		auto playerChunk = World::TransformToChunkPos(playerPos);
-		auto queue = std::queue<std::pair<Vector3i, SceneObject*>>();
+		auto queuePos = std::queue<Vector3i>();
+		auto queueObj = std::queue< std::pair<SceneObject*,Vector3i>>();
 
 		unloading = true;
 		while (CheckLoading()) Sleep(1);
@@ -197,21 +196,34 @@ class ChunkGenerator : public MonoScript {
 				};
 				if (d.x > renderDistance || d.y > renderDistance || d.z > renderDistance) {
 					it->second = false;
-					queue.push({chunkPos, &chunk});
+					queuePos.push(chunkPos); 
+					queueObj.push({ &chunk, chunkPos });
 				}
 			}
 		}
-		//make unloading particular
-		while (!queue.empty()) {
-			auto o = queue.front();
-			queue.pop();
-			sRen.WaitRendering(enabled);
-			sRen.Lock();
-			o.second->Disable();
-			sRen.Unlock();
-			world->UnloadChunk(o.first);
+
+		//auto time = steady_clock::now();
+		sRen.Wait(enabled);
+		sRen.Lock();
+		while (!queueObj.empty()) {
+			auto o = queueObj.front();
+			queueObj.pop();
+			o.first->Disable();
+			world->SetChunkStatus(o.second, Chunk::Unloaded);
+			//world->UnloadChunk(o.first);
+			/*if ((steady_clock::now() - time).count() > 100000) {
+				loadingQueue = positions;
+				unloading = false;
+				sRen.Unlock();
+				return;
+			}*/
 		}
+		sRen.Unlock();
 		unloading = false;
+		while (!queuePos.empty()) {
+			world->UnloadChunk(queuePos.front());
+			queuePos.pop();
+		}
 	}
 
 	void OnDisable() {
