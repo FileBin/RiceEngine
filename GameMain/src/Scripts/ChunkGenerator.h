@@ -48,7 +48,7 @@ class ChunkGenerator : public MonoScript {
 
 		//generator = new FlatGenerator(50.);
 		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
-		world = new World(generator);
+		world = new World(generator, &scene.GetEngine(), &scene.GetRender());
 
 		auto a = renderDistance;
 
@@ -102,7 +102,7 @@ class ChunkGenerator : public MonoScript {
 		auto& sRen = scene.GetRender();
 
 		auto& modelRender = *scene.GetObjectByName(L"Chunk").GetComponents<ModelRender>()[0];
-		auto mat = &modelRender.GetMaterial(0);
+		//auto mat = &modelRender.GetMaterial(0);
 
 		while(enabled) {
 			auto playerChunk = World::TransformToChunkPos(playerPos);
@@ -135,7 +135,10 @@ class ChunkGenerator : public MonoScript {
 			auto render = chunkObj.GetComponents<ModelRender>()[0];
 			model.transform.pos = World::TransformToWorldPos(chunkPos);
 			render->SetModel(&model);
-			render->SetMaterial(mat, 0);
+			auto n = model.GetSubMeshesCount();
+			for (size_t i = 0; i < n; i++) {
+				render->SetMaterial(&Voxel::GetMaterialAt(i), i);
+			}
 			chunkObj.Enable();
 			sRen.Unlock();
 			if (wrld.GetChunkStatus(chunkPos) != Chunk::Loaded) {

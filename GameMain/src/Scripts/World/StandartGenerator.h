@@ -64,7 +64,7 @@ public:
         if (cd > 0) {
             return *(new VoxelVoid(pos));
         }
-        return *(new VoxelDirt(pos));
+        return *(new VoxelGrass(pos));
     }
 
 private:

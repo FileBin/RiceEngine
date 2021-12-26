@@ -14,7 +14,7 @@ class SampleScene : public Scene {
 		auto chunk = Instaniate();
 		chunk->SetName(L"Chunk");
 
-		auto render = new ModelRender();
+		/*auto render = new ModelRender();
 		chunk->AddComponent(render);
 
 		auto mesh = new Mesh();
@@ -71,22 +71,16 @@ class SampleScene : public Scene {
 
 			22,20,21,
 			23,20,22
-		};
-
-		auto& shader = GetEngine().CreateShader();
-		shader.LoadVertexShader(Util::ReadFile(L"VertexShader.cso"), Vertex::GetLayout());
-		shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+		};*/
 
 		auto& ren = GetRender();
 
-		auto& mat = ren.CreateMaterial(&shader);
-
-		auto model = new Model();
+		/*auto model = new Model();
 		model->SetSubMeshesCount(1);
 		model->SetSubMesh(mesh, 0);
 
 		render->SetModel(model);
-		render->SetMaterial(&mat, 0);
+		render->SetMaterial(&mat, 0);*/
 
 		auto cam = new Camera();
 

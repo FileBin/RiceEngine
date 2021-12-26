@@ -48,23 +48,29 @@ Voxel& Chunk::GenVoxel(Vector3i voxelPos, bool genNormals) {
 Model* Chunk::GenerateModel() {
     auto mod = new Model();
 
-    auto mesh = new Mesh();
+    auto nMeshes = Voxel::GetMaterialCount();
 
-    mesh->layout = Vertex::GetLayout();
+    auto meshes = std::vector<Mesh*>(nMeshes);
+
+    for (auto& m : meshes) {
+        m = new Mesh();
+        m->layout = Vertex::GetLayout();
+    }
 
     std::function<void(int, int, int)> func = [&](int x, int y, int z) {
         bool v1, v2;
-        size_t idx1, idx2;
+        size_t idx1 = UINT32_MAX, idx2 = UINT32_MAX;
         Vector3i inChunkPos{ x,y,z };
         Vector3i offset = position * ChunkSize;
         Vector3i worldPos = inChunkPos + offset;
 
         if (x < 0 || y < 0 || z < 0) {
             idx1 = world->GetVoxelData(worldPos).index;
-            v1 = world->IsVoxelVoid(worldPos);
         } else {
-            v1 = IsVoxelVoid(inChunkPos);
+            idx1 = GetData(inChunkPos).index;
         }
+
+        v1 = Voxel::IsVoid(idx1);
 
         for (int i = 0; i < 3; i++) {
             Vector3i pos = inChunkPos;
@@ -72,24 +78,28 @@ Model* Chunk::GenerateModel() {
 
             if (pos[i] >= ChunkSize) {
                 Vector3i wp = pos + offset;
-                v2 = world->IsVoxelVoid(wp);
+                idx2 = world->GetVoxelData(wp).index;
             } else {
-                v2 = IsVoxelVoid(pos);
+                idx2 = GetData(pos).index;
             }
+
+            v2 = Voxel::IsVoid(idx2);
 
             auto o = Vector3::one * .5f;
 
             auto angle = -90.;
 
-            size_t matIdx;
+            size_t matIdx = UINT32_MAX;
 
             if (v1) {
                 o[i] = 1.5f;
                 if (v2) {
                     continue;
                 } else {
+                    matIdx = idx2;
                 }
             } else if (v2) {
+                matIdx = idx1;
                 angle = 90;
             } else {
                 continue;
@@ -109,7 +119,7 @@ Model* Chunk::GenerateModel() {
             }
             c.Rotate(q);
             c.Translate(p);
-            mesh->Combine(c);
+            meshes[matIdx]->Combine(c);
         }
     };
     auto a = ChunkSize;
@@ -121,8 +131,10 @@ Model* Chunk::GenerateModel() {
         }
     }
 
-    mod->SetSubMeshesCount(1);
-    mod->SetSubMesh(mesh, 0);
+    mod->SetSubMeshesCount(nMeshes);
+    for (size_t i = 0; i < nMeshes;i++) {
+        mod->SetSubMesh(meshes[i], i);
+    }
     return mod;
 }
 
@@ -134,8 +146,9 @@ Model* Chunk::GenerateModel() {
 
 concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
 concurrent_unordered_map <uint, bool> Voxel::voidMap{};
+concurrent_unordered_map <uint, Material*> Voxel::materialMap{};
 
-void Voxel::Register() {
+void Voxel::Register(Engine& en, SceneRender& ren) {
     builders.insert({ VoxelVoid::GetIdx(), VoxelVoid::Build });
     builders.insert({ VoxelGrass::GetIdx(), VoxelGrass::Build });
     builders.insert({ VoxelDirt::GetIdx(), VoxelDirt::Build });
@@ -147,4 +160,7 @@ void Voxel::Register() {
     voidMap.insert({ VoxelDirt::GetIdx(), VoxelDirt::IsVoid() });
     voidMap.insert({ VoxelStone::GetIdx(), VoxelStone::IsVoid() });
     voidMap.insert({ VoxelSnow::GetIdx(), VoxelSnow::IsVoid() });
+
+    materialMap.insert({ VoxelVoid::GetIdx(), nullptr });
+    materialMap.insert({ VoxelGrass::GetIdx(), &VoxelGrass::CreateMaterial(en,ren) });
 }

@@ -208,12 +208,12 @@
     <ClInclude Include="include\GameEngine\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3D\ModelRenderer.cpp" />
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />
     <ClCompile Include="src\Scene\Component.cpp" />
     <ClCompile Include="src\3D\Camera.cpp" />
     <ClCompile Include="src\3D\Material.cpp" />
-    <ClCompile Include="src\3D\ModelRenderer.cpp" />
     <ClCompile Include="src\3D\Model.cpp" />
     <ClCompile Include="src\3D\Shader.cpp" />
     <ClCompile Include="src\DX\Device.cpp" />
