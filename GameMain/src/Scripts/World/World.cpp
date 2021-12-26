@@ -123,6 +123,9 @@ Model* Chunk::GenerateModel() {
 
 #include "Voxels\VoxelVoid.h"
 #include "Voxels\VoxelGrass.h"
+#include "Voxels\VoxelDirt.h"
+#include "Voxels\VoxelStone.h"
+#include "Voxels\VoxelSnow.h"
 
 concurrency::concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
 concurrency::concurrent_unordered_map <uint, bool> Voxel::voidMap{};
@@ -130,7 +133,13 @@ concurrency::concurrent_unordered_map <uint, bool> Voxel::voidMap{};
 void Voxel::Register() {
     builders.insert({ VoxelVoid::GetIdx(), VoxelVoid::Build });
     builders.insert({ VoxelGrass::GetIdx(), VoxelGrass::Build });
+    builders.insert({ VoxelDirt::GetIdx(), VoxelDirt::Build });
+    builders.insert({ VoxelStone::GetIdx(), VoxelStone::Build });
+    builders.insert({ VoxelSnow::GetIdx(), VoxelSnow::Build });
 
     voidMap.insert({ VoxelVoid::GetIdx(), VoxelVoid::IsVoid() });
     voidMap.insert({ VoxelGrass::GetIdx(), VoxelGrass::IsVoid() });
+    voidMap.insert({ VoxelDirt::GetIdx(), VoxelDirt::IsVoid() });
+    voidMap.insert({ VoxelStone::GetIdx(), VoxelStone::IsVoid() });
+    voidMap.insert({ VoxelSnow::GetIdx(), VoxelSnow::IsVoid() });
 }

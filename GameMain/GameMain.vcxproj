@@ -185,7 +185,10 @@
     <ClInclude Include="src\Scripts\World\Voxel.h" />
     <ClInclude Include="src\Scripts\World\Voxels\Voxel.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelData.h" />
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelDirt.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelGrass.h" />
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelSnow.h" />
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelStone.h" />
     <ClInclude Include="src\Scripts\World\Voxels\VoxelVoid.h" />
     <ClInclude Include="src\Scripts\World\World.h" />
     <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
