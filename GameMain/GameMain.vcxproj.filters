@@ -97,7 +97,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\VertexShader.hlsl" />
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
+    <FxCompile Include="shaders\grass.hlsl" />
+    <FxCompile Include="shaders\snow.hlsl" />
+    <FxCompile Include="shaders\stone.hlsl" />
+    <FxCompile Include="shaders\dirt.hlsl" />
   </ItemGroup>
 </Project>

@@ -6,6 +6,8 @@
 #include "Voxels\VoxelVoid.h"
 #include "Voxels\VoxelGrass.h"
 #include "Voxels\VoxelDirt.h"
+#include "Voxels\VoxelStone.h"
+#include "Voxels\VoxelSnow.h"
 #include <Scripts\Util\PerlinNoise.h>
 
 class StandartGenerator : public WorldGenerator {
@@ -51,6 +53,13 @@ public:
         Vector3 n;
         auto cd = CaveDepth(pos) * 20.;
 
+        if (d < -1.7 && cd < 1 && pos.y > -10) {
+            return *(new VoxelDirt(pos));
+        }
+        else if (d < -1.7 && cd < 1) {
+            return *(new VoxelStone(pos));
+        }
+
         auto v = d - cd;
 
         //v *= 0.5f;
@@ -61,10 +70,27 @@ public:
         d = std::lerp(cd,d,v);
 
         d = max(cd, d);
-        if (cd > 0) {
-            return *(new VoxelVoid(pos));
+
+        if (cd > -5) {
+            if (pos.y > 30 - cd * 2) {
+                return *(new VoxelSnow(pos));
+            }
+            else if (pos.y < 20 && cd > 0) {
+                return *(new VoxelVoid(pos));
+            }
+            else {
+                return *(new VoxelStone(pos));
+            }
         }
-        return *(new VoxelGrass(pos));
+        else {
+            if (pos.y < 20) {
+                return *(new VoxelGrass(pos));
+            }
+            else {
+                return *(new VoxelStone(pos));
+            }
+        }
+
     }
 
 private:

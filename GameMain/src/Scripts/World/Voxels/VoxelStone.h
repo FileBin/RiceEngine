@@ -13,4 +13,12 @@ struct VoxelStone : public Voxel {
     static VoxelStone* Build(VoxelData& data, Vector3i& pos) {
         return new VoxelStone(pos);
     }
+
+    static Material& CreateMaterial(Engine& en, SceneRender& ren) {
+        auto& shader = en.CreateShader();
+        shader.LoadVertexShader(Util::ReadFile(L"stone.cso"), Vertex::GetLayout());
+        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+
+        return ren.CreateMaterial(&shader);
+    }
 };

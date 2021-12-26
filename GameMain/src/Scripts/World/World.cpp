@@ -163,4 +163,7 @@ void Voxel::Register(Engine& en, SceneRender& ren) {
 
     materialMap.insert({ VoxelVoid::GetIdx(), nullptr });
     materialMap.insert({ VoxelGrass::GetIdx(), &VoxelGrass::CreateMaterial(en,ren) });
+    materialMap.insert({ VoxelDirt::GetIdx(), &VoxelDirt::CreateMaterial(en,ren) });
+    materialMap.insert({ VoxelStone::GetIdx(), &VoxelStone::CreateMaterial(en,ren) });
+    materialMap.insert({ VoxelSnow::GetIdx(), &VoxelSnow::CreateMaterial(en,ren) });
 }
