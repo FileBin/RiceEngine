@@ -54,11 +54,13 @@ Model* Chunk::GenerateModel() {
 
     std::function<void(int, int, int)> func = [&](int x, int y, int z) {
         bool v1, v2;
+        size_t idx1, idx2;
         Vector3i inChunkPos{ x,y,z };
         Vector3i offset = position * ChunkSize;
         Vector3i worldPos = inChunkPos + offset;
 
         if (x < 0 || y < 0 || z < 0) {
+            idx1 = world->GetVoxelData(worldPos).index;
             v1 = world->IsVoxelVoid(worldPos);
         } else {
             v1 = IsVoxelVoid(inChunkPos);
@@ -79,10 +81,13 @@ Model* Chunk::GenerateModel() {
 
             auto angle = -90.;
 
+            size_t matIdx;
+
             if (v1) {
                 o[i] = 1.5f;
                 if (v2) {
                     continue;
+                } else {
                 }
             } else if (v2) {
                 angle = 90;
@@ -124,8 +129,8 @@ Model* Chunk::GenerateModel() {
 #include "Voxels\VoxelVoid.h"
 #include "Voxels\VoxelGrass.h"
 
-concurrency::concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
-concurrency::concurrent_unordered_map <uint, bool> Voxel::voidMap{};
+concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
+concurrent_unordered_map <uint, bool> Voxel::voidMap{};
 
 void Voxel::Register() {
     builders.insert({ VoxelVoid::GetIdx(), VoxelVoid::Build });

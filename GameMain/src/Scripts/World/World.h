@@ -155,6 +155,13 @@ public:
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk).IsVoxelVoid(vox);
 	}
+
+	VoxelData GetVoxelData(Vector3i voxelPos) {
+		Vector3 vox = voxelPos;
+		auto chunk = TransformToChunkPos(voxelPos);
+		vox = vox - chunk * Chunk::ChunkSize;
+		return GetChunk(chunk).GetData(vox);
+	}
 #pragma endregion
 #pragma region PrivateFunctions
 private:

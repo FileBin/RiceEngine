@@ -49,6 +49,10 @@ public:
         return Voxel::IsVoid(GetData(voxelPos).index);
     }
 
+    bool IsVoxelVoid(VoxelData data) {
+        return Voxel::IsVoid(data.index);
+    }
+
     VoxelData GetData(Vector3i pos) {
         auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
         while (lock) Sleep(1);
