@@ -19,10 +19,12 @@ struct Voxel {
 public:
 	Vector3i position;
 	bool isVoid;
+	bool isTransparent;
 	virtual VoxelData GetData() = 0;
 protected:
 	static concurrent_unordered_map <uint, std::function<Voxel*(VoxelData&, Vector3i&)>> builders;
 	static concurrent_unordered_map <uint, bool> voidMap;
+	static concurrent_unordered_map <uint, bool> transparentMap;
 	static concurrent_unordered_map <uint, Game::Material*> materialMap;
 public:
 	static Voxel* Build(VoxelData data, Vector3i position) {
@@ -36,6 +38,14 @@ public:
 	static bool IsVoid(uint index) {
 		auto it = voidMap.find(index);
 		if (it != voidMap.end()) {
+			return it->second;
+		}
+		throw std::exception("Voxel index invalid!");
+	}
+
+	static bool IsTransparent(uint index) {
+		auto it = transparentMap.find(index);
+		if (it != transparentMap.end()) {
 			return it->second;
 		}
 		throw std::exception("Voxel index invalid!");

@@ -8,8 +8,10 @@ struct VoxelDarkStone : public Voxel {
     VoxelDarkStone(Vector3i pos) {
         position = pos;
         isVoid = false;
+        isTransparent = false;
     }
     static bool IsVoid() { return false; }
+    static bool IsTransparent() { return false; }
     static uint GetIdx() { return VoxelTypeIndex::V_DARK_STONE; }
     VoxelData GetData() { return { GetIdx() }; }
     static VoxelDarkStone* Build(VoxelData& data, Vector3i& pos) {

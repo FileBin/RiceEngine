@@ -56,6 +56,7 @@ VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool genNormals) {
 
 concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
 concurrent_unordered_map <uint, bool> Voxel::voidMap{};
+concurrent_unordered_map <uint, bool> Voxel::transparentMap{};
 concurrent_unordered_map <uint, Material*> Voxel::materialMap{};
 
 void Voxel::Register(Engine& en, SceneRender& ren) {
@@ -76,6 +77,15 @@ void Voxel::Register(Engine& en, SceneRender& ren) {
     voidMap.insert({ VoxelDarkStone::GetIdx(), VoxelDarkStone::IsVoid() });
     voidMap.insert({ VoxelDarkGrass::GetIdx(), VoxelDarkGrass::IsVoid() });
     voidMap.insert({ VoxelWater::GetIdx(), VoxelWater::IsVoid() });
+
+    transparentMap.insert({ VoxelVoid::GetIdx(), VoxelVoid::IsTransparent() });
+    transparentMap.insert({ VoxelGrass::GetIdx(), VoxelGrass::IsTransparent() });
+    transparentMap.insert({ VoxelDirt::GetIdx(), VoxelDirt::IsTransparent() });
+    transparentMap.insert({ VoxelStone::GetIdx(), VoxelStone::IsTransparent() });
+    transparentMap.insert({ VoxelSnow::GetIdx(), VoxelSnow::IsTransparent() });
+    transparentMap.insert({ VoxelDarkStone::GetIdx(), VoxelDarkStone::IsTransparent() });
+    transparentMap.insert({ VoxelDarkGrass::GetIdx(), VoxelDarkGrass::IsTransparent() });
+    transparentMap.insert({ VoxelWater::GetIdx(), VoxelWater::IsTransparent() });
 
     materialMap.insert({ VoxelVoid::GetIdx(), nullptr });
     materialMap.insert({ VoxelGrass::GetIdx(), &VoxelGrass::CreateMaterial(en,ren) });
