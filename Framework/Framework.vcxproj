@@ -202,6 +202,7 @@
     <ClInclude Include="include\GameEngine\Vectors\Vector2.h" />
     <ClInclude Include="include\GameEngine\Vectors\Vector2i.h" />
     <ClInclude Include="include\GameEngine\Vectors\Vector3.h" />
+    <ClInclude Include="include\GameEngine\Vectors\Vector3f.h" />
     <ClInclude Include="include\GameEngine\Vectors\Vector3i.h" />
     <ClInclude Include="include\GameEngine\version.h" />
     <ClInclude Include="include\GameEngine\stdafx.h" />

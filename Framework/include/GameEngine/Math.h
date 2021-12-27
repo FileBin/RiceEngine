@@ -39,6 +39,20 @@ namespace Game
 			return x;
 		}
 
+		static float Qrsqrt(float x) {
+			float xhalf = 0.5 * x;
+			long i = *(long*)&x;	   //evil bit hack
+			i = 0x5f3759df - (i >> 1); //what a fuck?
+			x = *(float*)&i;
+
+			x *= (1.5f - xhalf * x * x); //1st iteration
+			x *= (1.5f - xhalf * x * x); //2nd iteration
+			//x *= (1.5 - xhalf * x * x); //3rd iteration
+			//x *= (1.5 - xhalf * x * x); //4th iteration
+
+			return x;
+		}
+
 		const static double PI;
 	};
 }

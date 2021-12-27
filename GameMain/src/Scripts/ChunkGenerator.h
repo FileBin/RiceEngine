@@ -46,7 +46,7 @@ class ChunkGenerator : public MonoScript {
 
 		playerPos.y = 30;
 
-		//generator = new FlatGenerator(50.);
+		//generator = new FlatGenerator(25.);
 		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
 		world = new World(generator, &scene.GetEngine(), &scene.GetRender());
 
@@ -85,7 +85,7 @@ class ChunkGenerator : public MonoScript {
 		auto newPos = GetRender().GetCamera(0).transform.pos;
 		auto playerChunk = World::TransformToChunkPos(newPos);
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
-			if (!unloading) { // fix unloading
+			if (!unloading) {
 				create_task([this]() { UnloadChunks(); });
 				loadingQueue = positions;
 			}
@@ -202,7 +202,6 @@ class ChunkGenerator : public MonoScript {
 			}
 		}
 
-		//auto time = steady_clock::now();
 		sRen.Wait(enabled);
 		sRen.Lock();
 		while (!queueObj.empty()) {
@@ -210,16 +209,10 @@ class ChunkGenerator : public MonoScript {
 			queueObj.pop();
 			o.first->Disable();
 			world->SetChunkStatus(o.second, Chunk::Unloaded);
-			//world->UnloadChunk(o.first);
-			/*if ((steady_clock::now() - time).count() > 100000) {
-				loadingQueue = positions;
-				unloading = false;
-				sRen.Unlock();
-				return;
-			}*/
 		}
 		sRen.Unlock();
-		unloading = false;
+		unloading = false;//it was risky but still working
+						  //if programm was stopped here, move this to the end of Unload
 		while (!queuePos.empty()) {
 			world->UnloadChunk(queuePos.front());
 			queuePos.pop();

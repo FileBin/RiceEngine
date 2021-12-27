@@ -254,6 +254,9 @@ num& Vector3i::operator[](size_t idx) {
     throw std::exception("Vector3i is out of range!");
 }
 
+#pragma endregion
+
+#pragma region Vector3f
 Vector3f& Vector3f::operator=(Vector3& v) {
     x = v.x;
     y = v.y;
@@ -268,7 +271,47 @@ Vector3f& Vector3f::operator+=(Vector3f& v) {
     return *this;
 }
 
+float Vector3f::Length() {
+    return sqrt(SqrLength());
+}
+
+float Vector3f::SqrLength() {
+    return x*x + y*y + z*z;
+}
+
+Vector3f Vector3f::Normalized() {
+    auto l = Math::Qrsqrt(SqrLength());
+    return { x * l, y * l, z * l };
+}
+
+float Vector3f::Dot(Vector3f a, Vector3f b) {
+    return a.x * b.x + a.y * b.y * a.z * b.z;
+}
+
+Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
+    return {
+    left.y * right.z - left.z * right.y,
+    left.z * right.x - left.x * right.z,
+    left.x * right.y - left.y * right.x };
+}
+
+Vector3f operator+(Vector3f a, Vector3f b) {
+    return { a.x + b.z, a.y + b.y, a.z + b.z };
+}
+
+Vector3f operator-(Vector3f a, Vector3f b) {
+    return { a.x - b.x, a.y - b.y, a.z - b.z };
+}
+
+Vector3f operator*(Vector3f a, float b) {
+    return { a.x * b, a.y * b, a.z * b };
+}
+
+Vector3f operator/(Vector3f a, float b) {
+    return { a.x / b, a.y / b, a.z / b };
+}
 #pragma endregion
+
 
 #pragma region Quaternion
 Quaternion operator*(Quaternion A, double b) {

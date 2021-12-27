@@ -18,6 +18,7 @@ namespace Game {
 		void Translate(Vector3 offset);
 		void Scale(Vector3 scale);
 		void Combine(Mesh& other);
+		void RecalculateNormals();
 	};
 
 	class Model {

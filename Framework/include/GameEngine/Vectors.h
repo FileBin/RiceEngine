@@ -16,11 +16,7 @@ struct Vector2f {
 	float x, y;
 };
 
-struct Vector3f {
-	float x, y, z;
-	Vector3f& operator=(Vector3& v);
-	Vector3f& operator+=(Vector3f& v);
-};
+#include "Vectors/Vector3f.h"
 
 struct Vector4f {
 	float x, y, z, w;

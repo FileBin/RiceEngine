@@ -96,6 +96,7 @@ Model* Chunk::GenerateModel() {
 
     mod->SetSubMeshesCount(nMeshes);
     for (size_t i = 0; i < nMeshes; i++) {
+
         mod->SetSubMesh(meshes[i], i);
     }
     return mod;
@@ -138,7 +139,7 @@ Model* Chunk::GenerateSmoothModel() {
             if (!Voxel::IsVoid(vox.index))
                 matIdx = vox.index;
             //norms[i] = vox.normal;
-            if (depth > 0) {
+            if (depth >= 0) {
                 _case += pow;
             }
             pow *= 2;
@@ -201,7 +202,9 @@ Model* Chunk::GenerateSmoothModel() {
 
     mod->SetSubMeshesCount(nMeshes);
     for (size_t i = 0; i < nMeshes; i++) {
-        mod->SetSubMesh(meshes[i], i);
+        auto mesh = meshes[i];
+        mesh->RecalculateNormals();
+        mod->SetSubMesh(mesh, i);
     }
 
     return mod;

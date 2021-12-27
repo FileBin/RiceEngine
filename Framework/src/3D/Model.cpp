@@ -1,7 +1,7 @@
 ﻿#include <GameEngine/Model.h>
 
 namespace Game {
-
+	using std::vector;
 	const Mesh Mesh::quad = {
 		{
 			{ {-.5f, -.5f, 0 }, { 0,0,1 } },
@@ -56,6 +56,36 @@ namespace Game {
 		auto m = indexBuffer.size();
 		for (size_t i = n; i < m; i++) {
 			indexBuffer[i] += s;
+		}
+	}
+
+	void Mesh::RecalculateNormals() {
+		auto vbsize = vertexBuffer.size();
+		auto ibsize = indexBuffer.size();
+		vector<dbl> nCounts(vbsize);
+		for (auto idx : indexBuffer) {
+			nCounts[idx] += 1;
+		}
+		for (size_t i = 0; i < vertexBuffer.size(); i++) {
+			auto& n = vertexBuffer[i].normal;
+			n = { 0,0,0 };
+		}
+		for (size_t i = 2; i < ibsize; i+=3) {
+			Vertex* triangle[3] = {
+				&vertexBuffer[indexBuffer[i-2]],
+				&vertexBuffer[indexBuffer[i-1]],
+				&vertexBuffer[indexBuffer[i]],
+			};
+			auto v1 = triangle[1]->position - triangle[2]->position;
+			auto v2 = triangle[2]->position - triangle[0]->position;
+			auto n = Vector3f::Cross(v1, v2).Normalized();
+			triangle[0]->normal += n;
+			triangle[1]->normal += n;
+			triangle[2]->normal += n;
+		}
+		for (size_t i = 0; i < vertexBuffer.size(); i++) {
+			auto& n = vertexBuffer[i].normal;
+			n = n.Normalized();
 		}
 	}
 
