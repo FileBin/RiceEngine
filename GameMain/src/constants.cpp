@@ -1,7 +1,7 @@
 ﻿#include "Scripts\World\Chunk.h"
 #include "Scripts\Util\Tables.h"
 
-const int Chunk::ChunkSize = 16;
+const int Chunk::ChunkSize = 8;
 
 #pragma region Tables
 

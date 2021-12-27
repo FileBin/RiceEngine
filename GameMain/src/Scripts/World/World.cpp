@@ -39,10 +39,10 @@ void Chunk::Generate() {
     }
 }
 
-VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool genNormals) {
+VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
     auto t = voxelPos + position * ChunkSize;
-    auto altitude = t.y - map->Get(voxelPos.x, voxelPos.z);
-    return gen->GetVoxelData(t, altitude);
+    auto altitude = t.y - hmap->Get(voxelPos.x, voxelPos.z);
+    return gen->GetVoxelData(t, altitude, transp);
 }
 
 #include "Voxels\VoxelVoid.h"

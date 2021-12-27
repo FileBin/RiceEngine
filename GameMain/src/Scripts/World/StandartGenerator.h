@@ -55,11 +55,17 @@ public:
         return terrainHeight;
     }
 
-    VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude) {
+    VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude, bool transparancy) {
         float d = (float)groundAltitude;
+
+        auto py = (float)pos.y;
+        if (transparancy) {
+            d = Math::Max(-d, py - waterLevel);
+        }
+
         if (groundAltitude > 0) {
-            if (pos.y == waterLevel) {
-                return { VoxelTypeIndex::V_WATER, waterLevel}; // lakes
+            if (py <= waterLevel) {
+                return { VoxelTypeIndex::V_WATER, d}; // lakes
             }
             else {
                 return { VoxelTypeIndex::V_VOID, d }; // sky
@@ -81,18 +87,18 @@ public:
 
         d = max(cd, d);
 
-        if (pos.y > -10 * d && pos.y < 5 *  d) {
+        if (py > -10.f * d && py < 5 *  d) {
             return { VoxelTypeIndex::V_DIRT, d }; // partially underground layer
         }
-        else if (d < -1.7 && cd < 2) {
+        else if (d < -1.7f && cd < 2) {
             return { VoxelTypeIndex::V_DARK_STONE, d }; // fully underground
         }
 
         if (cd > -5) {
-            if (pos.y > 30 - cd * 2) {
+            if (py > 30.f - cd * 2) {
                 return { VoxelTypeIndex::V_SNOW, d }; // mountain tops
             }
-            else if (pos.y < 20 && cd > 0) {
+            else if (py < 20.f && cd > 0) {
                 return { VoxelTypeIndex::V_VOID, d }; // caves
             }
             else {
@@ -100,8 +106,8 @@ public:
             }
         }
         else {
-            if (pos.y < 20 - cd / 2.0) {
-                if (pos.y < - cd / 1.7) {
+            if (py < 20.f - cd / 2.0f) {
+                if (py < - cd / 1.7f) {
                     return { VoxelTypeIndex::V_DARK_GRASS, d }; // grass bottom layer
                 }
                 else {

@@ -118,6 +118,8 @@ Model* Chunk::GenerateSmoothModel() {
         m->layout = Vertex::GetLayout();
     }
 
+    bool transp = false;
+
     function<void(num, num, num)> func = [&](num a, num b, num c) {
         Vector3i inChunkPos;
         inChunkPos.x = a - 1;
@@ -129,20 +131,38 @@ Model* Chunk::GenerateSmoothModel() {
 
         auto d = new float[8];
         //auto norms = new Vector3[8];
-        int _case = 0;
-        int pow = 1;
+        byte _case = 0;
+        byte pow = 1;
 
         for (byte i = 0; i < 8; i++) {
-            auto vox = world->GetVoxelData(worldPos + Tables::cubeVertices[i]);
+            VoxelData vox;
+            auto pos = worldPos + Tables::cubeVertices[i];
+            vox = world->GetVoxelData(pos);
             float depth = vox.depth;
+            if (transp) {
+                if(Voxel::IsTransparent(vox.index)) {
+                    depth = world->GetTransparentVoxelDepth(pos, vox.index);
+                } else {
+                    depth = abs(depth);
+                }
+            }
             d[i] = depth;
-            if (!Voxel::IsVoid(vox.index))
-                matIdx = vox.index;
+            if (!Voxel::IsVoid(vox.index)) {
+                if (transp) {
+                    if (Voxel::IsTransparent(vox.index)) {
+                        matIdx = vox.index;
+                    }
+                } else {
+                    if (!Voxel::IsTransparent(vox.index)) {
+                        matIdx = vox.index;
+                    }
+                }
+            }
             //norms[i] = vox.normal;
             if (depth >= 0) {
                 _case += pow;
             }
-            pow *= 2;
+            pow <<= 1; // *= 2
         }
 
         function<Vector3(int)> edgeToVert = [&](int e) {
@@ -192,6 +212,16 @@ Model* Chunk::GenerateSmoothModel() {
     };
 
     auto a = ChunkSize;
+    for (int i = 0; i < a; i++) {
+        for (int j = 0; j < a; j++) {
+            for (int k = 0; k < a; k++) {
+                func(i, j, k);
+            }
+        }
+    }
+
+    transp = true;
+
     for (int i = 0; i < a; i++) {
         for (int j = 0; j < a; j++) {
             for (int k = 0; k < a; k++) {

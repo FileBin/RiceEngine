@@ -143,6 +143,12 @@ public:
 		}
 	}
 
+	float GetTransparentVoxelDepth(Vector3i worldPos, size_t idx) {
+		auto chunk = TransformToChunkPos(worldPos);
+		worldPos = worldPos - chunk * Chunk::ChunkSize;
+		return GetChunk(chunk).GetTranspDepth(worldPos, idx);
+	}
+
 	Voxel& GetVoxel(Vector3i voxelPos) {
 		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
