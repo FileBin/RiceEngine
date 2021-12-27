@@ -53,6 +53,21 @@ namespace Game
 			return x;
 		}
 
+		template<typename T>
+		static T Max(T a, T b) { return max(a, b); }
+
+		template<typename T>
+		static T Clamp(T v, T a, T b) { return min(max(v, a), b); }
+
+		template<typename T>
+		static T Clamp01(T v) { return Clamp<T>(v, 0, 1); }
+
+		template<typename T>
+		static T Min(T a, T b) { return min(a, b); }
+
+		template<typename T>
+		static T Lerp(T a, T b,T t) { return a*(1 - t) + b*t; }
+
 		const static double PI;
 	};
 }

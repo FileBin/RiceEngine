@@ -6,11 +6,16 @@
 #include "Material.h"
 
 namespace Game {
+
 	using namespace Util;
 	struct Mesh {
+		struct Bounds {
+			Vector3f Min{}, Max{};
+		};
+		Bounds bounds;
 		std::vector<Vertex> vertexBuffer = {};
 		std::vector<UINT> indexBuffer = {};
-		VertexLayout layout = {};
+		VertexLayout layout = Vertex::GetLayout();
 
 		static const Mesh quad;
 
@@ -19,6 +24,7 @@ namespace Game {
 		void Scale(Vector3 scale);
 		void Combine(Mesh& other);
 		void RecalculateNormals();
+		void ReclaculateBounds();
 	};
 
 	class Model {

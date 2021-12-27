@@ -1,8 +1,10 @@
 ﻿#include <GameEngine/Model.h>
+#include <GameEngine\Math.h>
 
 namespace Game {
 	using std::vector;
 	const Mesh Mesh::quad = {
+		{ {-.5f, -.5f, 0}, {.5f, .5f, 0} },
 		{
 			{ {-.5f, -.5f, 0 }, { 0,0,1 } },
 			{ {.5f, -.5f, 0 }, { 0,0,1 } },
@@ -86,6 +88,15 @@ namespace Game {
 		for (size_t i = 0; i < vertexBuffer.size(); i++) {
 			auto& n = vertexBuffer[i].normal;
 			n = n.Normalized();
+		}
+	}
+
+	void Mesh::ReclaculateBounds() {
+		for (auto& vert : vertexBuffer) {
+			auto& min = bounds.Min;
+			auto& max = bounds.Max;
+			min = min.ApplyFunc([&vert](float x, size_t i) { return Math::Min(x, vert.position[i]); });
+			max = max.ApplyFunc([&vert](float x, size_t i) { return Math::Max(x, vert.position[i]); });
 		}
 	}
 
