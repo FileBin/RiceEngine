@@ -12,6 +12,7 @@ namespace Game {
 		struct Bounds {
 			Vector3f Min{}, Max{};
 			std::vector<Vector3f> GetCorners();
+			std::vector<Vector3f> GetPoints();
 			Vector3f GetSize();
 		};
 		Bounds bounds;

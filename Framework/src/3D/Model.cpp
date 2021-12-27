@@ -112,15 +112,14 @@ namespace Game {
 	}
 
 	bool Mesh::CheckVisiblity(ConstantBufferData WVP) {
-		auto boxSize = bounds.GetSize() * 2.f;
-		auto corners = bounds.GetCorners();
-		for (size_t i = 0; i < 8; i++) {
-			auto proj = corners[i] * WVP.World * WVP.View;
-			auto len = proj.Length();
-			if (len < boxSize.x && len < boxSize.y && len < boxSize.z) return true;
-			proj = proj * WVP.Projection;
-			auto b = proj.z * 1.2f;
-			if (b <= 0 || isnan(b) || isinf(b)) continue;
+		auto corners = bounds.GetPoints();
+		auto matrix = WVP.World * WVP.View * WVP.Projection;
+		for (size_t i = 0; i < 9; i++) {
+			auto proj = corners[i] * matrix;
+			//auto len = proj.Length();
+			//if (len < boxSize.x && len < boxSize.y && len < boxSize.z) return true;
+			//proj = proj * WVP.Projection;
+			auto b = proj.z * 1.5f;
 			if (proj.x < b && proj.x > -b && proj.y < b && proj.y > -b) { return true; }
 		}
 		return false;
@@ -166,6 +165,21 @@ namespace Game {
 			Max,
 		};
 	}
+
+	std::vector<Vector3f> Mesh::Bounds::GetPoints() {
+		return {
+			(Min + Max)*.5f,
+			Min,
+			{ Max.x, Min.y, Min.z },
+			{ Min.x, Max.y, Min.z },
+			{ Max.x, Max.y, Min.z },
+			{ Min.x, Min.y, Max.z },
+			{ Max.x, Min.y, Max.z },
+			{ Min.x, Max.y, Max.z },
+			Max,
+		};
+	}
+
 	Vector3f Mesh::Bounds::GetSize() {
 		return Max - Min;
 	}
