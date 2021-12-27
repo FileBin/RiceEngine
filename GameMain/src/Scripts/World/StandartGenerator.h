@@ -59,7 +59,7 @@ public:
         float d = (float)groundAltitude;
         if (groundAltitude > 0) {
             if (pos.y == waterLevel) {
-                return { VoxelTypeIndex::V_WATER, d + waterLevel}; // lakes
+                return { VoxelTypeIndex::V_WATER, waterLevel}; // lakes
             }
             else {
                 return { VoxelTypeIndex::V_VOID, d }; // sky
@@ -81,7 +81,7 @@ public:
 
         d = max(cd, d);
 
-        if (d < -1.7 && cd < 2 && pos.y > -10) {
+        if (pos.y > -10 * d && pos.y < 5 *  d) {
             return { VoxelTypeIndex::V_DIRT, d }; // partially underground layer
         }
         else if (d < -1.7 && cd < 2) {
