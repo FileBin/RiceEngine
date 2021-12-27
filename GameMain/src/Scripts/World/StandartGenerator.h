@@ -35,6 +35,7 @@ public:
     }
 
     const dbl sMultipiler = 2;
+    const dbl waterLevel = -7;
 
     dbl GetTerrainHeight(Vector2 pos) {
 
@@ -56,11 +57,9 @@ public:
 
     VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude) {
         float d = (float)groundAltitude;
-        float d2 = pos.y + 7;
-        d = Math::Min(d, d2);
         if (groundAltitude > 0) {
-            if (pos.y == -7) {
-                return { VoxelTypeIndex::V_WATER, d }; // lakes
+            if (pos.y == waterLevel) {
+                return { VoxelTypeIndex::V_WATER, d + waterLevel}; // lakes
             }
             else {
                 return { VoxelTypeIndex::V_VOID, d }; // sky
