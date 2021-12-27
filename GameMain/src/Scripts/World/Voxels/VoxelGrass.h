@@ -8,8 +8,10 @@ struct VoxelGrass : public Voxel {
     VoxelGrass(Vector3i pos) {
         position = pos;
         isVoid = false;
+        isTransparent = false;
     }
     static bool IsVoid() { return false; }
+    static bool IsTransparent() { return false; }
     static uint GetIdx() { return VoxelTypeIndex::V_GRASS; }
     VoxelData GetData() { return { GetIdx() }; }
     static VoxelGrass* Build(VoxelData& data, Vector3i& pos) {
