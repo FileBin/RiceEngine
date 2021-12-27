@@ -35,7 +35,7 @@ public:
     }
 
     const dbl sMultipiler = 2;
-    const dbl waterLevel = -7;
+    const float waterLevel = -8;
 
     dbl GetTerrainHeight(Vector2 pos) {
 
