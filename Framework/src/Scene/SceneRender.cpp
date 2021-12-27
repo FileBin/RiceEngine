@@ -50,6 +50,9 @@ namespace Game {
 					}
 					continue;
 				}
+
+				if (!mesh.CheckVisiblity(cb)) continue;
+
 				Buffer *ib, *vb;
 				auto iIt = indexBuffers.find(&mesh);
 				if (iIt != indexBuffers.end()) {
@@ -71,6 +74,8 @@ namespace Game {
 
 		for (auto pair = transparentQ.begin(); pair != transparentQ.end(); pair++) {
 			auto& m = *pair->first;
+
+			if (!m.CheckVisiblity(pair->second)) continue;
 
 			device->LoadBufferSubresource(constantBuffer, pair->second);
 			device->SetActiveVSConstantBuffer(constantBuffer);

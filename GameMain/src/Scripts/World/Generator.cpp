@@ -204,6 +204,7 @@ Model* Chunk::GenerateSmoothModel() {
     for (size_t i = 0; i < nMeshes; i++) {
         auto mesh = meshes[i];
         mesh->RecalculateNormals();
+        mesh->ReclaculateBounds();
         mod->SetSubMesh(mesh, i);
     }
 

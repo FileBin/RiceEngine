@@ -4,6 +4,7 @@
 
 struct Quaternion;
 struct Vector3;
+struct Vector3f;
 
 struct Matrix4x4 {
 public:
@@ -30,6 +31,33 @@ Matrix4x4 operator*(Matrix4x4 m1, Matrix4x4 m2);
 
 struct Matrix4x4f {
 public:
+
+	Matrix4x4f(
+		float _11, float _12, float _13, float _14,
+		float _21, float _22, float _23, float _24,
+		float _31, float _32, float _33, float _34,
+		float _41, float _42, float _43, float _44) {
+
+		c11 = _11;
+		c12 = _12;
+		c13 = _13;
+		c14 = _14;
+
+		c21 = _21;
+		c22 = _22;
+		c23 = _23;
+		c24 = _24;
+
+		c31 = _31;
+		c32 = _32;
+		c33 = _33;
+		c34 = _34;
+
+		c41 = _41;
+		c42 = _42;
+		c43 = _43;
+		c44 = _44;
+	}
 
 	Matrix4x4f(const Matrix4x4& mat) {
 		c11 = mat.c11;
@@ -86,3 +114,6 @@ public:
 		c31, c32, c33, c34,
 		c41, c42, c43, c44;
 };
+
+Vector3f operator*(Vector3f vec, Matrix4x4f mat);
+Matrix4x4f operator*(Matrix4x4f a, Matrix4x4f b);

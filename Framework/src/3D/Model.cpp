@@ -92,12 +92,42 @@ namespace Game {
 	}
 
 	void Mesh::ReclaculateBounds() {
-		for (auto& vert : vertexBuffer) {
+		if (vertexBuffer.empty()) return;
+		bounds.Min = vertexBuffer[0].position;
+		bounds.Max = bounds.Min;
+		auto n = vertexBuffer.size();
+		for (size_t i = 1; i < n; i++) {
+			auto& vert = vertexBuffer[i];
 			auto& min = bounds.Min;
 			auto& max = bounds.Max;
-			min = min.ApplyFunc([&vert](float x, size_t i) { return Math::Min(x, vert.position[i]); });
-			max = max.ApplyFunc([&vert](float x, size_t i) { return Math::Max(x, vert.position[i]); });
+			min.x = Math::Min(min.x, vert.position.x);
+			min.y = Math::Min(min.y, vert.position.y);
+			min.z = Math::Min(min.z, vert.position.z);
+
+			min.x = Math::Max(max.x, vert.position.x);
+			max.y = Math::Max(max.y, vert.position.y);
+			max.z = Math::Max(max.z, vert.position.z);
+			//max = max.ApplyFunc([&vert](float x, size_t idx) { return Math::Max(x, vert.position[idx]); });
 		}
+	}
+
+	bool Mesh::CheckVisiblity(ConstantBufferData WVP) {
+		auto boxSize = bounds.GetSize() * 2.f;
+		auto corners = bounds.GetCorners();
+		for (size_t i = 0; i < 8; i++) {
+			auto proj = corners[i] * WVP.World * WVP.View;
+			auto len = proj.Length();
+			if (len < boxSize.x && len < boxSize.y && len < boxSize.z) return true;
+			proj = proj * WVP.Projection;
+			auto b = proj.z * 1.2f;
+			if (b <= 0 || isnan(b) || isinf(b)) continue;
+			if (proj.x < b && proj.x > -b && proj.y < b && proj.y > -b) { return true; }
+		}
+		return false;
+	}
+
+	bool Model::CheckVisiblity(ConstantBufferData WVP, size_t idx) {
+		return subMeshes[idx]->CheckVisiblity(WVP);
 	}
 
 	size_t Model::GetSubMeshesCount() {
@@ -122,5 +152,21 @@ namespace Game {
 
 	void Model::SetSubMesh(Mesh* subMesh, size_t idx) {
 		subMeshes[idx] = subMesh;
+	}
+
+	std::vector<Vector3f> Mesh::Bounds::GetCorners() {
+		return {
+			Min,
+			{ Max.x, Min.y, Min.z },
+			{ Min.x, Max.y, Min.z },
+			{ Max.x, Max.y, Min.z },
+			{ Min.x, Min.y, Max.z },
+			{ Max.x, Min.y, Max.z },
+			{ Min.x, Max.y, Max.z },
+			Max,
+		};
+	}
+	Vector3f Mesh::Bounds::GetSize() {
+		return Max - Min;
 	}
 }

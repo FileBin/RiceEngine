@@ -11,6 +11,8 @@ namespace Game {
 	struct Mesh {
 		struct Bounds {
 			Vector3f Min{}, Max{};
+			std::vector<Vector3f> GetCorners();
+			Vector3f GetSize();
 		};
 		Bounds bounds;
 		std::vector<Vertex> vertexBuffer = {};
@@ -25,10 +27,13 @@ namespace Game {
 		void Combine(Mesh& other);
 		void RecalculateNormals();
 		void ReclaculateBounds();
+
+		bool CheckVisiblity(ConstantBufferData WVPm);
 	};
 
 	class Model {
 	public:
+		bool CheckVisiblity(ConstantBufferData WVPm, size_t meshIdx);
 		size_t GetSubMeshesCount();
 		void SetSubMeshesCount(size_t count);
 		void SetSubMesh(Mesh* subMesh, size_t idx);

@@ -2,6 +2,7 @@
 #include <GameEngine/Math.h>
 
 #include <GameEngine/Vectors/Vector3.h>
+#include <GameEngine/Vectors/Vector3f.h>
 #include <GameEngine/Vectors/Quaternion.h>
 
 const Matrix4x4 Matrix4x4::identity = {
@@ -70,6 +71,15 @@ Vector3 operator*(Vector3 vec, Matrix4x4 mat) {
     };
 }
 
+
+Vector3f operator*(Vector3f vec, Matrix4x4f mat) {
+    return {
+        vec.x * mat.c11 + vec.y * mat.c12 + vec.z * mat.c13 + mat.c14,
+        vec.x * mat.c21 + vec.y * mat.c22 + vec.z * mat.c23 + mat.c24,
+        vec.x * mat.c31 + vec.y * mat.c32 + vec.z * mat.c33 + mat.c34,
+    };
+}
+
 Matrix4x4 operator*(Matrix4x4 a, Matrix4x4 b) {
     return {
         a.c11 * b.c11 + a.c21 * b.c12 + a.c31 * b.c13 + a.c41 * b.c14,
@@ -93,4 +103,30 @@ Matrix4x4 operator*(Matrix4x4 a, Matrix4x4 b) {
         a.c14 * b.c41 + a.c24 * b.c42 + a.c34 * b.c43 + a.c44 * b.c44,
     };
 }
+
+Matrix4x4f operator*(Matrix4x4f a, Matrix4x4f b) {
+    return {
+        a.c11 * b.c11 + a.c21 * b.c12 + a.c31 * b.c13 + a.c41 * b.c14,
+        a.c12 * b.c11 + a.c22 * b.c12 + a.c32 * b.c13 + a.c42 * b.c14,
+        a.c13 * b.c11 + a.c23 * b.c12 + a.c33 * b.c13 + a.c43 * b.c14,
+        a.c14 * b.c11 + a.c24 * b.c12 + a.c34 * b.c13 + a.c44 * b.c14,
+
+        a.c11 * b.c21 + a.c21 * b.c22 + a.c31 * b.c23 + a.c41 * b.c24,
+        a.c12 * b.c21 + a.c22 * b.c22 + a.c32 * b.c23 + a.c42 * b.c24,
+        a.c13 * b.c21 + a.c23 * b.c22 + a.c33 * b.c23 + a.c43 * b.c24,
+        a.c14 * b.c21 + a.c24 * b.c22 + a.c34 * b.c23 + a.c44 * b.c24,
+
+        a.c11 * b.c31 + a.c21 * b.c32 + a.c31 * b.c33 + a.c41 * b.c34,
+        a.c12 * b.c31 + a.c22 * b.c32 + a.c32 * b.c33 + a.c42 * b.c34,
+        a.c13 * b.c31 + a.c23 * b.c32 + a.c33 * b.c33 + a.c43 * b.c34,
+        a.c14 * b.c31 + a.c24 * b.c32 + a.c34 * b.c33 + a.c44 * b.c34,
+
+        a.c11 * b.c41 + a.c21 * b.c42 + a.c31 * b.c43 + a.c41 * b.c44,
+        a.c12 * b.c41 + a.c22 * b.c42 + a.c32 * b.c43 + a.c42 * b.c44,
+        a.c13 * b.c41 + a.c23 * b.c42 + a.c33 * b.c43 + a.c43 * b.c44,
+        a.c14 * b.c41 + a.c24 * b.c42 + a.c34 * b.c43 + a.c44 * b.c44,
+    };
+}
+
+
 
