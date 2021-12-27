@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+
 struct Vector3;
 
 struct Vector3f {
@@ -13,6 +15,11 @@ struct Vector3f {
 
 	static float Dot(Vector3f a, Vector3f b);
 	static Vector3f Cross(Vector3f a, Vector3f b);
+
+	float& operator[](size_t i);
+
+	Vector3f ApplyFunc(std::function<float(float)> func);
+	Vector3f ApplyFunc(std::function<float(size_t, float)> func);
 };
 
 Vector3f operator+(Vector3f a, Vector3f b);

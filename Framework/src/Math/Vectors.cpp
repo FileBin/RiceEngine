@@ -176,8 +176,8 @@ Vector3 Vector3::operator/=(double v) {
     return *this;
 }
 
-Vector3 operator+(Vector3 A, Vector3 b) {
-    return { A.x + b.x, A.y + b.y, A.z + b.z };
+Vector3 operator+(Vector3 a, Vector3 b) {
+    return { a.x + b.x, a.y + b.y, a.z + b.z };
 }
 #pragma endregion
 
@@ -293,6 +293,32 @@ Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
     left.y * right.z - left.z * right.y,
     left.z * right.x - left.x * right.z,
     left.x * right.y - left.y * right.x };
+}
+
+float& Vector3f::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    if (idx == 2)
+        return z;
+    throw std::exception("Vector3f is out of range!");
+}
+
+Vector3f Vector3f::ApplyFunc(std::function<float(float)> func) {
+    return {
+        func(x),
+        func(y),
+        func(z)
+    };
+}
+
+Vector3f Vector3f::ApplyFunc(std::function<float(size_t, float)> func) {
+    return {
+        func(0, x),
+        func(1, y),
+        func(2, z)
+    };
 }
 
 Vector3f operator+(Vector3f a, Vector3f b) {

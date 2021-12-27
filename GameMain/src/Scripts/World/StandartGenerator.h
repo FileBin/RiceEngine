@@ -57,7 +57,7 @@ public:
     VoxelData GetVoxelData(Vector3 pos, dbl groundAltitude) {
         float d = (float)groundAltitude;
         float d2 = pos.y + 7;
-        d = min(d, d2);
+        d = Math::Min(d, d2);
         if (groundAltitude > 0) {
             if (pos.y == -7) {
                 return { VoxelTypeIndex::V_WATER, d }; // lakes
@@ -76,16 +76,16 @@ public:
         v *= 0.5f;
         v += 2.;
 
-        v = min(max(v, 0), 1);
+        v = Math::Clamp01(v);
 
-        d = std::lerp(cd, d, v); //smoothing between caves and terrain
+        d = Math::Lerp(cd, d, v); //smoothing between caves and terrain
 
         d = max(cd, d);
 
-        if (d < -1.7 && cd < 1 && pos.y > -10) {
+        if (d < -1.7 && cd < 2 && pos.y > -10) {
             return { VoxelTypeIndex::V_DIRT, d }; // partially underground layer
         }
-        else if (d < -1.7 && cd < 1) {
+        else if (d < -1.7 && cd < 2) {
             return { VoxelTypeIndex::V_DARK_STONE, d }; // fully underground
         }
 
