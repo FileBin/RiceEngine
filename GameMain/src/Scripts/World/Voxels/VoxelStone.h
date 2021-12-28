@@ -8,6 +8,7 @@ struct VoxelStone : public Voxel {
         isVoid = false;
         isTransparent = false;
     }
+    static const Vector4f color;
     static bool IsVoid() { return false; }
     static bool IsTransparent() { return false; }
     static uint GetIdx() { return VoxelTypeIndex::V_STONE; }
@@ -19,7 +20,7 @@ struct VoxelStone : public Voxel {
     static Material& CreateMaterial(SceneRender& ren) {
         auto& shader = ren.GetShader(L"Diffuse");
         auto& mat = ren.CreateMaterial(L"Stone", &shader, { Var(L"time"), Var(L"color") });
-        mat.SetVar<Vector4f>(L"color", { 0.3f, 0.3f, 0.3f, 1.f });
+        mat.SetVar<Vector4f>(L"color", color);
         mat.UpdateBuffer();
         return mat;
     }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <GameEngine\Vectors\Vector3i.h>
+#include <GameEngine\Vectors\Vector4f.h>
 #include "VoxelData.h"
 #include <concurrent_unordered_map.h>
 

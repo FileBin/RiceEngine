@@ -11,33 +11,93 @@
     <ClCompile Include="src\Scripts\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Scripts.h" />
-    <ClInclude Include="src\Scripts\CameraMoverScript.h" />
-    <ClInclude Include="src\Scripts\ChunkGenerator.h" />
-    <ClInclude Include="src\Scripts\InitSceneScript.h" />
-    <ClInclude Include="src\Scripts\MsaaTestScript.h" />
-    <ClInclude Include="src\Scripts\PreInitScript.h" />
-    <ClInclude Include="src\Scripts\SampleScene.h" />
-    <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />
-    <ClInclude Include="src\Scripts\Util\Tables.h" />
-    <ClInclude Include="src\Scripts\World\Chunk.h" />
-    <ClInclude Include="src\Scripts\World\FlatGenerator.h" />
-    <ClInclude Include="src\Scripts\World\HeightMap.h" />
-    <ClInclude Include="src\Scripts\World\StandartGenerator.h" />
-    <ClInclude Include="src\Scripts\World\Voxel.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\Voxel.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelDarkGrass.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelDarkStone.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelData.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelDirt.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelGrass.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelSand.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelSnow.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelStone.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelVoid.h" />
-    <ClInclude Include="src\Scripts\World\Voxels\VoxelWater.h" />
-    <ClInclude Include="src\Scripts\World\World.h" />
-    <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
-    <ClInclude Include="src\Scripts\World\WorldSeed.h" />
+    <ClInclude Include="src\Scripts\MsaaTestScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\PreInitScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\InitSceneScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\SampleScene.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\CameraMoverScript.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\ChunkGenerator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Chunk.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxel.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\World.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\WorldGenerator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\HeightMap.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\FlatGenerator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\Voxel.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelGrass.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelVoid.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\StandartGenerator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\WorldSeed.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\Util\PerlinNoise.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelData.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelStone.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelDirt.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelSnow.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelDarkGrass.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelDarkStone.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelWater.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\Util\Tables.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelSand.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\DiffuseShader.hlsl" />
+    <FxCompile Include="shaders\VertexShader.hlsl" />
   </ItemGroup>
 </Project>
