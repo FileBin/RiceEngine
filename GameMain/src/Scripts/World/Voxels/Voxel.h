@@ -13,7 +13,7 @@ namespace Game {
 	class SceneRender;
 }
 
-enum VoxelTypeIndex { V_VOID, V_GRASS, V_DARK_GRASS, V_STONE, V_DARK_STONE, V_DIRT, V_SNOW, V_WATER };
+enum VoxelTypeIndex { V_VOID, V_GRASS, V_DARK_GRASS, V_STONE, V_DARK_STONE, V_DIRT, V_SNOW, V_SAND, V_WATER };
 
 struct Voxel {
 public:
@@ -60,5 +60,13 @@ public:
 		throw std::exception("Material index invalid!");
 	}
 
-	static void Register(Game::SceneRender& ren);
+	template<typename V>
+	static void registerVoxel(Game::Engine& en, Game::SceneRender& ren) {
+		builders.insert({ V::GetIdx(), V::Build });
+		voidMap.insert({ V::GetIdx(), V::IsVoid() });
+		transparentMap.insert({ V::GetIdx(), V::IsTransparent() });
+		materialMap.insert({ V::GetIdx(), &V::CreateMaterial(en,ren) });
+	}
+
+	static void Register(Game::Engine& en, Game::SceneRender& ren);
 };

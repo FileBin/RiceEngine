@@ -10,6 +10,7 @@
 #include "Voxels\VoxelSnow.h"
 #include "Voxels\VoxelDarkStone.h"
 #include "Voxels\VoxelDarkGrass.h"
+#include "Voxels\VoxelSand.h"
 #include "Voxels\VoxelWater.h"
 #include <Scripts\Util\PerlinNoise.h>
 
@@ -64,7 +65,7 @@ public:
         }
 
         if (groundAltitude > 0) {
-            if (py <= waterLevel) {
+            if (py < waterLevel) {
                 return { VoxelTypeIndex::V_WATER, d}; // lakes
             }
             else {
@@ -95,13 +96,16 @@ public:
         }
 
         if (cd > -5) {
-            if (py > 30.f - cd * 2) {
+            if (py > 30.f - cd) {
                 return { VoxelTypeIndex::V_SNOW, d }; // mountain tops
             }
             else if (py < 20.f && cd > 0) {
                 return { VoxelTypeIndex::V_VOID, d }; // caves
             }
             else {
+                if (py >= waterLevel - 1&& py <= waterLevel + 1 && cd <= -2) {
+                    return  { VoxelTypeIndex::V_SAND, d };
+                }
                 return { VoxelTypeIndex::V_STONE, d }; // middle mountains
             }
         }
@@ -134,6 +138,11 @@ private:
             s *= sMultipiler;
             caveFactor += PerlinNoise(pos * s * params.caveScale, seeds[i]) * h;
         }
-        return (caveFactor - 1 + params.caveIntensity);
+        if (pos.y < waterLevel - 10) {
+            return (caveFactor - 1 + params.caveIntensity);
+        }
+        else {
+            return (caveFactor - 1 + params.caveIntensity / 1.5 );
+        }
     }
 };
