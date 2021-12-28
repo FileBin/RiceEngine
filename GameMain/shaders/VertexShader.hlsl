@@ -11,10 +11,6 @@ struct PixelShaderInput
     float3 norm : NORMAL;
     float4 viewPos : POSITION0;
     float3 light : POSITION2;
-    float4 color : COLOR0;
-    /*float4 tangent : TANGENT;
-    float4 texCoord : TEXCOORD;*/
-	//float4 color: COLOR0;
 };
 
 PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
@@ -23,20 +19,18 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
 
     float3 light = float3(2, -5, -1);
     light = normalize(light);
+    
+    output.light = mul(light, World);
+    output.light = mul(output.light, View);
 
     output.pos = float4(pos.xyz, 1.0f);
     output.pos = mul(output.pos, World);
-
-    output.color = float4(0.88, 0.74, 0.4, 1);
 
     output.pos = mul(output.pos, View);
     output.pos = mul(output.pos, Projection);
 
     output.norm = mul(norm.xyz, World);
     output.norm = mul(output.norm, View);
-
-    output.light = mul(light, World);
-    output.light = mul(output.light, View);
     
     output.viewPos = float4(pos.xyz, 1.0f);
     output.viewPos = mul(output.viewPos, World);

@@ -116,13 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
-    <FxCompile Include="shaders\grass.hlsl" />
-    <FxCompile Include="shaders\snow.hlsl" />
-    <FxCompile Include="shaders\stone.hlsl" />
-    <FxCompile Include="shaders\dirt.hlsl" />
-    <FxCompile Include="shaders\dark_grass.hlsl" />
-    <FxCompile Include="shaders\dark_stone.hlsl" />
-    <FxCompile Include="shaders\water.hlsl" />
-    <FxCompile Include="shaders\sand.hlsl" />
+    <FxCompile Include="shaders\VertexShader.hlsl" />
   </ItemGroup>
 </Project>
