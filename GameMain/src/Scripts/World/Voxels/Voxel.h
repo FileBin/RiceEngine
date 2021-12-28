@@ -61,12 +61,12 @@ public:
 	}
 
 	template<typename V>
-	static void registerVoxel(Game::Engine& en, Game::SceneRender& ren) {
+	static void registerVoxel(Game::SceneRender& ren) {
 		builders.insert({ V::GetIdx(), V::Build });
 		voidMap.insert({ V::GetIdx(), V::IsVoid() });
 		transparentMap.insert({ V::GetIdx(), V::IsTransparent() });
-		materialMap.insert({ V::GetIdx(), &V::CreateMaterial(en,ren) });
+		materialMap.insert({ V::GetIdx(), &V::CreateMaterial(ren) });
 	}
 
-	static void Register(Game::Engine& en, Game::SceneRender& ren);
+	static void Register(Game::SceneRender& ren);
 };

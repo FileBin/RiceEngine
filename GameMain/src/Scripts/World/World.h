@@ -55,7 +55,7 @@ public:
 
 	static void Register(Engine& en, SceneRender& ren);
 
-	World(WorldGenerator* gen, Engine* en, SceneRender* ren) : generator(*gen) { Voxel::Register(*en, *ren); }
+	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
 
 	void UnloadChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);

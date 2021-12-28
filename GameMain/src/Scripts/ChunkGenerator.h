@@ -48,7 +48,7 @@ class ChunkGenerator : public MonoScript {
 
 		//generator = new FlatGenerator(25.);
 		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
-		world = new World(generator, &scene.GetEngine(), &scene.GetRender());
+		world = new World(generator, &scene.GetRender());
 
 		auto a = renderDistance;
 

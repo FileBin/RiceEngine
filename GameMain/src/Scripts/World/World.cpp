@@ -60,19 +60,19 @@ concurrent_unordered_map <uint, bool> Voxel::voidMap{};
 concurrent_unordered_map <uint, bool> Voxel::transparentMap{};
 concurrent_unordered_map <uint, Material*> Voxel::materialMap{};
 
-void Voxel::Register(Engine& en, SceneRender& ren) {
+void Voxel::Register(SceneRender& ren) {
 
     builders.insert({ VoxelVoid::GetIdx(), VoxelVoid::Build });
     voidMap.insert({ VoxelVoid::GetIdx(), VoxelVoid::IsVoid() });
     transparentMap.insert({ VoxelVoid::GetIdx(), VoxelVoid::IsTransparent() });
     materialMap.insert({ VoxelVoid::GetIdx(), nullptr });
 
-    materialMap.insert({ VoxelVoid::GetIdx(), nullptr });
-    materialMap.insert({ VoxelGrass::GetIdx(), &VoxelGrass::CreateMaterial(en,ren) });
-    materialMap.insert({ VoxelDirt::GetIdx(), &VoxelDirt::CreateMaterial(en,ren) });
-    materialMap.insert({ VoxelStone::GetIdx(), &VoxelStone::CreateMaterial(en,ren) });
-    materialMap.insert({ VoxelSnow::GetIdx(), &VoxelSnow::CreateMaterial(en,ren) });
-    materialMap.insert({ VoxelDarkStone::GetIdx(), &VoxelDarkStone::CreateMaterial(en,ren) });
-    materialMap.insert({ VoxelDarkGrass::GetIdx(), &VoxelDarkGrass::CreateMaterial(en,ren) });
-    materialMap.insert({ VoxelWater::GetIdx(), &VoxelWater::CreateMaterial(en,ren) });
+    registerVoxel<VoxelGrass>(ren);
+    registerVoxel<VoxelDirt>(ren);
+    registerVoxel<VoxelStone>(ren);
+    registerVoxel<VoxelSnow>(ren);
+    registerVoxel<VoxelDarkStone>(ren);
+    registerVoxel<VoxelDarkGrass>(ren);
+    registerVoxel<VoxelSand>(ren);
+    registerVoxel<VoxelWater>(ren);
 }
