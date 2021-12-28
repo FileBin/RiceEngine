@@ -10,6 +10,7 @@ struct VoxelWater : public Voxel {
         isVoid = false;
         isTransparent = true;
     }
+    static const Vector4f color;
     static bool IsVoid() { return false; }
     static bool IsTransparent() { return true; }
     static uint GetIdx() { return VoxelTypeIndex::V_WATER; }
@@ -25,7 +26,7 @@ struct VoxelWater : public Voxel {
 
         auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"color")});
         mat.renderType = RenderType::Transparent;
-        mat.SetVar<Vector4f>(L"color", { 0.3f, 0.2f, 0.7f, 0.7f });
+        mat.SetVar<Vector4f>(L"color", color);
         mat.UpdateBuffer();
         return mat;
     }

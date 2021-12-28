@@ -1,6 +1,16 @@
 ﻿#include "Scripts\World\Chunk.h"
 #include "Scripts\Util\Tables.h"
 
+#include "Scripts\World\Voxels\VoxelVoid.h"
+#include "Scripts\World\Voxels\VoxelGrass.h"
+#include "Scripts\World\Voxels\VoxelDirt.h"
+#include "Scripts\World\Voxels\VoxelStone.h"
+#include "Scripts\World\Voxels\VoxelSnow.h"
+#include "Scripts\World\Voxels\VoxelDarkStone.h"
+#include "Scripts\World\Voxels\VoxelDarkGrass.h"
+#include "Scripts\World\Voxels\VoxelSand.h"
+#include "Scripts\World\Voxels\VoxelWater.h"
+
 const int Chunk::ChunkSize = 8;
 
 #pragma region Tables
@@ -289,5 +299,18 @@ const int Tables::triangualtionTable[][16] {
 		{0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
+
+#pragma endregion
+
+#pragma region VoxelColors
+
+const Vector4f VoxelGrass::color = { 0.2f, 0.4f, 0.2f, 1.f };
+const Vector4f VoxelDirt::color = { 0.2f, 0.1f, 0.f, 1.f };
+const Vector4f VoxelStone::color = { 0.3f, 0.3f, 0.3f, 1.f };
+const Vector4f VoxelSnow::color = { 1.f, 1.f, 1.f, 1.f };
+const Vector4f VoxelDarkStone::color = { 0.2f, 0.2f, 0.2f, 1.f };
+const Vector4f VoxelDarkGrass::color = { 0.2f, 0.4f, 0.2f, 1.f };
+const Vector4f VoxelSand::color = { 0.88f, 0.74f, 0.4f, 1.f };
+const Vector4f VoxelWater::color = { 0.3f, 0.2f, 0.7f, 0.7f };
 
 #pragma endregion
