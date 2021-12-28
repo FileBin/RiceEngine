@@ -3,7 +3,7 @@
 #include "../Util/defines.h"
 
 struct Vector2i {
-	num x, y;
+	num x = 0, y = 0;
 	Vector2i() {}
 	Vector2i(num x, num y) : x(x), y(y) {}
 

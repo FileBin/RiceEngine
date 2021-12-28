@@ -30,7 +30,7 @@ class ChunkGenerator : public MonoScript {
 	bool unloading = false;
 	vector<bool> loading{};
 	//Chunk* chunk;
-	int renderDistance = 10;
+	int renderDistance = 15;
 	World* world;
 	WorldGenerator* generator;
 
@@ -84,9 +84,9 @@ class ChunkGenerator : public MonoScript {
 	void Update() {
 		auto& en = GetEngine();
 		auto& ren = GetRender();
-		auto grassMat = ren.GetMaterial(L"DarkGrass");
-		grassMat.SetVar(L"time", (float)en.GetTime());
-		grassMat.UpdateBuffer();
+		//auto grassMat = ren.GetMaterial(L"DarkGrass");
+		//grassMat.SetVar(L"time", (float)en.GetTime());
+		//grassMat.UpdateBuffer();
 
 		auto newPos = ren.GetCamera(0).transform.pos;
 		auto playerChunk = World::TransformToChunkPos(newPos);

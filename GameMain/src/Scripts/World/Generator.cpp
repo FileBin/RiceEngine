@@ -129,7 +129,7 @@ Model* Chunk::GenerateSmoothModel() {
         Vector3i offset = position * s;
         Vector3i worldPos = inChunkPos + offset;
 
-        auto d = new float[8];
+        float d[8];
         //auto norms = new Vector3[8];
         byte _case = 0;
         byte pow = 1;

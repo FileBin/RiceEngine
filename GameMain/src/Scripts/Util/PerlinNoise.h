@@ -51,14 +51,14 @@ namespace Utilites {
         return NumToDoubleNorm(Hash(pos.x, pos.y, seed));
     }
 
-    dbl Interpolate(vector<dbl> arr, Vector2 s) {
+    dbl Interpolate(dbl arr[], Vector2 s) {
         s.x = Cosine(s.x);
         s.y = Cosine(s.y);
         return ((arr[0] * (1 - s.x) + arr[1] * s.x) * (1 - s.y) +
             (arr[2] * (1 - s.x) + arr[3] * s.x) * s.y);
     }
 
-    dbl Interpolate(vector<dbl> arr, Vector3 s) {
+    dbl Interpolate(dbl arr[], Vector3 s) {
         s.x = Cosine(s.x);
         s.y = Cosine(s.y);
         s.z = Cosine(s.z);
@@ -73,7 +73,7 @@ namespace Utilites {
 
         Vector2 s = pos - IntPos;
 
-        auto arr = vector<dbl>(4);
+        dbl arr[4];
         for (int i = 0; i < 2; i++)
             for (int j = 0; j < 2; j++)
                 arr[i * 2 + j] = Rand(IntPos + Vector2(j, i), seed);
@@ -88,7 +88,7 @@ namespace Utilites {
 
         Vector3 s = pos - IntPos;
 
-        auto arr = vector<dbl>(8);
+        dbl arr[8];
         for (int i = 0; i < 2; i++)
             for (int j = 0; j < 2; j++)
                 for (int k = 0; k < 2; k++)
