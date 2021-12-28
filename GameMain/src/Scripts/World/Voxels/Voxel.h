@@ -60,5 +60,5 @@ public:
 		throw std::exception("Material index invalid!");
 	}
 
-	static void Register(Game::Engine& en, Game::SceneRender& ren);
+	static void Register(Game::SceneRender& ren);
 };

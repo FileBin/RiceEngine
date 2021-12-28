@@ -16,11 +16,11 @@ struct VoxelStone : public Voxel {
         return new VoxelStone(pos);
     }
 
-    static Material& CreateMaterial(Engine& en, SceneRender& ren) {
-        auto& shader = en.CreateShader();
-        shader.LoadVertexShader(Util::ReadFile(L"stone.cso"), Vertex::GetLayout());
-        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
-
-        return ren.CreateMaterial(L"Stone", &shader);
+    static Material& CreateMaterial(SceneRender& ren) {
+        auto& shader = ren.GetShader(L"Diffuse");
+        auto& mat = ren.CreateMaterial(L"Stone", &shader, { Var(L"time"), Var(L"color") });
+        mat.SetVar<Vector4f>(L"color", { 0.3f, 0.3f, 0.3f, 1.f });
+        mat.UpdateBuffer();
+        return mat;
     }
 };

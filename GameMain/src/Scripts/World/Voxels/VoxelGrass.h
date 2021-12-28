@@ -18,11 +18,11 @@ struct VoxelGrass : public Voxel {
         return new VoxelGrass(pos);
     }
 
-    static Material& CreateMaterial(Engine& en, SceneRender& ren) {
-        auto& shader = en.CreateShader();
-        shader.LoadVertexShader(Util::ReadFile(L"grass.cso"), Vertex::GetLayout());
-        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
-
-        return ren.CreateMaterial(L"Grass", &shader);
+    static Material& CreateMaterial(SceneRender& ren) {
+        auto& shader = ren.GetShader(L"Diffuse");
+        auto& mat = ren.CreateMaterial(L"Grass", &shader, { Var(L"time"), Var(L"color") });
+        mat.SetVar<Vector4f>(L"color", { 0.2f, 0.4f, 0.2f, 1.f });
+        mat.UpdateBuffer();
+        return mat;
     }
 };

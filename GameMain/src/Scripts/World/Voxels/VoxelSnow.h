@@ -16,11 +16,11 @@ struct VoxelSnow : public Voxel {
         return new VoxelSnow(pos);
     }
 
-    static Material& CreateMaterial(Engine& en, SceneRender& ren) {
-        auto& shader = en.CreateShader();
-        shader.LoadVertexShader(Util::ReadFile(L"snow.cso"), Vertex::GetLayout());
-        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
-
-        return ren.CreateMaterial(L"Snow", &shader);
+    static Material& CreateMaterial(SceneRender& ren) {
+        auto& shader = ren.GetShader(L"Diffuse");
+        auto& mat = ren.CreateMaterial(L"Snow", &shader, { Var(L"time"), Var(L"color") });
+        mat.SetVar<Vector4f>(L"color", { 1.f, 1.f, 1.f, 1.f });
+        mat.UpdateBuffer();
+        return mat;
     }
 };

@@ -18,13 +18,15 @@ struct VoxelWater : public Voxel {
         return new VoxelWater(pos);
     }
 
-    static Material& CreateMaterial(Engine& en, SceneRender& ren) {
-        auto& shader = en.CreateShader();
-        shader.LoadVertexShader(Util::ReadFile(L"water.cso"), Vertex::GetLayout());
-        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+    static Material& CreateMaterial(SceneRender& ren) {
+        auto& shader = ren.GetShader(L"Diffuse");
+        //shader.LoadVertexShader(Util::ReadFile(L"water.cso"), Vertex::GetLayout());
+        //shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-        auto& mat = ren.CreateMaterial(L"Water", &shader);
+        auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"color")});
         mat.renderType = RenderType::Transparent;
+        mat.SetVar<Vector4f>(L"color", { 0.3f, 0.2f, 0.7f, 0.7f });
+        mat.UpdateBuffer();
         return mat;
     }
 };

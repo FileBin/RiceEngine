@@ -120,5 +120,6 @@
     <FxCompile Include="shaders\dark_grass.hlsl" />
     <FxCompile Include="shaders\dark_stone.hlsl" />
     <FxCompile Include="shaders\water.hlsl" />
+    <FxCompile Include="shaders\VertexShader.hlsl" />
   </ItemGroup>
 </Project>

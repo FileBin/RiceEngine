@@ -53,7 +53,7 @@ public:
 	void Lock() { lock = true; }
 	void Unlock() { lock = false; }
 
-	World(WorldGenerator* gen, Engine* en, SceneRender* ren) : generator(*gen) { Voxel::Register(*en, *ren); }
+	World(WorldGenerator* gen, Engine* en, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
 
 	void UnloadChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);

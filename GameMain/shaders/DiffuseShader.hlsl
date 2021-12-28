@@ -3,15 +3,12 @@ struct PixelShaderInput {
 	float3 norm : NORMAL;
 	float4 viewPos : POSITION0;
 	float3 light : POSITION2;
-	float4 color : COLOR0;
-  /*float4 tangent : TANGENT;
-	float4 texCoord : TEXCOORD;*/
-	//float4 color: COLOR0;
 };
 
 cbuffer CBuffer
 {
     float time;
+    float4 incolor;
 }
 
 static float emission = .3;
@@ -27,7 +24,7 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 
 	float em = emission;
 	
-	float3 col = input.color.xyz;
+	float3 col = incolor.xyz;
 	float dif = dot(-light, n);
 	float spec = max(dot(reflect(light, n), -eye), 0);
 	float shadow = 1;
@@ -41,6 +38,6 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 	s *= spec;
     col += s * shadow * specluar + (.5f -.5f*cos(time));
 
-	float4 color = float4(col, input.color.w);
+	float4 color = float4(col, incolor.w);
 	return color;
 }

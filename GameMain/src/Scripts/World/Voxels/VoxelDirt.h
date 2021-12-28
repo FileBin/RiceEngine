@@ -16,11 +16,11 @@ struct VoxelDirt : public Voxel {
         return new VoxelDirt(pos);
     }
 
-    static Material& CreateMaterial(Engine& en, SceneRender& ren) {
-        auto& shader = en.CreateShader();
-        shader.LoadVertexShader(Util::ReadFile(L"dirt.cso"), Vertex::GetLayout());
-        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
-
-        return ren.CreateMaterial(L"Dirt", &shader);
+    static Material& CreateMaterial(SceneRender& ren) {
+        auto& shader = ren.GetShader(L"Diffuse");
+        auto& mat = ren.CreateMaterial(L"Dirt", &shader, { Var(L"time"), Var(L"color") });
+        mat.SetVar<Vector4f>(L"color", { 0.2f, 0.1f, 0.f, 1.f });
+        mat.UpdateBuffer();
+        return mat;
     }
 };
