@@ -53,6 +53,8 @@ public:
 	void Lock() { lock = true; }
 	void Unlock() { lock = false; }
 
+	static void Register(Engine& en, SceneRender& ren);
+
 	World(WorldGenerator* gen, Engine* en, SceneRender* ren) : generator(*gen) { Voxel::Register(*en, *ren); }
 
 	void UnloadChunk(Vector3i chunkPos) {

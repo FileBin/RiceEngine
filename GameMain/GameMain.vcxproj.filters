@@ -110,6 +110,9 @@
     <ClInclude Include="src\Scripts\Util\Tables.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scripts\World\Voxels\VoxelSand.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
@@ -120,5 +123,6 @@
     <FxCompile Include="shaders\dark_grass.hlsl" />
     <FxCompile Include="shaders\dark_stone.hlsl" />
     <FxCompile Include="shaders\water.hlsl" />
+    <FxCompile Include="shaders\sand.hlsl" />
   </ItemGroup>
 </Project>
