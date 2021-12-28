@@ -1,36 +1,33 @@
 ﻿#pragma once
-
+#include "../Util/defines.h"
 struct Vector3i;
 struct Quaternion;
 struct Vector3f;
 
 struct Vector3 {
+public:
+	dbl x = 0, y = 0, z = 0;
 	Vector3() = default;
-	Vector3(double x, double y) : x(x), y(y) {}
-	Vector3(double x, double y, double z) : x(x), y(y), z(z) {}
+	Vector3(dbl x, dbl y) : x(x), y(y) {}
+	Vector3(dbl x, dbl y, dbl z) : x(x), y(y), z(z) {}
 	Vector3(const Vector3i& vec);
-	double x = 0, y = 0, z = 0;
 
-	double Length();
-	double SqrLength();
+	Vector3& operator=(Vector3f& v);
+	Vector3& operator-=(Vector3 v);
+	Vector3& operator+=(Vector3 v);
+	Vector3& operator*=(dbl v);
+	Vector3& operator/=(dbl v);
+	Vector3 operator*=(Quaternion q);
+	dbl& operator[](size_t idx);
+	Vector3 operator-();
 
 	Vector3 Normalized();
 
-	static double Dot(Vector3 a, Vector3 b);
+	static dbl Dot(Vector3 a, Vector3 b);
 	static Vector3 Cross(Vector3 a, Vector3 b);
-
 	static Vector3 Lerp(Vector3 a, Vector3 b, dbl t);
-
-	Vector3 operator-();
-
-	Vector3 operator-=(Vector3 v);
-	Vector3 operator+=(Vector3 v);
-	Vector3 operator*=(double v);
-	Vector3 operator*=(Quaternion q);
-	Vector3 operator/=(double v);
-	Vector3& operator=(Vector3f& v);
-
-	double& operator[](size_t idx);
+	dbl SqrLength();
+	dbl Length();
 
 	static const Vector3 zero;
 	static const Vector3 one;
@@ -42,9 +39,10 @@ struct Vector3 {
 	static const Vector3 backward;
 };
 
-Vector3 operator+(Vector3 A, Vector3 b);
-Vector3 operator-(Vector3 A, Vector3 b);
-Vector3 operator*(Vector3 A, double b);
-Vector3 operator/(Vector3 A, double b);
+bool operator==(Vector3 a, Vector3 b);
 
+Vector3 operator+(Vector3 a, Vector3 b);
+Vector3 operator-(Vector3 a, Vector3 b);
+Vector3 operator*(Vector3 a, dbl b);
+Vector3 operator/(Vector3 a, dbl b);
 Vector3 operator*(Quaternion q, Vector3 v);

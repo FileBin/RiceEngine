@@ -34,7 +34,21 @@ dbl Vector2::Dot(Vector2 A, Vector2 b) {
     return A.x * b.x + A.y * b.y;
 }
 
+dbl Vector2::SqrLength() { return x * x + y * y; };
+
 dbl Vector2::Length() { return sqrt(SqrLength()); }
+
+double& Vector2::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    throw std::exception("Vector2 is out of range!");
+}
+
+Vector2 Vector2::operator-() {
+    return { -x,-y };
+}
 
 Vector2 operator+(Vector2 A, Vector2 b) {
     return { A.x + b.x, A.y + b.y };
@@ -52,29 +66,151 @@ Vector2 operator/(Vector2 A, dbl b) {
     return { A.x / b, A.y / b };
 }
 
-Vector2 Vector2::operator+=(Vector2 v) {
+Vector2& Vector2::operator+=(Vector2 v) {
     *this = (*this) + v;
     return *this;
 }
 
-Vector2 Vector2::operator-=(Vector2 v) {
+Vector2& Vector2::operator-=(Vector2 v) {
     *this = (*this) - v;
     return *this;
 }
 
-Vector2 Vector2::operator*=(dbl x) {
+Vector2& Vector2::operator*=(dbl x) {
     *this = (*this) * x;
     return *this;
 }
 
-Vector2 Vector2::operator/=(dbl x) {
+Vector2& Vector2::operator/=(dbl x) {
     *this = (*this) / x;
     return *this;
+}
+
+bool operator==(Vector2 a, Vector2 b) {
+    return (a.x == b.x) && (a.y == b.y);
 }
 #pragma endregion
 
 #pragma region Vector2i
+dbl Vector2i::Dot(Vector2i a, Vector2i b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+dbl Vector2i::SqrLength() { return x * x + y * y; };
+
+dbl Vector2i::Length() { return sqrt(SqrLength()); }
+
+num& Vector2i::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    throw std::exception("Vector2i is out of range!");
+}
+
+Vector2i Vector2i::operator-() {
+    return { -x,-y };
+}
+
+Vector2i operator+(Vector2i a, Vector2i b) {
+    return { a.x + b.x, a.y + b.y };
+}
+
+Vector2i operator-(Vector2i a, Vector2i b) {
+    return { a.x - b.x, a.y - b.y };
+}
+
+Vector2i operator*(Vector2i a, num b) {
+    return { a.x * b, a.y * b };
+}
+
+Vector2i operator/(Vector2i a, num b) {
+    return { a.x / b, a.y / b };
+}
+
+Vector2i& Vector2i::operator+=(Vector2i v) {
+    *this = (*this) + v;
+    return *this;
+}
+
+Vector2i& Vector2i::operator-=(Vector2i v) {
+    *this = (*this) - v;
+    return *this;
+}
+
+Vector2i& Vector2i::operator*=(num x) {
+    *this = (*this) * x;
+    return *this;
+}
+
+Vector2i& Vector2i::operator/=(num x) {
+    *this = (*this) / x;
+    return *this;
+}
+
 bool operator==(Vector2i a, Vector2i b) {
+    return (a.x == b.x) && (a.y == b.y);
+}
+#pragma endregion
+
+#pragma region Vector2f
+dbl Vector2f::Dot(Vector2f a, Vector2f b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+dbl Vector2f::SqrLength() { return x * x + y * y; };
+
+dbl Vector2f::Length() { return sqrt(SqrLength()); }
+
+float& Vector2f::operator[](size_t idx) {
+    if (idx == 0)
+        return x;
+    if (idx == 1)
+        return y;
+    throw std::exception("Vector2f is out of range!");
+}
+
+Vector2f Vector2f::operator-() {
+    return { -x, -y };
+}
+
+Vector2f operator+(Vector2f a, Vector2f b) {
+    return { a.x + b.x, a.y + b.y };
+}
+
+Vector2f operator-(Vector2f a, Vector2f b) {
+    return { a.x - b.x, a.y - b.y };
+}
+
+Vector2f operator*(Vector2f a, float b) {
+    return { a.x * b, a.y * b };
+}
+
+Vector2f operator/(Vector2f a, float b) {
+    return { a.x / b, a.y / b };
+}
+
+Vector2f& Vector2f::operator+=(Vector2f v) {
+    *this = (*this) + v;
+    return *this;
+}
+
+Vector2f& Vector2f::operator-=(Vector2f v) {
+    *this = (*this) - v;
+    return *this;
+}
+
+Vector2f& Vector2f::operator*=(float x) {
+    *this = (*this) * x;
+    return *this;
+}
+
+Vector2f& Vector2f::operator/=(float x) {
+    *this = (*this) / x;
+    return *this;
+}
+
+bool operator==(Vector2f a, Vector2f b) {
     return (a.x == b.x) && (a.y == b.y);
 }
 #pragma endregion
@@ -117,14 +253,6 @@ Vector3 operator-(Vector3 A, Vector3 b) {
     return { A.x - b.x, A.y - b.y, A.z - b.z };
 }
 
-Vector3 operator*(Vector3 A, double b) {
-    return { A.x * b, A.y * b, A.z * b };
-}
-
-Vector3 operator/(Vector3 A, double b) {
-    return { A.x / b, A.y / b, A.z / b };
-}
-
 Vector3 operator*(Quaternion q, Vector3 v) {
     return v * Matrix4x4::Rotation(q);
 }
@@ -147,6 +275,16 @@ Vector3& Vector3::operator=(Vector3f& v) {
     return *this;
 }
 
+Vector3& Vector3::operator*=(dbl q) {
+    *this = (*this) * q;
+    return *this;
+}
+
+Vector3& Vector3::operator/=(dbl q) {
+    *this = (*this) / q;
+    return *this;
+}
+
 Vector3 Vector3::operator*=(Quaternion q) {
     *this = q * (*this);
     return *this;
@@ -156,92 +294,38 @@ Vector3 Vector3::operator-() {
     return { -x,-y,-z };
 }
 
-Vector3 Vector3::operator+=(Vector3 v) {
+Vector3& Vector3::operator+=(Vector3 v) {
     *this = *this + v;
     return *this;
 }
 
-Vector3 Vector3::operator-=(Vector3 v) {
+Vector3& Vector3::operator-=(Vector3 v) {
     *this = *this - v;
-    return *this;
-}
-
-Vector3 Vector3::operator*=(double v) {
-    *this = *this * v;
-    return *this;
-}
-
-Vector3 Vector3::operator/=(double v) {
-    *this = *this / v;
     return *this;
 }
 
 Vector3 operator+(Vector3 a, Vector3 b) {
     return { a.x + b.x, a.y + b.y, a.z + b.z };
 }
+
+Vector3 operator*(Vector3 a, dbl b) {
+    return { a.x * b , a.y * b, a.z * b };
+}
+
+Vector3 operator/(Vector3 a, dbl b) {
+    return { a.x / b , a.y / b, a.z / b };
+}
+
+bool operator==(Vector3 a, Vector3 b) {
+    return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
+}
 #pragma endregion
 
 #pragma region Vector3i
-
-bool operator==(Vector3i a, Vector3i b) {
-    return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
-}
-
-Vector3i Vector3i::operator-() {
-    return { -x, -y, -z };
-}
-
-Vector3i operator+(Vector3i a, Vector3i b) {
-    return {
-        a.x + b.x,
-        a.y + b.y,
-        a.z + b.z
-    };
-}
-
-Vector3i operator-(Vector3i a, Vector3i b) {
-    return {
-        a.x - b.x,
-        a.y - b.y,
-        a.z - b.z
-    };
-}
-
-Vector3i operator*(Vector3i a, num b) {
-    return {
-        a.x * b,
-        a.y * b,
-        a.z * b
-    };
-}
-
-Vector3i operator/(Vector3i a, num b) {
-    return {
-        a.x / b,
-        a.y / b,
-        a.z / b
-    };
-}
-
-num Vector3i::SqrLength() {
-    return x * x + y * y + z * z;
-}
-
-num Vector3i::Dot(Vector3i a, Vector3i b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-Vector3i Vector3i::Cross(Vector3i left, Vector3i right) {
-    return {
-        left.y * right.z - left.z * right.y,
-        left.z * right.x - left.x * right.z,
-        left.x * right.y - left.y * right.x };
-}
-
 Vector3i::Vector3i(const Vector3& v) {
-    x = floor(v.x);
-    y = floor(v.y);
-    z = floor(v.z);
+    x = (int)v.x;
+    y = (int)v.y;
+    z = (int)v.z;
 }
 
 num& Vector3i::operator[](size_t idx) {
@@ -254,45 +338,86 @@ num& Vector3i::operator[](size_t idx) {
     throw std::exception("Vector3i is out of range!");
 }
 
-#pragma endregion
-
-#pragma region Vector3f
-Vector3f& Vector3f::operator=(Vector3& v) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    return *this;
-}
-
-Vector3f& Vector3f::operator+=(Vector3f& v) {
-    x += v.x;
-    y += v.y;
-    z += v.z;
-    return *this;
-}
-
-float Vector3f::Length() {
+double Vector3i::Length() {
     return sqrt(SqrLength());
 }
 
-float Vector3f::SqrLength() {
-    return x*x + y*y + z*z;
+double Vector3i::SqrLength() {
+    return x * x + y * y + z * z;
 }
 
-Vector3f Vector3f::Normalized() {
-    auto l = Math::Qrsqrt(SqrLength());
-    return { x * l, y * l, z * l };
+num Vector3i::Dot(Vector3i a, Vector3i b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float Vector3f::Dot(Vector3f a, Vector3f b) {
-    return a.x * b.x + a.y * b.y * a.z * b.z;
+Vector3i operator-(Vector3i A, Vector3i b) {
+    return { A.x - b.x, A.y - b.y, A.z - b.z };
 }
 
-Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
+Vector3i operator*(Quaternion q, Vector3i v) {
+    return v * Matrix4x4::Rotation(q);
+}
+
+Vector3i Vector3i::Cross(Vector3i left, Vector3i right) {
     return {
-    left.y * right.z - left.z * right.y,
-    left.z * right.x - left.x * right.z,
-    left.x * right.y - left.y * right.x };
+        left.y * right.z - left.z * right.y,
+        left.z * right.x - left.x * right.z,
+        left.x * right.y - left.y * right.x };
+}
+
+Vector3i& Vector3i::operator=(Vector3& v) {
+    x = (int)v.x;
+    y = (int)v.y;
+    z = (int)v.z;
+    return *this;
+}
+
+Vector3i& Vector3i::operator*=(num q) {
+    *this = (*this) * q;
+    return *this;
+}
+
+Vector3i& Vector3i::operator/=(num q) {
+    *this = (*this) / q;
+    return *this;
+}
+
+Vector3i Vector3i::operator-() {
+    return { -x,-y,-z };
+}
+
+Vector3i& Vector3i::operator+=(Vector3i v) {
+    *this = *this + v;
+    return *this;
+}
+
+Vector3i& Vector3i::operator-=(Vector3i v) {
+    *this = *this - v;
+    return *this;
+}
+
+Vector3i operator+(Vector3i a, Vector3i b) {
+    return { a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
+Vector3i operator*(Vector3i a, num b) {
+    return { a.x * b , a.y * b, a.z * b };
+}
+
+Vector3i operator/(Vector3i a, num b) {
+    return { a.x / b , a.y / b, a.z / b };
+}
+
+bool operator==(Vector3i a, Vector3i b) {
+    return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
+}
+#pragma endregion
+
+#pragma region Vector3f
+Vector3f::Vector3f(const Vector3& v) {
+    x = (float)v.x;
+    y = (float)v.y;
+    z = (float)v.z;
 }
 
 float& Vector3f::operator[](size_t idx) {
@@ -305,39 +430,89 @@ float& Vector3f::operator[](size_t idx) {
     throw std::exception("Vector3f is out of range!");
 }
 
-Vector3f Vector3f::ApplyFunc(std::function<float(float)> func) {
-    return {
-        func(x),
-        func(y),
-        func(z)
-    };
+double Vector3f::Length() {
+    return sqrt(SqrLength());
 }
 
-Vector3f Vector3f::ApplyFunc(std::function<float(size_t, float)> func) {
-    return {
-        func(0, x),
-        func(1, y),
-        func(2, z)
-    };
+double Vector3f::SqrLength() {
+    return x * x + y * y + z * z;
 }
 
-Vector3f operator+(Vector3f a, Vector3f b) {
-    return { a.x + b.z, a.y + b.y, a.z + b.z };
+Vector3f Vector3f::Normalized() {
+    float l = Math::Qrsqrt(SqrLength());
+    return { x * l, y * l, z * l };
+}
+
+double Vector3f::Dot(Vector3f a, Vector3f b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 Vector3f operator-(Vector3f a, Vector3f b) {
     return { a.x - b.x, a.y - b.y, a.z - b.z };
 }
 
+Vector3f operator*(Quaternion q, Vector3f v) {
+    return v * Matrix4x4::Rotation(q);
+}
+
+Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
+    return {
+        left.y * right.z - left.z * right.y,
+        left.z * right.x - left.x * right.z,
+        left.x * right.y - left.y * right.x };
+}
+
+Vector3f Vector3f::Lerp(Vector3f a, Vector3f b, dbl t) {
+    return a * (1 - t) + b * t;
+}
+
+Vector3f& Vector3f::operator=(Vector3& v) {
+    x = (float)v.x;
+    y = (float)v.y;
+    z = (float)v.z;
+    return *this;
+}
+
+Vector3f& Vector3f::operator*=(float q) {
+    *this = (*this) * q;
+    return *this;
+}
+
+Vector3f& Vector3f::operator/=(float q) {
+    *this = (*this) / q;
+    return *this;
+}
+
+Vector3f Vector3f::operator-() {
+    return { -x,-y,-z };
+}
+
+Vector3f& Vector3f::operator+=(Vector3f v) {
+    *this = *this + v;
+    return *this;
+}
+
+Vector3f& Vector3f::operator-=(Vector3f v) {
+    *this = *this - v;
+    return *this;
+}
+
+Vector3f operator+(Vector3f a, Vector3f b) {
+    return { a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
 Vector3f operator*(Vector3f a, float b) {
-    return { a.x * b, a.y * b, a.z * b };
+    return { a.x * b , a.y * b, a.z * b };
 }
 
 Vector3f operator/(Vector3f a, float b) {
-    return { a.x / b, a.y / b, a.z / b };
+    return { a.x / b , a.y / b, a.z / b };
+}
+
+bool operator==(Vector3f a, Vector3f b) {
+    return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
 }
 #pragma endregion
-
 
 #pragma region Quaternion
 Quaternion operator*(Quaternion A, double b) {

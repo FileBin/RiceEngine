@@ -53,7 +53,7 @@ class CameraMover : public MonoScript {
 		mv = mv.Normalized();
 		mv *= cam.rotation;
 
-		auto dt = en.GetDeltaTime();
+		double dt = en.GetDeltaTime();
 		
 		mv *= 20.;
 

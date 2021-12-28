@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include "../Util/defines.h"
+#include "Vector3.h"
 
 struct Vector3;
 
 struct Quaternion {
-	double x, y, z, w;
+	dbl x, y, z, w;
 
 	static Quaternion FromAxisAngle(Vector3 axis) { return FromAxisAngle(axis.Normalized(), axis.Length()); };
 	static Quaternion FromAxisAngle(Vector3 axis, double angle);
@@ -13,7 +14,7 @@ struct Quaternion {
 	static Quaternion FromEulerAngles(Vector3 v) { return FromEulerAngles(v.x, v.y, v.z); }
 	static Quaternion FromEulerAngles(double x, double y, double z);
 
-	double Magnitude();
+	dbl Magnitude();
 
 	Quaternion operator-();
 	Quaternion Inversed();

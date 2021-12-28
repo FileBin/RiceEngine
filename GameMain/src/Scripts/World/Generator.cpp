@@ -48,7 +48,7 @@ Model* Chunk::GenerateModel() {
 
             v2 = Voxel::IsVoid(idx2);
 
-            auto o = Vector3::one * .5f;
+            auto o = Vector3::one * .5;
 
             auto angle = -90.;
 

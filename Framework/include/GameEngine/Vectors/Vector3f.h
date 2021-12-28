@@ -1,30 +1,35 @@
 #pragma once
-#include <functional>
-
-struct Vector3;
+#include "../Util/defines.h"
+#include "Quaternion.h"
 
 struct Vector3f {
-	float x, y, z;
-	Vector3f& operator=(Vector3& v);
-	Vector3f& operator+=(Vector3f& v);
+public:
+	float x = 0, y = 0, z = 0;
+	Vector3f() = default;
+	Vector3f(float x, float y) : x(x), y(y) {}
+	Vector3f(float x, float y, float z) : x(x), y(y), z(z) {}
+	Vector3f(const Vector3& vec);
 
-	float Length();
-	float SqrLength();
+	Vector3f& operator=(Vector3& v);
+	Vector3f& operator-=(Vector3f v);
+	Vector3f& operator+=(Vector3f v);
+	Vector3f& operator*=(float v);
+	Vector3f& operator/=(float v);
+	float& operator[](size_t idx);
+	Vector3f operator-();
 
 	Vector3f Normalized();
 
-	static float Dot(Vector3f a, Vector3f b);
+	static dbl Dot(Vector3f a, Vector3f b);
 	static Vector3f Cross(Vector3f a, Vector3f b);
-
-	float& operator[](size_t i);
-
-	Vector3f ApplyFunc(std::function<float(float)> func);
-	Vector3f ApplyFunc(std::function<float(size_t, float)> func);
+	static Vector3f Lerp(Vector3f a, Vector3f b, dbl t);
+	dbl SqrLength();
+	dbl Length();
 };
+
+bool operator==(Vector3f a, Vector3f b);
 
 Vector3f operator+(Vector3f a, Vector3f b);
 Vector3f operator-(Vector3f a, Vector3f b);
 Vector3f operator*(Vector3f a, float b);
 Vector3f operator/(Vector3f a, float b);
-
-//Vector3f operator*(Quaternion q, Vector3f v);
