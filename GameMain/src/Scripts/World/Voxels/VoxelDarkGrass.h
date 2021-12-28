@@ -19,10 +19,10 @@ struct VoxelDarkGrass : public Voxel {
     }
 
     static Material& CreateMaterial(Engine& en, SceneRender& ren) {
-        auto& shader = en.CreateShader();
-        shader.LoadVertexShader(Util::ReadFile(L"dark_grass.cso"), Vertex::GetLayout());
-        shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+        auto shader = ren.CreateShader(L"grass");
+        shader->LoadVertexShader(Util::ReadFile(L"dark_grass.cso"), Vertex::GetLayout());
+        shader->LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-        return ren.CreateMaterial(&shader);
+        return ren.CreateMaterial(L"DarkGrass", shader, { Var(L"time") });
     }
 };

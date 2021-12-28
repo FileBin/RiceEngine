@@ -82,7 +82,13 @@ class ChunkGenerator : public MonoScript {
 	}
 
 	void Update() {
-		auto newPos = GetRender().GetCamera(0).transform.pos;
+		auto& en = GetEngine();
+		auto& ren = GetRender();
+		auto grassMat = ren.GetMaterial(L"DarkGrass");
+		grassMat.SetVar(L"time", (float)en.GetTime());
+		grassMat.UpdateBuffer();
+
+		auto newPos = ren.GetCamera(0).transform.pos;
 		auto playerChunk = World::TransformToChunkPos(newPos);
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			if (!unloading) {
@@ -95,6 +101,7 @@ class ChunkGenerator : public MonoScript {
 	}
 
 	void ChunkLoaderThread(size_t idx) {
+
 		auto& o = GetSceneObject();
 		auto& scene = GetScene();
 		auto& en = GetEngine();

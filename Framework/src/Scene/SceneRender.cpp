@@ -106,7 +106,8 @@ namespace Game {
 
 	void SceneRender::Close() {
 		for (auto c : cameras) delete c;
-		for (auto m : materials) { delete m.first; }
+		for (auto m : materials) { delete m.second; }
+		for (auto m : shaders) { delete m.second; }
 		for (auto m : indexBuffers) { _RELEASE(m.second); }
 		for (auto m : vertexBuffers) { _RELEASE(m.second); }
 		for (auto m : models) { delete m.first; }
@@ -224,9 +225,30 @@ namespace Game {
 
 	Camera& SceneRender::GetCamera(size_t idx) { return *cameras[idx]; }
 
-	Material& SceneRender::CreateMaterial(Shader* sh) {
-		auto mat = new Material({}, *device, *sh);
-		materials.insert(materials.end(), { mat, true });
+	Shader* SceneRender::CreateShader(String name) {
+		auto sh = new Shader(device);
+		shaders.insert({name, sh});
+		return sh;
+	}
+
+	Shader& SceneRender::GetShader(String name) {
+		auto it = shaders.find(name);
+		if (it != shaders.end()) {
+			return *it->second;
+		}
+		throw new std::exception("Shader name invalid!");
+	}
+
+	Material& SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
+		auto mat = new Material(*device, *sh, mapping);
+		materials.insert(materials.end(), { name, mat });
 		return *mat;
+	}
+	Material& SceneRender::GetMaterial(String name) {
+		auto it = materials.find(name);
+		if (it != materials.end()) {
+			return *it->second;
+		}
+		throw new std::exception("Material name invalid!");
 	}
 }

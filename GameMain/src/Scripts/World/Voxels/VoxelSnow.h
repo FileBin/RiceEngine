@@ -21,6 +21,6 @@ struct VoxelSnow : public Voxel {
         shader.LoadVertexShader(Util::ReadFile(L"snow.cso"), Vertex::GetLayout());
         shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-        return ren.CreateMaterial(&shader);
+        return ren.CreateMaterial(L"Snow", &shader);
     }
 };

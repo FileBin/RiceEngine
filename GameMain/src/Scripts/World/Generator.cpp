@@ -158,7 +158,6 @@ Model* Chunk::GenerateSmoothModel() {
                     }
                 }
             }
-            //norms[i] = vox.normal;
             if (depth >= 0) {
                 _case += pow;
             }
@@ -175,17 +174,6 @@ Model* Chunk::GenerateSmoothModel() {
             Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]], Tables::cubeVertices[edge[1]], x);
             return p;
         };
-
-        /* function<Vector3(int)> edgeToNorm = [&](int e) {
-             const int* edge = Tables::edges[e];
-             auto d1 = d[edge[0]];
-             auto d2 = d[edge[1]];
-
-             var x = GetPoint(d1, d2);
-
-             var p = Vector3.Lerp(norms[edge.x], norms[edge.y], x);
-             return p;
-         };*/
 
         vector<int> edges{};
 

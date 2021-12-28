@@ -9,6 +9,11 @@ struct PixelShaderInput {
 	//float4 color: COLOR0;
 };
 
+cbuffer CBuffer
+{
+    float time;
+}
+
 static float emission = .3;
 static float glossines = 2.;
 static float specluar = .8;
@@ -34,7 +39,7 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 	col *= ((dif * shadow - 1) * em + 1);
 	float3 s = 1 - col;
 	s *= spec;
-	col += s * shadow * specluar;
+    col += s * shadow * specluar + (.5f -.5f*cos(time));
 
 	float4 color = float4(col, input.color.w);
 	return color;

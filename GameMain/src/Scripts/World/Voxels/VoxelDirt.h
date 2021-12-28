@@ -21,6 +21,6 @@ struct VoxelDirt : public Voxel {
         shader.LoadVertexShader(Util::ReadFile(L"dirt.cso"), Vertex::GetLayout());
         shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-        return ren.CreateMaterial(&shader);
+        return ren.CreateMaterial(L"Dirt", &shader);
     }
 };

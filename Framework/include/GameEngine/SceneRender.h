@@ -44,13 +44,18 @@ namespace Game {
 		void AddCamera(Camera* cam);
 		Camera& GetCamera(size_t idx = 0);
 
-		Material& CreateMaterial(Shader* sh);
+		Shader* CreateShader(String name);
+		Shader& GetShader(String name);
+
+		Material& CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping = {});
+		Material& GetMaterial(String name);
 
 	private:
 		bool isRendering = false, isLoading = false;
 
 		concurrent_vector<Camera*> cameras;
-		concurrent_unordered_map<Material*, bool> materials;
+		concurrent_unordered_map<String, Material*> materials;
+		concurrent_unordered_map<String, Shader*> shaders;
 		concurrent_unordered_map<Mesh*, Material*> materialMap;
 		size_t activeCameraIdx;
 		concurrent_unordered_map<Model*, bool> models; //that was a trick beacuse unordered_set doesn't work

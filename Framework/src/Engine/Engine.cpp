@@ -43,7 +43,7 @@ namespace Game {
 	void Engine::RegisterScript(ScriptBase* script, Stage stage) { core->AddScript(script, stage); }
 
 	Material& Engine::CreateMaterial(Shader& sh) {
-		auto m = new Material({}, **device, sh);
+		auto m = new Material(**device, sh);
 		return *m;
 	}
 
