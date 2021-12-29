@@ -161,7 +161,7 @@ public:
         return GetVoxel({ x, y, z });
     }
     Model* GetModel() {
-        if (model) return model;
+        //if (model) return model;
         return model = GenerateSmoothModel();
     }
     Model* GenerateModel();

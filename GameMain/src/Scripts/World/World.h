@@ -58,8 +58,8 @@ public:
 	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
 
 	void UnloadChunk(Vector3i chunkPos) {
-		Wait();
-		Lock();
+		//Wait();
+		//Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
 			auto& chunk = *it->second;
@@ -79,7 +79,7 @@ public:
 				}
 			}
 		}
-		Unlock();
+		//Unlock();
 	}
 
 	void SaveChunk(Chunk& chunk) {}
@@ -118,38 +118,38 @@ public:
 	}
 
 	Chunk::Status GetChunkStatus(Vector3i chunkPos) {
-		Wait();
-		Lock();
+		//Wait();
+		//Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
 			Unlock();
 			return it->second->status;
 		}
-		Unlock();
+		//Unlock();
 		return Chunk::NotCreated;
 	}
 
 	void SetChunkStatus(Vector3i chunkPos, Chunk::Status status) {
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			Wait();
-			Lock();
+			//Wait();
+			//Lock();
 			it->second->status = status;
-			Unlock();
+			//Unlock();
 		}
 	}
 
 	Chunk& GetChunk(Vector3i chunkPos) {
-		Wait();
-		Lock();
+		//Wait();
+		//Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			Unlock();
+			//Unlock();
 			return *it->second;
 		} else {
 			auto& ch = GenerateChunk(chunkPos);
 			chunkMap.insert(chunkMap.end(), { chunkPos, &ch });
-			Unlock();
+			//Unlock();
 			return ch;
 		}
 	}

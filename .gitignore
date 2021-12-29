@@ -1,13 +1,4 @@
 ﻿.vs/
-x64/
 obj/
 bin/
 
-*.recipe
-*.ilk
-*.log
-*.tlog
-*.idb
-*.iobj
-*.ipdb
-*.exe
