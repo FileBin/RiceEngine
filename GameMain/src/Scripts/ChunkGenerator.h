@@ -121,12 +121,17 @@ class ChunkGenerator : public MonoScript {
 					return;
 				loading[idx] = false;
 				if (!loadingQueue.try_pop(chunkPos)) {
-					Sleep(20);
-					while (unloading) { Sleep(1); loading[idx] = false; };
+					if (loadingQueue.empty())
+						Sleep(20);
+					else
+						Sleep(1);
+
+					while (unloading) { Sleep(1); };
 					loading[idx] = true;
 					continue;
 				}
 				chunkPos = chunkPos + playerChunk;
+				while (unloading) { Sleep(1); loading[idx] = false; };
 				loading[idx] = true;
 			}
 			wrld.SetChunkStatus(chunkPos, Chunk::Loading);
@@ -146,11 +151,7 @@ class ChunkGenerator : public MonoScript {
 			}
 			chunkObj.Enable();
 			sRen.Unlock();
-			if (wrld.GetChunkStatus(chunkPos) != Chunk::Loaded) {
-				wrld.SetChunkStatus(chunkPos, Chunk::Loaded);
-			} else {
-				wrld.SetChunkStatus(chunkPos, Chunk::Invalid);
-			}
+			wrld.SetChunkStatus(chunkPos, Chunk::Loaded);
 			loading[idx] = false;
 		}
 	}

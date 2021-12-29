@@ -43,7 +43,7 @@ public:
 private:
 	concurrent_unordered_map<Vector3i, Chunk*> chunkMap{};
 	concurrent_unordered_map<Vector2i, HeightMap*> heightMaps{};
-	bool lock;
+	bool lock = false;
 	WorldGenerator& generator;
 #pragma endregion
 
@@ -58,6 +58,8 @@ public:
 	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
 
 	void UnloadChunk(Vector3i chunkPos) {
+		Wait();
+		Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
 			auto& chunk = *it->second;
@@ -77,6 +79,7 @@ public:
 				}
 			}
 		}
+		Unlock();
 	}
 
 	void SaveChunk(Chunk& chunk) {}
@@ -119,7 +122,7 @@ public:
 		Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			lock = false;
+			Unlock();
 			return it->second->status;
 		}
 		Unlock();
@@ -127,20 +130,26 @@ public:
 	}
 
 	void SetChunkStatus(Vector3i chunkPos, Chunk::Status status) {
-		Wait();
-		Lock();
-		auto& chunk = GetChunk(chunkPos);
-		chunk.status = status;
-		Unlock();
+		auto it = chunkMap.find(chunkPos);
+		if (it != chunkMap.end()) {
+			Wait();
+			Lock();
+			it->second->status = status;
+			Unlock();
+		}
 	}
 
 	Chunk& GetChunk(Vector3i chunkPos) {
+		Wait();
+		Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
+			Unlock();
 			return *it->second;
 		} else {
 			auto& ch = GenerateChunk(chunkPos);
 			chunkMap.insert(chunkMap.end(), { chunkPos, &ch });
+			Unlock();
 			return ch;
 		}
 	}
