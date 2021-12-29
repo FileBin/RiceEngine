@@ -1,4 +1,5 @@
-﻿#include <GameEngine/InputManager.h>
+﻿#include "pch.h"
+#include <GameEngine/InputManager.h>
 #include <GameEngine/macros.h>
 #include <GameEngine\Log.h>
 

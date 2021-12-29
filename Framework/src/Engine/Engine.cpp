@@ -1,4 +1,5 @@
-﻿#include <GameEngine\stdafx.h>
+﻿#include "pch.h"
+#include <GameEngine\stdafx.h>
 #include <GameEngine\Engine.h>
 #include <GameEngine\Core.h>
 #include <GameEngine\Material.h>

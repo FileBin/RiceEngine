@@ -1,4 +1,5 @@
-﻿#include <GameEngine\Scene\Component.h>
+﻿#include "pch.h"
+#include <GameEngine\Scene\Component.h>
 #include <GameEngine\Scene\SceneObject.h>
 namespace Game {
 	void Component::Init(SceneObject* parent) {

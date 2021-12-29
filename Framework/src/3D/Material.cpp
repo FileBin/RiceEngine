@@ -1,4 +1,5 @@
-﻿#include <GameEngine\Material.h>
+﻿#include "pch.h"
+#include <GameEngine\Material.h>
 #include <GameEngine\Device.h>
 
 namespace Game {

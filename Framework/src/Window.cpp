@@ -1,4 +1,5 @@
-﻿#include <GameEngine/Window.h>
+﻿#include "pch.h"
+#include <GameEngine/Window.h>
 #include <GameEngine/Log.h>
 
 namespace Game {

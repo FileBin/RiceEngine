@@ -1,7 +1,7 @@
-﻿#include <GameEngine/Vectors.h>
+﻿#include "pch.h"
+#include <GameEngine/Vectors.h>
 #include <GameEngine\Math.h>
 #include <GameEngine\Matrixes.h>
-#include <GameEngine\stdafx.h>
 #include <GameEngine/Vectors/Quaternion.h>
 #include <GameEngine\Vectors\Vector2i.h>
 
