@@ -319,7 +319,7 @@ const Vector4f VoxelWater::color = { 0.3f, 0.2f, 0.7f, 0.7f };
 
 const Vector3f VoxelGrass::EGS = { 0.3f, 0.2f, 0.4f };
 const Vector3f VoxelDirt::EGS = { 0.3f, 0.2f, 0.4f };
-const Vector3f VoxelStone::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelStone::EGS = { 0.3f, 0.2f, 0.65f };
 const Vector3f VoxelSnow::EGS = { 0.3f, 0.2f, 0.8f };
 const Vector3f VoxelDarkStone::EGS = { 0.3f, 0.2f, 0.4f };
 const Vector3f VoxelDarkGrass::EGS = { 0.3f, 0.2f, 0.4f };

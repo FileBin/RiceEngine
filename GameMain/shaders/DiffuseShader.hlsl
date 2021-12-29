@@ -20,11 +20,9 @@ float rand(float w_x, float w_y)
     return x - floor(x);
 }
 
-float clamp(float value, float min, float max)
+float clamp(float value, float min_, float max_)
 {
-    if (value < min){return min;}
-    if (value > max){return max;}
-    return value;
+    return min(max(value, min_), max_);
 }
 
 float4 main(PixelShaderInput input) : SV_TARGET{
@@ -33,15 +31,19 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 
 	float emission = egs.x;
     float glossines = egs.y;
-    float specluar = egs.z;
+    float specular = egs.z;
 
     float add = 0;
     if (incolor.w < 1)
     {
-        add = pow((clamp(w_n.z, 0, 1) * sin(time * rand(w_n.x, w_n.z)) + clamp(w_n.x, 0, 1) * cos(time * rand(w_n.z, w_n.x))) * 5, 0.5);
+        float com1 = clamp(w_n.z, 0, 1) * sin(time * rand(w_n.x, w_n.z));
+        com1 = max(com1, 0);
+        float com2 = clamp(w_n.x, 0, 1) * cos(time * rand(w_n.z, w_n.x));
+        com2 = max(com2, 0);
+        add = pow((com1 + com2) * 5, 0.5);
     }
 
-    //specluar += 0.5f * sin(clamp(pow(((w_n.y + w_n.x + w_n.z) * 2 - 4), 7), -1.3, 1.3));
+    specular += add;
 
 	float3 eye = normalize(input.viewPos);
 
@@ -61,11 +63,7 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 	col *= ((dif * shadow - 1) * em + 1);
 	float3 s = 1 - col;
 	s *= spec;
-    col += s * shadow * specluar;
- 
-    col.x = add;
-    col.y = add;
-    col.z = add;
+    col += s * shadow * specular;
 
-    return float4(col, 1);
+    return float4(col, incolor.w);
 }
