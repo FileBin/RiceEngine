@@ -235,6 +235,7 @@ class ChunkGenerator : public MonoScript {
 				auto chunk = it->first;
 				if (!it->second) {
 					it->second = true;
+					return chunk;
 				}
 			}
 			loading[idx] = false;
