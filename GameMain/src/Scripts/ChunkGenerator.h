@@ -84,9 +84,9 @@ class ChunkGenerator : public MonoScript {
 	void Update() {
 		auto& en = GetEngine();
 		auto& ren = GetRender();
-		//auto grassMat = ren.GetMaterial(L"DarkGrass");
-		//grassMat.SetVar(L"time", (float)en.GetTime());
-		//grassMat.UpdateBuffer();
+		auto waterMat = ren.GetMaterial(L"Water");
+		waterMat.SetVar(L"time", (float)en.GetTime());
+		waterMat.UpdateBuffer();
 
 		auto newPos = ren.GetCamera(0).transform.pos;
 		auto playerChunk = World::TransformToChunkPos(newPos);
