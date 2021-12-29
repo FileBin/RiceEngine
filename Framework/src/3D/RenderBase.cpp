@@ -1,4 +1,5 @@
-﻿#include <GameEngine/RenderBase.h>
+﻿#include "pch.h"
+#include <GameEngine/RenderBase.h>
 #include <GameEngine/stdafx.h>
 #include <GameEngine/macros.h>
 

@@ -1,4 +1,5 @@
-﻿#include <GameEngine\Components\ModelRender.h>
+﻿#include "pch.h"
+#include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Scene\SceneObject.h>
 #include <GameEngine\Scene\Scene.h>

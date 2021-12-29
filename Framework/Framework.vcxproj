@@ -90,13 +90,15 @@
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
     <TargetName>$(ProjectName)_debug</TargetName>
-    <IncludePath>$(SolutionDir)RapidJSON\include;include;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <IncludePath>$(SolutionDir)lib\include\;$(SolutionDir)RapidJSON\include;include;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(SolutionDir)lib\x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
-    <IncludePath>$(SolutionDir)RapidJSON\include;include;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <IncludePath>$(SolutionDir)lib\include\;$(SolutionDir)RapidJSON\include;include;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(SolutionDir)lib\x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,9 +158,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;C:\Program Files\Microsoft SDKs\DirectX11\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -212,9 +216,13 @@
     <ClInclude Include="include\GameEngine\stdafx.h" />
     <ClInclude Include="include\GameEngine\Vectors.h" />
     <ClInclude Include="include\GameEngine\Window.h" />
+    <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\3D\ModelRenderer.cpp" />
+    <ClCompile Include="src\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />
     <ClCompile Include="src\Scene\Component.cpp" />

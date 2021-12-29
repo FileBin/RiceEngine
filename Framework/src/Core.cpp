@@ -1,4 +1,5 @@
-﻿#include <GameEngine/Core.h>
+﻿#include "pch.h"
+#include <GameEngine/Core.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
 #include <GameEngine/ScriptBase.h>

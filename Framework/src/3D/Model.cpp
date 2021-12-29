@@ -1,4 +1,5 @@
-﻿#include <GameEngine/Model.h>
+﻿#include "pch.h"
+#include <GameEngine/Model.h>
 #include <GameEngine\Math.h>
 
 namespace Game {

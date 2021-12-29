@@ -1,4 +1,5 @@
-﻿#include <GameEngine/Device.h>
+﻿#include "pch.h"
+#include <GameEngine/Device.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Vectors.h>
 #include <GameEngine/Log.h>
@@ -13,6 +14,21 @@ namespace Game {
 		_RELEASE(context);
 		_RELEASE(swapChain);
 		_RELEASE(device);
+	}
+
+	void Device::CreateFonts() {
+		spriteBatch = new DirectX::SpriteBatch(context);
+		fonts.insert({ L"ComicSans", new DirectX::SpriteFont(device,L"fonts\\comic_sans_ms_16.spritefont") });
+	}
+
+	void Device::Draw2D() {
+		using DirectX::XMFLOAT2;
+		using namespace DirectX;
+		spriteBatch->Begin();
+		for (auto pair : fonts) {
+			pair.second->DrawString(spriteBatch, L"SUS", XMFLOAT2(0,0), Colors::WhiteSmoke, 0, XMFLOAT2(0,0), XMFLOAT2(1,1));
+		}
+		spriteBatch->End();
 	}
 
 #pragma region Initialize
@@ -65,7 +81,6 @@ namespace Game {
 		rsdesc.AntialiasedLineEnable = true;
 
 		//enable blending
-		ID3D11BlendState* d3dBlendState;
 		D3D11_BLEND_DESC omDesc;
 		ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
 		omDesc.RenderTarget[0].BlendEnable = true;
@@ -78,10 +93,26 @@ namespace Game {
 		omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-		ThrowIfFailed(device->CreateBlendState(&omDesc, &d3dBlendState));
-		context->OMSetBlendState(d3dBlendState, 0, 0xffffffff);
+		ThrowIfFailed(device->CreateBlendState(&omDesc, &transparentState));
+
+		//solidState
+		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
+
+		ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
+		omDesc.RenderTarget[0].BlendEnable = false;
+		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+		ThrowIfFailed(device->CreateBlendState(&omDesc, &solidState));
 
 		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
+	}
+
+	void Device::SetBlendState(bool transparent) {
+		if (transparent) {
+			context->OMSetBlendState(transparentState, 0, 0xffffffff);
+		} else {
+			context->OMSetBlendState(solidState, 0, 0xffffffff);
+		}
 	}
 
 	void Device::Initialize(HWND hwnd, size_t idx) {
@@ -182,9 +213,7 @@ namespace Game {
 		Desc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 
 		// Create depth stencil state
-		ID3D11DepthStencilState* pDSState;
 		device->CreateDepthStencilState(&Desc, &pDSState);
-		context->OMSetDepthStencilState(pDSState, 1);
 	}
 
 	void Device::ReCreateSwapChain(Vector2 screenSize) {
@@ -287,6 +316,7 @@ namespace Game {
 	}
 
 	void Device::Draw() {
+		context->OMSetDepthStencilState(pDSState, 1);
 		context->RSSetState(state);
 		context->DrawIndexed(indexCount, 0, 0);
 	}

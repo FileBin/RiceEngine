@@ -1,4 +1,5 @@
-﻿#include <GameEngine/Log.h>
+﻿#include "pch.h"
+#include <GameEngine/Log.h>
 #include <ios>
 #include <locale.h>
 #include <GameEngine/Util.h>

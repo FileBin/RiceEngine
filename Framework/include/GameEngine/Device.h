@@ -11,6 +11,9 @@ namespace Game {
 		Device();
 		~Device();
 
+		void CreateFonts();
+		void Draw2D();
+
 		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
 
 		template<typename T>
@@ -56,6 +59,8 @@ namespace Game {
 
 		void SetActiveShader(Shader &shader);
 
+		void SetBlendState(bool transparent);
+
 		ID3D11PixelShader* CreatePixelShader(data_t shaderData);
 
 		ID3D11VertexShader* CreateVertexShader(data_t shaderData);
@@ -91,6 +96,11 @@ namespace Game {
 		ID3D11DepthStencilView* depthStencil = nullptr;
 		ID3D11Texture2D* depthStencilTex = nullptr;
 		ID3D11RasterizerState* state = nullptr;
+		ID3D11DepthStencilState* pDSState;
+		ID3D11BlendState* transparentState, *solidState;
+
+		DirectX::SpriteBatch* spriteBatch = nullptr;
+		std::unordered_map<String, DirectX::SpriteFont*> fonts{};
 
 		D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 		D3D_FEATURE_LEVEL featureLvl = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;

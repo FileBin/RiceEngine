@@ -1,4 +1,5 @@
-﻿#include <GameEngine/Shader.h>
+﻿#include "pch.h"
+#include <GameEngine/Shader.h>
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
 

@@ -1,4 +1,6 @@
-﻿#pragma once
+#pragma once
+
+#pragma warning( disable : 4005 4838 4267 4244 4458 )
 
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
@@ -26,10 +28,10 @@
 #pragma comment(lib, "d3d11.lib")
 #ifdef _DEBUG
 #	pragma comment(lib, "d3dx11d.lib")
-#	pragma comment(lib, "DirectXTK_debug.lib")
 #else
 #	pragma comment(lib, "d3dx11.lib")
-#	pragma comment(lib, "DirectXTK.lib")
 #endif
 
 #pragma comment(lib, "dxgi.lib")
+
+using std::vector, std::map, std::pair;

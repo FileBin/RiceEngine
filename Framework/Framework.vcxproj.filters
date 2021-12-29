@@ -144,6 +144,9 @@
     <ClInclude Include="include\GameEngine\Vectors\Vector4i.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Log.cpp">
@@ -213,6 +216,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\3D\ModelRenderer.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pch.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

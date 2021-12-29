@@ -1,4 +1,5 @@
-﻿#include <GameEngine\SceneRender.h>
+﻿#include "pch.h"
+#include <GameEngine\SceneRender.h>
 #include <GameEngine\Material.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Camera.h>
@@ -8,6 +9,7 @@ namespace Game {
 	using std::queue;
 	bool SceneRender::Init() {
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
+		device->CreateFonts();
 		return true;
 	}
 	void SceneRender::BeginFrame() {
@@ -19,6 +21,7 @@ namespace Game {
 
 		isRendering = true;
 		device->SetPrimitiveTopology();
+		device->SetBlendState(false);
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto& model = it->first;
 
@@ -71,7 +74,7 @@ namespace Game {
 				device->Draw();
 			}
 		}
-
+		device->SetBlendState(true);
 		for (auto pair = transparentQ.begin(); pair != transparentQ.end(); pair++) {
 			auto& m = *pair->first;
 
@@ -100,6 +103,7 @@ namespace Game {
 
 			device->Draw();
 		}
+		device->Draw2D();
 		isRendering = false;
 		return true;
 	}
