@@ -314,3 +314,16 @@ const Vector4f VoxelSand::color = { 0.88f, 0.74f, 0.4f, 1.f };
 const Vector4f VoxelWater::color = { 0.3f, 0.2f, 0.7f, 0.7f };
 
 #pragma endregion
+
+#pragma region VoxelEGSMaps
+
+const Vector3f VoxelGrass::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelDirt::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelStone::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelSnow::EGS = { 0.3f, 0.2f, 0.8f };
+const Vector3f VoxelDarkStone::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelDarkGrass::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelSand::EGS = { 0.3f, 0.2f, 0.4f };
+const Vector3f VoxelWater::EGS = { 0.3f, 0.2f, 0.8f };
+
+#pragma endregion

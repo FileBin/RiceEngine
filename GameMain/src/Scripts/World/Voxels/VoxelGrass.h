@@ -10,6 +10,7 @@ struct VoxelGrass : public Voxel {
         isVoid = false;
         isTransparent = false;
     }
+    static const Vector3f EGS;
     static const Vector4f color;
     static bool IsVoid() { return false; }
     static bool IsTransparent() { return false; }
@@ -21,8 +22,9 @@ struct VoxelGrass : public Voxel {
 
     static Material& CreateMaterial(SceneRender& ren) {
         auto& shader = ren.GetShader(L"Diffuse");
-        auto& mat = ren.CreateMaterial(L"Grass", &shader, { Var(L"time"), Var(L"color") });
+        auto& mat = ren.CreateMaterial(L"Grass", &shader, { Var(L"time"), Var(L"color"), Var(L"egs") });
         mat.SetVar<Vector4f>(L"color", color);
+        mat.SetVar<Vector3f>(L"egs", EGS);
         mat.UpdateBuffer();
         return mat;
     }
