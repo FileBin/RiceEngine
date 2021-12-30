@@ -120,7 +120,7 @@ namespace Game {
 			//auto len = proj.Length();
 			//if (len < boxSize.x && len < boxSize.y && len < boxSize.z) return true;
 			//proj = proj * WVP.Projection;
-			auto b = proj.z * 1.5f;
+			auto b = proj.z * 1.2f;
 			if (proj.x < b && proj.x > -b && proj.y < b && proj.y > -b) { return true; }
 		}
 		return false;

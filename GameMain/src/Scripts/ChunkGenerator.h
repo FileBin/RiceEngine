@@ -27,6 +27,7 @@ public:
 };
 
 class ChunkGenerator : public MonoScript {
+	bool multiThreading = false;
 	bool unloading = false;
 	vector<bool> loading{};
 	//Chunk* chunk;
@@ -43,6 +44,9 @@ class ChunkGenerator : public MonoScript {
 
 	void Start() {
 		auto& scene = GetScene();
+
+		if (!multiThreading)
+			nThreads = 1;
 
 		playerPos.y = 30;
 
@@ -144,18 +148,19 @@ class ChunkGenerator : public MonoScript {
 	}
 
 	void ChunkLoaderThread(size_t idx) {
-		Vector3i offset = {0,0,0};
-
-		if (idx % 2 == 1) {
-			offset.x = 1;
-		}
-		idx /= 2;
-		if (idx % 2 == 1) {
-			offset.z = 1;
-		}
-		idx /= 2;
-		if (idx % 2 == 1) {
-			offset.y = 1;
+		Vector3i offset = { 0,0,0 };
+		if (multiThreading) {
+			if (idx % 2 == 1) {
+				offset.x = 1;
+			}
+			idx /= 2;
+			if (idx % 2 == 1) {
+				offset.z = 1;
+			}
+			idx /= 2;
+			if (idx % 2 == 1) {
+				offset.y = 1;
+			}
 		}
 
 		auto& o = GetSceneObject();
@@ -172,9 +177,16 @@ class ChunkGenerator : public MonoScript {
 
 		std::vector<Vector3i> positions{};
 
-		while (CheckChunkVisible(newChunkPos * 2 + offset)) {
-			positions.push_back(newChunkPos * 2 + offset);
-			newChunkPos = GetNextPosition(newChunkPos);
+		if (multiThreading) {
+			while (CheckChunkVisible(newChunkPos * 2 + offset)) {
+				positions.push_back(newChunkPos * 2 + offset);
+				newChunkPos = GetNextPosition(newChunkPos);
+			}
+		} else {
+			while (CheckChunkVisible(newChunkPos)) {
+				positions.push_back(newChunkPos);
+				newChunkPos = GetNextPosition(newChunkPos);
+			}
 		}
 
 		auto posCount = positions.size();
@@ -183,9 +195,9 @@ class ChunkGenerator : public MonoScript {
 		size_t positionIdx = 0;
 
 		std::function<void(void)> updatePos = [&]() {
-			if (positionIdx < posCount)
+			if (positionIdx < posCount) {
 				newChunkPos = positions[positionIdx++] + Vector3i(playerChunk.x / 2, playerChunk.y / 2, playerChunk.z / 2) * 2;
-			else {
+			} else {
 				loading[idx] = false;
 				Sleep(10);
 				positionIdx = 0;
