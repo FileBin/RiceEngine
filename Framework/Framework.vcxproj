@@ -197,6 +197,7 @@
     <ClInclude Include="include\GameEngine\Scene\SceneScript.h" />
     <ClInclude Include="include\GameEngine\ScriptBase.h" />
     <ClInclude Include="include\GameEngine\Shader.h" />
+    <ClInclude Include="include\GameEngine\SoundManager.h" />
     <ClInclude Include="include\GameEngine\Stage.h" />
     <ClInclude Include="include\GameEngine\Util.h" />
     <ClInclude Include="include\GameEngine\Util3D.h" />
@@ -221,6 +222,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\3D\ModelRenderer.cpp" />
+    <ClCompile Include="src\Engine\SoundManager.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
