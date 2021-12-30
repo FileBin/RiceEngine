@@ -13,7 +13,7 @@ namespace Game {
 			instance = new InputManager();
 			return instance;
 		}
-		throw Game::exception("Input is already initialized!", 16, "InputManager* InputManager::Init()");
+		throw Game::exception("Input is already initialized!", 16, L"InputManager* InputManager::Init()");
 	}
 	InputManager::InputManager() {
 		windowRect = RECT();

@@ -140,9 +140,9 @@ namespace Game {
 			}
 		} catch (int code) {
 			if (code == -1) {
-				throw Game::exception("JSONParsingError!", 143, "Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
+				throw Game::exception("JSONParsingError!", 143, L"Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
 			} else if(code == -2) {
-				throw Game::exception("JSONHasNotMemberError!", 145, "Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
+				throw Game::exception("JSONHasNotMemberError!", 145, L"Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
 			}
 		}
 

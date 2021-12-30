@@ -257,7 +257,7 @@ namespace Game {
 
 		switch (format) {
 		case DXGI_FORMAT_UNKNOWN:
-			throw Game::exception("Unknown Format!", 260, "Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
+			throw Game::exception("Unknown Format!", 260, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
 			break;
 		case DXGI_FORMAT_R32_UINT:
 			stride = 4;
@@ -269,7 +269,7 @@ namespace Game {
 			stride = 1;
 			break;
 		default:
-			throw Game::exception("Format Error!", 272, "Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
+			throw Game::exception("Format Error!", 272, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
 			break;
 		}
 

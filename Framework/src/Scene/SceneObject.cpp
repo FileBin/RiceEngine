@@ -64,7 +64,7 @@ namespace Game {
 		if (TryGetObjectByName(name, o)) {
 			return *o;
 		}
-		throw Game::exception("Object not found", 67, "SceneObject.cpp : SceneObject& SceneObject::GetObjectByName(String name)");
+		throw Game::exception("Object not found", 67, L"SceneObject.cpp : SceneObject& SceneObject::GetObjectByName(String name)");
 	}
 
 	bool SceneObject::TryGetObjectByName(String& name, SceneObject* &object) {

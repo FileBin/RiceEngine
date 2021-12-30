@@ -24,8 +24,8 @@ namespace Game {
 		catch (exception e) {
 			Log::log(Log::ERR, L"Runtime error occured: ");
 			Log::log(Log::ERR, L"line " + std::to_wstring(e.get_line()));
-			Log::log(Log::ERR, "function: " + std::string(e.get_func()));
-			Log::log(Log::ERR, std::string(e.get_info()));
+			Log::log(Log::ERR, L"function: " + String(e.get_func()));
+			Log::log(Log::ERR, String(e.get_info()));
 			throw "err";
 		}
 		catch (...) {

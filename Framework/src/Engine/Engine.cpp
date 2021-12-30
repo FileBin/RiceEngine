@@ -14,7 +14,7 @@ namespace Game {
 			core = c;
 			stage = s;
 		} else {
-			throw Game::exception("Engine can't be created, because device reference is null!", 17, "Engine.cpp : Engine::Engine(Device** d, Core* c, Stage* s)");
+			throw Game::exception("Engine can't be created, because device reference is null!", 17, L"Engine.cpp : Engine::Engine(Device** d, Core* c, Stage* s)");
 		}
 	}
 

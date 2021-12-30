@@ -241,7 +241,7 @@ namespace Game {
 		if (it != shaders.end()) {
 			return *it->second;
 		}
-		throw new Game::exception("Shader name invalid", 244, "SceneRender.cpp : Shader& SceneRender::GetShader(String name)");
+		throw new Game::exception("Shader name invalid", 244, L"SceneRender.cpp : Shader& SceneRender::GetShader(String name)");
 	}
 
 	Material& SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
@@ -254,6 +254,6 @@ namespace Game {
 		if (it != materials.end()) {
 			return *it->second;
 		}
-		throw new Game::exception("Material name invalid", 257, "SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
+		throw new Game::exception("Material name invalid", 257, L"SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
 	}
 }
