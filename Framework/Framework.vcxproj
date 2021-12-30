@@ -217,6 +217,7 @@
     <ClInclude Include="include\GameEngine\Vectors.h" />
     <ClInclude Include="include\GameEngine\Window.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="include\GameEngine\Util\exception.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\3D\ModelRenderer.cpp" />

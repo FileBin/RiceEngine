@@ -3,6 +3,7 @@
 #include <GameEngine\Material.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Camera.h>
+#include <GameEngine\Util\exception.h>
 #include <queue>
 
 namespace Game {
@@ -240,7 +241,7 @@ namespace Game {
 		if (it != shaders.end()) {
 			return *it->second;
 		}
-		throw new std::exception("Shader name invalid!");
+		throw new Game::exception("Shader name invalid", 244, "SceneRender.cpp : Shader& SceneRender::GetShader(String name)");
 	}
 
 	Material& SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
@@ -253,6 +254,6 @@ namespace Game {
 		if (it != materials.end()) {
 			return *it->second;
 		}
-		throw new std::exception("Material name invalid!");
+		throw new Game::exception("Material name invalid", 257, "SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
 	}
 }

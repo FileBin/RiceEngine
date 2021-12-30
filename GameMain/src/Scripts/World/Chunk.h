@@ -1,13 +1,14 @@
 ﻿#pragma once
 #include <vector>
-#include <GameEngine\Model.h>
+#include <GameEngine/Model.h>
+#include <GameEngine/Util/exception.h>
 #include <functional>
 #include <vector>
 #include <map>
 #include <unordered_map>
 #include "Voxels/Voxel.h"
 #include "WorldGenerator.h"
-#include <GameEngine\Vectors\Hasher.h>
+#include <GameEngine/Vectors/Hasher.h>
 
 using namespace Game;
 using std::map, std::unordered_map;
@@ -67,7 +68,7 @@ public:
                 return it2->second;
             }
         }
-        throw new std::exception("TransparentVoxel not found!");
+        throw new Game::exception("TransparentVoxel not found", 71, "Chunk.h : float GetTranspDepth(Vector3i pos, size_t index)");
     }
 
     VoxelData GetData(Vector3i pos) {

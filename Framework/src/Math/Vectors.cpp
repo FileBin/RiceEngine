@@ -1,9 +1,10 @@
 ﻿#include "pch.h"
 #include <GameEngine/Vectors.h>
-#include <GameEngine\Math.h>
-#include <GameEngine\Matrixes.h>
+#include <GameEngine/Math.h>
+#include <GameEngine/Matrixes.h>
 #include <GameEngine/Vectors/Quaternion.h>
-#include <GameEngine\Vectors\Vector2i.h>
+#include <GameEngine/Vectors/Vector2i.h>
+#include <GameEngine/Util/exception.h>
 
 using namespace Game;
 
@@ -43,7 +44,7 @@ double& Vector2::operator[](size_t idx) {
         return x;
     if (idx == 1)
         return y;
-    throw std::exception("Vector2 is out of range!");
+    throw Game::exception("Vector2 is out of range!", 47, "Vectors.cpp : double& Vector2::operator[](size_t idx)");
 }
 
 Vector2 Vector2::operator-() {
@@ -105,7 +106,7 @@ num& Vector2i::operator[](size_t idx) {
         return x;
     if (idx == 1)
         return y;
-    throw std::exception("Vector2i is out of range!");
+    throw Game::exception("Vector2i is out of range!", 109, "Vectors.cpp : num& Vector2i::operator[](size_t idx)");
 }
 
 Vector2i Vector2i::operator-() {
@@ -167,7 +168,7 @@ float& Vector2f::operator[](size_t idx) {
         return x;
     if (idx == 1)
         return y;
-    throw std::exception("Vector2f is out of range!");
+    throw Game::exception("Vector2f is out of range!", 171, "Vectors.cpp : float& Vector2f::operator[](size_t idx)");
 }
 
 Vector2f Vector2f::operator-() {
@@ -229,7 +230,7 @@ double& Vector3::operator[](size_t idx) {
         return y;
     if (idx == 2)
         return z;
-    throw std::exception("Vector3i is out of range!");
+    throw Game::exception("Vector3i is out of range!", 233, "Vectors.cpp : double& Vector3::operator[](size_t idx)");
 }
 
 double Vector3::Length() {
@@ -335,7 +336,7 @@ num& Vector3i::operator[](size_t idx) {
         return y;
     if (idx == 2)
         return z;
-    throw std::exception("Vector3i is out of range!");
+    throw Game::exception("Vector3i is out of range!", 339, "Vector.cpp : num& Vector3i::operator[](size_t idx)");
 }
 
 double Vector3i::Length() {
@@ -427,7 +428,7 @@ float& Vector3f::operator[](size_t idx) {
         return y;
     if (idx == 2)
         return z;
-    throw std::exception("Vector3f is out of range!");
+    throw Game::exception("Vector3f is out of range!", 431, "Vectors.cpp : float& Vector3f::operator[](size_t idx)");
 }
 
 double Vector3f::Length() {

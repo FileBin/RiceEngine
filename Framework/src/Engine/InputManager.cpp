@@ -1,7 +1,8 @@
 ﻿#include "pch.h"
 #include <GameEngine/InputManager.h>
 #include <GameEngine/macros.h>
-#include <GameEngine\Log.h>
+#include <GameEngine/Log.h>
+#include <GameEngine/Util/exception.h>
 
 namespace Game {
 
@@ -12,7 +13,7 @@ namespace Game {
 			instance = new InputManager();
 			return instance;
 		}
-		throw std::exception("Input is already initialized!");
+		throw Game::exception("Input is already initialized!", 16, "InputManager* InputManager::Init()");
 	}
 	InputManager::InputManager() {
 		windowRect = RECT();

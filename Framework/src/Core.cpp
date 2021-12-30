@@ -3,8 +3,8 @@
 #include <GameEngine/macros.h>
 #include <GameEngine/Device.h>
 #include <GameEngine/ScriptBase.h>
-#include <GameEngine\Engine.h>
-
+#include <GameEngine/Engine.h>
+#include <GameEngine/Util/exception.h>
 #include <chrono>
 #include <thread>
 
@@ -15,10 +15,23 @@ namespace Game {
 
 	void Core::RunNew(ScriptBase* script) {
 		Core engine;
-		engine.AddScript(script, Stage::PreInit);
-		engine.Initialize();
-		engine.Run();
-		engine.Close();
+		try {
+			engine.AddScript(script, Stage::PreInit);
+			engine.Initialize();
+			engine.Run();
+			engine.Close();
+		}
+		catch (exception e) {
+			Log::log(Log::ERR, L"Runtime error occured: ");
+			Log::log(Log::ERR, L"line " + std::to_wstring(e.get_line()));
+			Log::log(Log::ERR, "function: " + std::string(e.get_func()));
+			Log::log(Log::ERR, std::string(e.get_info()));
+			throw "err";
+		}
+		catch (...) {
+			Log::log(Log::ERR, L"Unknown runtime error occured: ");
+			throw "err";
+		}
 	}
 
 	Core::Core() {}

@@ -2,6 +2,7 @@
 #include <GameEngine\Scene\SceneObject.h>
 #include <GameEngine\Scene\Component.h>
 #include <GameEngine\stdafx.h>
+#include <GameEngine\Util\exception.h>
 
 namespace Game {
 	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
@@ -63,7 +64,7 @@ namespace Game {
 		if (TryGetObjectByName(name, o)) {
 			return *o;
 		}
-		throw std::exception("Object not founded!");
+		throw Game::exception("Object not found", 67, "SceneObject.cpp : SceneObject& SceneObject::GetObjectByName(String name)");
 	}
 
 	bool SceneObject::TryGetObjectByName(String& name, SceneObject* &object) {

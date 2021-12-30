@@ -4,6 +4,7 @@
 #include <GameEngine/Vectors.h>
 #include <GameEngine/Log.h>
 #include <GameEngine/Util.h>
+#include <GameEngine/Util/exception.h>
 
 namespace Game {
 
@@ -256,7 +257,7 @@ namespace Game {
 
 		switch (format) {
 		case DXGI_FORMAT_UNKNOWN:
-			throw std::exception("Unknown Format!");
+			throw Game::exception("Unknown Format!", 260, "Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
 			break;
 		case DXGI_FORMAT_R32_UINT:
 			stride = 4;
@@ -268,7 +269,7 @@ namespace Game {
 			stride = 1;
 			break;
 		default:
-			throw std::exception("Format Error!");
+			throw Game::exception("Format Error!", 272, "Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
 			break;
 		}
 

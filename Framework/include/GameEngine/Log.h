@@ -36,6 +36,19 @@ namespace Game {
 			}
 		}
 
+		template<class... _Types>
+		static void log(LogLevel logLevel, std::string message, const _Types &...args) {
+			auto str = std::format(message, args...);
+			if (logLevel == LogLevel::DEBUG) {
+#ifdef _DEBUG
+				instance->print(logLevel_str[(int)logLevel], str);
+#endif
+			}
+			else {
+				instance->print(logLevel_str[(int)logLevel], str);
+			}
+		}
+
 		static void Close();
 		~Log();
 	private:

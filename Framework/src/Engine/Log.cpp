@@ -3,6 +3,7 @@
 #include <ios>
 #include <locale.h>
 #include <GameEngine/Util.h>
+#include <GameEngine/Util/exception.h>
 #include <rapidjson/document.h>
 
 #define LOGNAME "log.txt"
@@ -139,9 +140,9 @@ namespace Game {
 			}
 		} catch (int code) {
 			if (code == -1) {
-				throw std::exception("JSONParsingError!");
+				throw Game::exception("JSONParsingError!", 143, "Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
 			} else if(code == -2) {
-				throw std::exception("JSONHasNotMemberError!");
+				throw Game::exception("JSONHasNotMemberError!", 145, "Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
 			}
 		}
 
