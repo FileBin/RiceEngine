@@ -11,7 +11,7 @@
 #include "Scripts\World\Voxels\VoxelSand.h"
 #include "Scripts\World\Voxels\VoxelWater.h"
 
-const int Chunk::ChunkSize = 8;
+const int Chunk::ChunkSize = 10;
 
 #pragma region Tables
 
