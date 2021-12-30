@@ -50,7 +50,7 @@ class ChunkGenerator : public MonoScript {
 		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
 		world = new World(generator, &scene.GetRender());
 
-		auto a = renderDistance * 2 + 1;
+		auto a = renderDistance * 2 * 2 + 1;
 
 		size_t n = a * a * a;
 		chunksPool.resize(n * nThreads);
@@ -64,7 +64,7 @@ class ChunkGenerator : public MonoScript {
 			pos.y = idx % a - ad2;
 			idx /= a;
 			pos.z = idx - ad2;
-			if (!CheckChunkVisible(pos)) continue;
+			if (!CheckChunkVisible(pos, 3)) continue;
 			for (size_t j = 0; j < nThreads; j++) {
 				auto o = scene.Instaniate();
 				auto render = new ModelRender();
@@ -198,9 +198,9 @@ class ChunkGenerator : public MonoScript {
 
 		while (enabled) {
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
-			if (newPlayerChunk != playerChunk) {
+			if (newPlayerChunk/2 != playerChunk/2) {
 				playerChunk = newPlayerChunk;
-				chunkPos = { 0,0,0 };
+				positionIdx = 0;
 			}
 
 
