@@ -228,12 +228,12 @@ class ChunkGenerator : public MonoScript {
 			auto& chunkObj = *GetNextChunk(idx);
 			auto& chunk = world->GetChunk(newChunkPos);
 			auto& model = *chunk.GetModel();
-			//sRen.WaitRendering(enabled);
 			//sRen.Lock();
 			if (!enabled)
 				return;
 			auto render = chunkObj.GetComponents<ModelRender>()[0];
 			model.transform.pos = World::TransformToWorldPos(newChunkPos);
+			sRen.WaitRendering(enabled);
 			render->SetModel(&model);
 			auto n = model.GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
