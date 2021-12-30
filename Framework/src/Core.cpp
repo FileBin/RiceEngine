@@ -14,6 +14,7 @@ using namespace std::this_thread;
 namespace Game {
 
 	void Core::RunNew(ScriptBase* script) {
+		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 		Core engine;
 		try {
 			engine.AddScript(script, Stage::PreInit);

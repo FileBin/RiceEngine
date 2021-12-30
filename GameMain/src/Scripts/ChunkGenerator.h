@@ -27,7 +27,8 @@ public:
 };
 
 class ChunkGenerator : public MonoScript {
-	bool multiThreading = false;
+	enum class ThreadMode {Single = 0, Duo, Quadro, Octo};
+	ThreadMode tdMode = ThreadMode::Quadro;
 	bool unloading = false;
 	vector<bool> loading{};
 	//Chunk* chunk;
@@ -45,8 +46,22 @@ class ChunkGenerator : public MonoScript {
 	void Start() {
 		auto& scene = GetScene();
 
-		if (!multiThreading)
+		switch (tdMode) {
+		case ChunkGenerator::ThreadMode::Single:
 			nThreads = 1;
+			break;
+		case ChunkGenerator::ThreadMode::Duo:
+			nThreads = 2;
+			break;
+		case ChunkGenerator::ThreadMode::Quadro:
+			nThreads = 4;
+			break;
+		case ChunkGenerator::ThreadMode::Octo:
+			nThreads = 8;
+			break;
+		default:
+			break;
+		}
 
 		playerPos.y = 30;
 
@@ -149,18 +164,18 @@ class ChunkGenerator : public MonoScript {
 
 	void ChunkLoaderThread(size_t idx) {
 		Vector3i offset = { 0,0,0 };
-		if (multiThreading) {
-			if (idx % 2 == 1) {
-				offset.x = 1;
-			}
-			idx /= 2;
-			if (idx % 2 == 1) {
-				offset.z = 1;
-			}
-			idx /= 2;
-			if (idx % 2 == 1) {
-				offset.y = 1;
-			}
+		auto i = idx;
+
+		if (i % 2 == 1) {
+			offset.x = 1;
+		}
+		i /= 2;
+		if (i % 2 == 1) {
+			offset.z = 1;
+		}
+		i /= 2;
+		if (i % 2 == 1) {
+			offset.y = 1;
 		}
 
 		auto& o = GetSceneObject();
@@ -177,16 +192,37 @@ class ChunkGenerator : public MonoScript {
 
 		std::vector<Vector3i> positions{};
 
-		if (multiThreading) {
-			while (CheckChunkVisible(newChunkPos * 2 + offset)) {
-				positions.push_back(newChunkPos * 2 + offset);
-				newChunkPos = GetNextPosition(newChunkPos);
-			}
-		} else {
+		switch (tdMode) {
+		case ChunkGenerator::ThreadMode::Single:
 			while (CheckChunkVisible(newChunkPos)) {
 				positions.push_back(newChunkPos);
 				newChunkPos = GetNextPosition(newChunkPos);
 			}
+			break;
+		case ChunkGenerator::ThreadMode::Duo:
+		{
+			while (CheckChunkVisible(newChunkPos)) {
+				if ((newChunkPos.x + renderDistance) % 2 == offset.x)
+					positions.push_back(newChunkPos);
+				newChunkPos = GetNextPosition(newChunkPos);
+			}
+		}
+		break;
+		case ChunkGenerator::ThreadMode::Quadro:
+			while (CheckChunkVisible(newChunkPos)) {
+				if ((newChunkPos.x + renderDistance) % 2 == offset.x && (newChunkPos.z + renderDistance) % 2 == offset.z)
+					positions.push_back(newChunkPos);
+				newChunkPos = GetNextPosition(newChunkPos);
+			}
+		break;
+		case ChunkGenerator::ThreadMode::Octo:
+			while (CheckChunkVisible(newChunkPos * 2 + offset)) {
+				positions.push_back(newChunkPos * 2 + offset);
+				newChunkPos = GetNextPosition(newChunkPos);
+			}
+			break;
+		default:
+			break;
 		}
 
 		auto posCount = positions.size();
@@ -210,7 +246,7 @@ class ChunkGenerator : public MonoScript {
 
 		while (enabled) {
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
-			if (newPlayerChunk/2 != playerChunk/2) {
+			if (newPlayerChunk / 2 != playerChunk / 2) {
 				playerChunk = newPlayerChunk;
 				positionIdx = 0;
 			}
@@ -229,19 +265,19 @@ class ChunkGenerator : public MonoScript {
 			auto& chunkObj = *GetNextChunk(idx);
 			auto& chunk = world->GetChunk(newChunkPos);
 			auto& model = *chunk.GetModel();
-			//sRen.Lock();
 			if (!enabled)
 				return;
 			auto render = chunkObj.GetComponents<ModelRender>()[0];
 			model.transform.pos = World::TransformToWorldPos(newChunkPos);
-			//sRen.WaitRendering(enabled);
 			render->SetModel(&model);
 			auto n = model.GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
 				render->SetMaterial(&Voxel::GetMaterialAt(i), i);
 			}
+			sRen.WaitRendering(enabled);
+			sRen.Lock();
 			chunkObj.Enable();
-			//sRen.Unlock();
+			sRen.Unlock();
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loaded);
 			loading[idx] = false;
 		}
