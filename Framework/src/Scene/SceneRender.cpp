@@ -104,7 +104,7 @@ namespace Game {
 
 			device->Draw();
 		}
-		device->Draw2D();
+		//device->Draw2D();
 		isRendering = false;
 		return true;
 	}

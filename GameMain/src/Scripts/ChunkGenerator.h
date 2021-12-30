@@ -41,6 +41,8 @@ class ChunkGenerator : public MonoScript {
 
 	Vector3 playerPos{0, 0, 0};
 
+	size_t nThreads = 8;
+
 	void Start() {
 		auto& scene = GetScene();
 
@@ -72,7 +74,6 @@ class ChunkGenerator : public MonoScript {
 		}
 		loadingQueue = positions;
 
-		auto nThreads = 8;
 		threads.resize(nThreads);
 		loading.resize(nThreads);
 
@@ -190,7 +191,7 @@ class ChunkGenerator : public MonoScript {
 			while (unloading) { Sleep(1); loading[idx] = false; };
 			loading[idx] = true;
 
-			while (wrld.GetChunkStatus(newChunkPos) > 0) {
+			while (CheckLoaded(newChunkPos, idx)) {
 				if (!enabled)
 					return;
 				chunkPos = GetNextPosition(chunkPos);
@@ -228,16 +229,39 @@ class ChunkGenerator : public MonoScript {
 		}
 	}
 
+	bool CheckLoaded(Vector3i pos, size_t idx) {
+		auto n = chunksPool.size();
+		for (auto i = idx; i < n; i += nThreads) {
+			auto chunk = chunksPool[i].first;
+			if (!chunksPool[i].second)
+				continue;
+			auto& model = chunk->GetComponents<ModelRender>()[0]->GetModel().transform.pos;
+			if (&model == nullptr)
+				continue;
+			if (World::TransformToChunkPos(model) == pos)
+				return true;
+		}
+		return false;
+	}
+
 	SceneObject* GetNextChunk(size_t idx) {
 		auto& sRen = GetScene().GetRender();
+		auto n = chunksPool.size();
 		while (enabled) {
-			for (auto it = chunksPool.begin(); it != chunksPool.end(); it++) {
+			for (auto i = idx; i < n; i += nThreads) {
+				auto chunk = chunksPool[i].first;
+				if (!chunksPool[i].second) {
+					chunksPool[i].second = true;
+					return chunk;
+				}
+			}
+			/*for (auto it = chunksPool.begin(); it != chunksPool.end(); it++) {
 				auto chunk = it->first;
 				if (!it->second) {
 					it->second = true;
 					return chunk;
 				}
-			}
+			}*/
 			loading[idx] = false;
 			//more threads -> moreTimeout
 			Sleep(50);
@@ -262,6 +286,8 @@ class ChunkGenerator : public MonoScript {
 
 		unloading = true;
 		while (CheckLoading()) Sleep(1);
+		sRen.Wait(enabled);
+		sRen.Lock();
 
 		for (auto it = chunksPool.begin(); it != chunksPool.end(); it++) {
 			auto& chunk = *it->first;
@@ -282,8 +308,6 @@ class ChunkGenerator : public MonoScript {
 			}
 		}
 
-		sRen.Wait(enabled);
-		sRen.Lock();
 		while (!queueObj.empty()) {
 			auto o = queueObj.front();
 			queueObj.pop();
@@ -291,12 +315,12 @@ class ChunkGenerator : public MonoScript {
 			world->SetChunkStatus(o.second, Chunk::Unloaded);
 		}
 		sRen.Unlock();
-		unloading = false;//it was risky but still working
-						  //if programm was stopped here, move this to the end of Unload
 		while (!queuePos.empty()) {
 			world->UnloadChunk(queuePos.front());
 			queuePos.pop();
 		}
+		unloading = false;//it was risky but still working
+				  //if programm was stopped here, move this to the end of Unload
 
 	}
 
