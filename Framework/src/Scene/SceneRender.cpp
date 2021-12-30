@@ -104,7 +104,7 @@ namespace Game {
 
 			device->Draw();
 		}
-		device->Draw2D();
+		//device->Draw2D();
 		isRendering = false;
 		return true;
 	}
@@ -205,7 +205,7 @@ namespace Game {
 			return;
 		if (mat->renderType == RenderType::Transparent)
 			transparentQ.insert({ mesh, {} });
-		materialMap.insert(materialMap.end(), {mesh, mat}); 
+		materialMap.insert({mesh, mat}); 
 	}
 
 	void SceneRender::UnmapMaterial(Mesh* mesh) {

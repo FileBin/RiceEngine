@@ -30,16 +30,16 @@ class ChunkGenerator : public MonoScript {
 	bool unloading = false;
 	vector<bool> loading{};
 	//Chunk* chunk;
-	int renderDistance = 15;
+	int renderDistance = 20;
 	World* world;
 	WorldGenerator* generator;
 
 	vector<thread*> threads;
 	concurrent_vector<std::pair<SceneObject*, bool>> chunksPool{};
-	concurrent_priority_queue<Vector3i, MyComparer> positions{};
-	concurrent_priority_queue<Vector3i, MyComparer> loadingQueue{};
 
 	Vector3 playerPos{0, 0, 0};
+
+	size_t nThreads = 8;
 
 	void Start() {
 		auto& scene = GetScene();
@@ -50,29 +50,32 @@ class ChunkGenerator : public MonoScript {
 		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
 		world = new World(generator, &scene.GetRender());
 
-		auto a = renderDistance;
+		auto a = renderDistance * 2 + 1;
 
-		for (num i = -a; i <= a; i++) {
-			for (num j = -a; j <= a; j++) {
-				for (num k = -a; k <= a; k++) {
-					positions.push({ i, j, k });
-				}
+		size_t n = a * a * a;
+		chunksPool.resize(n * nThreads);
+		size_t poolSize = 0;
+		for (int i = 0; i < n; i++) {
+			Vector3i pos;
+			auto idx = i;
+			auto ad2 = a / 2;
+			pos.x = idx % a - ad2;
+			idx /= a;
+			pos.y = idx % a - ad2;
+			idx /= a;
+			pos.z = idx - ad2;
+			if (!CheckChunkVisible(pos)) continue;
+			for (size_t j = 0; j < nThreads; j++) {
+				auto o = scene.Instaniate();
+				auto render = new ModelRender();
+				o->AddComponent(render);
+				chunksPool[poolSize].first = o;
+				chunksPool[poolSize].second = false;
+				poolSize++;
 			}
 		}
+		chunksPool.resize(poolSize);
 
-		auto n = positions.size();
-		chunksPool.resize(n);
-		n = chunksPool.size();
-		for (size_t i = 0; i < n; i++) {
-			auto o = scene.Instaniate();
-			auto render = new ModelRender();
-			o->AddComponent(render);
-			chunksPool[i].first = o;
-			chunksPool[i].second = false;
-		}
-		loadingQueue = positions;
-
-		auto nThreads = 8;
 		threads.resize(nThreads);
 		loading.resize(nThreads);
 
@@ -93,7 +96,6 @@ class ChunkGenerator : public MonoScript {
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			if (!unloading) {
 				create_task([this]() { UnloadChunks(); });
-				loadingQueue = positions;
 			}
 			Log::log(Log::INFO, L"ChunkStatus: {}", (int)world->GetChunkStatus(playerChunk));
 		}
@@ -165,81 +167,101 @@ class ChunkGenerator : public MonoScript {
 		auto& modelRender = *scene.GetObjectByName(L"Chunk").GetComponents<ModelRender>()[0];
 		//auto mat = &modelRender.GetMaterial(0);
 		auto playerChunk = World::TransformToChunkPos(playerPos);
-		Vector3i chunkPos = {0,0,0};
 
 		auto newChunkPos = Vector3i();
 
+		std::vector<Vector3i> positions{};
+
+		while (CheckChunkVisible(newChunkPos * 2 + offset)) {
+			positions.push_back(newChunkPos * 2 + offset);
+			newChunkPos = GetNextPosition(newChunkPos);
+		}
+
+		auto posCount = positions.size();
+
+		newChunkPos = { 0,0,0 };
+		size_t positionIdx = 0;
+
 		std::function<void(void)> updatePos = [&]() {
-			newChunkPos = chunkPos + Vector3i(playerChunk.x / 2, playerChunk.y / 2, playerChunk.z / 2);
-			newChunkPos.x *= 2;
-			newChunkPos.y *= 2;
-			newChunkPos.z *= 2;
-			newChunkPos += offset;
+			if (positionIdx < posCount)
+				newChunkPos = positions[positionIdx++] + Vector3i(playerChunk.x / 2, playerChunk.y / 2, playerChunk.z / 2) * 2;
+			else {
+				loading[idx] = false;
+				Sleep(10);
+				positionIdx = 0;
+				while (unloading) { Sleep(1); loading[idx] = false; };
+				loading[idx] = true;
+			}
 		};
 		updatePos();
 
 
 		while (enabled) {
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
-			if (newPlayerChunk != playerChunk) {
+			if (newPlayerChunk/2 != playerChunk/2) {
 				playerChunk = newPlayerChunk;
-				chunkPos = { 0,0,0 };
+				positionIdx = 0;
 			}
 
 
 			while (unloading) { Sleep(1); loading[idx] = false; };
 			loading[idx] = true;
 
-			while (wrld.GetChunkStatus(newChunkPos) > 0) {
+			while (CheckLoaded(newChunkPos, idx)) {
 				if (!enabled)
 					return;
-				chunkPos = GetNextPosition(chunkPos);
 				updatePos();
-				/*if (!loadingQueue.try_pop(chunkPos)) {
-					if (loadingQueue.empty())
-						Sleep(20);
-					else
-						Sleep(1);
-
-					while (unloading) { Sleep(1); };
-					loading[idx] = true;
-					continue;
-				}*/
 			}
+			if (unloading) continue;
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loading);
 			auto& chunkObj = *GetNextChunk(idx);
 			auto& chunk = world->GetChunk(newChunkPos);
 			auto& model = *chunk.GetModel();
-			sRen.WaitRendering(enabled);
-			sRen.Lock();
+			//sRen.Lock();
 			if (!enabled)
 				return;
 			auto render = chunkObj.GetComponents<ModelRender>()[0];
 			model.transform.pos = World::TransformToWorldPos(newChunkPos);
+			//sRen.WaitRendering(enabled);
 			render->SetModel(&model);
 			auto n = model.GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
 				render->SetMaterial(&Voxel::GetMaterialAt(i), i);
 			}
 			chunkObj.Enable();
-			sRen.Unlock();
+			//sRen.Unlock();
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loaded);
 			loading[idx] = false;
 		}
 	}
 
+	bool CheckLoaded(Vector3i pos, size_t idx) {
+		auto n = chunksPool.size();
+		for (auto i = idx; i < n; i += nThreads) {
+			auto chunk = chunksPool[i].first;
+			if (!chunksPool[i].second)
+				continue;
+			auto& model = chunk->GetComponents<ModelRender>()[0]->GetModel().transform.pos;
+			if (&model == nullptr)
+				continue;
+			if (World::TransformToChunkPos(model) == pos)
+				return true;
+		}
+		return false;
+	}
+
 	SceneObject* GetNextChunk(size_t idx) {
 		auto& sRen = GetScene().GetRender();
+		auto n = chunksPool.size();
 		while (enabled) {
-			for (auto it = chunksPool.begin(); it != chunksPool.end(); it++) {
-				auto chunk = it->first;
-				if (!it->second) {
-					it->second = true;
+			for (auto i = idx; i < n; i += nThreads) {
+				auto chunk = chunksPool[i].first;
+				if (!chunksPool[i].second) {
+					chunksPool[i].second = true;
 					return chunk;
 				}
 			}
 			loading[idx] = false;
-			//more threads -> moreTimeout
 			Sleep(50);
 			while (unloading) { Sleep(1); loading[idx] = false; }
 			loading[idx] = true;
@@ -262,6 +284,8 @@ class ChunkGenerator : public MonoScript {
 
 		unloading = true;
 		while (CheckLoading()) Sleep(1);
+		sRen.Wait(enabled);
+		sRen.Lock();
 
 		for (auto it = chunksPool.begin(); it != chunksPool.end(); it++) {
 			auto& chunk = *it->first;
@@ -270,11 +294,7 @@ class ChunkGenerator : public MonoScript {
 				if (&model == nullptr) continue;
 				auto chunkPos = World::TransformToChunkPos(model.transform.pos);
 
-				auto d =
-					abs(chunkPos.x - playerChunk.x) +
-					abs(chunkPos.y - playerChunk.y) +
-					abs(chunkPos.z - playerChunk.z);
-				if (d > renderDistance + 10) {
+				if (!CheckChunkVisible(chunkPos - (playerChunk / 2) * 2)) {
 					it->second = false;
 					queuePos.push(chunkPos); 
 					queueObj.push({ &chunk, chunkPos });
@@ -282,22 +302,27 @@ class ChunkGenerator : public MonoScript {
 			}
 		}
 
-		sRen.Wait(enabled);
-		sRen.Lock();
 		while (!queueObj.empty()) {
 			auto o = queueObj.front();
 			queueObj.pop();
 			o.first->Disable();
 			world->SetChunkStatus(o.second, Chunk::Unloaded);
 		}
+		unloading = false;
 		sRen.Unlock();
-		unloading = false;//it was risky but still working
-						  //if programm was stopped here, move this to the end of Unload
 		while (!queuePos.empty()) {
 			world->UnloadChunk(queuePos.front());
 			queuePos.pop();
 		}
+	}
 
+	bool CheckChunkVisible(Vector3i chunkPos, int addedDistance = 0) {
+		//chunkPos /= 2;
+		//chunkPos *= 2;
+		chunkPos.x = Math::Abs(chunkPos.x);
+		chunkPos.y = Math::Abs(chunkPos.y);
+		chunkPos.z = Math::Abs(chunkPos.z);
+		return chunkPos.x + chunkPos.y + chunkPos.z <= renderDistance + addedDistance;
 	}
 
 	void OnDisable() {

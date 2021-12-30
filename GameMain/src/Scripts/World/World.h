@@ -140,16 +140,12 @@ public:
 	}
 
 	Chunk& GetChunk(Vector3i chunkPos) {
-		//Wait();
-		//Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			//Unlock();
 			return *it->second;
 		} else {
 			auto& ch = GenerateChunk(chunkPos);
 			chunkMap.insert(chunkMap.end(), { chunkPos, &ch });
-			//Unlock();
 			return ch;
 		}
 	}
