@@ -10,7 +10,7 @@ struct VoxelWater : public Voxel {
         isVoid = false;
         isTransparent = true;
     }
-    static const Vector3f EGS;
+    static const Vector4f EGST;
     static const Vector4f color;
     static bool IsVoid() { return false; }
     static bool IsTransparent() { return true; }
@@ -25,10 +25,10 @@ struct VoxelWater : public Voxel {
         //shader.LoadVertexShader(Util::ReadFile(L"water.cso"), Vertex::GetLayout());
         //shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-        auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"color"), Var(L"egs") });
+        auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
         mat.renderType = RenderType::Transparent;
         mat.SetVar<Vector4f>(L"color", color);
-        mat.SetVar<Vector3f>(L"egs", EGS);
+        mat.SetVar<Vector4f>(L"egst", EGST);
         mat.UpdateBuffer();
         return mat;
     }

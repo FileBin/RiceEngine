@@ -11,7 +11,7 @@ cbuffer CBuffer
 {
     float time;
     float4 incolor;
-    float3 egs;
+    float4 egst;
 }
 
 float rand(float w_x, float w_y)
@@ -20,31 +20,27 @@ float rand(float w_x, float w_y)
     return x - floor(x);
 }
 
-float clamp(float value, float min_, float max_)
-{
-    return min(max(value, min_), max_);
-}
-
 float4 main(PixelShaderInput input) : SV_TARGET{
     float3 n = input.norm;
     float3 w_n = normalize(input.world_norm);
 
-	float emission = egs.x;
-    float glossines = egs.y;
-    float specular = egs.z;
+	float emission = egst.x;
+    float glossines = egst.y;
+    float specular = egst.z;
 
     float add = 0;
-    if (incolor.w < 1)
+    switch (egst.w)
     {
-        float com1 = clamp(w_n.z, 0, 1) * sin(time * rand(w_n.x, w_n.z));
+    case 8:
+        float com1 = w_n.z * sin(time * rand(w_n.x, w_n.z) * 2);
         com1 = max(com1, 0);
-        float com2 = clamp(w_n.x, 0, 1) * cos(time * rand(w_n.z, w_n.x));
+        float com2 = w_n.x * cos(time * rand(w_n.z, w_n.x));
         com2 = max(com2, 0);
         add = pow((com1 + com2) * 5, 0.5);
+        specular = specular * 0.2 + add;
+        break;
     }
-
-    specular += add;
-
+   
 	float3 eye = normalize(input.viewPos);
 
 	float3 light = input.light;
