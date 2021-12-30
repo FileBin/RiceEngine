@@ -202,7 +202,7 @@ class ChunkGenerator : public MonoScript {
 		case ChunkGenerator::ThreadMode::Duo:
 		{
 			while (CheckChunkVisible(newChunkPos)) {
-				if ((newChunkPos.x + renderDistance) % 2 == offset.x)
+				if ((newChunkPos.x + 20000) % 2 == offset.x)
 					positions.push_back(newChunkPos);
 				newChunkPos = GetNextPosition(newChunkPos);
 			}
@@ -210,7 +210,7 @@ class ChunkGenerator : public MonoScript {
 		break;
 		case ChunkGenerator::ThreadMode::Quadro:
 			while (CheckChunkVisible(newChunkPos)) {
-				if ((newChunkPos.x + renderDistance) % 2 == offset.x && (newChunkPos.z + renderDistance) % 2 == offset.z)
+				if ((newChunkPos.x + 20000) % 2 == offset.x && (newChunkPos.z + 20000) % 2 == offset.z)
 					positions.push_back(newChunkPos);
 				newChunkPos = GetNextPosition(newChunkPos);
 			}
@@ -310,7 +310,7 @@ class ChunkGenerator : public MonoScript {
 				}
 			}
 			loading[idx] = false;
-			Sleep(50);
+			Sleep(20);
 			while (unloading) { Sleep(1); loading[idx] = false; }
 			loading[idx] = true;
 		}

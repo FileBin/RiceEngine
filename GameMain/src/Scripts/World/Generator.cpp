@@ -164,6 +164,8 @@ Model* Chunk::GenerateSmoothModel() {
             pow <<= 1; // *= 2
         }
 
+        if (_case == 0x0 || _case == 0xff) return;
+
         function<Vector3(int)> edgeToVert = [&](int e) {
             const int* edge = Tables::edges[e];
             auto d1 = d[edge[0]];
