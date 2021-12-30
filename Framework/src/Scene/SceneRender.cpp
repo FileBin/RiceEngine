@@ -205,7 +205,7 @@ namespace Game {
 			return;
 		if (mat->renderType == RenderType::Transparent)
 			transparentQ.insert({ mesh, {} });
-		materialMap.insert(materialMap.end(), {mesh, mat}); 
+		materialMap.insert({mesh, mat}); 
 	}
 
 	void SceneRender::UnmapMaterial(Mesh* mesh) {

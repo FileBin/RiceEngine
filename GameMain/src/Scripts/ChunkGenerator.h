@@ -207,6 +207,7 @@ class ChunkGenerator : public MonoScript {
 					continue;
 				}*/
 			}
+			if (unloading) continue;
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loading);
 			auto& chunkObj = *GetNextChunk(idx);
 			auto& chunk = world->GetChunk(newChunkPos);
@@ -300,7 +301,7 @@ class ChunkGenerator : public MonoScript {
 					abs(chunkPos.x - playerChunk.x) +
 					abs(chunkPos.y - playerChunk.y) +
 					abs(chunkPos.z - playerChunk.z);
-				if (d > renderDistance + 10) {
+				if (d > renderDistance + 2) {
 					it->second = false;
 					queuePos.push(chunkPos); 
 					queueObj.push({ &chunk, chunkPos });
