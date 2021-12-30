@@ -315,15 +315,15 @@ const Vector4f VoxelWater::color = { 0.3f, 0.2f, 0.7f, 0.7f };
 
 #pragma endregion
 
-#pragma region VoxelEGSMaps
+#pragma region VoxelEGSTMaps
 
 const Vector4f VoxelGrass::EGST =     { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_GRASS };
 const Vector4f VoxelDirt::EGST =      { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_DIRT };
 const Vector4f VoxelStone::EGST =     { 0.3f, 0.2f, 0.65f, VoxelTypeIndex::V_STONE };
-const Vector4f VoxelSnow::EGST =      { 0.3f, 0.2f, 0.8f,  VoxelTypeIndex::V_SNOW };
+const Vector4f VoxelSnow::EGST =      { 0, 1, 2,           VoxelTypeIndex::V_SNOW };
 const Vector4f VoxelDarkStone::EGST = { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_DARK_STONE };
 const Vector4f VoxelDarkGrass::EGST = { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_DARK_GRASS };
 const Vector4f VoxelSand::EGST =      { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_SAND };
-const Vector4f VoxelWater::EGST =     { 0.3f, 0.2f, 0.8f,  VoxelTypeIndex::V_WATER };
+const Vector4f VoxelWater::EGST =     { 0.3f, 0.2f, 2,     VoxelTypeIndex::V_WATER };
 
 #pragma endregion
