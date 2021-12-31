@@ -99,8 +99,15 @@ namespace Game {
 		ID3D11DepthStencilState* pDSState;
 		ID3D11BlendState* transparentState, *solidState;
 
+
 		DirectX::SpriteBatch* spriteBatch = nullptr;
 		std::unordered_map<String, DirectX::SpriteFont*> fonts{};
+
+		ID2D1RenderTarget* renderTarget2d = nullptr;
+		ID2D1Factory* factory2d = nullptr;
+		ID2D1SolidColorBrush* colorBrush = nullptr;
+		IDWriteTextFormat* format = nullptr;
+		IDWriteFactory* writeFactory = nullptr;
 
 		D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 		D3D_FEATURE_LEVEL featureLvl = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;

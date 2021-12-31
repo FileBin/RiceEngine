@@ -17,19 +17,65 @@ namespace Game {
 		_RELEASE(device);
 	}
 
-	void Device::CreateFonts() {
-		spriteBatch = new DirectX::SpriteBatch(context);
-		fonts.insert({ L"ComicSans", new DirectX::SpriteFont(device,L"fonts\\comic_sans_ms_16.spritefont") });
+	void Device::Create2D() {
+
+		D2D1CreateFactory(D2D1_FACTORY_TYPE::D2D1_FACTORY_TYPE_SINGLE_THREADED, &factory2d);
+		DWriteCreateFactory(DWRITE_FACTORY_TYPE::DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&writeFactory));
+
+		writeFactory->CreateTextFormat(
+			L"Arial",
+			nullptr,
+			DWRITE_FONT_WEIGHT_NORMAL,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			10.0f * 96.0f / 72.0f,
+			L"en-US",
+			&textFormat
+		);
+
+		FLOAT dpiX;
+		FLOAT dpiY;
+		factory2d->GetDesktopDpi(&dpiX, &dpiY);
+
+		D2D1_RENDER_TARGET_PROPERTIES props =
+			D2D1::RenderTargetProperties(
+				D2D1_RENDER_TARGET_TYPE_DEFAULT,
+				D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+				dpiX,
+				dpiY
+			);
+
+		IDXGISurface* pBackBuffer = nullptr;
+		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
+
+		if (pBackBuffer == nullptr)
+			throw Game::exception("Back buffer was null", 49, L"Device.cpp Device::Create2D()");
+
+		ThrowIfFailed(factory2d->CreateDxgiSurfaceRenderTarget(pBackBuffer, props, &renderTarget2d));
+
+		renderTarget2d->CreateSolidColorBrush(
+			D2D1::ColorF(D2D1::ColorF::Red),
+			&colorBrush
+		);
+
+
+		//spriteBatch = new DirectX::SpriteBatch(context);
+		//fonts.insert({ L"ComicSans", new DirectX::SpriteFont(device,L"fonts\\comic_sans_ms_16.spritefont") });
 	}
 
 	void Device::Draw2D() {
-		using DirectX::XMFLOAT2;
+		renderTarget2d->BeginDraw();
+
+		renderTarget2d->EndDraw();
+
+
+		/*using DirectX::XMFLOAT2;
 		using namespace DirectX;
 		spriteBatch->Begin();
 		for (auto pair : fonts) {
 			pair.second->DrawString(spriteBatch, L"SUS", XMFLOAT2(0,0), Colors::WhiteSmoke, 0, XMFLOAT2(0,0), XMFLOAT2(1,1));
 		}
-		spriteBatch->End();
+		spriteBatch->End();*/
 	}
 
 #pragma region Initialize
@@ -249,15 +295,15 @@ namespace Game {
 		_createDepthStencil(screenSize);
 	}
 
-	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format) {
+	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat) {
 		D3D11_BUFFER_DESC desc;
 		(*buffer).GetDesc(&desc);
 
 		UINT stride = 0;
 
-		switch (format) {
+		switch (textFormat) {
 		case DXGI_FORMAT_UNKNOWN:
-			throw Game::exception("Unknown Format!", 260, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
+			throw Game::exception("Unknown Format!", 260, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat)");
 			break;
 		case DXGI_FORMAT_R32_UINT:
 			stride = 4;
@@ -269,12 +315,12 @@ namespace Game {
 			stride = 1;
 			break;
 		default:
-			throw Game::exception("Format Error!", 272, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format)");
+			throw Game::exception("Format Error!", 272, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat)");
 			break;
 		}
 
 		indexCount = desc.ByteWidth / stride;
-		context->IASetIndexBuffer(buffer, format, 0);
+		context->IASetIndexBuffer(buffer, textFormat, 0);
 	}
 
 	void Game::Device::SetActiveVSConstantBuffer(ID3D11Buffer* buffer, size_t index) {
