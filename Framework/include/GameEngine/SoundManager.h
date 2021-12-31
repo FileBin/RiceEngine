@@ -15,6 +15,7 @@ namespace Game {
 	private:
 		bool check_al_errors(const std::wstring& filename, const std::uint_fast32_t line);
 		bool check_alc_errors(const std::wstring& filename, const std::uint_fast32_t line, ALCdevice* device);
+		void play(ALuint* sound);
 		ALuint* sound_load_ogg(const char* path);
 
 		template<typename alFunction, typename... Params>

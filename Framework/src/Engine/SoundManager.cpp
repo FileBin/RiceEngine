@@ -3,8 +3,6 @@
 #include <GameEngine/Log.h>
 #include <GameEngine/Util/exception.h>
 
-#include <al/al.h>
-#include <al/alc.h>
 #include <vorbis/vorbisfile.h>
 
 namespace Game {
@@ -118,6 +116,36 @@ namespace Game {
 			return false;
 		}
 		return true;
+	}
+
+	void SoundManager::play(ALuint* sound) {
+		//create source
+		ALuint source;
+		alCall(alGenSources, 1, &source);
+		alCall(alSourcef, source, AL_PITCH, 1);
+		alCall(alSourcef, source, AL_GAIN, 1.0f);
+		alCall(alSource3f, source, AL_POSITION, 0, 0, 0);
+		alCall(alSource3f, source, AL_VELOCITY, 0, 0, 0);
+		alCall(alSourcei, source, AL_LOOPING, AL_FALSE);
+		alCall(alSourcei, source, AL_BUFFER, *sound);
+
+		alCall(alSourcePlay, source);
+
+		ALint state = AL_PLAYING;
+
+		while (state == AL_PLAYING)
+		{
+			alCall(alGetSourcei, source, AL_SOURCE_STATE, &state);
+		}
+
+		alCall(alDeleteSources, 1, &source);
+		alCall(alDeleteBuffers, 1, sound);
+
+		alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, nullptr);
+		alcCall(alcDestroyContext, openALDevice, openALContext);
+
+		ALCboolean closed;
+		alcCall(alcCloseDevice, closed, openALDevice, openALDevice);
 	}
 
 	ALuint* SoundManager::sound_load_ogg(const char* path) {
