@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include <GameEngine/InputManager.h>
 #include <GameEngine/macros.h>
-#include <GameEngine/Log.h>
 #include <GameEngine/Util/exception.h>
 
 namespace Game {

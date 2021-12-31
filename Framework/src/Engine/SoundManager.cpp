@@ -1,12 +1,104 @@
-#include <GameEngine/SoundManager.h>
-#include <GameEngine/Util/exception.h>
 #include "pch.h"
+#include <GameEngine/SoundManager.h>
+#include <GameEngine/Log.h>
+#include <GameEngine/Util/exception.h>
+
 #include <al/al.h>
+#include <al/alc.h>
 #include <vorbis/vorbisfile.h>
 
 namespace Game {
+	
+	SoundManager* instance = nullptr;
+	ALCdevice* openALDevice;
 
-	ALuint* sound_load_ogg(const char* path) {
+	SoundManager* SoundManager::Init() {
+		if (instance == nullptr) {
+			instance = new SoundManager();
+			return instance;
+		}
+		throw Game::exception("Sound is already initialized!", 16, L"SoundManager.cpp : SoundManager* SoundManager::Init()");
+	}
+
+	SoundManager::SoundManager() {
+		ALCdevice* openALDevice = alcOpenDevice(nullptr); // default device
+		if (!openALDevice)
+		{
+			throw Game::exception("Sound device initialization failed!", 27, L"SoundManager.cpp : SoundManager::SoundManager()");
+		}
+	}
+
+	SoundManager::~SoundManager() {
+		
+	}
+
+	bool SoundManager::check_al_errors(const std::wstring& filename, const std::uint_fast32_t line)
+	{
+		ALenum error = alGetError();
+		if (error != AL_NO_ERROR)
+		{
+			Log::log(Log::ERR, L"Audio error occured");
+			Log::log(Log::ERR, filename);
+			Log::log(Log::ERR, std::to_wstring(line));
+			switch (error)
+			{
+			case AL_INVALID_NAME:
+				Log::log(Log::ERR, L"AL_INVALID_NAME: a bad name (ID) was passed to an OpenAL function");
+				break;
+			case AL_INVALID_ENUM:
+				Log::log(Log::ERR, L"AL_INVALID_ENUM: an invalid enum value was passed to an OpenAL function");
+				break;
+			case AL_INVALID_VALUE:
+				Log::log(Log::ERR, L"AL_INVALID_VALUE: an invalid value was passed to an OpenAL function");
+				break;
+			case AL_INVALID_OPERATION:
+				Log::log(Log::ERR, L"AL_INVALID_OPERATION: the requested operation is not valid");
+				break;
+			case AL_OUT_OF_MEMORY:
+				Log::log(Log::ERR, L"AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory");
+				break;
+			default:
+				Log::log(Log::ERR, L"UNKNOWN AL ERROR: " + std::to_wstring(error));
+			}
+			return false;
+		}
+		return true;
+	}
+
+	bool SoundManager::check_alc_errors(const std::wstring& filename, const std::uint_fast32_t line, ALCdevice* device)
+	{
+		ALCenum error = alcGetError(device);
+		if (error != ALC_NO_ERROR)
+		{
+			Log::log(Log::ERR, L"Audio error occured");
+			Log::log(Log::ERR, filename);
+			Log::log(Log::ERR, std::to_wstring(line));
+			switch (error)
+			{
+			case ALC_INVALID_VALUE:
+				Log::log(Log::ERR, L"ALC_INVALID_VALUE: an invalid value was passed to an OpenAL function");
+				break;
+			case ALC_INVALID_DEVICE:
+				Log::log(Log::ERR, L"ALC_INVALID_DEVICE: a bad device was passed to an OpenAL function");
+				break;
+			case ALC_INVALID_CONTEXT:
+				Log::log(Log::ERR, L"ALC_INVALID_CONTEXT: a bad context was passed to an OpenAL function");
+				break;
+			case ALC_INVALID_ENUM:
+				Log::log(Log::ERR, L"ALC_INVALID_ENUM: an unknown enum value was passed to an OpenAL function");
+				break;
+			case ALC_OUT_OF_MEMORY:
+				Log::log(Log::ERR, L"ALC_OUT_OF_MEMORY: an unknown enum value was passed to an OpenAL function");
+				break;
+			default:
+				Log::log(Log::ERR, L"UNKNOWN ALC ERROR: " + std::to_wstring(error));
+			}
+			return false;
+		}
+		return true;
+	}
+
+	ALuint* SoundManager::sound_load_ogg(const char* path) {
 		ALenum error = 0;
 		ALuint* sound = 0;
 		FILE* fp = 0;
@@ -16,17 +108,19 @@ namespace Game {
 		ALenum format = 0;
 		short* pcmout = 0;
 
+		size_t data_len = 0;
+
 		if ((err = fopen_s(&fp, path, "r")) != 0) {
 			fprintf(stderr, "cannot open file '%s': %d\n",
 				path, err);
-			//goto exit;
+			goto exit;
 		}
 
 		// make a handle
 		sound = (ALuint*)malloc(1 * sizeof(ALuint));
 		if (sound == 0) {
 			fprintf(stderr, "Out of memory.");
-			//goto exit;
+			goto exit;
 		}
 
 		// make a buffer
@@ -42,7 +136,7 @@ namespace Game {
 	  // set OV_CALLBACKS_NOCLOSE else it will close your fp when ov_close() is reached, which is fine.
 		if (ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
 			fprintf(stderr, "Stream is not a valid OggVorbis stream!\n");
-			//goto exit;
+			goto exit;
 		}
 
 
@@ -53,7 +147,7 @@ namespace Game {
 
 		// data_len is the amount of data to read, allocate said data space
 		// this is calculated by (samples * channels * 2 (aka 16bits))
-		size_t data_len = ov_pcm_total(&vf, -1) * vi->channels * 2;
+		data_len = ov_pcm_total(&vf, -1) * vi->channels * 2;
 		pcmout = (short*)malloc(data_len);
 		if (pcmout == 0) {
 			fprintf(stderr, "Out of memory.\n");
