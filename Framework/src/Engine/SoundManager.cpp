@@ -3,14 +3,15 @@
 #include <GameEngine/Log.h>
 #include <GameEngine/Util/exception.h>
 
-#include <al/al.h>
-#include <al/alc.h>
 #include <vorbis/vorbisfile.h>
 
 namespace Game {
 	
 	SoundManager* instance = nullptr;
 	ALCdevice* openALDevice;
+
+	ALCboolean contextMadeCurrent;
+	ALCcontext* openALContext;
 
 	SoundManager* SoundManager::Init() {
 		if (instance == nullptr) {
@@ -21,15 +22,34 @@ namespace Game {
 	}
 
 	SoundManager::SoundManager() {
-		ALCdevice* openALDevice = alcOpenDevice(nullptr); // default device
+		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice)
 		{
 			throw Game::exception("Sound device initialization failed!", 27, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
+		openALContext;
+		if (!alcCall(alcCreateContext, openALContext, openALDevice, openALDevice, nullptr) || !openALContext)
+		{
+			throw Game::exception("Could not create openAL context!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
+		}
+		contextMadeCurrent = false;
+		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, openALContext)
+			|| contextMadeCurrent != ALC_TRUE)
+		{
+			throw Game::exception("Could not make openAL context context current!", 39, L"SoundManager.cpp : SoundManager::SoundManager()");
+		}
 	}
 
 	SoundManager::~SoundManager() {
-		
+		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, nullptr))
+		{
+			Log::log(Log::WARNING, L"Error while destroying openAL context");
+		}
+
+		if (!alcCall(alcDestroyContext, openALDevice, openALContext))
+		{
+			Log::log(Log::WARNING, L"Error while destroying openAL context");
+		}
 	}
 
 	bool SoundManager::check_al_errors(const std::wstring& filename, const std::uint_fast32_t line)
@@ -98,6 +118,36 @@ namespace Game {
 		return true;
 	}
 
+	void SoundManager::play(ALuint* sound) {
+		//create source
+		ALuint source;
+		alCall(alGenSources, 1, &source);
+		alCall(alSourcef, source, AL_PITCH, 1);
+		alCall(alSourcef, source, AL_GAIN, 1.0f);
+		alCall(alSource3f, source, AL_POSITION, 0, 0, 0);
+		alCall(alSource3f, source, AL_VELOCITY, 0, 0, 0);
+		alCall(alSourcei, source, AL_LOOPING, AL_FALSE);
+		alCall(alSourcei, source, AL_BUFFER, *sound);
+
+		alCall(alSourcePlay, source);
+
+		ALint state = AL_PLAYING;
+
+		while (state == AL_PLAYING)
+		{
+			alCall(alGetSourcei, source, AL_SOURCE_STATE, &state);
+		}
+
+		alCall(alDeleteSources, 1, &source);
+		alCall(alDeleteBuffers, 1, sound);
+
+		alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, nullptr);
+		alcCall(alcDestroyContext, openALDevice, openALContext);
+
+		ALCboolean closed;
+		alcCall(alcCloseDevice, closed, openALDevice, openALDevice);
+	}
+
 	ALuint* SoundManager::sound_load_ogg(const char* path) {
 		ALenum error = 0;
 		ALuint* sound = 0;
@@ -124,16 +174,13 @@ namespace Game {
 		}
 
 		// make a buffer
-		alGenBuffers(1, sound);
-
-		// check for errors
-		if ((error = alGetError()) != AL_NO_ERROR) {
+		if (!alCall(alGenBuffers, 1, sound)) {
 			fprintf(stderr, "Failed to generate sound buffer %d\n", error);
 			//goto exit;
 		}
 
 		// open the ogg vorbis file. This is a must on windows, do not use ov_open.
-	  // set OV_CALLBACKS_NOCLOSE else it will close your fp when ov_close() is reached, which is fine.
+	    // set OV_CALLBACKS_NOCLOSE else it will close your fp when ov_close() is reached, which is fine.
 		if (ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
 			fprintf(stderr, "Stream is not a valid OggVorbis stream!\n");
 			goto exit;
@@ -167,8 +214,7 @@ namespace Game {
 		}
 
 		// send data to openal, vi->rate is your freq in Hz, dont assume 44100
-		alBufferData(*sound, format, pcmout, data_len, vi->rate);
-		if ((error = alGetError()) != AL_NO_ERROR) {
+		if (!alCall(alBufferData, *sound, format, pcmout, data_len, vi->rate)) {
 			printf("Failed to send audio information buffer to OpenAL! 0x%06x\n", error);
 			goto exit;
 		}
