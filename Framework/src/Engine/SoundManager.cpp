@@ -12,6 +12,9 @@ namespace Game {
 	SoundManager* instance = nullptr;
 	ALCdevice* openALDevice;
 
+	ALCboolean contextMadeCurrent;
+	ALCcontext* openALContext;
+
 	SoundManager* SoundManager::Init() {
 		if (instance == nullptr) {
 			instance = new SoundManager();
@@ -21,15 +24,34 @@ namespace Game {
 	}
 
 	SoundManager::SoundManager() {
-		ALCdevice* openALDevice = alcOpenDevice(nullptr); // default device
+		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice)
 		{
 			throw Game::exception("Sound device initialization failed!", 27, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
+		openALContext;
+		if (!alcCall(alcCreateContext, openALContext, openALDevice, openALDevice, nullptr) || !openALContext)
+		{
+			throw Game::exception("Could not create openAL context!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
+		}
+		contextMadeCurrent = false;
+		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, openALContext)
+			|| contextMadeCurrent != ALC_TRUE)
+		{
+			throw Game::exception("Could not make openAL context context current!", 39, L"SoundManager.cpp : SoundManager::SoundManager()");
+		}
 	}
 
 	SoundManager::~SoundManager() {
-		
+		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, nullptr))
+		{
+			Log::log(Log::WARNING, L"Error while destroying openAL context");
+		}
+
+		if (!alcCall(alcDestroyContext, openALDevice, openALContext))
+		{
+			Log::log(Log::WARNING, L"Error while destroying openAL context");
+		}
 	}
 
 	bool SoundManager::check_al_errors(const std::wstring& filename, const std::uint_fast32_t line)
