@@ -11,7 +11,7 @@ namespace Game {
 		Device();
 		~Device();
 
-		void CreateFonts();
+		void Create2D();
 		void Draw2D();
 
 		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
@@ -51,7 +51,7 @@ namespace Game {
 			ThrowIfFailed(_loadVertexBuffer(&buffer, sizeof(T)));
 		}
 
-		void SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT format = DXGI_FORMAT_R32_UINT);
+		void SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat = DXGI_FORMAT_R32_UINT);
 		void SetActiveVSConstantBuffer(ID3D11Buffer* buffer, size_t index = 0);
 		void SetActivePSConstantBuffer(ID3D11Buffer* buffer, size_t index = 0);
 
@@ -106,8 +106,9 @@ namespace Game {
 		ID2D1RenderTarget* renderTarget2d = nullptr;
 		ID2D1Factory* factory2d = nullptr;
 		ID2D1SolidColorBrush* colorBrush = nullptr;
-		IDWriteTextFormat* format = nullptr;
+		IDWriteTextFormat* textFormat = nullptr;
 		IDWriteFactory* writeFactory = nullptr;
+		IDWriteTextLayout* layout = nullptr;
 
 		D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 		D3D_FEATURE_LEVEL featureLvl = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;

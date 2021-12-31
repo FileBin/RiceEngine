@@ -143,6 +143,8 @@
       <AdditionalIncludeDirectories>src;C:\Program Files\Microsoft SDKs\DirectX11\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>Default</LanguageStandard_C>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -225,6 +227,7 @@
     <ClCompile Include="src\Engine\SoundManager.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />

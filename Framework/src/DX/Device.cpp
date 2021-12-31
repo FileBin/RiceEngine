@@ -18,8 +18,11 @@ namespace Game {
 	}
 
 	void Device::Create2D() {
+		auto options = D2D1_FACTORY_OPTIONS();
+		options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
+		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options, &factory2d);
 
-		D2D1CreateFactory(D2D1_FACTORY_TYPE::D2D1_FACTORY_TYPE_SINGLE_THREADED, &factory2d);
+
 		DWriteCreateFactory(DWRITE_FACTORY_TYPE::DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&writeFactory));
 
 		writeFactory->CreateTextFormat(
@@ -33,25 +36,16 @@ namespace Game {
 			&textFormat
 		);
 
-		FLOAT dpiX;
-		FLOAT dpiY;
-		factory2d->GetDesktopDpi(&dpiX, &dpiY);
+		auto props = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), 0, 0);
 
-		D2D1_RENDER_TARGET_PROPERTIES props =
-			D2D1::RenderTargetProperties(
-				D2D1_RENDER_TARGET_TYPE_DEFAULT,
-				D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
-				dpiX,
-				dpiY
-			);
 
-		IDXGISurface* pBackBuffer = nullptr;
-		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
+		Microsoft::WRL::ComPtr<IDXGISurface1> d2dRT = NULL;
+		ThrowIfFailed(swapChain->GetBuffer(0, IID_PPV_ARGS(&d2dRT)));
 
-		if (pBackBuffer == nullptr)
+		if (d2dRT == nullptr)
 			throw Game::exception("Back buffer was null", 49, L"Device.cpp Device::Create2D()");
 
-		ThrowIfFailed(factory2d->CreateDxgiSurfaceRenderTarget(pBackBuffer, props, &renderTarget2d));
+		//ThrowIfFailed(factory2d->CreateDxgiSurfaceRenderTarget(d2dRT.Get(), &props, &renderTarget2d));
 
 		renderTarget2d->CreateSolidColorBrush(
 			D2D1::ColorF(D2D1::ColorF::Red),
@@ -64,9 +58,18 @@ namespace Game {
 	}
 
 	void Device::Draw2D() {
+		/*using namespace D2D1;
 		renderTarget2d->BeginDraw();
 
-		renderTarget2d->EndDraw();
+
+		ThrowIfFailed(writeFactory->CreateTextLayout(L"SUS", 3, textFormat, 100, 100, &layout));
+
+		renderTarget2d->DrawTextLayout({ 0,0 }, layout, colorBrush);
+
+		layout->Release();
+		layout = nullptr;
+
+		renderTarget2d->EndDraw();*/
 
 
 		/*using DirectX::XMFLOAT2;
@@ -127,6 +130,8 @@ namespace Game {
 		
 		rsdesc.AntialiasedLineEnable = true;
 
+		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
+
 		//enable blending
 		D3D11_BLEND_DESC omDesc;
 		ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
@@ -143,15 +148,11 @@ namespace Game {
 		ThrowIfFailed(device->CreateBlendState(&omDesc, &transparentState));
 
 		//solidState
-		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
-
 		ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
 		omDesc.RenderTarget[0].BlendEnable = false;
 		omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
 		ThrowIfFailed(device->CreateBlendState(&omDesc, &solidState));
-
-		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
 	}
 
 	void Device::SetBlendState(bool transparent) {
@@ -165,6 +166,7 @@ namespace Game {
 	void Device::Initialize(HWND hwnd, size_t idx) {
 		this->hwnd = hwnd;		
 		_init(idx);
+		Create2D();
 		initialized = true;
 	}
 #pragma endregion
@@ -277,9 +279,9 @@ namespace Game {
 
 		sd.SampleDesc.Count = msaaLevel;
 		sd.SampleDesc.Quality = 0;
+		sd.Flags = D3D10_RESOURCE_MISC_SHARED_KEYEDMUTEX;
 		sd.Windowed = true;
 
-		void* pp = (void*)swapChain;
 		_RELEASE(swapChain);
 
 		ThrowIfFailed(factory->CreateSwapChain(device, &sd, &swapChain));
@@ -287,7 +289,6 @@ namespace Game {
 		ID3D11Texture2D* pBackBuffer = NULL;
 		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
 
-		pp = (void*)renderTarget;
 		_RELEASE(renderTarget);
 		ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget));
 		_RELEASE(pBackBuffer);

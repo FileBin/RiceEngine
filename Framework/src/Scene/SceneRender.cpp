@@ -10,7 +10,6 @@ namespace Game {
 	using std::queue;
 	bool SceneRender::Init() {
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
-		device->CreateFonts();
 		return true;
 	}
 	void SceneRender::BeginFrame() {
@@ -104,7 +103,7 @@ namespace Game {
 
 			device->Draw();
 		}
-		//device->Draw2D();
+		device->Draw2D();
 		isRendering = false;
 		return true;
 	}

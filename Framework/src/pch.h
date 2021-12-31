@@ -21,6 +21,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include <wrl.h>
+
 #include <d3d11_1.h>
 #include <dxgi1_2.h>
 #include <d3dx11.h>
