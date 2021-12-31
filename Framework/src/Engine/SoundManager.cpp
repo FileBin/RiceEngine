@@ -146,16 +146,13 @@ namespace Game {
 		}
 
 		// make a buffer
-		alGenBuffers(1, sound);
-
-		// check for errors
-		if ((error = alGetError()) != AL_NO_ERROR) {
+		if (!alCall(alGenBuffers, 1, sound)) {
 			fprintf(stderr, "Failed to generate sound buffer %d\n", error);
 			//goto exit;
 		}
 
 		// open the ogg vorbis file. This is a must on windows, do not use ov_open.
-	  // set OV_CALLBACKS_NOCLOSE else it will close your fp when ov_close() is reached, which is fine.
+	    // set OV_CALLBACKS_NOCLOSE else it will close your fp when ov_close() is reached, which is fine.
 		if (ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
 			fprintf(stderr, "Stream is not a valid OggVorbis stream!\n");
 			goto exit;
@@ -189,8 +186,7 @@ namespace Game {
 		}
 
 		// send data to openal, vi->rate is your freq in Hz, dont assume 44100
-		alBufferData(*sound, format, pcmout, data_len, vi->rate);
-		if ((error = alGetError()) != AL_NO_ERROR) {
+		if (!alCall(alBufferData, *sound, format, pcmout, data_len, vi->rate)) {
 			printf("Failed to send audio information buffer to OpenAL! 0x%06x\n", error);
 			goto exit;
 		}
