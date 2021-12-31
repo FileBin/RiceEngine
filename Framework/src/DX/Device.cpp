@@ -47,10 +47,10 @@ namespace Game {
 
 		//ThrowIfFailed(factory2d->CreateDxgiSurfaceRenderTarget(d2dRT.Get(), &props, &renderTarget2d));
 
-		renderTarget2d->CreateSolidColorBrush(
+		/*renderTarget2d->CreateSolidColorBrush(
 			D2D1::ColorF(D2D1::ColorF::Red),
 			&colorBrush
-		);
+		);*/
 
 
 		//spriteBatch = new DirectX::SpriteBatch(context);
