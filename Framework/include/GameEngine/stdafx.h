@@ -1,8 +1,5 @@
 ﻿#pragma once
 
-#include <SpriteBatch.h>
-#include <SpriteFont.h>
-
 #include <clocale>
 #include <ctime>
 #include <stdexcept>

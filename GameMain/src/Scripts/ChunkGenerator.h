@@ -194,31 +194,87 @@ class ChunkGenerator : public MonoScript {
 
 		switch (tdMode) {
 		case ChunkGenerator::ThreadMode::Single:
-			while (CheckChunkVisible(newChunkPos)) {
+			for (auto i = -renderDistance; i <= renderDistance; i++) {
+				for (auto j = -renderDistance; j <= renderDistance; j++) {
+					for (auto k = -renderDistance; k <= renderDistance; k++) {
+						Vector3i pos = { i,j,k };
+						if (CheckChunkVisible(pos)) {
+							positions.insert(positions.begin(), pos);
+							auto n = positions.size();
+							for (size_t i = 1; i < n; i++) {
+								if (positions[i].SqrLength() < positions[i - 1].SqrLength())
+									std::swap(positions[i], positions[i - 1]);
+								else break;
+							}
+						}
+					}
+				}
+			}
+			/*while (CheckChunkVisible(newChunkPos)) {
 				positions.push_back(newChunkPos);
 				newChunkPos = GetNextPosition(newChunkPos);
 			}
-			break;
+			break;*/
 		case ChunkGenerator::ThreadMode::Duo:
 		{
-			while (CheckChunkVisible(newChunkPos)) {
-				if ((newChunkPos.x + 20000) % 2 == offset.x)
-					positions.push_back(newChunkPos);
-				newChunkPos = GetNextPosition(newChunkPos);
+			for (auto i = -(renderDistance / 2)* 2 + offset.x; i <= renderDistance; i+=2) {
+				for (auto j = -renderDistance; j <= renderDistance; j++) {
+					for (auto k = -renderDistance; k <= renderDistance; k++) {
+						Vector3i pos = { i,j,k };
+						if (CheckChunkVisible(pos)) {
+							positions.insert(positions.begin(), pos);
+							auto n = positions.size();
+							for (size_t i = 1; i < n; i++) {
+								if (positions[i].SqrLength() < positions[i - 1].SqrLength())
+									std::swap(positions[i], positions[i - 1]);
+								else break;
+							}
+						}
+					}
+				}
 			}
 		}
 		break;
 		case ChunkGenerator::ThreadMode::Quadro:
-			while (CheckChunkVisible(newChunkPos)) {
+			for (auto i = -(renderDistance / 2) * 2 + offset.x; i <= renderDistance; i += 2) {
+				for (auto j = -(renderDistance / 2) * 2 + offset.z; j <= renderDistance; j += 2) {
+					for (auto k = -renderDistance; k <= renderDistance; k++) {
+						Vector3i pos = { i, k, j };
+						if (CheckChunkVisible(pos)) {
+							positions.insert(positions.begin(), pos);
+							auto n = positions.size();
+							for (size_t i = 1; i < n; i++) {
+								if (positions[i].SqrLength() < positions[i - 1].SqrLength())
+									std::swap(positions[i], positions[i - 1]);
+								else break;
+							}
+						}
+					}
+				}
+			}
+
+			/*while (CheckChunkVisible(newChunkPos)) {
 				if ((newChunkPos.x + 20000) % 2 == offset.x && (newChunkPos.z + 20000) % 2 == offset.z)
 					positions.push_back(newChunkPos);
 				newChunkPos = GetNextPosition(newChunkPos);
-			}
+			}*/
 		break;
 		case ChunkGenerator::ThreadMode::Octo:
-			while (CheckChunkVisible(newChunkPos * 2 + offset)) {
-				positions.push_back(newChunkPos * 2 + offset);
-				newChunkPos = GetNextPosition(newChunkPos);
+			for (auto i = -(renderDistance / 2) * 2 + offset.x; i <= renderDistance; i += 2) {
+				for (auto j = -(renderDistance / 2) * 2 + offset.z; j <= renderDistance; j += 2) {
+					for (auto k = -(renderDistance / 2) * 2 + offset.y; k <= renderDistance; k+=2) {
+						Vector3i pos = { i, k, j };
+						if (CheckChunkVisible(pos)) {
+							positions.insert(positions.begin(), pos);
+							auto n = positions.size();
+							for (size_t i = 1; i < n; i++) {
+								if (positions[i].SqrLength() < positions[i - 1].SqrLength())
+									std::swap(positions[i], positions[i - 1]);
+								else break;
+							}
+						}
+					}
+				}
 			}
 			break;
 		default:
@@ -262,9 +318,14 @@ class ChunkGenerator : public MonoScript {
 			}
 			if (unloading) continue;
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loading);
-			auto& chunkObj = *GetNextChunk(idx);
 			auto& chunk = world->GetChunk(newChunkPos);
 			auto& model = *chunk.GetModel();
+			/*if (model.IsEmpty()) {
+				wrld.SetChunkStatus(newChunkPos, Chunk::Loaded);
+				loading[idx] = false;
+				continue;
+			}*/
+			auto& chunkObj = *GetNextChunk(idx);
 			if (!enabled)
 				return;
 			auto render = chunkObj.GetComponents<ModelRender>()[0];
@@ -367,10 +428,7 @@ class ChunkGenerator : public MonoScript {
 	bool CheckChunkVisible(Vector3i chunkPos, int addedDistance = 0) {
 		//chunkPos /= 2;
 		//chunkPos *= 2;
-		chunkPos.x = Math::Abs(chunkPos.x);
-		chunkPos.y = Math::Abs(chunkPos.y);
-		chunkPos.z = Math::Abs(chunkPos.z);
-		return chunkPos.x + chunkPos.y + chunkPos.z <= renderDistance + addedDistance;
+		return chunkPos.Length() <= renderDistance + addedDistance;
 	}
 
 	void OnDisable() {

@@ -29,6 +29,10 @@ namespace Game {
 		void RecalculateNormals();
 		void ReclaculateBounds();
 
+		bool IsEmpty() {
+			return vertexBuffer.empty(); 
+		}
+
 		bool CheckVisiblity(ConstantBufferData WVPm);
 	};
 
@@ -39,6 +43,14 @@ namespace Game {
 		void SetSubMeshesCount(size_t count);
 		void SetSubMesh(Mesh* subMesh, size_t idx);
 		Mesh& GetSubMesh(size_t idx);
+
+		bool IsEmpty() { 
+			for (auto mesh : subMeshes) {
+				if (!mesh->IsEmpty())
+					return false;
+			}
+			return true;
+		}
 
 		~Model();
 

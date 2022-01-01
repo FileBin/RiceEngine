@@ -187,6 +187,7 @@ Model* Chunk::GenerateSmoothModel() {
         }
         Mesh m{};
         auto n = edges.size();
+        if (n == 0) return;
         m.vertexBuffer.resize(n);
         m.indexBuffer.resize(n);
         for (byte i = 0; i < n; i++) {
