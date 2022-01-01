@@ -22,9 +22,10 @@
 #include <windows.h>
 
 #include <wrl.h>
+#include <atlbase.h>
 
-#include <d3d11_1.h>
-#include <dxgi1_2.h>
+#include <d3d11.h>
+#include <dxgi.h>
 #include <d3dx11.h>
 #include <d2d1.h>
 #include <dwrite.h>

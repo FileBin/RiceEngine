@@ -138,7 +138,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_WINNT=0x0601;_WIN7_PLATFORM_UPDATE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>src;C:\Program Files\Microsoft SDKs\DirectX11\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -158,7 +158,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_WINNT=0x0601;_WIN7_PLATFORM_UPDATE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -199,6 +199,7 @@
     <ClInclude Include="include\GameEngine\Scene\SceneScript.h" />
     <ClInclude Include="include\GameEngine\ScriptBase.h" />
     <ClInclude Include="include\GameEngine\Shader.h" />
+    <ClInclude Include="include\GameEngine\SoundManager.h" />
     <ClInclude Include="include\GameEngine\Stage.h" />
     <ClInclude Include="include\GameEngine\Util.h" />
     <ClInclude Include="include\GameEngine\Util3D.h" />

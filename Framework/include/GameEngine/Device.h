@@ -11,7 +11,6 @@ namespace Game {
 		Device();
 		~Device();
 
-		void Create2D();
 		void Draw2D();
 
 		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
@@ -86,7 +85,7 @@ namespace Game {
 		bool initialized = false;
 		HWND hwnd = 0;
 		size_t indexCount = 0;
-		size_t msaaLevel = 4;
+		size_t msaaLevel = 1;
 		IDXGIFactory* factory = nullptr;
 		IDXGIAdapter* adapter = nullptr;
 		ID3D11Device* device = nullptr;
@@ -98,6 +97,7 @@ namespace Game {
 		ID3D11RasterizerState* state = nullptr;
 		ID3D11DepthStencilState* pDSState;
 		ID3D11BlendState* transparentState, *solidState;
+		ID3D11Texture2D* textureFor2d = nullptr;
 
 
 		DirectX::SpriteBatch* spriteBatch = nullptr;
@@ -105,7 +105,7 @@ namespace Game {
 
 		ID2D1RenderTarget* renderTarget2d = nullptr;
 		ID2D1Factory* factory2d = nullptr;
-		ID2D1SolidColorBrush* colorBrush = nullptr;
+		ID2D1SolidColorBrush* defBrush = nullptr;
 		IDWriteTextFormat* textFormat = nullptr;
 		IDWriteFactory* writeFactory = nullptr;
 		IDWriteTextLayout* layout = nullptr;
@@ -118,5 +118,7 @@ namespace Game {
 		HRESULT _loadVertexBuffer(ID3D11Buffer** buffer, size_t stride);
 		void _init(size_t adapterIdx = 0);
 		void _createDepthStencil(Vector2 size);
+		void _create2d();
+		void _create2dRT();
 	};
 }

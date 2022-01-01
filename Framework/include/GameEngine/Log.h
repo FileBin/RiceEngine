@@ -21,12 +21,12 @@ namespace Game {
 		static void Init();
 		static void LoadLocalization(Localization locale);
 
-		enum LogLevel {NONE = 0, INFO = 1, DEBUG = 2, WARNING = 3, ERR = 4, CRITICAl = 5};
+		enum LogLevel {NONE = 0, INFO = 1, Debug = 2, WARNING = 3, ERR = 4, CRITICAl = 5};
 		
 		template<class... _Types> 
 		static void log(LogLevel logLevel, String message, const _Types &...args) {
 			auto str = std::format(message, args...);
-			if (logLevel == LogLevel::DEBUG) {
+			if (logLevel == LogLevel::Debug) {
 #ifdef _DEBUG
 				instance->print(logLevel_str[(int)logLevel], str);
 #endif

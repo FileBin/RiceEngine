@@ -22,7 +22,7 @@ namespace Game {
 
 	bool Window::Create(const DescWindow& desc) {
 		inputmgr = InputManager::Init();
-		Log::log(Log::DEBUG, L"Window Create");
+		Log::log(Log::Debug, L"Window Create");
 		this->desc = desc;
 
 		WNDCLASSEXW wnd;
@@ -94,7 +94,7 @@ namespace Game {
 		if (m_hwnd)
 			DestroyWindow(m_hwnd);
 		m_hwnd = nullptr;
-		Log::log(Log::DEBUG, L"Window Close");
+		Log::log(Log::Debug, L"Window Close");
 	}
 
 	LRESULT Window::WndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam) {

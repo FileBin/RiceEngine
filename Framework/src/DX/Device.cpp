@@ -17,9 +17,33 @@ namespace Game {
 		_RELEASE(device);
 	}
 
-	void Device::Create2D() {
+	void Device::_create2dRT() {
+		if (renderTarget2d != nullptr) return;
+		IDXGISurface1* pBackBuffer = NULL;
+		ThrowIfFailed(swapChain->GetBuffer(
+			0,
+			__uuidof(IDXGISurface1),
+			reinterpret_cast<void**>(&pBackBuffer)
+		));
+
+		IDXGISurface1* surf;
+		ThrowIfFailed(pBackBuffer->QueryInterface(&surf));
+
+		D2D1_RENDER_TARGET_PROPERTIES rtDesc = D2D1::RenderTargetProperties(
+			D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_DEFAULT,
+			D2D1::PixelFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED)
+		);
+
+		ThrowIfFailed(factory2d->CreateDxgiSurfaceRenderTarget(surf, &rtDesc, &renderTarget2d));
+
+		renderTarget2d->CreateSolidColorBrush(
+			D2D1::ColorF(D2D1::ColorF::Black),
+			&defBrush
+		);
+	}
+
+	void Device::_create2d() {
 		auto options = D2D1_FACTORY_OPTIONS();
-		options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options, &factory2d);
 
 
@@ -35,41 +59,21 @@ namespace Game {
 			L"en-US",
 			&textFormat
 		);
-
-		auto props = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), 0, 0);
-
-
-		Microsoft::WRL::ComPtr<IDXGISurface1> d2dRT = NULL;
-		ThrowIfFailed(swapChain->GetBuffer(0, IID_PPV_ARGS(&d2dRT)));
-
-		if (d2dRT == nullptr)
-			throw Game::exception("Back buffer was null", 49, L"Device.cpp Device::Create2D()");
-
-		//ThrowIfFailed(factory2d->CreateDxgiSurfaceRenderTarget(d2dRT.Get(), &props, &renderTarget2d));
-
-		/*renderTarget2d->CreateSolidColorBrush(
-			D2D1::ColorF(D2D1::ColorF::Red),
-			&colorBrush
-		);*/
-
-
-		//spriteBatch = new DirectX::SpriteBatch(context);
-		//fonts.insert({ L"ComicSans", new DirectX::SpriteFont(device,L"fonts\\comic_sans_ms_16.spritefont") });
 	}
 
 	void Device::Draw2D() {
-		/*using namespace D2D1;
+		using namespace D2D1;
 		renderTarget2d->BeginDraw();
 
 
-		ThrowIfFailed(writeFactory->CreateTextLayout(L"SUS", 3, textFormat, 100, 100, &layout));
+		ThrowIfFailed(writeFactory->CreateTextLayout(L"SUS Амогус", 11, textFormat, 100, 100, &layout));
 
-		renderTarget2d->DrawTextLayout({ 0,0 }, layout, colorBrush);
+		renderTarget2d->DrawTextLayout({ 0,0 }, layout, defBrush);
 
 		layout->Release();
 		layout = nullptr;
 
-		renderTarget2d->EndDraw();*/
+		renderTarget2d->EndDraw();
 
 
 		/*using DirectX::XMFLOAT2;
@@ -85,7 +89,7 @@ namespace Game {
 	void Device::_init(size_t adapterIdx) {
 		Vector2 size = Util::GetWindowScreenSize(hwnd);
 
-		UINT createDeviceFlags = 0;
+		UINT createDeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #ifdef _DEBUG
 		createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -107,9 +111,9 @@ namespace Game {
 		Log::log(Log::NONE, L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
 			adapterDesc.DedicatedVideoMemory / 0x100000);
 
-		ThrowIfFailed(D3D11CreateDevice(adapter, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN, NULL,
+		ThrowIfFailed(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, NULL,
 			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context));
-
+		_create2d();
 		ReCreateSwapChain();
 
 		D3D11_VIEWPORT vp;
@@ -166,7 +170,6 @@ namespace Game {
 	void Device::Initialize(HWND hwnd, size_t idx) {
 		this->hwnd = hwnd;		
 		_init(idx);
-		Create2D();
 		initialized = true;
 	}
 #pragma endregion
@@ -279,7 +282,6 @@ namespace Game {
 
 		sd.SampleDesc.Count = msaaLevel;
 		sd.SampleDesc.Quality = 0;
-		sd.Flags = D3D10_RESOURCE_MISC_SHARED_KEYEDMUTEX;
 		sd.Windowed = true;
 
 		_RELEASE(swapChain);
@@ -294,6 +296,7 @@ namespace Game {
 		_RELEASE(pBackBuffer);
 
 		_createDepthStencil(screenSize);
+		_create2dRT();
 	}
 
 	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat) {
@@ -382,10 +385,11 @@ namespace Game {
 
 	void Device::Resize() {
 		context->OMSetRenderTargets(0, 0, 0);
-		renderTarget->Release();
-		renderTarget = nullptr;
-		depthStencil->Release();
-		depthStencil = nullptr;
+
+		_RELEASE(depthStencil)
+		_RELEASE(renderTarget)
+		_RELEASE(renderTarget2d)
+
 
 		Vector2 size;
 		RECT rect;
@@ -395,30 +399,15 @@ namespace Game {
 		if (size.SqrLength() < 1) {
 			size = { 640, 480 };
 		}
-		if (swapChain != nullptr) {
-			HRESULT hr = swapChain->ResizeBuffers(1, lround(size.x), lround(size.y), DXGI_FORMAT_B8G8R8A8_UNORM, 0);
-
-			ID3D11Texture2D* pBuffer;
-			hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
-				(void**)&pBuffer);
-
-			hr = device->CreateRenderTargetView(pBuffer, nullptr, &renderTarget);
-			pBuffer->Release();
-
-			_createDepthStencil(size);
-
-			D3D11_VIEWPORT vp;
-			vp.Width = size.x;
-			vp.Height = size.y;
-			vp.MinDepth = 0.0f;
-			vp.MaxDepth = 1.0f;
-			vp.TopLeftX = 0;
-			vp.TopLeftY = 0;
-			context->RSSetViewports(1, &vp);
-
-			if (FAILED(hr))
-				throw hr;
-		}
+		ReCreateSwapChain(size);
+		D3D11_VIEWPORT vp;
+		vp.Width = size.x;
+		vp.Height = size.y;
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		context->RSSetViewports(1, &vp);
 	}
 
 }
