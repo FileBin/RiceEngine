@@ -357,11 +357,11 @@ class ChunkGenerator : public MonoScript {
 			world->SetChunkStatus(o.second, Chunk::Unloaded);
 		}
 		sRen.Unlock();
-		while (!queuePos.empty()) {
-			world->UnloadChunk(queuePos.front());
+		unloading = false;
+		while (!queuePos.empty()) { 
+			world->UnloadChunk(queuePos.front()); //it needs some per-chunk lock
 			queuePos.pop();
 		}
-		unloading = false; // stable, needs optimizing, but later
 	}
 
 	bool CheckChunkVisible(Vector3i chunkPos, int addedDistance = 0) {
