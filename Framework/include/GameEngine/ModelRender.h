@@ -23,7 +23,7 @@ namespace Game {
 		Model& GetModel() const;
 		Material& GetMaterial(size_t subMeshIdx) const;
 
-		Transform transform;
+		Transform3D transform;
 		Camera camera;
 	private:
 		Color clearColor = { 0.1f, 0.15f, 0.6f, 1.f };

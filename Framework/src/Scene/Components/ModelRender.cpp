@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include <GameEngine\Components\Transform.h>
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Scene\SceneObject.h>
@@ -9,6 +10,10 @@ namespace Game {
 
 	void ModelRender::OnEnable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
+		auto& transform = *GetSceneObject().GetComponents<Transform>()[0];
+		model->pPos = &transform.position;
+		model->pRot = &transform.rotation;
+		model->pScale = &transform.scale;
 		if (model != nullptr) {
 			ren.AddModel(model);
 			auto n = model->GetSubMeshesCount();
@@ -23,6 +28,9 @@ namespace Game {
 	void ModelRender::OnDisable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
 		if (model) {
+			model->pPos = nullptr;
+			model->pRot = nullptr;
+			model->pScale = nullptr;
 			auto n = model->GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
 				auto& mesh = model->GetSubMesh(i);

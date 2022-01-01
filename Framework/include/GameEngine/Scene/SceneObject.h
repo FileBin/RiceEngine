@@ -29,7 +29,7 @@ namespace Game {
 		std::vector<T*> GetComponents() {
 			std::vector<T*> vec = {};
 			for (auto c : components) {
-				auto o = static_cast<T*>(c);
+				auto o = dynamic_cast<T*>(c);
 				if (o != nullptr) { 
 					vec.push_back(o);
 				}

@@ -23,13 +23,14 @@ namespace Game {
 		isRendering = true;
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
+		auto n = models.size();
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto& model = it->first;
 
 			ConstantBufferData cb = {};
 
 			auto cam = cameras[activeCameraIdx];
-			cb.World = model->transform.GetTransformationMatrix();
+			cb.World = Matrix4x4::TRS(*model->pPos, *model->pRot, *model->pScale);
 			cb.View = cam->GetTransformationMatrix();
 			cb.Projection = cam->GetProjectionMatrix();
 

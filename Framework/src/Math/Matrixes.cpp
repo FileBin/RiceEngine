@@ -55,6 +55,10 @@ Matrix4x4 Matrix4x4::Rotation(Quaternion q) {
     };
 }
 
+Matrix4x4 Matrix4x4::TRS(Vector3 translate, Quaternion rotate, Vector3 scale) {
+    return Matrix4x4::Scale(scale) * Matrix4x4::Translation(translate) * Matrix4x4::Rotation(rotate);
+}
+
 Matrix4x4 Matrix4x4::Transpose() {
     return {
         c11, c21, c31, c41,

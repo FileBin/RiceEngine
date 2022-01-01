@@ -16,22 +16,19 @@ class CameraMover : public MonoScript {
 
 	Vector2 pos = Vector2::zero;
 
-	ModelRender* modelRender;
-
 	Vector3 speed = {0,0,0};
 
 	void Start() {
 		auto& scene = GetScene();
 		auto& en = GetEngine();
 		hwnd = en.GetHWND();
-		modelRender = scene.GetObjectByName(L"Chunk").GetComponents<ModelRender>()[0];
 	}
 
 
 	void Update() {
 		auto& ren = GetRender();
 		auto& en = GetEngine();
-		auto& cam = ren.GetCamera().transform;
+		auto& cam = ren.GetCamera();
 		auto mouse = InputManager::GetMousePos();
 
 		auto fwd = cam.rotation * Vector3::forward;
@@ -66,7 +63,7 @@ class CameraMover : public MonoScript {
 		}
 		speed -= damp;
 
-		cam.pos = cam.pos + speed * dt;
+		cam.position += speed * dt;
 
 		if (lock) {
 			if (InputManager::GetKey(KeyCode::Escape)) {

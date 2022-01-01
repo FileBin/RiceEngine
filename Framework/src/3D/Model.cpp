@@ -139,6 +139,9 @@ namespace Game {
 	}
 
 	Model::~Model() {
+		pPos = nullptr;
+		pRot = nullptr;
+		pScale = nullptr;
 		for (auto& m : subMeshes) {
 			if (m) delete m;
 			m = nullptr;

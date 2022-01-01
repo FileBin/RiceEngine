@@ -37,7 +37,4 @@ namespace Game {
 			return size;
 		}
 	}
-	Matrix4x4 Transform::GetTransformationMatrix() {
-		return Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos) * Matrix4x4::Rotation(rotation);
-	}
 }

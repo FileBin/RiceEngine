@@ -31,12 +31,4 @@ namespace Game {
 	struct ConstantBufferData {
 		Matrix4x4f World = Matrix4x4f::identity, View = Matrix4x4f::identity, Projection = Matrix4x4f::identity;
 	};
-
-	struct Transform {
-		Vector3 pos = {0,0,0};
-		Quaternion rotation = Quaternion::identity;
-		Vector3 scale = Vector3::one;
-
-		Matrix4x4 GetTransformationMatrix();
-	};
 }

@@ -14,6 +14,7 @@ public:
 	static Matrix4x4 Translation(Vector3 v);
 	static Matrix4x4 Scale(Vector3 v);
 	static Matrix4x4 Rotation(Quaternion q);
+	static Matrix4x4 TRS(Vector3 translate, Quaternion rotate, Vector3 scale);
 
 	Matrix4x4 Transpose();
 

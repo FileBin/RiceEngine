@@ -54,7 +54,9 @@ namespace Game {
 
 		~Model();
 
-		Transform transform;
+		Vector3* pPos;
+		Quaternion* pRot;
+		Vector3* pScale;
 	private:
 		std::vector<Mesh*> subMeshes = {};
 	};

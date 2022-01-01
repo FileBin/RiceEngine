@@ -25,7 +25,9 @@ namespace Game {
 			this->farPlane = farPlane;
 		}
 
-		Transform transform;
+		Vector3 position{0,0,0};
+		Quaternion rotation{0,0,0,1};
+
 	private:
 		double fov;
 		double aspectRatio;

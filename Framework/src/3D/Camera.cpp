@@ -12,7 +12,7 @@ namespace Game {
 	}
 
 	Matrix4x4 Camera::GetTransformationMatrix() {
-		auto mat = Matrix4x4::Translation(-transform.pos) * Matrix4x4::Rotation(transform.rotation.Opposite());
+		auto mat = Matrix4x4::Translation(-position) * Matrix4x4::Rotation(rotation.Opposite());
 		return mat;
 	}
 }
