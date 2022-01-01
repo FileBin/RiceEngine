@@ -11,7 +11,8 @@ namespace Game {
 		Device();
 		~Device();
 
-		void Draw2D();
+		void Begin2D();
+		void End2D();
 
 		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
 
@@ -98,10 +99,6 @@ namespace Game {
 		ID3D11DepthStencilState* pDSState;
 		ID3D11BlendState* transparentState, *solidState;
 		ID3D11Texture2D* textureFor2d = nullptr;
-
-
-		DirectX::SpriteBatch* spriteBatch = nullptr;
-		std::unordered_map<String, DirectX::SpriteFont*> fonts{};
 
 		ID2D1RenderTarget* renderTarget2d = nullptr;
 		ID2D1Factory* factory2d = nullptr;

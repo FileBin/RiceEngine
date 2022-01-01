@@ -255,4 +255,13 @@ namespace Game {
 		}
 		throw new Game::exception("Material name invalid", 257, L"SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
 	}
+	void SceneRender::AddText(UI::Text* txt) {
+		texts.insert({ txt, true });
+	}
+	void SceneRender::RemoveText(UI::Text* txt) {
+		auto it = texts.find(txt);
+		if (it != texts.end()) {
+			texts.unsafe_erase(it);
+		}
+	}
 }

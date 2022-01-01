@@ -49,7 +49,7 @@ namespace Game {
 
 		DWriteCreateFactory(DWRITE_FACTORY_TYPE::DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&writeFactory));
 
-		writeFactory->CreateTextFormat(
+		ThrowIfFailed(writeFactory->CreateTextFormat(
 			L"Arial",
 			nullptr,
 			DWRITE_FONT_WEIGHT_NORMAL,
@@ -58,31 +58,25 @@ namespace Game {
 			20.0f * 96.0f / 72.0f,
 			L"en-US",
 			&textFormat
-		);
+		));
 	}
 
-	void Device::Draw2D() {
-		using namespace D2D1;
+	void Device::Begin2D() {
+		//using namespace D2D1;
 		renderTarget2d->BeginDraw();
 
-
-		ThrowIfFailed(writeFactory->CreateTextLayout(L"SUS Амогус", 11, textFormat, 100, 100, &layout));
+		/*ThrowIfFailed(writeFactory->CreateTextLayout(L"SUS Амогус", 11, textFormat, 100, 100, &layout));
 
 		renderTarget2d->DrawTextLayout({ 0,0 }, layout, defBrush);
 
 		layout->Release();
 		layout = nullptr;
 
+		renderTarget2d->EndDraw();*/
+	}
+
+	void Device::Begin2D() {
 		renderTarget2d->EndDraw();
-
-
-		/*using DirectX::XMFLOAT2;
-		using namespace DirectX;
-		spriteBatch->Begin();
-		for (auto pair : fonts) {
-			pair.second->DrawString(spriteBatch, L"SUS", XMFLOAT2(0,0), Colors::WhiteSmoke, 0, XMFLOAT2(0,0), XMFLOAT2(1,1));
-		}
-		spriteBatch->End();*/
 	}
 
 #pragma region Initialize

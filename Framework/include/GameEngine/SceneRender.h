@@ -14,6 +14,9 @@ namespace Game {
 	class Model;
 	class Camera;
 	struct Mesh;
+	namespace UI {
+		class Text;
+	}
 
 	class SceneRender : public RenderBase {
 	public:
@@ -50,15 +53,18 @@ namespace Game {
 		Material& CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping = {});
 		Material& GetMaterial(String name);
 
+		void AddText(UI::Text* txt);
+		void RemoveText(UI::Text* txt);
+
 	private:
 		bool isRendering = false, isLoading = false;
-
 		concurrent_vector<Camera*> cameras;
 		concurrent_unordered_map<String, Material*> materials;
 		concurrent_unordered_map<String, Shader*> shaders;
 		concurrent_unordered_map<Mesh*, Material*> materialMap;
 		size_t activeCameraIdx;
 		concurrent_unordered_map<Model*, bool> models; //that was a trick beacuse unordered_set doesn't work
+		concurrent_unordered_map<UI::Text*, bool> texts;
 		concurrent_unordered_map<Mesh*, ConstantBufferData> transparentQ;
 		concurrent_unordered_map<Mesh*, Buffer*> indexBuffers;
 		concurrent_unordered_map<Mesh*, Buffer*> vertexBuffers;
