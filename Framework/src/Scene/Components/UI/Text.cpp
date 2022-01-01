@@ -1,11 +1,22 @@
 #include "pch.h"
 #include <GameEngine/Components/UI/Text.h>
 #include <GameEngine/Util.h>
+#include <GameEngine/Scene/Scene.h>
 
 using namespace Game::Util;
 
 namespace Game::UI {
 	void Text::OnInit() {}
+
+	void Text::OnEnable() {
+		auto& ren = GetSceneObject().GetScene().GetRender();
+		ren.AddText(this);
+	}
+
+	void Text::OnDisable() {
+		auto& ren = GetSceneObject().GetScene().GetRender();
+		ren.RemoveText(this);
+	}
 
 	void Text::Draw(IDWriteFactory* factory, IDWriteTextFormat* defformat, ID2D1RenderTarget* rt) {
 		Microsoft::WRL::ComPtr<IDWriteTextLayout> layout { nullptr };
@@ -28,7 +39,5 @@ namespace Game::UI {
 		ThrowIfFailed(rt->CreateSolidColorBrush(m_color, reinterpret_cast<ID2D1SolidColorBrush**>(brush.GetAddressOf())));
 
 		rt->DrawTextLayout({ (FLOAT)m_position.x, (FLOAT)m_position.y }, layout.Get(), brush.Get());
-		brush->Release();
-		layout->Release();
 	}
 }

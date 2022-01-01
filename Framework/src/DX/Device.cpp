@@ -75,7 +75,7 @@ namespace Game {
 		renderTarget2d->EndDraw();*/
 	}
 
-	void Device::Begin2D() {
+	void Device::End2D() {
 		renderTarget2d->EndDraw();
 	}
 

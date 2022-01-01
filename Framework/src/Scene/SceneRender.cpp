@@ -5,6 +5,7 @@
 #include <GameEngine\Camera.h>
 #include <GameEngine\Util\exception.h>
 #include <queue>
+#include <GameEngine\Components\UI\Text.h>
 
 namespace Game {
 	using std::queue;
@@ -103,7 +104,15 @@ namespace Game {
 
 			device->Draw();
 		}
-		device->Draw2D();
+
+		device->Begin2D();
+
+		for (auto pair : texts) {
+			auto& txt = pair.first;
+			txt->Draw(device->GetWriteFactory(), device->GetDefFormat(), device->Get2DRenderTarget());
+		}
+		device->End2D();
+
 		isRendering = false;
 		return true;
 	}

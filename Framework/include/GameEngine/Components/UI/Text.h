@@ -12,18 +12,20 @@ namespace Game::UI {
 		void OnEnable();
 		void OnDisable();
 
-		void SetFont(String fontName, IDWriteFontCollection* fontCollection = nullptr);
+		void SetFont(String fontName, IDWriteFontCollection* fontCollection = nullptr) { m_fontName = fontName; }
 
-		void SetFontSize(float size);
-		void SetFontWeight(DWRITE_FONT_WEIGHT weight);
-		void SetFontStyle(DWRITE_FONT_STYLE style);
-		void SetFontStretch(DWRITE_FONT_STRETCH stretch);
-		void SetColor(D2D1::ColorF color);
+		void SetFontSize(float size) { m_fontSize = size; }
+		void SetFontWeight(DWRITE_FONT_WEIGHT weight) { m_weight = weight; }
+		void SetFontStyle(DWRITE_FONT_STYLE style) { m_style = style; }
+		void SetFontStretch(DWRITE_FONT_STRETCH stretch) { m_stretch = stretch; }
+		void SetColor(D2D1::ColorF color) { m_color = color; }
+
+		void SetText(String newText) { m_text = newText; }
 
 		void Draw(IDWriteFactory* factory, IDWriteTextFormat* defformat, ID2D1RenderTarget* rt);
 	private:
 		String m_fontName = L"Arial";
-		float m_fontSize = 14.f;
+		float m_fontSize = 20.f;
 		DWRITE_FONT_WEIGHT m_weight = DWRITE_FONT_WEIGHT_NORMAL;
 		DWRITE_FONT_STYLE m_style = DWRITE_FONT_STYLE_NORMAL;
 		DWRITE_FONT_STRETCH m_stretch = DWRITE_FONT_STRETCH_NORMAL;

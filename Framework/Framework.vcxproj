@@ -178,6 +178,7 @@
     <ClInclude Include="include\GameEngine\Camera.h" />
     <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\MonoScript.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\Text.h" />
     <ClInclude Include="include\GameEngine\Device.h" />
     <ClInclude Include="include\GameEngine\Engine.h" />
     <ClInclude Include="include\GameEngine\Material.h" />
@@ -229,6 +230,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
+    <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />
     <ClCompile Include="src\Scene\Component.cpp" />
     <ClCompile Include="src\3D\Camera.cpp" />

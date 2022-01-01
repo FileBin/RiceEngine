@@ -39,6 +39,7 @@
     <ClInclude Include="src\Scripts\World\World.h" />
     <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
     <ClInclude Include="src\Scripts\World\WorldSeed.h" />
+    <ClInclude Include="src\Scripts\UI\DebugText.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />

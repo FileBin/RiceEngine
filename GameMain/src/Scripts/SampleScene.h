@@ -3,14 +3,18 @@
 #include <GameEngine\Scene\Scene.h>
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
+#include <GameEngine\Components\UI\Text.h>
 
 #include "CameraMoverScript.h"
 #include "ChunkGenerator.h"
+#include "UI\DebugText.h"
 
 using namespace Game;
 
 class SampleScene : public Scene {
 	void Initialize() {
+		auto debugText = Instaniate();
+		debugText->SetName(L"DebugText");
 		auto chunk = Instaniate();
 		chunk->SetName(L"Chunk");
 
@@ -33,5 +37,12 @@ class SampleScene : public Scene {
 
 		AddScript(new CameraMover());
 		chunk->AddComponent(new ChunkGenerator());
+
+
+		auto txt = new UI::Text();
+		txt->SetText(L"SUS");
+		txt->SetColor(D2D1::ColorF::White);
+		debugText->AddComponent(txt);
+		debugText->AddComponent(new DebugText());
 	}
 };

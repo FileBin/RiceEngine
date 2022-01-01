@@ -14,6 +14,10 @@ namespace Game {
 		void Begin2D();
 		void End2D();
 
+		IDWriteFactory* GetWriteFactory() { return writeFactory; }
+		ID2D1RenderTarget* Get2DRenderTarget() { return renderTarget2d; }
+		IDWriteTextFormat* GetDefFormat() { return textFormat; }
+
 		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
 
 		template<typename T>
