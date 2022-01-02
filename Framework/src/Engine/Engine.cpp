@@ -55,10 +55,14 @@ namespace Game {
 	}
 
 	void Engine::SetRender(RenderBase* render) { core->SetRender(render); }
+
+	SoundManager& Engine::getSoundManager() { return scene->GetSoundManager(); };
+
 	void Engine::LoadScene(Scene* scene) {
 		auto& c = *core;
 		c.SetRender(&scene->GetRender());
 		scene->Init(this);
+		this->scene = scene;
 		auto s = scene->GetScripts();
 		c.AddScript(s[0], Stage::PostInit);
 		c.AddScript(s[1], Stage::Update);

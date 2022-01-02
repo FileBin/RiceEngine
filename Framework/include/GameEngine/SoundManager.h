@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.h"
+#define AL_LIBTYPE_STATIC 
 #include <al/al.h>
 #include <al/alc.h>
 
@@ -12,9 +12,13 @@ namespace Game {
 		static SoundManager* Init();
 		SoundManager();
 		~SoundManager();
+
+		void playOgg(const char* path);
 	private:
 		bool check_al_errors(const std::wstring& filename, const std::uint_fast32_t line);
 		bool check_alc_errors(const std::wstring& filename, const std::uint_fast32_t line, ALCdevice* device);
+		bool check_al_errors(const char* filename, const std::uint_fast32_t line);
+		bool check_alc_errors(const char* filename, const std::uint_fast32_t line, ALCdevice* device);
 		void play(ALuint* sound);
 		ALuint* sound_load_ogg(const char* path);
 

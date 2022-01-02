@@ -4,6 +4,7 @@
 namespace Game {
 	Scene::Scene() {
 		engine = nullptr;
+		soundManager = nullptr;
 		initScript = new InitScript();
 		preUpdateScript = new PreUpdateScript();
 		updateScript = new UpdateScript();
@@ -13,7 +14,7 @@ namespace Game {
 		render = new SceneRender();
 	}
 
-	Scene::~Scene() {};
+	Scene::~Scene() { soundManager->~SoundManager(); };
 	
 	void Scene::AddScript(MonoScript* script) {
 		root->AddComponent(script);
@@ -22,6 +23,8 @@ namespace Game {
 	SceneObject& Scene::GetObjectByName(String name) { return root->GetObjectByName(name); }
 
 	SceneObject* Scene::Instaniate() { return root->Instaniate(); }
+
+	SoundManager& Scene::GetSoundManager() { return *soundManager; }
 
 	Engine& Scene::GetEngine() { return *engine; }
 

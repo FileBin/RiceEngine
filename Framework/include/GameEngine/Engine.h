@@ -4,6 +4,7 @@
 
 namespace Game {
 
+	class SoundManager;
 	class ScriptBase;
 	class Core;
 	class RenderBase;
@@ -37,10 +38,13 @@ namespace Game {
 		Material& CreateMaterial(Shader& sh);
 		Shader& CreateShader();
 
+		SoundManager& getSoundManager();
+
 	private:
 		Device** device = nullptr;
 		Core* core;
 		size_t msaaLevel = 1;
 		Stage* stage;
+		Scene* scene;
 	};
 }

@@ -3,6 +3,7 @@
 #include "../SceneRender.h"
 #include <vector>
 #include "../ScriptBase.h"
+#include <GameEngine/SoundManager.h>
 
 namespace Game {
 	class MonoScript;
@@ -13,7 +14,7 @@ namespace Game {
 
 		virtual ~Scene() = 0;
 
-		void Init(Engine* en) { engine = en; }
+		void Init(Engine* en) { engine = en; soundManager = new SoundManager(); }
 
 		virtual void Initialize() = 0;
 
@@ -41,12 +42,14 @@ namespace Game {
 
 		SceneObject* Instaniate();
 		Engine& GetEngine();
+		SoundManager& GetSoundManager();
 
 	private:
 		SceneObject* root;
 		SceneRender* render;
 
 		Engine* engine;
+		SoundManager* soundManager;
 
 		class InitScript : public ScriptBase {
 		public:

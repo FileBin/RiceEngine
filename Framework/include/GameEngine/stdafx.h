@@ -34,3 +34,8 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "OpenAL32.lib")
+#pragma comment(lib, "ogg.lib")
+#pragma comment(lib, "vorbis.lib")
+#pragma comment(lib, "vorbisfile.lib")
+#pragma comment(lib, "vorbisenc.lib")
