@@ -336,6 +336,25 @@ namespace Game {
 		context->PSSetConstantBuffers(index, 1, arr);
 	}
 
+	void Device::SetPSTexture2D(Texture2D* tex, size_t idx) {
+		ID3D11SamplerState* samplers[] = { tex->GetSampler() };
+		ID3D11ShaderResourceView* resArr[] = { tex->GetResource() };
+		context->PSSetSamplers(idx, 1, samplers);
+		context->PSSetShaderResources(idx, 1, resArr);
+	}
+
+	void Device::SetPSTextures(std::vector<Texture2D*> texArr) {
+		auto n = texArr.size();
+		std::vector<ID3D11SamplerState*> samplers{n};
+		std::vector<ID3D11ShaderResourceView*> resArr{n};
+		for (size_t i = 0; i < n; i++) {
+			samplers[i] = texArr[i]->GetSampler();
+			resArr[i] = texArr[i]->GetResource();
+		}
+		context->PSSetSamplers(0, n, samplers.data());
+		context->PSSetShaderResources(0, n, resArr.data());
+	}
+
 	void Device::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology) {
 		context->IASetPrimitiveTopology(topology);
 	}

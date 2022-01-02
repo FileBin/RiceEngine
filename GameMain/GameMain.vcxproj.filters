@@ -3,6 +3,7 @@
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
     <FxCompile Include="shaders\VertexShader.hlsl" />
+    <FxCompile Include="shaders\TexturedShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

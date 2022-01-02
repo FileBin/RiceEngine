@@ -72,6 +72,7 @@ namespace Game {
 
 				device->SetActivePSConstantBuffer(mat->GetBuffer());
 				device->SetActiveShader(mat->GetShader());
+				device->SetPSTextures(mat->GetTextures());
 				
 				device->Draw();
 			}

@@ -62,6 +62,9 @@ namespace Game {
 		void SetActiveVSConstantBuffer(ID3D11Buffer* buffer, size_t index = 0);
 		void SetActivePSConstantBuffer(ID3D11Buffer* buffer, size_t index = 0);
 
+		void SetPSTexture2D(Texture2D* tex, size_t idx = 0);
+		void SetPSTextures(std::vector<Texture2D*> texArr);
+
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		void SetActiveShader(Shader &shader);

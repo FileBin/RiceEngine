@@ -53,6 +53,8 @@ namespace Game {
 		Material& CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping = {});
 		Material& GetMaterial(String name);
 
+		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
+
 		void AddDrawable(UI::IDrawable* txt);
 		void RemoveDrawable(UI::IDrawable* txt);
 

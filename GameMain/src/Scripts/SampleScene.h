@@ -34,6 +34,11 @@ class SampleScene : public Scene {
 		sh->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
 		sh->LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
+		sh = ren.CreateShader(L"Amogus");
+
+		sh->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
+		sh->LoadPixelShader(Util::ReadFile(L"TexturedShader.cso"));
+
 		AddScript(new CameraMover());
 		chunk->AddComponent(new ChunkGenerator());
 
