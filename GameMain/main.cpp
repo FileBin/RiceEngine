@@ -1,6 +1,7 @@
-﻿#include <GameEngine/Core.h>
-#include <Scripts\PreInitScript.h>
+﻿#include "pch.h"
 
+#include <GameEngine/Core.h>
+#include <Scripts/PreInitScript.h>
 
 using namespace Game;
 

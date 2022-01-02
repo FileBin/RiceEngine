@@ -17,6 +17,15 @@ namespace Game {
 		if (constantBuffer)
 			d->LoadBufferSubresource(constantBuffer, mapping.GetData()[0]);
 	}
+	void Material::AddTexture(Texture2D* tex) {
+		textureArr.push_back(tex);
+	}
+	Texture2D& Material::GetTexture(size_t idx) {
+		return *textureArr[idx];
+	}
+	const std::vector<Texture2D*> Material::GetTextures() const {
+		return textureArr;
+	}
 	Material::Mapping::Mapping(std::vector<std::pair<String, size_t>> mapping) {
 		size_t bufferSize = 0;
 		for (auto arg : mapping) {

@@ -152,6 +152,9 @@
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;_WIN7_PLATFORM_UPDATE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -167,10 +170,14 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\constants.cpp" />
+    <ClCompile Include="src\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\Scripts\World\Generator.cpp" />
     <ClCompile Include="src\Scripts\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Scripts.h" />
     <ClInclude Include="src\Scripts\CameraMoverScript.h" />
     <ClInclude Include="src\Scripts\ChunkGenerator.h" />

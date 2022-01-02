@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Shader.h"
 #include <unordered_map>
+#include "DX\Texture2D.h"
 
 namespace Game {
 
@@ -26,12 +27,17 @@ namespace Game {
 			mapping.SetData(name, &val, sizeof(val));
 		}
 
+		void AddTexture(Texture2D* tex);
+		Texture2D& GetTexture(size_t idx);
+		const std::vector<Texture2D*> GetTextures() const;
+
 		Shader& GetShader() { return *shader; }
 		Buffer* GetBuffer() { return constantBuffer; }
 	private:
 		Shader* shader = nullptr;
 		Buffer* constantBuffer = nullptr;
 		Device* d;
+		std::vector<Texture2D*> textureArr{};
 
 		class Mapping {
 		private:

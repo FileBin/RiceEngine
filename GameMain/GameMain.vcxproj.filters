@@ -9,6 +9,7 @@
     <ClCompile Include="src\constants.cpp" />
     <ClCompile Include="src\Scripts\World\Generator.cpp" />
     <ClCompile Include="src\Scripts\World\World.cpp" />
+    <ClCompile Include="src\pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scripts.h" />
@@ -40,6 +41,7 @@
     <ClInclude Include="src\Scripts\World\WorldGenerator.h" />
     <ClInclude Include="src\Scripts\World\WorldSeed.h" />
     <ClInclude Include="src\Scripts\UI\DebugText.h" />
+    <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />

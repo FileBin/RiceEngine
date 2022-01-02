@@ -10,12 +10,12 @@ namespace Game::UI {
 
 	void Text::OnEnable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
-		ren.AddText(this);
+		ren.AddDrawable(this);
 	}
 
 	void Text::OnDisable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
-		ren.RemoveText(this);
+		ren.RemoveDrawable(this);
 	}
 
 	void Text::Draw(IDWriteFactory* factory, IDWriteTextFormat* defformat, ID2D1RenderTarget* rt) {

@@ -22,12 +22,12 @@ namespace Game {
 			engine.Run();
 			engine.Close();
 		}
-		catch (exception e) {
+		catch (exception& e) {
 			Log::log(Log::ERR, L"Runtime error occured: ");
 			Log::log(Log::ERR, L"line " + std::to_wstring(e.get_line()));
 			Log::log(Log::ERR, L"function: " + String(e.get_func()));
 			Log::log(Log::ERR, String(e.get_info()));
-			throw "err";
+			throw e;
 		}
 		catch (...) {
 			Log::log(Log::ERR, L"Unknown runtime error occured: ");

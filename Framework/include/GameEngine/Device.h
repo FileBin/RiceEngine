@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Util.h"
 #include "Shader.h"
+#include "DX/Texture2D.h"
 
 namespace Game {
 	using namespace Game::Util;
@@ -31,7 +32,7 @@ namespace Game {
 			return buf;
 		}
 
-		ID3D11Buffer* CreateBuffer(data_t data, UINT stride,
+		Buffer* CreateBuffer(data_t data, UINT stride,
 			UINT bindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE,
 			UINT CpuAccessFlags = 0,
 			D3D11_USAGE usage = D3D11_USAGE_DEFAULT) {
@@ -39,6 +40,8 @@ namespace Game {
 			ThrowIfFailed(_createBuffer((void*)data.data(), data.size() / stride, stride, &buf, usage, bindFlags, CpuAccessFlags));
 			return buf;
 		}
+
+		Texture2D* CreateTexture(String filename);
 
 		template<typename T>
 		void UpdateBufferData(ID3D11Buffer* buf, std::vector<T> data = {}) {

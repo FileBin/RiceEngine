@@ -282,7 +282,7 @@ namespace Game {
 
 		ThrowIfFailed(factory->CreateSwapChain(device, &sd, &swapChain));
 
-		ID3D11Texture2D* pBackBuffer = NULL;
+		ID3D11Texture2D* pBackBuffer = nullptr;
 		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
 
 		_RELEASE(renderTarget);
@@ -291,6 +291,11 @@ namespace Game {
 
 		_createDepthStencil(screenSize);
 		_create2dRT();
+	}
+
+	Texture2D* Device::CreateTexture(String path) {
+		auto tex = new Texture2D(path, device);
+		return tex;
 	}
 
 	void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat) {

@@ -1,4 +1,6 @@
-﻿#include "HeightMap.h"
+﻿#include "pch.h"
+
+#include "HeightMap.h"
 #include "Chunk.h"
 #include "World.h"
 

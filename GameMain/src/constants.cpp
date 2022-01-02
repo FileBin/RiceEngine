@@ -1,4 +1,5 @@
-﻿#include "Scripts\World\Chunk.h"
+﻿#include "pch.h"
+#include "Scripts\World\Chunk.h"
 #include "Scripts\Util\Tables.h"
 
 #include "Scripts\World\Voxels\VoxelVoid.h"

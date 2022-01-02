@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <wrl.h>
 
 
 #define WIN32_LEAN_AND_MEAN

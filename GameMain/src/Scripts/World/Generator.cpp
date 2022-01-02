@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "Chunk.h"
 #include "World.h"
 #include <Scripts\Util\Tables.h>

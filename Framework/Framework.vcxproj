@@ -179,8 +179,10 @@
     <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\MonoScript.h" />
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Text.h" />
     <ClInclude Include="include\GameEngine\Device.h" />
+    <ClInclude Include="include\GameEngine\DX\Texture2D.h" />
     <ClInclude Include="include\GameEngine\Engine.h" />
     <ClInclude Include="include\GameEngine\Material.h" />
     <ClInclude Include="include\GameEngine\Matrixes.h" />
@@ -225,6 +227,7 @@
     <ClInclude Include="include\GameEngine\Util\exception.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DX\Texture2D.cpp" />
     <ClCompile Include="src\Engine\SoundManager.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

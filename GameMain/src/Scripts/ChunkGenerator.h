@@ -117,52 +117,12 @@ class ChunkGenerator : public MonoScript {
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			if (!unloading) {
 				create_task([this]() { UnloadChunks(); });
+				playerPos = newPos;
 			}
 			Log::log(Log::INFO, L"ChunkStatus: {}", (int)world->GetChunkStatus(playerChunk));
 		}
-		playerPos = newPos;
 	}
 
-	Vector3i GetNextPosition(Vector3i pos) {
-		if (pos.x == 0 && pos.z == 0) {
-			if (pos.y == 0)
-				return { 0,-1,0 };
-			if (pos.y > 0) {
-				pos.y = -pos.y - 1;
-				return pos;
-			}
-			pos.z += -1;
-			pos.y += 1;
-			return pos;
-		}
-		if (pos.x >= 0 && pos.z < 0) {
-			pos.x += 1;
-			pos.z += 1;
-			return pos;
-		}
-		if (pos.x > 0 && pos.z >= 0) {
-			pos.x += -1;
-			pos.z += 1;
-			return pos;
-		}
-		if (pos.x <= 0 && pos.z > 0) {
-			pos.x += -1;
-			pos.z += -1;
-			return pos;
-		}
-		if (pos.x < 0 && pos.z <= 0) {
-			pos.x += 1;
-			if (pos.x == 0) {
-				if (pos.y < 0)
-					pos.z += -2;
-				pos.y += 1;
-				return pos;
-			}
-			pos.z += -1;
-			return pos;
-		}
-		return pos;
-	}
 
 	void ChunkLoaderThread(size_t idx) {
 		Vector3i offset = { 0,0,0 };

@@ -3,9 +3,10 @@
 #include "../../Scene/Component.h"
 #include "../../Util/defines.h"
 #include "../../Vectors/Vector2.h"
+#include "IDrawable.h"
 
 namespace Game::UI {
-	class Text : public Component {
+	class Text : public Component, public IDrawable {
 	public:
 		void OnInit();
 

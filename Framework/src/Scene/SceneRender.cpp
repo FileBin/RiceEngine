@@ -5,7 +5,7 @@
 #include <GameEngine\Camera.h>
 #include <GameEngine\Util\exception.h>
 #include <queue>
-#include <GameEngine\Components\UI\Text.h>
+#include <GameEngine\Components\UI\IDrawable.h>
 
 namespace Game {
 	using std::queue;
@@ -109,8 +109,8 @@ namespace Game {
 		device->Begin2D();
 
 		for (auto pair : texts) {
-			auto& txt = pair.first;
-			txt->Draw(device->GetWriteFactory(), device->GetDefFormat(), device->Get2DRenderTarget());
+			auto& d = pair.first;
+			d->Draw(device->GetWriteFactory(), device->GetDefFormat(), device->Get2DRenderTarget());
 		}
 		device->End2D();
 
@@ -265,10 +265,10 @@ namespace Game {
 		}
 		throw new Game::exception("Material name invalid", 257, L"SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
 	}
-	void SceneRender::AddText(UI::Text* txt) {
+	void SceneRender::AddDrawable(UI::IDrawable* txt) {
 		texts.insert({ txt, true });
 	}
-	void SceneRender::RemoveText(UI::Text* txt) {
+	void SceneRender::RemoveDrawable(UI::IDrawable* txt) {
 		auto it = texts.find(txt);
 		if (it != texts.end()) {
 			texts.unsafe_erase(it);
