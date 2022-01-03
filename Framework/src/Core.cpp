@@ -5,6 +5,7 @@
 #include <GameEngine/ScriptBase.h>
 #include <GameEngine/Engine.h>
 #include <GameEngine/Util/exception.h>
+#include <GameEngine/Util.h>
 #include <chrono>
 #include <thread>
 
@@ -23,7 +24,7 @@ namespace Game {
 			engine.Close();
 		}
 		catch (exception& e) {
-			Log::log(Log::ERR, L"Runtime error occured: ");
+			Log::log(Log::ERR, L"Runtime error occured: " + Util::Utf8ToWstring(e.what()));
 			Log::log(Log::ERR, L"line " + std::to_wstring(e.get_line()));
 			Log::log(Log::ERR, L"function: " + String(e.get_func()));
 			Log::log(Log::ERR, String(e.get_info()));

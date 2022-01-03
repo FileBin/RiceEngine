@@ -175,7 +175,7 @@ namespace Game {
 
 		size_t data_len = 0;
 
-		if ((err = fopen_s(&fp, path, "r")) != 0) {
+		if ((err = fopen_s(&fp, path, "rb")) != 0) {
 			throw Game::exception("cannot open audio file (line = error_code)", err, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 		}
 
@@ -192,8 +192,25 @@ namespace Game {
 
 		// open the ogg vorbis file. This is a must on windows, do not use ov_open.
 	    // set OV_CALLBACKS_NOCLOSE else it will close your fp when ov_close() is reached, which is fine.
-		if (ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
-			throw Game::exception("Stream is not a valid OggVorbis stream!", 197, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+		if ((error = ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE)) != 0) {
+			switch (error)
+			{
+			case OV_EREAD:
+				throw Game::exception("A read from media returned an error", 199, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				break;
+			case OV_ENOTVORBIS:
+				throw Game::exception("Bitstream does not contain any Vorbis data", 202, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				break;
+			case OV_EVERSION:
+				throw Game::exception("Vorbis version mismatch", 205, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				break;
+			case OV_EBADHEADER:
+				throw Game::exception("Invalid Vorbis bitstream header", 208, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				break;
+			case OV_EFAULT:
+				throw Game::exception("Internal logic fault; indicates a bug or heap/stack corruption", 211, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				break;
+			}
 		}
 
 		// fill vi with a new ogg vorbis info struct, determine audio format
@@ -206,7 +223,7 @@ namespace Game {
 		data_len = ov_pcm_total(&vf, -1) * vi->channels * 2;
 		pcmout = (short*)malloc(data_len);
 		if (pcmout == 0) {
-			throw Game::exception("Cannot create audio, out of memory.", 212, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+			throw Game::exception("Cannot create audio, out of memory.", 226, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 		}
 
 		// fill pcmout buffer with ov_read data samples
@@ -218,7 +235,7 @@ namespace Game {
 			(size = ov_read(&vf, (char*)pcmout + offset, 4096, 0, 2, 1, (int*)&sel)) != 0;
 			offset += size) {
 			if (size < 0)
-				throw Game::exception("Faulty ogg file :o", 221, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)"); // use https://xiph.org/vorbis/doc/vorbisfile/ov_read.html for handling enums
+				throw Game::exception("Faulty ogg file :o", 238, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)"); // use https://xiph.org/vorbis/doc/vorbisfile/ov_read.html for handling enums
 		}
 
 		// send data to openal, vi->rate is your freq in Hz, dont assume 44100

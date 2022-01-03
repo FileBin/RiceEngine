@@ -9,7 +9,7 @@ class MsaaTestScript : public ScriptBase {
 		auto& engine = GetEngine();
 		if (InputManager::GetKey(KeyCode::Button1)) {
 			//engine.SetMsaaLevel(1);
-			//engine.getSoundManager().playOgg("test.ogg");
+			engine.getSoundManager().playOgg("test.ogg");
 		} else if (InputManager::GetKey(KeyCode::Button2)) {
 			//engine.SetMsaaLevel(2);
 		} else if (InputManager::GetKey(KeyCode::Button3)) {
