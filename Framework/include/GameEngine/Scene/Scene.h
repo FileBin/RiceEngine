@@ -14,7 +14,7 @@ namespace Game {
 
 		virtual ~Scene() = 0;
 
-		void Init(Engine* en) { engine = en;/* soundManager = new SoundManager();*/ }
+		void Init(Engine* en) { engine = en; soundManager = new SoundManager(); }
 
 		virtual void Initialize() = 0;
 

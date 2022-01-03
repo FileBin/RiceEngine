@@ -14,31 +14,24 @@ namespace Game {
 	ALCboolean contextMadeCurrent;
 	ALCcontext* openALContext;
 
-	SoundManager* SoundManager::Init() {
-		if (instance == nullptr) {
-			instance = new SoundManager();
-			return instance;
-		}
-		throw Game::exception("Sound is already initialized!", 16, L"SoundManager.cpp : SoundManager* SoundManager::Init()");
-	}
-
 	SoundManager::SoundManager() {
 		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice)
 		{
-			throw Game::exception("Sound device initialization failed!", 27, L"SoundManager.cpp : SoundManager::SoundManager()");
+			throw Game::exception("Sound device initialization failed!", 21, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
 		openALContext;
 		if (!alcCall(alcCreateContext, openALContext, openALDevice, openALDevice, nullptr) || !openALContext)
 		{
-			throw Game::exception("Could not create openAL context!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
+			throw Game::exception("Could not create openAL context!", 26, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
 		contextMadeCurrent = false;
 		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, openALContext)
 			|| contextMadeCurrent != ALC_TRUE)
 		{
-			throw Game::exception("Could not make openAL context context current!", 39, L"SoundManager.cpp : SoundManager::SoundManager()");
+			throw Game::exception("Could not make openAL context context current!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
+		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 	}
 
 	SoundManager::~SoundManager() {
@@ -51,6 +44,9 @@ namespace Game {
 		{
 			Log::log(Log::WARNING, L"Error while destroying openAL context");
 		}
+
+		ALCboolean closed;
+		alcCall(alcCloseDevice, closed, openALDevice, openALDevice);
 	}
 
 	bool SoundManager::check_al_errors(const std::wstring& filename, const std::uint_fast32_t line)
@@ -119,6 +115,22 @@ namespace Game {
 		return true;
 	}
 
+	void SoundManager::list_audio_devices(const ALCchar* devices)
+	{
+		const ALCchar* device = devices, * next = devices + 1;
+		size_t len = 0;
+
+		Log::log(Log::INFO, L"Devices list:\n");
+		Log::log(Log::INFO, L"----------\n");
+		while (device && *device != '\0' && next && *next != '\0') {
+			Log::log(Log::INFO, Util::Utf8ToWstring(std::string(device)));
+			len = strlen(device);
+			device += (len + 1);
+			next += (len + 2);
+		}
+		Log::log(Log::INFO, L"----------\n");
+	}
+
 	bool SoundManager::check_al_errors(const char* filename, const std::uint_fast32_t line)
 	{
 		return check_al_errors(Util::Utf8ToWstring(std::string(filename)), line);
@@ -136,7 +148,7 @@ namespace Game {
 	void SoundManager::play(ALuint* sound) {
 		//create source
 		ALuint source;
-		alCall(alGenSources, 1, &source);
+		alCall(alGenSources, (ALuint)1, &source);
 		alCall(alSourcef, source, AL_PITCH, 1);
 		alCall(alSourcef, source, AL_GAIN, 1.0f);
 		alCall(alSource3f, source, AL_POSITION, 0, 0, 0);
@@ -154,13 +166,7 @@ namespace Game {
 		}
 
 		alCall(alDeleteSources, 1, &source);
-		alCall(alDeleteBuffers, 1, sound);
-
-		alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, nullptr);
-		alcCall(alcDestroyContext, openALDevice, openALContext);
-
-		ALCboolean closed;
-		alcCall(alcCloseDevice, closed, openALDevice, openALDevice);
+		alCall(alDeleteBuffers, 1, sound);		
 	}
 
 	ALuint* SoundManager::sound_load_ogg(const char* path) {
@@ -182,7 +188,7 @@ namespace Game {
 		// make a handle
 		sound = (ALuint*)malloc(1 * sizeof(ALuint));
 		if (sound == 0) {
-			throw Game::exception("Cannot create audio, out of memory.", 185, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+			throw Game::exception("Cannot create audio, out of memory.", 194, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 		}
 
 		// make a buffer
@@ -196,19 +202,19 @@ namespace Game {
 			switch (error)
 			{
 			case OV_EREAD:
-				throw Game::exception("A read from media returned an error", 199, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				throw Game::exception("A read from media returned an error", 208, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 				break;
 			case OV_ENOTVORBIS:
-				throw Game::exception("Bitstream does not contain any Vorbis data", 202, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				throw Game::exception("Bitstream does not contain any Vorbis data", 211, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 				break;
 			case OV_EVERSION:
-				throw Game::exception("Vorbis version mismatch", 205, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				throw Game::exception("Vorbis version mismatch", 214, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 				break;
 			case OV_EBADHEADER:
-				throw Game::exception("Invalid Vorbis bitstream header", 208, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				throw Game::exception("Invalid Vorbis bitstream header", 217, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 				break;
 			case OV_EFAULT:
-				throw Game::exception("Internal logic fault; indicates a bug or heap/stack corruption", 211, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+				throw Game::exception("Internal logic fault; indicates a bug or heap/stack corruption", 220, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 				break;
 			}
 		}
@@ -223,7 +229,7 @@ namespace Game {
 		data_len = ov_pcm_total(&vf, -1) * vi->channels * 2;
 		pcmout = (short*)malloc(data_len);
 		if (pcmout == 0) {
-			throw Game::exception("Cannot create audio, out of memory.", 226, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
+			throw Game::exception("Cannot create audio, out of memory.", 235, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)");
 		}
 
 		// fill pcmout buffer with ov_read data samples
@@ -235,7 +241,7 @@ namespace Game {
 			(size = ov_read(&vf, (char*)pcmout + offset, 4096, 0, 2, 1, (int*)&sel)) != 0;
 			offset += size) {
 			if (size < 0)
-				throw Game::exception("Faulty ogg file :o", 238, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)"); // use https://xiph.org/vorbis/doc/vorbisfile/ov_read.html for handling enums
+				throw Game::exception("Faulty ogg file :o", 247, L"SoundManager.cpp: ALuint* SoundManager::sound_load_ogg(const char* path)"); // use https://xiph.org/vorbis/doc/vorbisfile/ov_read.html for handling enums
 		}
 
 		// send data to openal, vi->rate is your freq in Hz, dont assume 44100

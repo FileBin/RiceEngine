@@ -8,12 +8,12 @@
 namespace Game {
 	class SoundManager {
 	public:
-		static SoundManager* Init();
 		SoundManager();
 		~SoundManager();
 
 		void playOgg(const char* path);
 	private:
+		void list_audio_devices(const ALCchar* devices);
 		bool check_al_errors(const std::wstring& filename, const std::uint_fast32_t line);
 		bool check_alc_errors(const std::wstring& filename, const std::uint_fast32_t line, ALCdevice* device);
 		bool check_al_errors(const char* filename, const std::uint_fast32_t line);
