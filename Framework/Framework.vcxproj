@@ -175,6 +175,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\GameEngine\AlDevice.h" />
     <ClInclude Include="include\GameEngine\Camera.h" />
     <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\MonoScript.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="include\GameEngine\Matrixes.h" />
     <ClInclude Include="include\GameEngine\Model.h" />
     <ClInclude Include="include\GameEngine\ModelRender.h" />
+    <ClInclude Include="include\GameEngine\OggStream.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
     <ClInclude Include="include\GameEngine\Core.h" />
     <ClInclude Include="include\GameEngine\InputEvents.h" />
@@ -228,6 +230,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DX\Texture2D.cpp" />
+    <ClCompile Include="src\Engine\OggStream.cpp" />
     <ClCompile Include="src\Engine\SoundManager.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
