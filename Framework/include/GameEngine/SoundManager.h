@@ -1,6 +1,8 @@
 #pragma once
 #include <al/al.h>
 #include <al/alc.h>
+#include <ogg/ogg.h>
+#include <vorbis/vorbisfile.h>
 
 #define alCall(function, ...) alCallImpl(__FILE__, __LINE__, function, __VA_ARGS__)
 #define alcCall(function, device, ...) alcCallImpl(__FILE__, __LINE__, function, device, __VA_ARGS__)

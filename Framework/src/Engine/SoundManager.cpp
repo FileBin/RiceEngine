@@ -4,8 +4,6 @@
 #include <GameEngine/Util/exception.h>
 #include <GameEngine/Util.h>
 
-#include <vorbis/vorbisfile.h>
-
 namespace Game {
 	
 	SoundManager* instance = nullptr;
@@ -15,6 +13,7 @@ namespace Game {
 	ALCcontext* openALContext;
 
 	SoundManager::SoundManager() {
+		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice)
 		{
@@ -31,7 +30,6 @@ namespace Game {
 		{
 			throw Game::exception("Could not make openAL context context current!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
-		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 	}
 
 	SoundManager::~SoundManager() {
