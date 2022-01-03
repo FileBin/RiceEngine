@@ -84,7 +84,7 @@ class ChunkGenerator : public MonoScript {
 			pos.y = idx % a - ad2;
 			idx /= a;
 			pos.z = idx - ad2;
-			if (!CheckChunkVisible(pos)) continue;
+			//if (!CheckChunkVisible(pos)) continue;
 			for (size_t j = 0; j < nThreads; j++) {
 				auto o = scene.Instaniate();
 				auto render = new ModelRender();
@@ -249,13 +249,18 @@ class ChunkGenerator : public MonoScript {
 		newChunkPos = { 0,0,0 };
 		size_t positionIdx = 0;
 
+		size_t lod = 0;
+
 		std::function<void(void)> updatePos = [&]() {
 			if (positionIdx < posCount) {
-				newChunkPos = positions[positionIdx++] + Vector3i(playerChunk.x / 2, playerChunk.y / 2, playerChunk.z / 2) * 2;
+				newChunkPos = positions[positionIdx++];
+				lod = newChunkPos.Length() * .5;
+				lod = Math::Min<size_t>(lod, 3);
+				newChunkPos += Vector3i(playerChunk.x / 2, playerChunk.y / 2, playerChunk.z / 2) * 2;
 			} else {
 				loading[idx] = false;
-				Sleep(10);
-				positionIdx = 0;
+				Sleep(100);
+				//positionIdx = 0;
 				while (unloading) { Sleep(1); loading[idx] = false; };
 				loading[idx] = true;
 			}
@@ -274,28 +279,29 @@ class ChunkGenerator : public MonoScript {
 			while (unloading) { Sleep(1); loading[idx] = false; };
 			loading[idx] = true;
 
-			while (CheckLoaded(newChunkPos, idx)) {
+			/*while (CheckLoaded(newChunkPos, idx)) {
 				if (!enabled)
 					return;
 				updatePos();
-			}
-			if (unloading) continue;
+			}*/
+			//if (unloading) continue;
+
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loading);
 			auto& chunk = world->GetChunk(newChunkPos);
-			auto& model = *chunk.GetModel();
+			auto& model = *chunk.GetModel(lod);
 			/*if (model.IsEmpty()) {
 				wrld.SetChunkStatus(newChunkPos, Chunk::Loaded);
 				loading[idx] = false;
 				continue;
 			}*/
-			auto& chunkObj = *GetNextChunk(idx);
+			auto& chunkObj = *chunksPool[positionIdx * nThreads + idx].first;//*GetNextChunk(idx);
 			if (!enabled)
 				return;
 			auto render = chunkObj.GetComponents<ModelRender>()[0];
+			sRen.Wait(enabled);
+			sRen.Lock();
 			auto& transform = *chunkObj.GetComponents<Transform>()[0];
 			transform.position = World::TransformToWorldPos(newChunkPos);
-			sRen.WaitRendering(enabled);
-			sRen.Lock();
 			render->SetModel(&model);
 			auto n = model.GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
@@ -305,6 +311,7 @@ class ChunkGenerator : public MonoScript {
 			sRen.Unlock();
 			wrld.SetChunkStatus(newChunkPos, Chunk::Loaded);
 			loading[idx] = false;
+			updatePos();
 		}
 	}
 

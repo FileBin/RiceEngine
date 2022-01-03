@@ -13,6 +13,7 @@ namespace Game {
 	}
 
 	void SceneObject::Enable() {
+		if (enabled) return;
 		for (auto c : components) {
 			c->Enable();
 		}
@@ -47,6 +48,7 @@ namespace Game {
 		}
 	}
 	void SceneObject::Disable() {
+		if (!enabled) return;
 		enabled = false;
 		for (auto c : components) {
 			c->Disable();
