@@ -137,10 +137,8 @@ namespace Game {
 	void SoundManager::play_music(const char* name, bool force) {
 		if (current_music_stream != nullptr && force) {
 			current_music_stream->setVolume(0, false);
-			concurrency::create_task([&]() {Sleep(1000); nextMusic = "music/" + std::string(name) + ".ogg"; });
+			current_music_stream->closeOnNoVolume(true);
 		}
-		else {
-			nextMusic = "music/" + std::string(name) + ".ogg";
-		}
+		nextMusic = "music/" + std::string(name) + ".ogg";
 	}
 }

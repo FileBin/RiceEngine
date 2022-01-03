@@ -5,6 +5,7 @@ char pcm[BUFFER_SIZE];
 
 namespace Game {
 
+    bool closeOnNoVol = false;
     float targetVolume = 1;
     float currentVolume = 0;
 
@@ -113,7 +114,12 @@ namespace Game {
             alCall(alSourceQueueBuffers, source, 1, &buffer);
         }
 
-        return active;
+        if (closeOnNoVol) {
+            return active && currentVolume > 0.002f;
+        }
+        else {
+            return active;
+        }
     }
 
     bool OggStream::stream(ALuint buffer)
@@ -141,6 +147,10 @@ namespace Game {
         alCall(alBufferData, buffer, format, pcm, size, vorbisInfo->rate);
         
         return true;
+    }
+
+    void OggStream::closeOnNoVolume(bool close) {
+        closeOnNoVol = close;
     }
 
     void OggStream::empty()

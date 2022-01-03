@@ -24,6 +24,7 @@ namespace Game {
         bool update();
 
         void setVolume(float volume, bool instant);
+        void closeOnNoVolume(bool close);
 
     protected:
 
