@@ -24,6 +24,7 @@ namespace Game {
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
 		auto n = models.size();
+		float time = clock() * .001;
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto& model = it->first;
 
@@ -33,6 +34,7 @@ namespace Game {
 			cb.World = Matrix4x4::TRS(*model->pPos, *model->pRot, *model->pScale);
 			cb.View = cam->GetTransformationMatrix();
 			cb.Projection = cam->GetProjectionMatrix();
+			cb.World.c41 = time;
 
 
 			device->LoadBufferSubresource(constantBuffer, cb);

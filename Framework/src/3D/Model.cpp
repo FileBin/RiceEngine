@@ -114,6 +114,7 @@ namespace Game {
 
 	bool Mesh::CheckVisiblity(ConstantBufferData WVP) {
 		auto corners = bounds.GetPoints();
+		WVP.World.c41 = WVP.World.c42 = WVP.World.c43 = 0;
 		auto matrix = WVP.World * WVP.View * WVP.Projection;
 		for (size_t i = 0; i < 9; i++) {
 			auto proj = corners[i] * matrix;

@@ -57,8 +57,8 @@ float simplexNoise(float2 uv)
 
 float waterN(float2 texcoord)
 {
-    float n1 = simplexNoise(texcoord + time);
-    float n2 = simplexNoise(texcoord - time);
+    float n1 = simplexNoise(texcoord + time * .2);
+    float n2 = simplexNoise(texcoord - time * .2);
     float offset = lerp(n1, n2, .5);
     float noise = simplexNoise(texcoord + offset * 5) * simplexNoise(texcoord);
     return noise;
