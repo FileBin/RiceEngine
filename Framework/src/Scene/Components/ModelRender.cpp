@@ -46,7 +46,9 @@ namespace Game {
 	void ModelRender::SetMaterial(Material* material, size_t i) { materials[i] = material; }
 
 	void ModelRender::SetModel(Model* _model, bool updateBuffer) {
+		//if (model == _model) return;
 		auto& ren = GetSceneObject().GetScene().GetRender();
+		auto& transform = *GetSceneObject().GetComponents<Transform>()[0];
 
 		auto n = _model->GetSubMeshesCount();
 		materials.resize(n);
@@ -57,12 +59,15 @@ namespace Game {
 		}
 		model = _model;
 		if (enabled) {
+			model->pPos = &transform.position;
+			model->pRot = &transform.rotation;
+			model->pScale = &transform.scale;
 			ren.AddModel(model);
 			for (size_t i = 0; i < n; i++) {
 				auto& mesh = this->model->GetSubMesh(i);
 				ren.MapMaterial(&mesh, materials[i]);
 			}
-			//ren.UpdateModel(this->model);
+			ren.UpdateModel(this->model);
 		}
 	}
 	Model& ModelRender::GetModel() const { return *model; }

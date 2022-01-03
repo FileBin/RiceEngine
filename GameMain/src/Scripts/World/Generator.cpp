@@ -218,6 +218,8 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
 
     transp = true;
 
+    step = 4;
+
     for (int i = 0; i < a; i += step) {
         for (int j = 0; j < a; j += step) {
             for (int k = 0; k < a; k += step) {

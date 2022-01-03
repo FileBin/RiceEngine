@@ -20,7 +20,7 @@ class Chunk {
 private:
     WorldGenerator* gen;
     HeightMap* hmap;
-    Model* model[LOD_COUNT] = { nullptr, nullptr, nullptr, nullptr };
+    Model* model = nullptr;
     World* world;
 
     bool lock = false;
@@ -46,9 +46,9 @@ public:
     ~Chunk() {
         voxels.clear();
         for (size_t i = 0; i < LOD_COUNT; i++) {
-            if (model[i] != nullptr) {
-                delete model[i];
-                model[i] = nullptr;
+            if (model != nullptr) {
+                delete model;
+                model = nullptr;
             }
         }
     }
@@ -165,9 +165,12 @@ public:
     }
     Model* GetModel(size_t lod = 0) {
         auto idx = 1 << lod;
-        if (model[lod]) return model[lod];
-        return model[lod] = GenerateSmoothModel(idx);
+        if (lod == 0) {
+            if (model) return model;
+            return model = GenerateSmoothModel();
+        }
+        return GenerateSmoothModel(idx);
     }
     Model* GenerateModel();
-    Model* GenerateSmoothModel(size_t step = 4);
+    Model* GenerateSmoothModel(size_t step = 1);
 };
