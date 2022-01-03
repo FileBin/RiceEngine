@@ -23,18 +23,19 @@ namespace Game {
         bool playing();
         bool update();
 
+        void setVolume(float volume, bool instant);
+
     protected:
 
         bool stream(ALuint buffer);
         void empty();
         std::wstring errorString(int code);
-
+        
     private:
 
         FILE* oggFile;
         OggVorbis_File  oggStream;
         vorbis_info* vorbisInfo;
-        vorbis_comment* vorbisComment;
 
         ALuint buffers[2];
         ALuint source;

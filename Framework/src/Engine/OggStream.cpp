@@ -4,6 +4,10 @@
 char pcm[BUFFER_SIZE];
 
 namespace Game {
+
+    float targetVolume = 1;
+    float currentVolume = 0;
+
     void OggStream::open(std::string path)
     {
         int result;
@@ -20,7 +24,6 @@ namespace Game {
         }
 
         vorbisInfo = ov_info(&oggStream, -1);
-        vorbisComment = ov_comment(&oggStream, -1);
 
         if (vorbisInfo->channels == 1)
             format = AL_FORMAT_MONO16;
@@ -36,6 +39,15 @@ namespace Game {
         alSource3f(source, AL_DIRECTION, 0.0, 0.0, 0.0);
         alSourcef(source, AL_ROLLOFF_FACTOR, 0.0);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
+        alSourcef(source, AL_GAIN, 0);
+    }
+
+    void OggStream::setVolume(float volume, bool instant) {
+        targetVolume = volume;
+        if (instant) {
+            alSourcef(source, AL_GAIN, volume);
+            currentVolume = volume;
+        }
     }
 
     void OggStream::release()
@@ -78,6 +90,15 @@ namespace Game {
     {
         int processed;
         bool active = true;
+
+        if (currentVolume > targetVolume + 0.001f) {
+            currentVolume -= 0.001f;
+            alSourcef(source, AL_GAIN, currentVolume);
+        }
+        else if (currentVolume < targetVolume - 0.001f) {
+            currentVolume += 0.001f;
+            alSourcef(source, AL_GAIN, currentVolume);
+        }
 
         alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
 

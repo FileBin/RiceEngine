@@ -4,6 +4,7 @@
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 
+#include <GameEngine/OggStream.h>
 #include <GameEngine/AlDevice.h>
 
 namespace Game {
@@ -12,9 +13,13 @@ namespace Game {
 		SoundManager();
 		~SoundManager();
 
-		void play(const char* path);
+		void play_music(const char* name, bool force);
+		void play_sound(const char* name, float volume);
+		void setMusicVolume(float volume);
 	private:
-		void play_thread(const char* path);
+		void playOggStream(OggStream ogg);
+		void music_thread();
+		void sound_thread(std::string path, float volume);
 		void list_audio_devices(const ALCchar* devices);
 	};
 }

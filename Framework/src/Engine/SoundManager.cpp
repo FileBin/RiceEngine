@@ -3,7 +3,6 @@
 #include <GameEngine/Log.h>
 #include <GameEngine/Util/exception.h>
 #include <GameEngine/Util.h>
-#include <GameEngine/OggStream.h>
 
 #include <thread>
 #include <ppltasks.h>
@@ -16,8 +15,9 @@ namespace Game {
 	ALCboolean contextMadeCurrent;
 	ALCcontext* openALContext;
 
-	std::vector<OggStream> streams;
-	OggStream stream;
+	OggStream* current_music_stream;
+	float musicVolume = 1;
+	std::string nextMusic;
 
 	SoundManager::SoundManager() {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
@@ -37,6 +37,7 @@ namespace Game {
 		{
 			throw Game::exception("Could not make openAL context context current!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
+		concurrency::create_task([this]() {music_thread(); });
 	}
 
 	SoundManager::~SoundManager() {
@@ -70,29 +71,76 @@ namespace Game {
 		Log::log(Log::INFO, L"----------\n");
 	}
 
-	void SoundManager::play_thread(const char* path) {
+	void SoundManager::playOggStream(OggStream ogg) {
+		if (!ogg.playback())
+			throw std::wstring(L"Ogg refused to play");
+		while (ogg.update())
+		{
+			if (!ogg.playing())
+			{
+				if (!ogg.playback())
+					throw std::wstring(L"Ogg abruptly stopped");
+				else
+					throw std::wstring(L"Ogg stream was interrupted");
+			}
+			Sleep(1);
+		}
+		ogg.release();
+	}
+
+	void SoundManager::music_thread() {
+		while (true) {
+			if (nextMusic.size() > 0) {
+				OggStream ogg;
+				try {
+					ogg.open(nextMusic);
+					ogg.setVolume(musicVolume, false);
+					current_music_stream = &ogg;
+					nextMusic.clear();
+					playOggStream(ogg);
+					current_music_stream = nullptr;
+				}
+				catch (std::wstring e) {
+					current_music_stream = nullptr;
+					Log::log(Log::ERR, e);
+				}
+			}
+			else {
+				Sleep(100);
+			}
+		}
+	}
+
+	void SoundManager::sound_thread(std::string path, float volume) {
 		OggStream ogg;
 		try {
 			ogg.open(path);
-			if (!ogg.playback())
-				throw std::wstring(L"Ogg refused to play");
-			while (ogg.update())
-			{
-				if (!ogg.playing())
-				{
-					if (!ogg.playback())
-						throw std::wstring(L"Ogg abruptly stopped");
-					else
-						throw std::wstring(L"Ogg stream was interrupted");
-				}
-			}
-			ogg.release();
-		} catch (std::wstring e) {
+			ogg.setVolume(volume, true);
+			playOggStream(ogg);
+		}
+		catch (std::wstring e) {
 			Log::log(Log::ERR, e);
 		}
 	}
 
-	void SoundManager::play(const char* path) {
-		concurrency::create_task([&]() {play_thread(path); });
+	void SoundManager::play_sound(const char* name, float volume) {
+		concurrency::create_task([&]() {sound_thread("sfx/" + std::string(name) + ".ogg", volume); });
+	}
+
+	void setMusicVolume(float volume) {
+		musicVolume = volume;
+		if (current_music_stream != nullptr) {
+			current_music_stream->setVolume(volume, false);
+		}
+	}
+
+	void SoundManager::play_music(const char* name, bool force) {
+		if (current_music_stream != nullptr && force) {
+			current_music_stream->setVolume(0, false);
+			concurrency::create_task([&]() {Sleep(1000); nextMusic = "music/" + std::string(name) + ".ogg"; });
+		}
+		else {
+			nextMusic = "music/" + std::string(name) + ".ogg";
+		}
 	}
 }
