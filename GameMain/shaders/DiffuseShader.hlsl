@@ -42,7 +42,7 @@ float4 main(PixelShaderInput input) : SV_TARGET{
         break;
     }
    
-	float3 eye = normalize(input.viewPos);
+	float3 eye = normalize(input.viewPos.xyz);
 
 	float3 light = input.light;
 

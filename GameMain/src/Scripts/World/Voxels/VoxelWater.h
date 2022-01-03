@@ -21,14 +21,11 @@ struct VoxelWater : public Voxel {
     }
 
     static Material& CreateMaterial(SceneRender& ren) {
-        auto& shader = ren.GetShader(L"Diffuse");
-        //shader.LoadVertexShader(Util::ReadFile(L"water.cso"), Vertex::GetLayout());
-        //shader.LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+        auto& shader = ren.GetShader(L"Water");
 
-        auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
+        auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"resolution") });
+        mat.AddTexture(&ren.GetDepthBufferTex());
         mat.renderType = RenderType::Transparent;
-        mat.SetVar<Vector4f>(L"color", color);
-        mat.SetVar<Vector4f>(L"egst", EGST);
         mat.UpdateBuffer();
         return mat;
     }

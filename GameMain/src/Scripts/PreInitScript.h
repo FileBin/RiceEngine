@@ -11,7 +11,7 @@ class PreInitScript : public ScriptBase {
 	void Run() {
 		auto& engine = GetEngine();
 		Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
-		engine.SetMsaaLevel(4);
+		//engine.SetMsaaLevel(4);
 
 		engine.RegisterScript(new InitSceneScript(), Stage::Init);
 		//engine.RegisterScript(new MsaaTestScript());

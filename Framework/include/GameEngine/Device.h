@@ -32,6 +32,9 @@ namespace Game {
 			return buf;
 		}
 
+		void UnsetDepthBuffer() { context->OMSetRenderTargets(1, &renderTarget, nullptr); }
+		void SetDepthBuffer() { context->OMSetRenderTargets(1, &renderTarget, depthStencil); }
+
 		Buffer* CreateBuffer(data_t data, UINT stride,
 			UINT bindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE,
 			UINT CpuAccessFlags = 0,
@@ -82,6 +85,8 @@ namespace Game {
 		void ClearFrame(Color color = Color(0,0,0));
 		void SwapBuffers();
 
+		Texture2D* GetDepthBufferTex() { return depthTexture; }
+
 		void Resize();
 		void ReCreateSwapChain() { ReCreateSwapChain(Util::GetWindowScreenSize(hwnd)); }
 		void ReCreateSwapChain(Vector2 screenSize);
@@ -104,11 +109,12 @@ namespace Game {
 		ID3D11DeviceContext* context = nullptr;
 		ID3D11RenderTargetView* renderTarget = nullptr;
 		ID3D11DepthStencilView* depthStencil = nullptr;
-		ID3D11Texture2D* depthStencilTex = nullptr;
+		ID3D11Texture2D* depthStencilTex = nullptr, *nonMsDT = nullptr;
 		ID3D11RasterizerState* state = nullptr;
 		ID3D11DepthStencilState* pDSState;
 		ID3D11BlendState* transparentState, *solidState;
-		ID3D11Texture2D* textureFor2d = nullptr;
+		ID3D11ShaderResourceView* depthBufferRes = nullptr;
+		Texture2D* depthTexture = nullptr;
 
 		ID2D1RenderTarget* renderTarget2d = nullptr;
 		ID2D1Factory* factory2d = nullptr;

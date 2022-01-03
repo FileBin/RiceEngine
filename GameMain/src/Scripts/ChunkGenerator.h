@@ -110,6 +110,8 @@ class ChunkGenerator : public MonoScript {
 		auto& ren = GetRender();
 		auto waterMat = ren.GetMaterial(L"Water");
 		waterMat.SetVar(L"time", (float)en.GetTime());
+		auto res = Util::GetWindowScreenSize(en.GetHWND());
+		waterMat.SetVar<Vector2f>(L"resolution", { (float)res.x, (float)res.y });
 		waterMat.UpdateBuffer();
 
 		auto newPos = ren.GetCamera(0).position;

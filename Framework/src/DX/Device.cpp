@@ -109,6 +109,7 @@ namespace Game {
 			createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &device, &featureLvl, &context));
 		_create2d();
 		ReCreateSwapChain();
+		depthTexture = new Texture2D(&depthBufferRes, device);
 
 		D3D11_VIEWPORT vp;
 		vp.Width = size.x;
@@ -214,25 +215,43 @@ namespace Game {
 
 	void Device::_createDepthStencil(Vector2 size) {
 		D3D11_TEXTURE2D_DESC dsDesc;
-		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT;
+		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
 		dsDesc.SampleDesc.Count = msaaLevel;
 		dsDesc.SampleDesc.Quality = 0;
 		dsDesc.MipLevels = 1;
 		dsDesc.ArraySize = 1;
 		dsDesc.Width = lround(size.x);
 		dsDesc.Height = lround(size.y);
-		dsDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
-		dsDesc.Usage = D3D11_USAGE_DEFAULT;
+		dsDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+		dsDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 		dsDesc.CPUAccessFlags = 0;
 		dsDesc.MiscFlags = 0;
 
 		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &depthStencilTex));
 
-		void* p = (void*)depthStencil;
 		_RELEASE(depthStencil);
 
-		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, nullptr, &depthStencil));
-		_RELEASE(depthStencilTex);
+		D3D11_DEPTH_STENCIL_VIEW_DESC dwdesc;
+		ZeroMemory(&dwdesc, sizeof(dwdesc));
+		dwdesc.Format = DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT;
+		dwdesc.ViewDimension = msaaLevel > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
+		dwdesc.Texture2D.MipSlice = 0;
+
+		dsDesc.SampleDesc.Count = 1;
+		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &nonMsDT));
+
+		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, &dwdesc, &depthStencil));
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+		ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
+		//setup the description of the shader resource view
+		shaderResourceViewDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
+		shaderResourceViewDesc.ViewDimension = msaaLevel > 1 ? D3D11_SRV_DIMENSION::D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
+		shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+		shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+		//create the shader resource view.
+		device->CreateShaderResourceView(depthStencilTex, &shaderResourceViewDesc, &depthBufferRes);
 
 		D3D11_DEPTH_STENCIL_DESC Desc;
 
@@ -269,6 +288,7 @@ namespace Game {
 		sd.BufferDesc.Width = screenSize.x;
 		sd.BufferDesc.Height = screenSize.y;
 		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.BufferDesc.Scaling = DXGI_MODE_SCALING::DXGI_MODE_SCALING_CENTERED;
 		sd.BufferDesc.RefreshRate.Numerator = 60;
 		sd.BufferDesc.RefreshRate.Denominator = 1;
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -388,6 +408,8 @@ namespace Game {
 		context->OMSetDepthStencilState(pDSState, 1);
 		context->RSSetState(state);
 		context->DrawIndexed(indexCount, 0, 0);
+
+		context->ResolveSubresource(nonMsDT, 0, depthStencilTex, 0, DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT);
 	}
 
 	void Device::ClearFrame(Color color) {

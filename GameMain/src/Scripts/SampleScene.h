@@ -34,10 +34,11 @@ class SampleScene : public Scene {
 		sh->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
 		sh->LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-		sh = ren.CreateShader(L"Amogus");
+		sh = ren.CreateShader(L"Water");
+		sh->usesDepthBuffer = true;
 
-		sh->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
-		sh->LoadPixelShader(Util::ReadFile(L"TexturedShader.cso"));
+		sh->LoadVertexShader(Util::ReadFile(L"WaterVS.cso"));
+		sh->LoadPixelShader(Util::ReadFile(L"WaterShader.cso"));
 
 		AddScript(new CameraMover());
 		chunk->AddComponent(new ChunkGenerator());

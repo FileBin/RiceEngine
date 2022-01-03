@@ -54,6 +54,7 @@ namespace Game {
 		Material& GetMaterial(String name);
 
 		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
+		Texture2D& GetDepthBufferTex() { return *device->GetDepthBufferTex(); }
 
 		void AddDrawable(UI::IDrawable* txt);
 		void RemoveDrawable(UI::IDrawable* txt);

@@ -78,6 +78,7 @@ namespace Game {
 			}
 		}
 		device->SetBlendState(true);
+		device->UnsetDepthBuffer();
 		for (auto pair = transparentQ.begin(); pair != transparentQ.end(); pair++) {
 			auto& m = *pair->first;
 
@@ -103,6 +104,7 @@ namespace Game {
 			auto& mat = matIt->second;
 			device->SetActivePSConstantBuffer(mat->GetBuffer());
 			device->SetActiveShader(mat->GetShader());
+			device->SetPSTextures(mat->GetTextures());
 
 			device->Draw();
 		}
