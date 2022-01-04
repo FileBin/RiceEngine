@@ -28,7 +28,7 @@ protected:
 	static concurrent_unordered_map <uint, std::function<Voxel*(VoxelData&, Vector3i&)>> builders;
 	static concurrent_unordered_map <uint, bool> voidMap;
 	static concurrent_unordered_map <uint, bool> transparentMap;
-	static concurrent_unordered_map <uint, Game::Material*> materialMap;
+	static concurrent_unordered_map <uint, std::shared_ptr<Game::Material>> materialMap;
 public:
 	static Voxel* Build(VoxelData data, Vector3i position) {
 		auto it = builders.find(data.index);
@@ -55,10 +55,10 @@ public:
 	}
 
 	static size_t GetMaterialCount() { return materialMap.size(); }
-	static Game::Material& GetMaterialAt(size_t idx) {
+	static std::shared_ptr<Game::Material> GetMaterialAt(size_t idx) {
 		auto it = materialMap.find(idx);
 		if (it != materialMap.end()) {
-			return *it->second;
+			return it->second;
 		}
 		throw Game::exception("Material index invalid!", 63, L"Voxel.h : static Game::Material& GetMaterialAt(size_t idx)");
 	}
@@ -68,7 +68,7 @@ public:
 		builders.insert({ V::GetIdx(), V::Build });
 		voidMap.insert({ V::GetIdx(), V::IsVoid() });
 		transparentMap.insert({ V::GetIdx(), V::IsTransparent() });
-		materialMap.insert({ V::GetIdx(), &V::CreateMaterial(ren) });
+		materialMap.insert({ V::GetIdx(), V::CreateMaterial(ren) });
 	}
 
 	static void Register(Game::SceneRender& ren);

@@ -20,7 +20,7 @@ class Chunk {
 private:
     WorldGenerator* gen;
     HeightMap* hmap;
-    Model* model[LOD_COUNT] = { nullptr, nullptr, nullptr, nullptr };
+    std::shared_ptr<Model>* model[LOD_COUNT] = { nullptr, nullptr, nullptr, nullptr };
     World* world;
 
     bool lock = false;
@@ -45,11 +45,8 @@ public:
 
     ~Chunk() {
         voxels.clear();
-        for (size_t i = 0; i < LOD_COUNT; i++) {
-            if (model[i] != nullptr) {
-                delete model[i];
-                model[i] = nullptr;
-            }
+        for (int i = 0; i < LOD_COUNT; i++) {
+            delete model[i];
         }
     }
 
@@ -163,10 +160,11 @@ public:
     Voxel& GetVoxel(int x, int y, int z) {
         return GetVoxel({ x, y, z });
     }
-    Model* GetModel(size_t lod = 0) {
+
+    std::shared_ptr<Model> GetModel(size_t lod = 0) {
         auto idx = 1 << lod;
-        if (model[lod]) return model[lod];
-        return model[lod] = GenerateSmoothModel(idx);
+        if (model[lod]) return *model[lod];
+        return *(model[lod] = new std::shared_ptr<Model>(GenerateSmoothModel(idx)));
     }
     Model* GenerateModel();
     Model* GenerateSmoothModel(size_t step = 4);

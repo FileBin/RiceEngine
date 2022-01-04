@@ -18,12 +18,12 @@ struct VoxelSnow : public Voxel {
         return new VoxelSnow(pos);
     }
 
-    static Material& CreateMaterial(SceneRender& ren) {
+    static std::shared_ptr<Material> CreateMaterial(SceneRender& ren) {
         auto& shader = ren.GetShader(L"Diffuse");
-        auto& mat = ren.CreateMaterial(L"Snow", &shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
-        mat.SetVar<Vector4f>(L"color", color);
-        mat.SetVar<Vector4f>(L"egst", EGST);
-        mat.UpdateBuffer();
+        auto mat = ren.CreateMaterial(L"Snow", &shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
+        mat->SetVar<Vector4f>(L"color", color);
+        mat->SetVar<Vector4f>(L"egst", EGST);
+        mat->UpdateBuffer();
         return mat;
     }
 };

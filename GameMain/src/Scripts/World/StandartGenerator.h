@@ -133,7 +133,7 @@ private:
         num n = seeds.size();
         dbl s = pow(sMultipiler, -n);
         dbl h = 1.;
-        for (size_t i = 0; i < n; i++) {
+        for (num i = 0; i < n; i++) {
             h /= 2;
             s *= sMultipiler;
             caveFactor += PerlinNoise(pos * s * params.caveScale, seeds[i]) * h;

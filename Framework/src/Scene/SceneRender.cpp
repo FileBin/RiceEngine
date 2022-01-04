@@ -42,29 +42,29 @@ namespace Game {
 
 			auto m = model->GetSubMeshesCount();
 			for (size_t j = 0; j < m; j++) {
-				auto& mesh = model->GetSubMesh(j);
+				auto mesh = model->GetSubMesh(j);
 
-				auto matIt = materialMap.find(&mesh);
+				auto matIt = materialMap.find(mesh);
 				if (matIt == materialMap.end()) continue;
 				auto mat = matIt->second;
 
 				if (mat == nullptr) continue;
 
 				if (mat->renderType == RenderType::Transparent) {
-					auto i = transparentQ.find(&mesh);
+					auto i = transparentQ.find(mesh);
 					if (i != transparentQ.end()) {
 						i->second = cb;
 					}
 					continue;
 				}
 
-				if (!mesh.CheckVisiblity(cb)) continue;
+				if (!mesh->CheckVisiblity(cb)) continue;
 
 				Buffer *ib, *vb;
-				auto iIt = indexBuffers.find(&mesh);
+				auto iIt = indexBuffers.find(mesh);
 				if (iIt != indexBuffers.end()) {
 					ib = iIt->second;
-					vb = vertexBuffers.at(&mesh);
+					vb = vertexBuffers.at(mesh);
 				} else {
 					continue;
 				}
@@ -82,18 +82,18 @@ namespace Game {
 		device->SetBlendState(true);
 		device->UnsetDepthBuffer();
 		for (auto pair = transparentQ.begin(); pair != transparentQ.end(); pair++) {
-			auto& m = *pair->first;
+			auto m = pair->first;
 
-			if (!m.CheckVisiblity(pair->second)) continue;
+			if (!m->CheckVisiblity(pair->second)) continue;
 
 			device->LoadBufferSubresource(constantBuffer, pair->second);
 			device->SetActiveVSConstantBuffer(constantBuffer);
 
 			Buffer* ib, * vb;
-			auto iIt = indexBuffers.find(&m);
+			auto iIt = indexBuffers.find(m);
 			if (iIt != indexBuffers.end()) {
 				ib = iIt->second;
-				vb = vertexBuffers.at(&m);
+				vb = vertexBuffers.at(m);
 			} else {
 				continue;
 			}
@@ -101,7 +101,7 @@ namespace Game {
 			device->SetActiveVertexBuffer<Vertex>(vb);
 			device->SetActiveIndexBuffer(ib);
 
-			auto matIt = materialMap.find(&m);
+			auto matIt = materialMap.find(m);
 			if (matIt == materialMap.end()) continue;
 			auto& mat = matIt->second;
 			device->SetActivePSConstantBuffer(mat->GetBuffer());
@@ -125,11 +125,9 @@ namespace Game {
 
 	void SceneRender::Close() {
 		for (auto c : cameras) delete c;
-		for (auto m : materials) { delete m.second; }
 		for (auto m : shaders) { delete m.second; }
 		for (auto m : indexBuffers) { _RELEASE(m.second); }
 		for (auto m : vertexBuffers) { _RELEASE(m.second); }
-		for (auto m : models) { delete m.first; }
 		_RELEASE(constantBuffer);
 	}
 
@@ -141,36 +139,36 @@ namespace Game {
 		}
 	}
 
-	void SceneRender::AddModel(Model* model) {
+	void SceneRender::AddModel(std::shared_ptr<Model> model) {
 		auto n = model->GetSubMeshesCount();
 
 		bool b = false;
 
 		for (size_t i = 0; i < n; i++) {
-			auto& mesh = model->GetSubMesh(i);
-			if (mesh.indexBuffer.size() == 0) continue;
+			auto mesh = model->GetSubMesh(i);
+			if (mesh->indexBuffer.size() == 0) continue;
 			b = true;
-			auto vertexBuffer = device->CreateBuffer(mesh.vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
-			auto indexBuffer = device->CreateBuffer(mesh.indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto vertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto indexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
 
-			vertexBuffers.insert(vertexBuffers.end(), { &mesh, vertexBuffer });
-			indexBuffers.insert(indexBuffers.end(), { &mesh, indexBuffer });
+			vertexBuffers.insert(vertexBuffers.end(), { mesh, vertexBuffer });
+			indexBuffers.insert(indexBuffers.end(), { mesh, indexBuffer });
 		}
 		if (b) {
 			models.insert(models.end(), { model, true });
 		}
 	}
 
-	bool SceneRender::RemoveModel(Model* model, bool del) {
+	bool SceneRender::RemoveModel(std::shared_ptr<Model> model, bool del) {
 		auto it = models.find(model);
 		if (it != models.end()) {
 			//Wait();
 			//Lock();
-			auto& model = *it->first;
+			auto model = it->first;
 			models.unsafe_erase(it);
-			auto n = model.GetSubMeshesCount();
+			auto n = model->GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
-				auto m = &model.GetSubMesh(i);
+				auto m = model->GetSubMesh(i);
 				auto vIt = vertexBuffers.find(m);
 				if (vIt != vertexBuffers.end()) {
 					vIt->second->Release();
@@ -188,43 +186,41 @@ namespace Game {
 		return false;
 	}
 
-	void SceneRender::UpdateModel(Model* model) {
+	void SceneRender::UpdateModel(std::shared_ptr<Model> model) {
 
 		auto n = model->GetSubMeshesCount();
 
 		for (size_t i = 0; i < n; i++) {
-			auto& mesh = model->GetSubMesh(i);
+			auto mesh = model->GetSubMesh(i);
 
-			auto vertexBuffer = device->CreateBuffer(mesh.vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
-			auto indexBuffer = device->CreateBuffer(mesh.indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
-			auto it = vertexBuffers.find(&mesh);
+			auto vertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto indexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto it = vertexBuffers.find(mesh);
 			if (it != vertexBuffers.end()) {
 				it->second = vertexBuffer;
 			} else {
-				vertexBuffers.insert(vertexBuffers.end(), { &mesh, vertexBuffer });
+				vertexBuffers.insert(vertexBuffers.end(), { mesh, vertexBuffer });
 			}
-			it = indexBuffers.find(&mesh);
+			it = indexBuffers.find(mesh);
 			if (it != indexBuffers.end()) {
 				it->second = indexBuffer;
 			} else {
-				indexBuffers.insert(indexBuffers.end(), { &mesh, indexBuffer });
+				indexBuffers.insert(indexBuffers.end(), { mesh, indexBuffer });
 			}
 		}
 	}
 
 
 
-	void SceneRender::MapMaterial(Mesh* mesh, Material* mat) {
+	void SceneRender::MapMaterial(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> mat) {
 		if (mat == nullptr)
 			return;
 		if (mat->renderType == RenderType::Transparent)
 			transparentQ.insert({ mesh, {} });
-		materialMap.insert({mesh, mat}); 
+		materialMap.insert({mesh, mat});
 	}
 
-	void SceneRender::UnmapMaterial(Mesh* mesh) {
-		while (isRendering)
-			Sleep(1);
+	void SceneRender::UnmapMaterial(std::shared_ptr<Mesh> mesh) {
 		auto it = materialMap.find(mesh);
 		if (it != materialMap.end()) {
 			if (it->second->renderType == RenderType::Transparent)
@@ -233,7 +229,7 @@ namespace Game {
 		}
 	}
 
-	void SceneRender::UpdateBuffer(Mesh* mesh) {
+	void SceneRender::UpdateBuffer(std::shared_ptr<Mesh> mesh) {
 		auto ib = indexBuffers.at(mesh);
 		device->UpdateBufferData(ib, mesh->indexBuffer);
 		auto vb = vertexBuffers.at(mesh);
@@ -258,15 +254,15 @@ namespace Game {
 		throw new Game::exception("Shader name invalid", 244, L"SceneRender.cpp : Shader& SceneRender::GetShader(String name)");
 	}
 
-	Material& SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
-		auto mat = new Material(*device, *sh, mapping);
+	shared_ptr<Material> SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
+		auto mat = std::make_shared<Material>(*device, *sh, mapping);
 		materials.insert(materials.end(), { name, mat });
-		return *mat;
+		return mat;
 	}
-	Material& SceneRender::GetMaterial(String name) {
+	shared_ptr<Material> SceneRender::GetMaterial(String name) {
 		auto it = materials.find(name);
 		if (it != materials.end()) {
-			return *it->second;
+			return it->second;
 		}
 		throw new Game::exception("Material name invalid", 257, L"SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
 	}
