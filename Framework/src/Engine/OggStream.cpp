@@ -8,6 +8,7 @@ namespace Game {
     bool closeOnNoVol = false;
     float targetVolume = 1;
     float currentVolume = 0;
+    Vector3f prevPos = {};
 
     void OggStream::open(std::string path)
     {
@@ -37,19 +38,19 @@ namespace Game {
         alCall(alGenSources, 1, &source);
         alSourcef(source, AL_GAIN, 0);
 
-        ALuint effect; //effect id
+        //ALuint effect; //effect id
 
-        alCall(alGenEffects, 1, &effect); //generate empty effect
-        alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_REVERB); //assign reverb to the id
-        alEffectf(effect, AL_REVERB_DECAY_TIME, 20);//set reverb decay time to 20
+        //alCall(alGenEffects, 1, &effect); //generate empty effect
+        //alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_REVERB); //assign reverb to the id
+        //alEffectf(effect, AL_REVERB_DECAY_TIME, 20);//set reverb decay time to 20
 
-        ALuint effectSlot; //effect slot id (this is where the effects get played through)
+        //ALuint effectSlot; //effect slot id (this is where the effects get played through)
 
-        alGenAuxiliaryEffectSlots(1, &effectSlot); //generate slot
-        alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, effect); // assign an effect to the effect slot
-        alSource3i(source, AL_AUXILIARY_SEND_FILTER, effectSlot, 0, NULL); // pass audio through the slot
+        //alGenAuxiliaryEffectSlots(1, &effectSlot); //generate slot
+        //alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, effect); // assign an effect to the effect slot
+        //alSource3i(source, AL_AUXILIARY_SEND_FILTER, effectSlot, 0, NULL); // pass audio through the slot
 
-        //for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
+        ////for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
     }
 
     void OggStream::setVolume(float volume, bool instant) {
@@ -61,11 +62,11 @@ namespace Game {
     }
 
     void OggStream::setPosition(Vector3f position) {
+        alSource3f(source, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+        prevPos.x = position.x;
+        prevPos.y = position.y;
+        prevPos.z = position.z;
         alSource3f(source, AL_POSITION, position.x, position.y, position.z);
-    }
-
-    void OggStream::setVelocity(Vector3f velocity) {
-        alSource3f(source, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
     }
 
     void OggStream::setLooping(bool looping) {

@@ -20,6 +20,8 @@ namespace Game {
 	float musicVolume = 1;
 	std::string nextMusic;
 
+	Vector3f prevPos = {};
+
 	SoundManager::SoundManager(Camera *cam) {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
@@ -64,17 +66,18 @@ namespace Game {
 	void SoundManager::update_thread() {
 		while (true) {
 			setListenerPosition(camera->position);
-			setListenerOrientation(camera->rotation * Vector3::forward, camera->rotation * Vector3::down);
+			setListenerOrientation(camera->rotation * Vector3::forward, camera->rotation * Vector3::up);
 			Sleep(30);
 		}
 	}
 
 	void SoundManager::setListenerPosition(Vector3f position) {
+		alListener3f(AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+		setListenerVelocity(position - prevPos);
+		prevPos.x = position.x;
+		prevPos.y = position.y;
+		prevPos.z = position.z;
 		alListener3f(AL_POSITION, position.x, position.y, position.z);
-	}
-
-	void SoundManager::setListenerVelocity(Vector3f velocity) {
-		alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 	}
 
 	void SoundManager::setListenerOrientation(Vector3f at, Vector3f up) {

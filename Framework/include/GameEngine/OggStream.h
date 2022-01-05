@@ -30,7 +30,6 @@ namespace Game {
 
         void setVolume(float volume, bool instant);
         void setPosition(Vector3f position);
-        void setVelocity(Vector3f velocity);
         void setLooping(bool looping);
         void setPitch(float pitch);
         void closeOnNoVolume(bool close);

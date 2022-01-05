@@ -22,7 +22,6 @@ namespace Game {
 		void update_thread();
 
 		void setListenerPosition(Vector3f position);
-		void setListenerVelocity(Vector3f velocity);
 		void setListenerOrientation(Vector3f at, Vector3f up);
 
 	private:
