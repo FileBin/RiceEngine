@@ -16,7 +16,7 @@ namespace Game {
 
 		void Init(Engine* en) { engine = en; }
 
-		virtual void Initialize() { soundManager = new SoundManager(&render->GetCamera()); }
+		virtual void Initialize() { soundManager = new SoundManager(render->GetActiveCamera()); }
 
 		SceneRender& GetRender() { return *render; }
 

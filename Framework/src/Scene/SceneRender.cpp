@@ -124,7 +124,6 @@ namespace Game {
 	}
 
 	void SceneRender::Close() {
-		for (auto c : cameras) delete c;
 		for (auto m : shaders) { delete m.second; }
 		for (auto m : indexBuffers) { _RELEASE(m.second); }
 		for (auto m : vertexBuffers) { _RELEASE(m.second); }
@@ -241,9 +240,9 @@ namespace Game {
 		device->UpdateBufferData(vb, msh->vertexBuffer);
 	}
 
-	void SceneRender::AddCamera(Camera* cam) { cameras.push_back(cam); }
+	void SceneRender::AddCamera(std::shared_ptr<Camera> cam) { cameras.push_back(cam); }
 
-	Camera& SceneRender::GetCamera(size_t idx) { return *cameras[idx]; }
+	std::weak_ptr<Camera> SceneRender::GetCamera(size_t idx) { return { cameras[idx] }; }
 
 	Shader* SceneRender::CreateShader(String name) {
 		auto sh = new Shader(device);

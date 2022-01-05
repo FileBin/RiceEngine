@@ -111,7 +111,7 @@ class ChunkGenerator : public MonoScript {
 		waterMat->SetVar<Vector2f>(L"resolution", { (float)res.x, (float)res.y });
 		waterMat->UpdateBuffer();
 
-		auto newPos = ren.GetCamera(0).position;
+		auto newPos = ren.GetActiveCamera().lock()->position;
 		auto playerChunk = World::TransformToChunkPos(newPos);
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			playerPos = newPos;

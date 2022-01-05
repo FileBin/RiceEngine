@@ -24,7 +24,7 @@ namespace Game {
 	private:
 		Scene* scene;
 		SoundManager* soundManager;
-		OggStream* ogg;
+		std::shared_ptr<OggStream> ogg;
 		Transform* transform;
 	};
 }

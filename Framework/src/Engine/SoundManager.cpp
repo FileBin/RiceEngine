@@ -9,18 +9,7 @@
 
 namespace Game {
 
-	SoundManager* instance = nullptr;
-	std::shared_ptr<Camera> camera = nullptr;
-	ALCdevice* openALDevice;
-
-	ALCboolean contextMadeCurrent;
-	ALCcontext* openALContext;
-
-	std::shared_ptr<OggStream> current_music_stream;
-	float musicVolume = 1;
-	std::string nextMusic;
-
-	SoundManager::SoundManager(std::shared_ptr<Camera> cam) {
+	SoundManager::SoundManager(std::weak_ptr<Camera> cam) {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice)
@@ -60,9 +49,10 @@ namespace Game {
 	}
 
 	void SoundManager::update_thread() {
+		auto cam = camera.lock();
 		while (true) {
-			setListenerPosition(camera->position);
-			setListenerOrientation(camera->rotation * Vector3::forward, camera->rotation * Vector3::up);
+			setListenerPosition(cam->position);
+			setListenerOrientation(cam->rotation * Vector3::forward, cam->rotation * Vector3::up);
 			Sleep(30);
 		}
 	}
@@ -148,7 +138,7 @@ namespace Game {
 		}
 	}
 
-	 std::shared_ptr<OggStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
+	 std::weak_ptr<OggStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
 		std::shared_ptr<OggStream> ogg;
 		concurrency::create_task([&]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
 		return ogg;

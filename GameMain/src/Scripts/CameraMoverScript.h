@@ -28,10 +28,10 @@ class CameraMover : public MonoScript {
 	void Update() {
 		auto& ren = GetRender();
 		auto& en = GetEngine();
-		auto& cam = ren.GetCamera();
+		auto cam = ren.GetActiveCamera().lock();
 		auto mouse = InputManager::GetMousePos();
 
-		auto fwd = cam.rotation * Vector3::forward;
+		auto fwd = cam->rotation * Vector3::forward;
 
 		auto rect = Util::GetWindowScreenSize(hwnd);
 		auto center = rect * .5;
@@ -48,7 +48,7 @@ class CameraMover : public MonoScript {
 		if (InputManager::GetKey(KeyCode::Space)) { mv.y += 1; }
 
 		mv = mv.Normalized();
-		mv *= cam.rotation;
+		mv *= cam->rotation;
 
 		double dt = en.GetDeltaTime();
 		
@@ -63,7 +63,7 @@ class CameraMover : public MonoScript {
 		}
 		speed -= damp;
 
-		cam.position += speed * dt;
+		cam->position += speed * dt;
 
 		if (lock) {
 			if (InputManager::GetKey(KeyCode::Escape)) {
@@ -78,7 +78,7 @@ class CameraMover : public MonoScript {
 			pos.y = min(max(pos.y, -90), 90);
 			pos.x = fmod(pos.x, 360);
 			auto yrot = Quaternion::FromAxisAngle(Vector3::up, pos.x);
-			cam.rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
+			cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 
 		} else if (InputManager::GetKey(KeyCode::MouseLeft)) {
 			InputManager::SetMousePos(center);

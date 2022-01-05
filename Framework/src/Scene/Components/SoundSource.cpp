@@ -16,7 +16,7 @@ namespace Game {
 		setPosition(transform->position);
 	}
 	void SoundSource::play(char* name, float volume, Vector3f position) {
-		ogg = soundManager->play_sound(name, volume, position);
+		ogg = soundManager->play_sound(name, volume, position).lock();
 	}
 	void SoundSource::setPosition(Vector3f position) {
 		if (ogg != nullptr) {

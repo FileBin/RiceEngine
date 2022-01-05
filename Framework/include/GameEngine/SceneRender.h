@@ -50,8 +50,9 @@ namespace Game {
 		void UnmapMaterial(std::weak_ptr<Mesh> mesh);
 		void UpdateBuffer(std::weak_ptr<Mesh> mesh);
 
-		void AddCamera(Camera* cam);
-		Camera& GetCamera(size_t idx = 0);
+		void AddCamera(std::shared_ptr<Camera> cam);
+		std::weak_ptr<Camera> GetCamera(size_t idx);
+		std::weak_ptr<Camera> GetActiveCamera() { return GetCamera(activeCameraIdx); }
 
 		Shader* CreateShader(String name);
 		Shader& GetShader(String name);
@@ -68,7 +69,7 @@ namespace Game {
 	private:
 		bool isRendering = false;
 		bool isLoading[0xff];
-		concurrent_vector<Camera*> cameras;
+		concurrent_vector<std::shared_ptr<Camera>> cameras;
 		concurrent_unordered_map<String, std::shared_ptr<Material>> materials;
 		concurrent_unordered_map<String, Shader*> shaders;
 		concurrent_unordered_map<Mesh*, std::weak_ptr<Material>> materialMap;
