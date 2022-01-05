@@ -12,11 +12,11 @@
 namespace Game {
 	class SoundManager : private AlDevice{
 	public:
-		SoundManager(Camera *cam);
+		SoundManager(std::shared_ptr<Camera> cam);
 		~SoundManager();
 
-		void play_music(const char* name, bool force);
-		OggStream* play_sound(const char* name, float volume, Vector3f position);
+		void play_music(const std::string name, bool force);
+		std::shared_ptr<OggStream> play_sound(const std::string name, float volume, Vector3f position);
 		void setMusicVolume(float volume);
 
 		void update_thread();
@@ -25,9 +25,9 @@ namespace Game {
 		void setListenerOrientation(Vector3f at, Vector3f up);
 
 	private:
-		void playOggStream(OggStream *ogg);
+		void playOggStream(std::shared_ptr<OggStream> ogg);
 		void music_thread();
-		void sound_thread(OggStream *ogg, std::string path, float volume, Vector3f position);
+		void sound_thread(std::shared_ptr<OggStream> ogg, std::string path, float volume, Vector3f position);
 		void list_audio_devices(const ALCchar* devices);
 
 		Vector3f prevPos = {};

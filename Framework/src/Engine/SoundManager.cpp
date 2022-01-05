@@ -10,17 +10,17 @@
 namespace Game {
 
 	SoundManager* instance = nullptr;
-	Camera* camera = nullptr;
+	std::shared_ptr<Camera> camera = nullptr;
 	ALCdevice* openALDevice;
 
 	ALCboolean contextMadeCurrent;
 	ALCcontext* openALContext;
 
-	OggStream* current_music_stream;
+	std::shared_ptr<OggStream> current_music_stream;
 	float musicVolume = 1;
 	std::string nextMusic;
 
-	SoundManager::SoundManager(Camera *cam) {
+	SoundManager::SoundManager(std::shared_ptr<Camera> cam) {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice)
@@ -96,7 +96,7 @@ namespace Game {
 		Log::log(Log::INFO, L"----------\n");
 	}
 
-	void SoundManager::playOggStream(OggStream *ogg) {
+	void SoundManager::playOggStream(std::shared_ptr<OggStream> ogg) {
 		if (!ogg->playback())
 			throw std::wstring(L"Ogg refused to play");
 		while (ogg->update())
@@ -116,13 +116,13 @@ namespace Game {
 	void SoundManager::music_thread() {
 		while (true) {
 			if (nextMusic.size() > 0) {
-				OggStream ogg;
+				auto ogg = std::make_shared<OggStream>();
 				try {
-					ogg.open(nextMusic);
-					ogg.setVolume(musicVolume, false);
-					current_music_stream = &ogg;
+					ogg->open(nextMusic);
+					ogg->setVolume(musicVolume, false);
+					current_music_stream = ogg;
 					nextMusic.clear();
-					playOggStream(&ogg);
+					playOggStream(ogg);
 					current_music_stream = nullptr;
 				}
 				catch (std::wstring e) {
@@ -136,7 +136,7 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::sound_thread(OggStream* ogg, std::string path, float volume, Vector3f pos) {
+	void SoundManager::sound_thread(std::shared_ptr<OggStream> ogg, std::string path, float volume, Vector3f pos) {
 		try {
 			ogg->open(path);
 			ogg->setVolume(volume, true);
@@ -148,10 +148,10 @@ namespace Game {
 		}
 	}
 
-	OggStream* SoundManager::play_sound(const char* name, float volume, Vector3f pos) {
-		OggStream ogg;
-		concurrency::create_task([&]() {sound_thread(&ogg, "sfx/" + std::string(name) + ".ogg", volume, pos); });
-		return &ogg;
+	 std::shared_ptr<OggStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
+		std::shared_ptr<OggStream> ogg;
+		concurrency::create_task([&]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
+		return ogg;
 	}
 
 	void SoundManager::setMusicVolume(float volume) {
@@ -161,11 +161,11 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::play_music(const char* name, bool force) {
+	void SoundManager::play_music(const std::string name, bool force) {
 		if (current_music_stream != nullptr && force) {
 			current_music_stream->setVolume(0, false);
 			current_music_stream->closeOnNoVolume(true);
 		}
-		nextMusic = "music/" + std::string(name) + ".ogg";
+		nextMusic = "music/" + name + ".ogg";
 	}
 }
