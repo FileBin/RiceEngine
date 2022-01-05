@@ -135,8 +135,8 @@ namespace Game {
 		return subMeshes.size();
 	}
 
-	std::shared_ptr<Mesh> Model::GetSubMesh(size_t idx){
-		return subMeshes[idx];
+	std::weak_ptr<Mesh> Model::GetSubMesh(size_t idx){
+		return { subMeshes[idx] };
 	}
 
 	Model::~Model() {

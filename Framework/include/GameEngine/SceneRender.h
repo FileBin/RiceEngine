@@ -43,12 +43,12 @@ namespace Game {
 
 		void Unlock(size_t idx) { isLoading[idx] = false; }
 
-		void AddModel(std::shared_ptr<Model> model);
-		bool RemoveModel(std::shared_ptr<Model> model, bool erase = false);
-		void UpdateModel(std::shared_ptr<Model> model);
-		void MapMaterial(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> mat);
-		void UnmapMaterial(std::shared_ptr<Mesh> mesh);
-		void UpdateBuffer(std::shared_ptr<Mesh> mesh);
+		void AddModel(std::weak_ptr<Model> model);
+		bool RemoveModel(std::weak_ptr<Model> model, bool erase = false);
+		void UpdateModel(std::weak_ptr<Model> model);
+		void MapMaterial(std::weak_ptr<Mesh> mesh, std::weak_ptr<Material> mat);
+		void UnmapMaterial(std::weak_ptr<Mesh> mesh);
+		void UpdateBuffer(std::weak_ptr<Mesh> mesh);
 
 		void AddCamera(Camera* cam);
 		Camera& GetCamera(size_t idx = 0);
@@ -71,13 +71,13 @@ namespace Game {
 		concurrent_vector<Camera*> cameras;
 		concurrent_unordered_map<String, std::shared_ptr<Material>> materials;
 		concurrent_unordered_map<String, Shader*> shaders;
-		concurrent_unordered_map<std::shared_ptr<Mesh>, std::shared_ptr<Material>> materialMap;
+		concurrent_unordered_map<Mesh*, std::weak_ptr<Material>> materialMap;
 		size_t activeCameraIdx;
-		concurrent_unordered_map<std::shared_ptr<Model>, bool> models; //that was a trick beacuse unordered_set doesn't work
+		concurrent_unordered_map<Model*, bool> models; //that was a trick beacuse unordered_set doesn't work
 		concurrent_unordered_map<UI::IDrawable*, bool> texts;
-		concurrent_unordered_map<std::shared_ptr<Mesh>, ConstantBufferData> transparentQ;
-		concurrent_unordered_map<std::shared_ptr<Mesh>, Buffer*> indexBuffers;
-		concurrent_unordered_map<std::shared_ptr<Mesh>, Buffer*> vertexBuffers;
+		concurrent_unordered_map<Mesh*, ConstantBufferData> transparentQ;
+		concurrent_unordered_map<Mesh*, Buffer*> indexBuffers;
+		concurrent_unordered_map<Mesh*, Buffer*> vertexBuffers;
 		Buffer* constantBuffer;
 
 		struct RenderingMesh {

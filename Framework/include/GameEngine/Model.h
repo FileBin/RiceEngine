@@ -42,7 +42,7 @@ namespace Game {
 		size_t GetSubMeshesCount();
 		void SetSubMeshesCount(size_t count);
 		void SetSubMesh(std::shared_ptr<Mesh> subMesh, size_t idx);
-		std::shared_ptr<Mesh> GetSubMesh(size_t idx);
+		std::weak_ptr<Mesh> GetSubMesh(size_t idx);
 
 		bool IsEmpty() { 
 			for (auto mesh : subMeshes) {
