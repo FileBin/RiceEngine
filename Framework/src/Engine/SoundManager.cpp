@@ -40,8 +40,6 @@ namespace Game {
 		{
 			throw Game::exception("Could not make openAL context context current!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
 		}
-		setListenerPosition({ 0, 0, 0 });
-		setListenerVelocity({ 0, 0, 0 });
 
 		camera = cam;
 		concurrency::create_task([this]() {music_thread(); });
@@ -73,7 +71,6 @@ namespace Game {
 
 	void SoundManager::setListenerPosition(Vector3f position) {
 		alListener3f(AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
-		setListenerVelocity(position - prevPos);
 		prevPos.x = position.x;
 		prevPos.y = position.y;
 		prevPos.z = position.z;
