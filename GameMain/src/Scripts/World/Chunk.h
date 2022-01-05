@@ -16,10 +16,11 @@ class HeightMap;
 class World;
 
 class Chunk {
+#define LOD_COUNT 5
 private:
     WorldGenerator* gen;
     HeightMap* hmap;
-    Model* model = nullptr;
+    std::vector<std::shared_ptr<Model>> model { LOD_COUNT };
     World* world;
 
     bool lock = false;
@@ -34,6 +35,14 @@ public:
     static const int ChunkSize;
     Vector3i position{};
 
+    static long GetMaxLod() {
+        return LOD_COUNT - 1;
+    }
+
+    static long GetMinLod() {
+        return 0;
+    }
+
     Chunk(WorldGenerator* gen, Vector3i pos, HeightMap* _map, World* world) {
         voxels.resize((INT64)ChunkSize * ChunkSize * ChunkSize);
         this->gen = gen;
@@ -44,10 +53,7 @@ public:
 
     ~Chunk() {
         voxels.clear();
-        if (model != nullptr) {
-            delete model;
-            model = nullptr;
-        }
+        model.clear();
     }
 
     bool IsVoxelVoid(Vector3i voxelPos) {
@@ -160,10 +166,12 @@ public:
     Voxel& GetVoxel(int x, int y, int z) {
         return GetVoxel({ x, y, z });
     }
-    Model* GetModel() {
-        if (model) return model;
-        return model = GenerateSmoothModel();
+
+    std::weak_ptr<Model> GetModel(size_t lod = 0) {
+        auto idx = 1 << lod;
+        if (model[lod]) return { model[lod] };
+        return { model[lod] = std::shared_ptr<Model>(GenerateSmoothModel(idx)) };
     }
     Model* GenerateModel();
-    Model* GenerateSmoothModel();
+    Model* GenerateSmoothModel(size_t step = 4);
 };

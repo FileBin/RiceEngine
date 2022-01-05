@@ -114,13 +114,13 @@ namespace Game {
 
 	bool Mesh::CheckVisiblity(ConstantBufferData WVP) {
 		auto corners = bounds.GetPoints();
+		auto boxSize = bounds.GetSize().SqrLength() * 5;
 		WVP.World.c41 = WVP.World.c42 = WVP.World.c43 = 0;
-		auto matrix = WVP.World * WVP.View * WVP.Projection;
+		auto matrix = WVP.World * WVP.View;
 		for (size_t i = 0; i < 9; i++) {
 			auto proj = corners[i] * matrix;
-			//auto len = proj.Length();
-			//if (len < boxSize.x && len < boxSize.y && len < boxSize.z) return true;
-			//proj = proj * WVP.Projection;
+			if (proj.SqrLength() < boxSize) return true;
+			proj = proj * WVP.Projection;
 			auto b = proj.z * 1.2f;
 			if (proj.x < b && proj.x > -b && proj.y < b && proj.y > -b) { return true; }
 		}
@@ -135,18 +135,14 @@ namespace Game {
 		return subMeshes.size();
 	}
 
-	Mesh& Model::GetSubMesh(size_t idx){
-		return *subMeshes[idx];
+	std::weak_ptr<Mesh> Model::GetSubMesh(size_t idx){
+		return { subMeshes[idx] };
 	}
 
 	Model::~Model() {
 		pPos = nullptr;
 		pRot = nullptr;
 		pScale = nullptr;
-		for (auto& m : subMeshes) {
-			if (m) delete m;
-			m = nullptr;
-		}
 		subMeshes.clear();
 	}
 
@@ -154,7 +150,7 @@ namespace Game {
 		subMeshes.resize(count);
 	}
 
-	void Model::SetSubMesh(Mesh* subMesh, size_t idx) {
+	void Model::SetSubMesh(std::shared_ptr<Mesh> subMesh, size_t idx) {
 		subMeshes[idx] = subMesh;
 	}
 

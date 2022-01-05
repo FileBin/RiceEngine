@@ -18,8 +18,8 @@ namespace Game {
 			ren.AddModel(model);
 			auto n = model->GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
-				auto& mesh = model->GetSubMesh(i);
-				ren.MapMaterial(&mesh, materials[i]);
+				auto mesh = model->GetSubMesh(i);
+				ren.MapMaterial(mesh, materials[i]);
 			}
 		}
 		enabled = true;
@@ -33,34 +33,47 @@ namespace Game {
 			model->pScale = nullptr;
 			auto n = model->GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
-				auto& mesh = model->GetSubMesh(i);
-				ren.UnmapMaterial(&mesh);
+				auto mesh = model->GetSubMesh(i);
+				ren.UnmapMaterial(mesh);
 			}
  			ren.RemoveModel(model);
-			//delete model;
-			model = nullptr;
 		}
 		enabled = false;
 	}
 
-	void ModelRender::SetMaterial(Material* material, size_t i) { materials[i] = material; }
+	void ModelRender::SetMaterial(shared_ptr<Material> material, size_t i) {
+		materials[i] = material; 
+	}
 
-	void ModelRender::SetModel(Model* _model, bool updateBuffer) {
+	void ModelRender::SetModel(shared_ptr<Model> _model, bool updateBuffer) {
+		if (model == _model) return;
 		auto& ren = GetSceneObject().GetScene().GetRender();
+		auto& transform = *GetSceneObject().GetComponents<Transform>()[0];
 
 		auto n = _model->GetSubMeshesCount();
 		materials.resize(n);
 		if (model) {
-			ren.RemoveModel(model);
-			//delete model;
-			//model = nullptr;
+			if (enabled) {
+				model->pPos = nullptr;
+				model->pRot = nullptr;
+				model->pScale = nullptr;
+				auto n = model->GetSubMeshesCount();
+				for (size_t i = 0; i < n; i++) {
+					auto mesh = model->GetSubMesh(i);
+					ren.UnmapMaterial(mesh);
+				}
+				ren.RemoveModel(model);
+			}
 		}
-		model = _model;
+		model.swap(_model);
 		if (enabled) {
+			model->pPos = &transform.position;
+			model->pRot = &transform.rotation;
+			model->pScale = &transform.scale;
 			ren.AddModel(model);
 			for (size_t i = 0; i < n; i++) {
-				auto& mesh = this->model->GetSubMesh(i);
-				ren.MapMaterial(&mesh, materials[i]);
+				auto mesh = this->model->GetSubMesh(i);
+				ren.MapMaterial(mesh, materials[i]);
 			}
 			//ren.UpdateModel(this->model);
 		}

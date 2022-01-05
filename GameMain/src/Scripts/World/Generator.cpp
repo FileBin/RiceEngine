@@ -15,10 +15,10 @@ Model* Chunk::GenerateModel() {
 
     auto nMeshes = Voxel::GetMaterialCount();
 
-    auto meshes = std::vector<Mesh*>(nMeshes);
+    auto meshes = std::vector<std::shared_ptr<Mesh>>(nMeshes);
 
     for (auto& m : meshes) {
-        m = new Mesh();
+        m = std::make_shared<Mesh>();
         m->layout = Vertex::GetLayout();
     }
 
@@ -104,7 +104,7 @@ Model* Chunk::GenerateModel() {
     return mod;
 }
 
-Model* Chunk::GenerateSmoothModel() {
+Model* Chunk::GenerateSmoothModel(size_t step) {
     auto mod = new Model();
     size_t s = Chunk::ChunkSize;
     size_t loop = s * s * s;
@@ -113,14 +113,17 @@ Model* Chunk::GenerateSmoothModel() {
 
     size_t matIdx = 0;
 
-    auto meshes = std::vector<Mesh*>(nMeshes);
+    auto meshes = std::vector<std::shared_ptr<Mesh>>(nMeshes);
 
     for (auto& m : meshes) {
-        m = new Mesh();
+        m = std::make_shared<Mesh>();
         m->layout = Vertex::GetLayout();
     }
 
     bool transp = false;
+
+    Vector3 scale{};
+    scale.x = scale.y = scale.z = step;
 
     function<void(num, num, num)> func = [&](num a, num b, num c) {
         Vector3i inChunkPos;
@@ -138,7 +141,7 @@ Model* Chunk::GenerateSmoothModel() {
 
         for (byte i = 0; i < 8; i++) {
             VoxelData vox;
-            auto pos = worldPos + Tables::cubeVertices[i];
+            auto pos = worldPos + Tables::cubeVertices[i] * step;
             vox = world->GetVoxelData(pos);
             float depth = vox.depth;
             if (transp) {
@@ -175,7 +178,7 @@ Model* Chunk::GenerateSmoothModel() {
 
             auto x = GetPoint(d1, d2);
 
-            Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]], Tables::cubeVertices[edge[1]], x);
+            Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]] * step, Tables::cubeVertices[edge[1]] * step, x);
             return p;
         };
 
@@ -205,9 +208,9 @@ Model* Chunk::GenerateSmoothModel() {
     };
 
     auto a = ChunkSize;
-    for (int i = 0; i < a; i++) {
-        for (int j = 0; j < a; j++) {
-            for (int k = 0; k < a; k++) {
+    for (int i = 0; i < a; i += step) {
+        for (int j = 0; j < a; j += step) {
+            for (int k = 0; k < a; k += step) {
                 func(i, j, k);
             }
         }
@@ -215,9 +218,12 @@ Model* Chunk::GenerateSmoothModel() {
 
     transp = true;
 
-    for (int i = 0; i < a; i++) {
-        for (int j = 0; j < a; j++) {
-            for (int k = 0; k < a; k++) {
+    step *= 4;
+    step = min(step, 8);
+
+    for (int i = 0; i < a; i += step) {
+        for (int j = 0; j < a; j += step) {
+            for (int k = 0; k < a; k += step) {
                 func(i, j, k);
             }
         }

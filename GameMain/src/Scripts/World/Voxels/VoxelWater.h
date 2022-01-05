@@ -20,13 +20,13 @@ struct VoxelWater : public Voxel {
         return new VoxelWater(pos);
     }
 
-    static Material& CreateMaterial(SceneRender& ren) {
+    static std::shared_ptr<Material> CreateMaterial(SceneRender& ren) {
         auto& shader = ren.GetShader(L"Water");
 
-        auto& mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"resolution") });
-        mat.AddTexture(&ren.GetDepthBufferTex());
-        mat.renderType = RenderType::Transparent;
-        mat.UpdateBuffer();
+        auto mat = ren.CreateMaterial(L"Water", &shader, { Var(L"time"), Var(L"resolution") });
+        mat->AddTexture(&ren.GetDepthBufferTex());
+        mat->renderType = RenderType::Transparent;
+        mat->UpdateBuffer();
         return mat;
     }
 };

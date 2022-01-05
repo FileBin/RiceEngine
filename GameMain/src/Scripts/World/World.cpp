@@ -60,7 +60,7 @@ VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
 concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
 concurrent_unordered_map <uint, bool> Voxel::voidMap{};
 concurrent_unordered_map <uint, bool> Voxel::transparentMap{};
-concurrent_unordered_map <uint, Material*> Voxel::materialMap{};
+concurrent_unordered_map <uint, std::shared_ptr<Material>> Voxel::materialMap{};
 
 void Voxel::Register(SceneRender& ren) {
 

@@ -1,13 +1,14 @@
 ﻿#pragma once
 
 #include "../Scene/Component.h"
-#include <vector>
+#include <GameEngine/macros.h>
+#include "../Model.h"
+#include <concurrent_vector.h>
 
 namespace Game {
 
 	using std::vector;
 
-	class Model;
 	class Material;
 
 	class ModelRender : public Component {
@@ -17,12 +18,14 @@ namespace Game {
 		void OnEnable();
 		void OnDisable();
 
-		void SetMaterial(Material* material, size_t subMeshIdx);
-		void SetModel(Model* model, bool updateBuffer = true);
+		void DeleteModel() { model = nullptr; }
+
+		void SetMaterial(std::shared_ptr<Material> material, size_t subMeshIdx);
+		void SetModel(std::shared_ptr<Model> model, bool updateBuffer = true);
 		Model& GetModel() const;
 		Material& GetMaterial(size_t subMeshIdx) const;
 	private:
-		Model* model = nullptr;
-		vector<Material*> materials{};
+		std::shared_ptr<Model> model = nullptr;
+		concurrency::concurrent_vector<std::shared_ptr<Material>> materials{};
 	};
 }

@@ -19,6 +19,7 @@ namespace Game {
 		RenderType renderType = RenderType::Solid;
 
 		Material(Device& dev, Shader& sh, std::vector<std::pair<String, size_t>> mapping = {});
+		~Material() {}
 
 		void UpdateBuffer();
 

@@ -5,6 +5,7 @@
 using namespace Game;
 
 class MsaaTestScript : public ScriptBase {
+	bool playing = false;
 	void Run() {
 		auto& engine = GetEngine();
 		if (InputManager::GetKey(KeyCode::Button1)) {

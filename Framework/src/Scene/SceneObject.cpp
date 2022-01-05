@@ -13,13 +13,14 @@ namespace Game {
 	}
 
 	void SceneObject::Enable() {
+		if (enabled) return;
+		enabled = true;
 		for (auto c : components) {
 			c->Enable();
 		}
 		for (auto o : children) {
 			o->Enable();
 		}
-		enabled = true;
 	}
 
 	void SceneObject::Start() {
@@ -39,6 +40,7 @@ namespace Game {
 		}
 	}
 	void SceneObject::Update() {
+		if (!enabled) return;
 		for (auto c : components) {
 			c->Update();
 		}
@@ -47,6 +49,7 @@ namespace Game {
 		}
 	}
 	void SceneObject::Disable() {
+		if (!enabled) return;
 		enabled = false;
 		for (auto c : components) {
 			c->Disable();

@@ -41,8 +41,8 @@ public:
 #pragma endregion
 #pragma region Fields
 private:
-	concurrent_unordered_map<Vector3i, Chunk*> chunkMap{};
-	concurrent_unordered_map<Vector2i, HeightMap*> heightMaps{};
+	concurrent_unordered_map<Vector3i, std::shared_ptr<Chunk>> chunkMap{};
+	concurrent_unordered_map<Vector2i, std::shared_ptr<HeightMap>> heightMaps{};
 	bool lock = false;
 	WorldGenerator& generator;
 #pragma endregion
@@ -66,7 +66,6 @@ public:
 			SaveChunk(chunk);
 			auto hmPos = ToTerrainPos(chunk.position);
 			auto n = GetChunks(hmPos).size();
-			delete &chunk;
 			chunkMap.unsafe_erase(chunkPos);
 
 			if (n == 0) {
@@ -75,7 +74,6 @@ public:
 					auto& hm = *hIt->second;
 					SaveHeightMap(hm);
 					heightMaps.unsafe_erase(hmPos);
-					delete &hm;
 				}
 			}
 		}
@@ -86,11 +84,11 @@ public:
 
 	void SaveHeightMap(HeightMap& hm) {}
 
-	std::vector<Chunk*> GetChunks(Vector2i hmPos) {
-		std::vector<Chunk*> chunks{};
+	std::vector<std::weak_ptr<Chunk>> GetChunks(Vector2i hmPos) {
+		std::vector<std::weak_ptr<Chunk>> chunks{};
 		for (auto ch = chunkMap.begin(); ch != chunkMap.end(); ch++) {
 			if (ToTerrainPos(ch->second->position) == hmPos) {
-				chunks.push_back(ch->second);
+				chunks.push_back({ ch->second });
 			}
 		}
 		return chunks;
@@ -101,18 +99,18 @@ public:
 		auto hm = GetHeightMap(chunkPos);
 		Vector3i iPos = pos;
 		auto localPos = iPos - chunkPos * Chunk::ChunkSize;
-		double height = hm.Get(localPos.x, localPos.z);
+		double height = hm.lock()->Get(localPos.x, localPos.z);
 		return pos.y - height;
 	}
 
 	int GetChunkAltitude(Vector3i chunkPos) {
-		auto hm = GetHeightMap(chunkPos);
+		auto hm = GetHeightMap(chunkPos).lock();
 		auto hmax = (chunkPos.y + 1.) * Chunk::ChunkSize;
 		auto hmin = (chunkPos.y) * Chunk::ChunkSize;
-		if (hmin > hm.MaxHeight()) {
-			return chunkPos.y - (int)floor(hm.MaxHeight() / Chunk::ChunkSize);
-		} else if (hmax < hm.MinHeight()) {
-			return chunkPos.y - (int)ceil(hm.MinHeight() / Chunk::ChunkSize);
+		if (hmin > hm->MaxHeight()) {
+			return chunkPos.y - (int)floor(hm->MaxHeight() / Chunk::ChunkSize);
+		} else if (hmax < hm->MinHeight()) {
+			return chunkPos.y - (int)ceil(hm->MinHeight() / Chunk::ChunkSize);
 		}
 		return 0;
 	}
@@ -139,13 +137,13 @@ public:
 		}
 	}
 
-	Chunk& GetChunk(Vector3i chunkPos) {
+	std::weak_ptr<Chunk> GetChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			return *it->second;
+			return it->second;
 		} else {
-			auto& ch = GenerateChunk(chunkPos);
-			chunkMap.insert(chunkMap.end(), { chunkPos, &ch });
+			auto ch = GenerateChunk(chunkPos);
+			chunkMap.insert(chunkMap.end(), { chunkPos, ch });
 			return ch;
 		}
 	}
@@ -153,53 +151,53 @@ public:
 	float GetTransparentVoxelDepth(Vector3i worldPos, size_t idx) {
 		auto chunk = TransformToChunkPos(worldPos);
 		worldPos = worldPos - chunk * Chunk::ChunkSize;
-		return GetChunk(chunk).GetTranspDepth(worldPos, idx);
+		return GetChunk(chunk).lock()->GetTranspDepth(worldPos, idx);
 	}
 
 	Voxel& GetVoxel(Vector3i voxelPos) {
 		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
-		return GetChunk(chunk).GetVoxel(vox);
+		return GetChunk(chunk).lock()->GetVoxel(vox);
 	}
 
 	bool IsVoxelVoid(Vector3i voxelPos) {
 		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
-		return GetChunk(chunk).IsVoxelVoid(vox);
+		return GetChunk(chunk).lock()->IsVoxelVoid(vox);
 	}
 
 	VoxelData GetVoxelData(Vector3i voxelPos) {
 		Vector3i& vox = voxelPos;
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
-		return GetChunk(chunk).GetData(vox);
+		return GetChunk(chunk).lock()->GetData(vox);
 	}
 #pragma endregion
 #pragma region PrivateFunctions
 private:
-	Chunk& GenerateChunk(Vector3i chunkPos) {
-		auto& hm = GetHeightMap(chunkPos);
-		auto chunk = new Chunk(&generator, chunkPos, &hm, this);
-		return *chunk;
+	std::shared_ptr<Chunk> GenerateChunk(Vector3i chunkPos) {
+		auto hm = GetHeightMap(chunkPos).lock();
+		auto chunk = std::make_shared<Chunk>(&generator, chunkPos, hm.get(), this);
+		return chunk;
 	}
 
-	HeightMap& GetHeightMap(Vector3i chunkPos) {
+	std::weak_ptr<HeightMap> GetHeightMap(Vector3i chunkPos) {
 		Vector2i pos{ chunkPos.x, chunkPos.z };
 		auto it = heightMaps.find(pos);
 		if (it != heightMaps.end()) {
-			return *it->second;
+			return it->second;
 		} else {
-			auto& hm = CreateHeightMap(pos);
-			heightMaps.insert(heightMaps.end(), { pos, &hm });
+			auto hm = CreateHeightMap(pos);
+			heightMaps.insert(heightMaps.end(), { pos, hm });
 			return hm;
 		}
 	}
 
-	HeightMap& CreateHeightMap(Vector2i pos) {
-		auto hm = new HeightMap(generator, pos);
-		return *hm;
+	std::shared_ptr<HeightMap> CreateHeightMap(Vector2i pos) {
+		auto hm = std::make_shared<HeightMap>(generator, pos);
+		return hm;
 	}
 #pragma endregion
 };
