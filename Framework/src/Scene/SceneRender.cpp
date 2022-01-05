@@ -17,7 +17,7 @@ namespace Game {
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
 	}
 	bool SceneRender::Draw() {
-		while (isLoading)
+		while (CheckLoading())
 			Sleep(1);
 
 		isRendering = true;

@@ -16,7 +16,7 @@ class HeightMap;
 class World;
 
 class Chunk {
-#define LOD_COUNT 4
+#define LOD_COUNT 5
 private:
     WorldGenerator* gen;
     HeightMap* hmap;
@@ -34,6 +34,14 @@ public:
 
     static const int ChunkSize;
     Vector3i position{};
+
+    static long GetMaxLod() {
+        return LOD_COUNT - 1;
+    }
+
+    static long GetMinLod() {
+        return 0;
+    }
 
     Chunk(WorldGenerator* gen, Vector3i pos, HeightMap* _map, World* world) {
         voxels.resize((INT64)ChunkSize * ChunkSize * ChunkSize);

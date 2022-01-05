@@ -5,11 +5,15 @@
 using namespace Game;
 
 class MsaaTestScript : public ScriptBase {
+	bool playing = false;
 	void Run() {
 		auto& engine = GetEngine();
 		if (InputManager::GetKey(KeyCode::Button1)) {
 			//engine.SetMsaaLevel(1);
-			engine.getSoundManager().play("test.ogg");
+			if (!playing) {
+				playing = true;
+				engine.getSoundManager().play("test.ogg");
+			}
 		} else if (InputManager::GetKey(KeyCode::Button2)) {
 			//engine.SetMsaaLevel(2);
 		} else if (InputManager::GetKey(KeyCode::Button3)) {
