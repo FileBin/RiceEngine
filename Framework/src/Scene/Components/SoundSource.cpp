@@ -6,12 +6,15 @@ namespace Game {
 		scene = &GetSceneObject().GetScene();
 		soundManager = &scene->GetSoundManager();
 		ogg = nullptr;
-		Initialize();
+		transform = GetSceneObject().GetComponents<Transform>()[0];
 	}
 	SoundSource::~SoundSource() {};
 	Scene& SoundSource::GetScene() { return *scene; }
 	SceneRender& SoundSource::GetRender() { return GetScene().GetRender(); }
 	Engine& SoundSource::GetEngine() { return GetScene().GetEngine(); }
+	void SoundSource::Update() {
+		setPosition(transform->position);
+	}
 	void SoundSource::play(char* name, float volume, Vector3f position) {
 		ogg = soundManager->play_sound(name, volume, position);
 	}

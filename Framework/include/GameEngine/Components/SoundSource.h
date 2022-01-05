@@ -6,12 +6,14 @@
 
 #include <GameEngine/Vectors/Vector3f.h>
 
+#include "Transform.h"
+
 namespace Game {
 	class SoundSource : public Component {
 	public:
 		void OnInit();
-		virtual void Initialize() {}
 		virtual ~SoundSource() = 0;
+		void Update();
 		void play(char* name, float volume , Vector3f position);
 		void setPosition(Vector3f newPos);
 		void setVolume(float volume);
@@ -23,5 +25,6 @@ namespace Game {
 		Scene* scene;
 		SoundManager* soundManager;
 		OggStream* ogg;
+		Transform* transform;
 	};
 }

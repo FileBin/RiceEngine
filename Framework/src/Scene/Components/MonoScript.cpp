@@ -6,7 +6,6 @@
 namespace Game {
 	void MonoScript::OnInit() {
 		scene = &GetSceneObject().GetScene();
-		Initialize();
 	}
 	MonoScript::~MonoScript() {};
 	Scene& MonoScript::GetScene() { return *scene; }

@@ -99,20 +99,20 @@ namespace Game {
 	}
 
 	void SoundManager::playOggStream(OggStream *ogg) {
-		if (!(*ogg).playback())
+		if (!ogg->playback())
 			throw std::wstring(L"Ogg refused to play");
-		while ((*ogg).update())
+		while (ogg->update())
 		{
-			if (!(*ogg).playing())
+			if (!ogg->playing())
 			{
-				if (!(*ogg).playback())
+				if (!ogg->playback())
 					throw std::wstring(L"Ogg abruptly stopped");
 				else
 					throw std::wstring(L"Ogg stream was interrupted");
 			}
 			Sleep(1);
 		}
-		(*ogg).release();
+		ogg->release();
 	}
 
 	void SoundManager::music_thread() {
@@ -140,8 +140,9 @@ namespace Game {
 
 	void SoundManager::sound_thread(OggStream* ogg, std::string path, float volume, Vector3f pos) {
 		try {
-			(*ogg).open(path);
-			(*ogg).setVolume(volume, true);
+			ogg->open(path);
+			ogg->setVolume(volume, true);
+			ogg->setPosition(pos);
 			playOggStream(ogg);
 		}
 		catch (std::wstring e) {

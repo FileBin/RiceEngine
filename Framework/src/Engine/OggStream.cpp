@@ -33,6 +33,7 @@ namespace Game {
             Log::log(Log::WARNING, L"Stereo sounds will not play in 3d");
         }
 
+        ALuint effect;
         alCall(alGenBuffers, 2, buffers);
         alCall(alGenSources, 1, &source);
         alSourcef(source, AL_GAIN, 0);
