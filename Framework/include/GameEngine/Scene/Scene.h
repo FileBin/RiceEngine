@@ -14,9 +14,9 @@ namespace Game {
 
 		virtual ~Scene() = 0;
 
-		void Init(Engine* en) { engine = en; soundManager = new SoundManager(); }
+		void Init(Engine* en) { engine = en; }
 
-		virtual void Initialize() = 0;
+		virtual void Initialize() { soundManager = new SoundManager(&render->GetCamera()); }
 
 		SceneRender& GetRender() { return *render; }
 
@@ -44,13 +44,13 @@ namespace Game {
 		Engine& GetEngine();
 		SoundManager& GetSoundManager();
 
+		SoundManager* soundManager;
 	private:
 		SceneObject* root;
 		SceneRender* render;
 
 		Engine* engine;
-		SoundManager* soundManager;
-
+		
 		class InitScript : public ScriptBase {
 		public:
 			Scene* scene = nullptr;

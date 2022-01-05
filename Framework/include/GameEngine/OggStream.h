@@ -10,6 +10,8 @@
 
 #include "AlDevice.h"
 
+#include <GameEngine/Vectors/Vector3f.h>
+
 #define BUFFER_SIZE (4096 * 4)
 
 namespace Game {
@@ -24,6 +26,10 @@ namespace Game {
         bool update();
 
         void setVolume(float volume, bool instant);
+        void setPosition(Vector3f position);
+        void setVelocity(Vector3f velocity);
+        void setLooping(bool looping);
+        void setPitch(float pitch);
         void closeOnNoVolume(bool close);
 
     protected:

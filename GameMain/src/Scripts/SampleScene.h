@@ -26,7 +26,7 @@ class SampleScene : public Scene {
 		cam->SetClippingPlanes(.01, 1000.);
 		cam->rotation = Quaternion::identity;
 		cam->position = { 0, 30, -5 };
-		
+
 		ren.AddCamera(cam);
 
 		auto sh = ren.CreateShader(L"Diffuse");
@@ -49,5 +49,7 @@ class SampleScene : public Scene {
 		txt->SetColor(D2D1::ColorF::White);
 		debugText->AddComponent(txt);
 		debugText->AddComponent(new DebugText());
+
+		Scene::Initialize(); // call super initialize method to initialize sound manager with a valid camera reference
 	}
 };

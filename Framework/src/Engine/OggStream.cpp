@@ -28,18 +28,13 @@ namespace Game {
 
         if (vorbisInfo->channels == 1)
             format = AL_FORMAT_MONO16;
-        else
+        else {
             format = AL_FORMAT_STEREO16;
-
+            Log::log(Log::WARNING, L"Stereo sounds will not play in 3d");
+        }
 
         alCall(alGenBuffers, 2, buffers);
         alCall(alGenSources, 1, &source);
-
-        alSource3f(source, AL_POSITION, 0.0, 0.0, 0.0);
-        alSource3f(source, AL_VELOCITY, 0.0, 0.0, 0.0);
-        alSource3f(source, AL_DIRECTION, 0.0, 0.0, 0.0);
-        alSourcef(source, AL_ROLLOFF_FACTOR, 0.0);
-        alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
         alSourcef(source, AL_GAIN, 0);
     }
 
@@ -49,6 +44,22 @@ namespace Game {
             alSourcef(source, AL_GAIN, volume);
             currentVolume = volume;
         }
+    }
+
+    void OggStream::setPosition(Vector3f position) {
+        alSource3f(source, AL_POSITION, position.x, position.y, position.z);
+    }
+
+    void OggStream::setVelocity(Vector3f velocity) {
+        alSource3f(source, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+    }
+
+    void OggStream::setLooping(bool looping) {
+        alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
+    }
+
+    void OggStream::setPitch(float pitch) {
+        alSourcef(source, AL_PITCH, pitch);
     }
 
     void OggStream::release()
@@ -80,6 +91,10 @@ namespace Game {
 
     bool OggStream::playing()
     {
+        if (source == 0) {
+            return false;
+        }
+
         ALenum state;
 
         alGetSourcei(source, AL_SOURCE_STATE, &state);
