@@ -5,6 +5,9 @@
 
 #include <al/al.h>
 #include <al/alc.h>
+#define AL_ALEXT_PROTOTYPES
+#include <al/alext.h>
+#include <al/efx.h>
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 

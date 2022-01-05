@@ -33,10 +33,23 @@ namespace Game {
             Log::log(Log::WARNING, L"Stereo sounds will not play in 3d");
         }
 
-        ALuint effect;
         alCall(alGenBuffers, 2, buffers);
         alCall(alGenSources, 1, &source);
         alSourcef(source, AL_GAIN, 0);
+
+        ALuint effect; //effect id
+
+        alCall(alGenEffects, 1, &effect); //generate empty effect
+        alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_REVERB); //assign reverb to the id
+        alEffectf(effect, AL_REVERB_DECAY_TIME, 20);//set reverb decay time to 20
+
+        ALuint effectSlot; //effect slot id (this is where the effects get played through)
+
+        alGenAuxiliaryEffectSlots(1, &effectSlot); //generate slot
+        alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, effect); // assign an effect to the effect slot
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, effectSlot, 0, NULL); // pass audio through the slot
+
+        //for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
     }
 
     void OggStream::setVolume(float volume, bool instant) {
