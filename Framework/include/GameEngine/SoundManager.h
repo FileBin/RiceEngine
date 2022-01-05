@@ -29,5 +29,7 @@ namespace Game {
 		void music_thread();
 		void sound_thread(OggStream *ogg, std::string path, float volume, Vector3f position);
 		void list_audio_devices(const ALCchar* devices);
+
+		Vector3f prevPos = {};
 	};
 }

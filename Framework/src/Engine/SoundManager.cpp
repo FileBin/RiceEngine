@@ -20,8 +20,6 @@ namespace Game {
 	float musicVolume = 1;
 	std::string nextMusic;
 
-	Vector3f prevPos = {};
-
 	SoundManager::SoundManager(Camera *cam) {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
