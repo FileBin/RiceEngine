@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <iostream>
-
 #include <al/al.h>
 #include <al/alc.h>
 #define AL_ALEXT_PROTOTYPES
@@ -12,6 +9,7 @@
 #include <vorbis/vorbisfile.h>
 
 #include "AlDevice.h"
+#include "SoundEffect.h"
 
 #include <GameEngine/Vectors/Vector3f.h>
 
@@ -34,6 +32,8 @@ namespace Game {
         void setPitch(float pitch);
         void closeOnNoVolume(bool close);
 
+        void applyEffectChain(std::vector<SoundEffect*>* effects);
+
     protected:
 
         bool stream(ALuint buffer);
@@ -49,5 +49,13 @@ namespace Game {
         ALuint buffers[2];
         ALuint source;
         ALenum format;
+
+        bool closeOnNoVol = false;
+        float targetVolume = 1;
+        float currentVolume = 0;
+        Vector3f prevPos = {};
+
+        bool hasEffects;
+        ALuint filter;
     };
 }

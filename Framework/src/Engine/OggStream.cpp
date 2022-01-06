@@ -5,11 +5,6 @@ char pcm[BUFFER_SIZE];
 
 namespace Game {
 
-    bool closeOnNoVol = false;
-    float targetVolume = 1;
-    float currentVolume = 0;
-    Vector3f prevPos = {};
-
     void OggStream::open(std::string path)
     {
         int result;
@@ -37,20 +32,24 @@ namespace Game {
         alCall(alGenBuffers, 2, buffers);
         alCall(alGenSources, 1, &source);
         alSourcef(source, AL_GAIN, 0);
+    }
 
-        //ALuint effect; //effect id
+    void OggStream::applyEffectChain(std::vector<SoundEffect*> *effects) {
+        hasEffects = true;
 
-        //alCall(alGenEffects, 1, &effect); //generate empty effect
-        //alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_REVERB); //assign reverb to the id
-        //alEffectf(effect, AL_REVERB_DECAY_TIME, 20);//set reverb decay time to 20
+        alGenFilters(1, &filter);
+        alFilteri(filter, AL_FILTER_TYPE, AL_FILTER_BANDPASS);
+        alFilterf(filter, AL_BANDPASS_GAINHF, 0);
+        alFilterf(filter, AL_BANDPASS_GAIN, 0);
+        alSourcei(source, AL_DIRECT_FILTER, filter);
 
-        //ALuint effectSlot; //effect slot id (this is where the effects get played through)
-
-        //alGenAuxiliaryEffectSlots(1, &effectSlot); //generate slot
-        //alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, effect); // assign an effect to the effect slot
-        //alSource3i(source, AL_AUXILIARY_SEND_FILTER, effectSlot, 0, NULL); // pass audio through the slot
-
-        ////for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
+        if (effects->size() > 1) {
+            for (size_t i = 1; i < effects->size(); i++) {
+                alAuxiliaryEffectSloti(effects->at(i - 1)->slotID, AL_EFFECTSLOT_TARGET_SOFT, effects->at(i)->slotID);
+            }
+        }
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, effects->at(0)->slotID, 0, NULL);
+        //for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
     }
 
     void OggStream::setVolume(float volume, bool instant) {
@@ -82,7 +81,11 @@ namespace Game {
         alSourceStop(source);
         empty();
         alCall(alDeleteSources, 1, &source);
-        alCall(alDeleteBuffers, 1, buffers);
+        alCall(alDeleteBuffers, 2, buffers);
+
+        if (hasEffects) {
+            alCall(alDeleteFilters, 1, &filter);
+        }
 
         ov_clear(&oggStream);
     }
@@ -100,7 +103,7 @@ namespace Game {
 
         alSourceQueueBuffers(source, 2, buffers);
         alSourcePlay(source);
-
+        
         return true;
     }
 

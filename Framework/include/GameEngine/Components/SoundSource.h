@@ -6,6 +6,8 @@
 
 #include <GameEngine/Vectors/Vector3f.h>
 
+#include <GameEngine/SoundEffect.h>
+
 #include "Transform.h"
 
 namespace Game {
@@ -14,9 +16,10 @@ namespace Game {
 		void OnInit();
 		virtual ~SoundSource() = 0;
 		void Update();
-		void play(char* name, float volume , Vector3f position);
+		void play(char* name, float volume);
 		void setPosition(Vector3f newPos);
 		void setVolume(float volume);
+		void addEffect(SoundEffect *soundEffect);
 	protected:
 		Scene& GetScene();
 		SceneRender& GetRender();
@@ -25,6 +28,7 @@ namespace Game {
 		Scene* scene;
 		SoundManager* soundManager;
 		std::shared_ptr<OggStream> ogg;
+		std::vector<SoundEffect*> effects;
 		Transform* transform;
 	};
 }
