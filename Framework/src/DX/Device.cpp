@@ -62,17 +62,7 @@ namespace Game {
 	}
 
 	void Device::Begin2D() {
-		//using namespace D2D1;
 		renderTarget2d->BeginDraw();
-
-		/*ThrowIfFailed(writeFactory->CreateTextLayout(L"SUS Амогус", 11, textFormat, 100, 100, &layout));
-
-		renderTarget2d->DrawTextLayout({ 0,0 }, layout, defBrush);
-
-		layout->Release();
-		layout = nullptr;
-
-		renderTarget2d->EndDraw();*/
 	}
 
 	void Device::End2D() {
@@ -102,7 +92,7 @@ namespace Game {
 
 		DXGI_ADAPTER_DESC adapterDesc;
 		adapter->GetDesc(&adapterDesc);
-		Log::log(Log::NONE, L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
+		Log::log(Log::INFO, L"\nVideocard Info:\n Description: {}\n VideoMemory {}M\n", adapterDesc.Description,
 			adapterDesc.DedicatedVideoMemory / 0x100000);
 
 		ThrowIfFailed(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, NULL,
@@ -163,9 +153,11 @@ namespace Game {
 	}
 
 	void Device::Initialize(HWND hwnd, size_t idx) {
+		Log::log(Log::INFO,L"Device initialization...");
 		this->hwnd = hwnd;		
 		_init(idx);
 		initialized = true;
+		Log::log(Log::INFO, L"Successfully device init!");
 	}
 #pragma endregion
 
