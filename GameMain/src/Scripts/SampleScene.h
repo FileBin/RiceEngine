@@ -25,7 +25,7 @@ class SampleScene : public Scene {
 		cam->SetFov(90);
 		cam->SetClippingPlanes(.01, 1000.);
 		cam->rotation = Quaternion::identity;
-		cam->position = { 100000, 30, -5000 };
+		cam->position = { 1, 1, 1 };
 
 		ren.AddCamera(cam);
 

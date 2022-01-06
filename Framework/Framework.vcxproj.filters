@@ -180,6 +180,9 @@
     <ClInclude Include="include\GameEngine\Util\exeptions\NullPtrExeption.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameEngine\SoundEffect.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Log.cpp">
@@ -264,6 +267,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\Components\SoundSource.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\SoundEffect.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
