@@ -7,7 +7,7 @@
 
 #include <GameEngine\Material.h>
 
-#include "GameEngine\Util\exception.h"
+#include "GameEngine\Util\exceptions.h"
 
 using concurrency::concurrent_unordered_map;
 
@@ -35,7 +35,7 @@ public:
 		if (it != builders.end()) {
 			return it->second(data, position);
 		}
-		throw Game::exception("Voxel index invalid!", 38, L"Voxel.h : static Voxel* Build(VoxelData data, Vector3i position)");
+		THROW_INVALID_ARG_EXCEPTION("data.index");
 	}
 
 	static bool IsVoid(uint index) {
@@ -43,7 +43,7 @@ public:
 		if (it != voidMap.end()) {
 			return it->second;
 		}
-		throw Game::exception("Voxel index invalid!", 46, L"Voxel.h : static bool IsVoid(uint index)");
+		THROW_INVALID_ARG_EXCEPTION("index");
 	}
 
 	static bool IsTransparent(uint index) {
@@ -51,7 +51,7 @@ public:
 		if (it != transparentMap.end()) {
 			return it->second;
 		}
-		throw Game::exception("Voxel index invalid!", 54, L"Voxel.h : static bool IsTransparent(uint index)");
+		THROW_INVALID_ARG_EXCEPTION("index");
 	}
 
 	static size_t GetMaterialCount() { return materialMap.size(); }
@@ -60,7 +60,7 @@ public:
 		if (it != materialMap.end()) {
 			return it->second;
 		}
-		throw Game::exception("Material index invalid!", 63, L"Voxel.h : static Game::Material& GetMaterialAt(size_t idx)");
+		THROW_INVALID_ARG_EXCEPTION("idx");
 	}
 
 	template<typename V>

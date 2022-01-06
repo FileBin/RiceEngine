@@ -4,7 +4,7 @@
 #include <GameEngine/Vectors.h>
 #include <GameEngine/Log.h>
 #include <GameEngine/Util.h>
-#include <GameEngine/Util/exception.h>
+#include <GameEngine/Util/exceptions.h>
 
 namespace Game {
 
@@ -325,8 +325,9 @@ namespace Game {
 		UINT stride = 0;
 
 		switch (textFormat) {
+		default:
 		case DXGI_FORMAT_UNKNOWN:
-			throw Game::exception("Unknown Format!", 260, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat)");
+			THROW_UNKNOWN_FORMAT_EXCEPTION;
 			break;
 		case DXGI_FORMAT_R32_UINT:
 			stride = 4;
@@ -336,9 +337,6 @@ namespace Game {
 			break;
 		case DXGI_FORMAT_R8_UINT:
 			stride = 1;
-			break;
-		default:
-			throw Game::exception("Format Error!", 272, L"Device.cpp : void Device::SetActiveIndexBuffer(ID3D11Buffer* buffer, DXGI_FORMAT textFormat)");
 			break;
 		}
 
@@ -429,7 +427,6 @@ namespace Game {
 		_RELEASE(depthStencil)
 		_RELEASE(renderTarget)
 		_RELEASE(renderTarget2d)
-
 
 		Vector2 size;
 		RECT rect;

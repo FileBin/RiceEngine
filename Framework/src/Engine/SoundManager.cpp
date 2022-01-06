@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <GameEngine/SoundManager.h>
 #include <GameEngine/Log.h>
-#include <GameEngine/Util/exception.h>
+#include <GameEngine/Util/exceptions.h>
 #include <GameEngine/Util.h>
 
 #include <thread>
@@ -12,20 +12,16 @@ namespace Game {
 	SoundManager::SoundManager(std::weak_ptr<Camera> cam) {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
-		if (!openALDevice)
-		{
-			throw Game::exception("Sound device initialization failed!", 21, L"SoundManager.cpp : SoundManager::SoundManager()");
+		if (!openALDevice) {
+			THROW_OPENAL_EXCEPTION("Sound device initialization failed!");
 		}
-		openALContext;
-		if (!alcCall(alcCreateContext, openALContext, openALDevice, openALDevice, nullptr) || !openALContext)
-		{
-			throw Game::exception("Could not create openAL context!", 26, L"SoundManager.cpp : SoundManager::SoundManager()");
+		if (!alcCall(alcCreateContext, openALContext, openALDevice, openALDevice, nullptr) || !openALContext) {
+			THROW_OPENAL_EXCEPTION("Could not create openAL context!");
 		}
 		contextMadeCurrent = false;
 		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, openALContext)
-			|| contextMadeCurrent != ALC_TRUE)
-		{
-			throw Game::exception("Could not make openAL context context current!", 32, L"SoundManager.cpp : SoundManager::SoundManager()");
+			|| contextMadeCurrent != ALC_TRUE) {
+			THROW_OPENAL_EXCEPTION("Could not make openAL context context current!");
 		}
 
 		camera = cam;

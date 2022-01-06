@@ -211,7 +211,15 @@
     <ClInclude Include="include\GameEngine\Util.h" />
     <ClInclude Include="include\GameEngine\Util3D.h" />
     <ClInclude Include="include\GameEngine\Util\defines.h" />
-    <ClInclude Include="include\GameEngine\Util\exeptions\NullPtrExeption.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\IndexOutOfRangeException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\InvalidArgException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\JSONHasNotMemberException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\JSONParsingException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\NullPtrException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\OpenALException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\RemovedException.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\UnknownFormatException.h" />
     <ClInclude Include="include\GameEngine\Util\SmartPointer.h" />
     <ClInclude Include="include\GameEngine\Vectors\Hasher.h" />
     <ClInclude Include="include\GameEngine\Vectors\Quaternion.h" />
@@ -229,7 +237,7 @@
     <ClInclude Include="include\GameEngine\Vectors.h" />
     <ClInclude Include="include\GameEngine\Window.h" />
     <ClInclude Include="src\pch.h" />
-    <ClInclude Include="include\GameEngine\Util\exception.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\exception.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DX\Texture2D.cpp" />

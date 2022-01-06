@@ -28,6 +28,16 @@ namespace Game {
 			return wstrTo;
 		}
 
+		std::string ToStdString(String s) {
+			std::string out{};
+			for (int i = 0; s[i]; ++i) {
+				wchar_t wc = s[i];
+				char c = (char)wc;
+				out.push_back(c);
+			}
+			return out;
+		}
+
 		Vector2 GetWindowScreenSize(HWND hwnd) {
 			Vector2 size;
 			RECT rc;

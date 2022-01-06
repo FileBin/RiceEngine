@@ -4,7 +4,7 @@
 #include <GameEngine\Core.h>
 #include <GameEngine\Material.h>
 #include <GameEngine\Scene\Scene.h>
-#include <GameEngine\Util\exception.h>
+#include <GameEngine\Util\exceptions.h>
 
 namespace Game {
 
@@ -14,7 +14,7 @@ namespace Game {
 			core = c;
 			stage = s;
 		} else {
-			throw Game::exception("Engine can't be created, because device reference is null!", 17, L"Engine.cpp : Engine::Engine(Device** d, Core* c, Stage* s)");
+			THROW_EXCEPTION("Engine can't be created, because device reference is null!");
 		}
 	}
 

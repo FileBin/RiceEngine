@@ -13,6 +13,7 @@
 #include <functional>
 #include <wrl.h>
 #include <DbgHelp.h>
+#include <comdef.h>
 
 
 #define WIN32_LEAN_AND_MEAN

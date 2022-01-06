@@ -73,7 +73,7 @@ public:
                 return it2->second;
             }
         }
-        throw new Game::exception("TransparentVoxel not found", 71, L"Chunk.h : float GetTranspDepth(Vector3i pos, size_t index)");
+        THROW_EXCEPTION("TransparentVoxel not found");
     }
 
     VoxelData GetData(Vector3i pos) {

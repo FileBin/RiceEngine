@@ -147,7 +147,7 @@
     <ClInclude Include="src\pch.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\Util\exception.h">
+    <ClInclude Include="include\GameEngine\Util\exceptions\exception.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\GameEngine\SoundManager.h">
@@ -177,7 +177,31 @@
     <ClInclude Include="include\GameEngine\Util\SmartPointer.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\Util\exeptions\NullPtrExeption.h">
+    <ClInclude Include="include\GameEngine\Util\exceptions\NullPtrException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\RemovedException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\OpenALException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\UnknownFormatException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\JSONParsingException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\JSONHasNotMemberException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\IndexOutOfRangeException.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Util\exceptions\InvalidArgException.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exception.h"
+#include "exceptions.h"
 #include "../stdafx.h"
 
 template<typename T = std::nullptr_t>
@@ -25,17 +25,25 @@ public:
 
 	void Release() {
 		if (!ppObject)
-			throw Game::exception("Pointer is not initialized or deleted!", 27, L"Release() SmartPointer.h");
+			THROW_REMOVED_EXCEPTION(ppObject);
 		T* pointer = ppObject[0];
 		ppObject[0] = nullptr;
 		delete pointer;
 	}
 
-	T operator->() {
+	T* Get() {
+		return ppObject[0];
+	}
+
+	T** GetAddress() {
+		return ppObject;
+	}
+
+	T* operator->() {
 		if (!ppObject)
-			throw Game::exception("Pointer is not initialized or deleted!", 32, L"operator->() SmartPointer.h");
+			THROW_REMOVED_EXCEPTION(ppObject);
 		if(!ppObject[0])
-			throw Game::exception("NullPointerExeption", 34, L"operator->() SmartPointer.h");
-		return ppObject[0][0];
+			THROW_NULL_PTR_EXCEPTION(*this);
+		return ppObject[0];
 	}
 };

@@ -3,7 +3,7 @@
 #include <GameEngine\Material.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Camera.h>
-#include <GameEngine\Util\exception.h>
+#include <GameEngine\Util\exceptions.h>
 #include <queue>
 #include <GameEngine\Components\UI\IDrawable.h>
 
@@ -255,7 +255,7 @@ namespace Game {
 		if (it != shaders.end()) {
 			return *it->second;
 		}
-		throw new Game::exception("Shader name invalid", 244, L"SceneRender.cpp : Shader& SceneRender::GetShader(String name)");
+		THROW_INVALID_ARG_EXCEPTION("name");
 	}
 
 	shared_ptr<Material> SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
@@ -268,7 +268,7 @@ namespace Game {
 		if (it != materials.end()) {
 			return it->second;
 		}
-		throw new Game::exception("Material name invalid", 257, L"SceneRender.cpp : Material& SceneRender::GetMaterial(String name)");
+		THROW_INVALID_ARG_EXCEPTION("name");
 	}
 	void SceneRender::AddDrawable(UI::IDrawable* txt) {
 		texts.insert({ txt, true });

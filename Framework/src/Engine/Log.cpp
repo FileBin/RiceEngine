@@ -3,8 +3,9 @@
 #include <ios>
 #include <locale.h>
 #include <GameEngine/Util.h>
-#include <GameEngine/Util/exception.h>
+#include <GameEngine/Util/exceptions.h>
 #include <rapidjson/document.h>
+#include <rapidjson/error/error.h>
 
 #define LOGNAME "log.txt"
 
@@ -120,30 +121,21 @@ namespace Game {
 
 		Document doc;
 		doc.Parse((const char*)fileData.data());
-		try {
-			if (doc.HasParseError()) throw -1;
+		if (doc.HasParseError()) THROW_JSON_PARSING_EXCEPTION(filename.c_str(), doc.GetErrorOffset());
+		const char* values[] = { "log.begin", "log.end", "log.already_created", "log.creation_error" };
+		std::function<void(String)> functions[] = {
+			[&](String v) { loc.log_begin = v; },
+			[&](String v) { loc.log_end = v; },
+			[&](String v) { loc.log_is_already_created = v; },
+			[&](String v) { loc.log_creation_error = v; },
+		};
 
-			const char* values[] = { "log.begin", "log.end", "log.already_created", "log.creation_error" };
-			std::function<void(String)> functions[] = {
-				[&](String v) { loc.log_begin = v; },
-				[&](String v) { loc.log_end = v; },
-				[&](String v) { loc.log_is_already_created = v; },
-				[&](String v) { loc.log_creation_error = v; },
-			};
-
-			auto n = ARRAYSIZE(values);
-			for (size_t i = 0; i < n; i++) {
-				auto v = values[i];
-				if (doc.HasMember(v)) {
-					functions[i](Util::Utf8ToWstring(doc[v].GetString()));
-				} else throw -2;
-			}
-		} catch (int code) {
-			if (code == -1) {
-				throw Game::exception("JSONParsingError!", 143, L"Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
-			} else if(code == -2) {
-				throw Game::exception("JSONHasNotMemberError!", 145, L"Log.cpp : Log::Localization Log::Localization::LoadFromJSON(String filename)");
-			}
+		auto n = ARRAYSIZE(values);
+		for (size_t i = 0; i < n; i++) {
+			auto v = values[i];
+			if (doc.HasMember(v)) {
+				functions[i](Util::Utf8ToWstring(doc[v].GetString()));
+			} else THROW_JSON_HAS_NOT_MEMBER_EXCEPTION(filename.c_str(), v);
 		}
 
 		return loc;
