@@ -2,6 +2,9 @@
 #include <exception>
 #include <string>
 
+#define THROW_EXEPTION(wtf) throw exeption(wtf, __LINE__, __FILE__)
+#define THROW_TYPED_EXEPTION(type,wtf) throw type(wtf, __LINE__, __FILE__)
+
 namespace Game {
     class exception : public std::exception {
         int line;

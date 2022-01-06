@@ -49,7 +49,7 @@ class ChunkGenerator : public MonoScript {
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[5] = { 0, 2, 4, 5, 7 };
+	int lodDistances[5] = { 0, 3, 4, 5, 7 };
 
 	void Start() {
 #ifdef _DEBUG
@@ -280,6 +280,7 @@ class ChunkGenerator : public MonoScript {
 		enabled = false;
 		world->Unlock();
 		chunkLoaderThread->join();
+		chunkLoaderThread.release();
 		for (auto& t : threads) {
 			t->join();
 			t.release();
