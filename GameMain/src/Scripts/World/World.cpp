@@ -43,6 +43,9 @@ void Chunk::Generate() {
 
 VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
     auto t = voxelPos + position * ChunkSize;
+    if(hmap.IsNull()) {
+        hmap = world->GetHeightMap(position);
+    }
     auto altitude = t.y - hmap->Get(voxelPos.x, voxelPos.z);
     return gen->GetVoxelData(t, altitude, transp);
 }
@@ -60,7 +63,7 @@ VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
 concurrent_unordered_map <uint, std::function<Voxel* (VoxelData&, Vector3i&)>> Voxel::builders{};
 concurrent_unordered_map <uint, bool> Voxel::voidMap{};
 concurrent_unordered_map <uint, bool> Voxel::transparentMap{};
-concurrent_unordered_map <uint, std::shared_ptr<Material>> Voxel::materialMap{};
+concurrent_unordered_map <uint, SmartPtr<Material>> Voxel::materialMap{};
 
 void Voxel::Register(SceneRender& ren) {
 

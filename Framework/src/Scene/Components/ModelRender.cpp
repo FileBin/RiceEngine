@@ -14,7 +14,7 @@ namespace Game {
 		model->pPos = &transform.position;
 		model->pRot = &transform.rotation;
 		model->pScale = &transform.scale;
-		if (model != nullptr) {
+		if (!model.IsNull()) {
 			ren.AddModel(model);
 			auto n = model->GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
@@ -27,7 +27,7 @@ namespace Game {
 
 	void ModelRender::OnDisable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
-		if (model) {
+		if (!model.IsNull()) {
 			model->pPos = nullptr;
 			model->pRot = nullptr;
 			model->pScale = nullptr;
@@ -41,18 +41,18 @@ namespace Game {
 		enabled = false;
 	}
 
-	void ModelRender::SetMaterial(shared_ptr<Material> material, size_t i) {
+	void ModelRender::SetMaterial(SmartPtr<Material> material, size_t i) {
 		materials[i] = material; 
 	}
 
-	void ModelRender::SetModel(shared_ptr<Model> _model, bool updateBuffer) {
+	void ModelRender::SetModel(SmartPtr<Model> _model, bool updateBuffer) {
 		if (model == _model) return;
 		auto& ren = GetSceneObject().GetScene().GetRender();
 		auto& transform = *GetSceneObject().GetComponents<Transform>()[0];
 
 		auto n = _model->GetSubMeshesCount();
 		materials.resize(n);
-		if (model) {
+		if (!model.IsNull()) {
 			if (enabled) {
 				model->pPos = nullptr;
 				model->pRot = nullptr;
@@ -64,8 +64,9 @@ namespace Game {
 				}
 				ren.RemoveModel(model);
 			}
+			model.Release();
 		}
-		model.swap(_model);
+		model = _model;
 		if (enabled) {
 			model->pPos = &transform.position;
 			model->pRot = &transform.rotation;
@@ -78,6 +79,6 @@ namespace Game {
 			//ren.UpdateModel(this->model);
 		}
 	}
-	Model& ModelRender::GetModel() const { return *model; }
-	Material& ModelRender::GetMaterial(size_t subMeshIdx) const { return *materials[subMeshIdx]; }
+	SmartPtr<Model> ModelRender::GetModel() const { return model; }
+	SmartPtr<Material> ModelRender::GetMaterial(size_t subMeshIdx) const { return materials[subMeshIdx]; }
 }

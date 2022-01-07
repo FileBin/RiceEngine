@@ -19,8 +19,8 @@ class Chunk {
 #define LOD_COUNT 5
 private:
     WorldGenerator* gen;
-    HeightMap* hmap;
-    std::vector<std::shared_ptr<Model>> model { LOD_COUNT };
+    SmartPtr<HeightMap> hmap;
+    std::vector<SmartPtr<Model>> model { LOD_COUNT };
     World* world;
 
     bool lock = false;
@@ -43,7 +43,7 @@ public:
         return 0;
     }
 
-    Chunk(WorldGenerator* gen, Vector3i pos, HeightMap* _map, World* world) {
+    Chunk(WorldGenerator* gen, Vector3i pos, SmartPtr<HeightMap> _map, World* world) {
         voxels.resize((INT64)ChunkSize * ChunkSize * ChunkSize);
         this->gen = gen;
         this->position = pos;
@@ -53,7 +53,14 @@ public:
 
     ~Chunk() {
         voxels.clear();
+        for (auto it : model) {
+            it.Release();
+        }
         model.clear();
+        for (auto it : transpDepth) {
+            it.second.clear();
+        }
+        transpDepth.clear();
     }
 
     bool IsVoxelVoid(Vector3i voxelPos) {
@@ -82,13 +89,13 @@ public:
         lock = true;
         auto& data = voxels[idx];
         if (data.index == UINT32_MAX) {
-            data = GenVoxelData(pos);
+            voxels[idx] = GenVoxelData(pos);
             if (Voxel::IsTransparent(data.index)) {
                 auto transpData = GenVoxelData(pos, true);
                 SetTranspData(transpData, pos);
             }
             lock = false;
-            SetVoxelData(data, pos);
+            //SetVoxelData(data, pos);
         }
         lock = false;
         return data;
@@ -167,10 +174,10 @@ public:
         return GetVoxel({ x, y, z });
     }
 
-    std::weak_ptr<Model> GetModel(size_t lod = 0) {
+    SmartPtr<Model> GetModel(size_t lod = 0) {
         auto idx = 1 << lod;
-        if (model[lod]) return { model[lod] };
-        return { model[lod] = std::shared_ptr<Model>(GenerateSmoothModel(idx)) };
+        if (model[lod].Get()) return { model[lod] };
+        return model[lod] = GenerateSmoothModel(idx);
     }
     Model* GenerateModel();
     Model* GenerateSmoothModel(size_t step = 4);

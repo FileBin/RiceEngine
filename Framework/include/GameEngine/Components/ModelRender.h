@@ -18,14 +18,14 @@ namespace Game {
 		void OnEnable();
 		void OnDisable();
 
-		void DeleteModel() { model = nullptr; }
+		void DeleteModel() { model.Release(); }
 
-		void SetMaterial(std::shared_ptr<Material> material, size_t subMeshIdx);
-		void SetModel(std::shared_ptr<Model> model, bool updateBuffer = true);
-		Model& GetModel() const;
-		Material& GetMaterial(size_t subMeshIdx) const;
+		void SetMaterial(SmartPtr<Material> material, size_t subMeshIdx);
+		void SetModel(SmartPtr<Model> model, bool updateBuffer = true);
+		SmartPtr<Model> GetModel() const;
+		SmartPtr<Material> GetMaterial(size_t subMeshIdx) const;
 	private:
-		std::shared_ptr<Model> model = nullptr;
-		concurrency::concurrent_vector<std::shared_ptr<Material>> materials{};
+		SmartPtr<Model> model;
+		concurrency::concurrent_vector<SmartPtr<Material>> materials{};
 	};
 }

@@ -41,8 +41,8 @@ class ChunkGenerator : public MonoScript {
 	World* world;
 	WorldGenerator* generator;
 
-	vector<std::unique_ptr<thread>> threads;
-	std::unique_ptr<thread> chunkLoaderThread{nullptr};
+	vector<SmartPtr<thread>> threads;
+	SmartPtr<thread> chunkLoaderThread{nullptr};
 	concurrent_vector<PooledChunk> chunksPool{};
 
 	Vector3 playerPos{0, 0, 0};
@@ -96,10 +96,10 @@ class ChunkGenerator : public MonoScript {
 		threads.resize(nLodThreads);
 
 		for (size_t i = 0; i < nLodThreads; i++) {
-			threads[i] = std::make_unique<thread>(&ChunkGenerator::LodLoaderThread, this, i);
+			threads[i] = Core::RunThread<void(size_t)>([this](size_t i) { LodLoaderThread(i); }, i);
 		}
 
-		chunkLoaderThread = std::make_unique<thread>(&ChunkGenerator::ChunkLoaderThread, this);
+		chunkLoaderThread = Core::RunThread<void()>([this]() { ChunkLoaderThread(); });
 	}
 
 	void Update() {
@@ -111,7 +111,7 @@ class ChunkGenerator : public MonoScript {
 		waterMat->SetVar<Vector2f>(L"resolution", { (float)res.x, (float)res.y });
 		waterMat->UpdateBuffer();
 
-		auto newPos = ren.GetActiveCamera().lock()->position;
+		auto newPos = ren.GetActiveCamera()->position;
 		auto playerChunk = World::TransformToChunkPos(newPos);
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			playerPos = newPos;
@@ -150,7 +150,7 @@ class ChunkGenerator : public MonoScript {
 
 						//lod = Math::Clamp(lod, 0, 3);
 						if (lod != pooledCh.lod) {
-							auto model = world->GetChunk(pooledCh.pos).lock()->GetModel(lod).lock();
+							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 							sRen.WaitRendering();
 							sRen.Lock(thIdx);
@@ -179,17 +179,21 @@ class ChunkGenerator : public MonoScript {
 		for (auto i = 0; i < poolSize; i++) {
 			positions.push_back(chunksPool[i].pos);
 		}
-		auto nPos = positions.size();
-		for (auto i = 0; i < nPos; i++) {
-			toLoad.push(chunksPool[i].pos);
-		}
-		auto nLoad = toLoad.size();
 
 		playerChunk = World::TransformToChunkPos(playerPos);
+
+		auto nPos = positions.size();
+		for (auto i = 0; i < nPos; i++) {
+			toLoad.push(chunksPool[i].pos + playerChunk);
+		}
+		auto nLoad = toLoad.size();
 
 		unordered_map<Vector3i, bool> posStates{};
 
 		while (enabled) {
+
+			int lod = Chunk::GetMaxLod();
+
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
 			if (playerChunk != newPlayerChunk) {
 				playerChunk = newPlayerChunk;
@@ -205,8 +209,6 @@ class ChunkGenerator : public MonoScript {
 				}
 			}
 
-			int lod = Chunk::GetMaxLod();
-
 			for (auto i = 0; i < nLoad; i++) {
 				if (!enabled) return;
 				auto poolIdx = i;
@@ -221,16 +223,16 @@ class ChunkGenerator : public MonoScript {
 						continue; 
 					}
 					auto& chPos = toLoad.front();
-					auto ch = world->GetChunk(chPos).lock();
+					auto ch = world->GetChunk(chPos);
 					toLoad.pop();
-					auto model = ch->GetModel(lod).lock();
+					auto model = ch->GetModel(lod);
 					sRen.WaitRendering();
 					sRen.Lock(thIdx);
 					pooledCh.pos = chPos;
 					transform->position = World::TransformToWorldPos(chPos);
 					render->SetModel(model);
 					for (auto i = 0; i < Voxel::GetMaterialCount(); i++) {
-						render->SetMaterial(shared_ptr<Material>(Voxel::GetMaterialAt(i)), i);
+						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);
 					}
 					pooledCh.obj->Enable();
 					posStates.insert({ pooledCh.pos, true });
@@ -280,10 +282,10 @@ class ChunkGenerator : public MonoScript {
 		enabled = false;
 		world->Unlock();
 		chunkLoaderThread->join();
-		chunkLoaderThread.release();
+		chunkLoaderThread.Release();
 		for (auto& t : threads) {
 			t->join();
-			t.release();
+			t.Release();
 		}
 	}
 };

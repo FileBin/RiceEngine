@@ -11,7 +11,7 @@ namespace Game {
         int line;
         const char* file;
         char* stack;
-        const char* info = "[NONE]";
+        char* info;
 
         std::string getStack() {
             HANDLE process = GetCurrentProcess();
@@ -28,7 +28,7 @@ namespace Game {
             std::string strstack{};
             for (int i = 0; i < frames; i++) {
                 SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol);
-                strstack += std::format("{}:{} {:#x}\n", frames - i - 1, symbol->Name, symbol->Address);//'\n' << frames - i - 1 << ':' << symbol->Name << " " << (void*)symbol->Address;
+                strstack += std::format("[{}]\t{} {:#x}\n", frames - i - 1, symbol->Name, symbol->Address);//'\n' << frames - i - 1 << ':' << symbol->Name << " " << (void*)symbol->Address;
             }
 
             free(symbol);
@@ -40,8 +40,10 @@ namespace Game {
             auto s = getStack();
             auto size = s.size() * sizeof(char);
             stack = (char*)malloc(size + 1);
+            info = (char*)malloc(7);
             memcpy((void*)stack, s.c_str(), size);
             stack[size] = '\0';
+            memcpy((void*)info, "[NONE]", 7);
         }
 
         int GetLine() const { return line; }
@@ -51,7 +53,8 @@ namespace Game {
 
     protected:
         void SetInfo(const char* info_) {
-            info = info_;
+            auto len = strlen(info_);
+            memcpy((void*)info, (void*)info_, len);
         }
     };
 }

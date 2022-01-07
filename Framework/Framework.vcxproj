@@ -239,6 +239,7 @@
     <ClInclude Include="include\GameEngine\Window.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\exception.h" />
+    <ClInclude Include="src\Util\ExeptionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DX\Texture2D.cpp" />

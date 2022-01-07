@@ -18,7 +18,7 @@ struct VoxelDirt : public Voxel {
         return new VoxelDirt(pos);
     }
 
-    static std::shared_ptr<Material> CreateMaterial(SceneRender& ren) {
+    static SmartPtr<Material> CreateMaterial(SceneRender& ren) {
         auto& shader = ren.GetShader(L"Diffuse");
         auto mat = ren.CreateMaterial(L"Dirt", &shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
         mat->SetVar<Vector4f>(L"color", color);

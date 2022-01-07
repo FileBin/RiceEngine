@@ -4,8 +4,13 @@
 #include <GameEngine\Util3D.h>
 #include <GameEngine\Math.h>
 #include <stringapiset.h>
+#include <GameEngine/Util/SmartPointer.h>
+
+
 
 namespace Game {
+	std::mutex g_Vars::smartPtrConstructorMutex{};
+
 	namespace Util {
 		void ThrowIfFailed(HRESULT hr) {
 			if (FAILED(hr))
@@ -20,15 +25,13 @@ namespace Game {
 		}
 
 		String Utf8ToWstring(const std::string& str) {
-			/*std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-			return myconv.from_bytes(str);*/
 			int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
 			std::wstring wstrTo(size_needed, 0);
 			MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
 			return wstrTo;
 		}
 
-		std::string ToStdString(String s) {
+		std::string ToStdString(const String& s) {
 			std::string out{};
 			for (int i = 0; s[i]; ++i) {
 				wchar_t wc = s[i];

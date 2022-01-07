@@ -6,6 +6,7 @@
 #include <concurrent_unordered_map.h>
 #include <concurrent_vector.h>
 #include <GameEngine\macros.h>
+#include <GameEngine\Vectors\Hasher.h>
 
 
 namespace Game {
@@ -43,22 +44,22 @@ namespace Game {
 
 		void Unlock(size_t idx) { isLoading[idx] = false; }
 
-		void AddModel(std::weak_ptr<Model> model);
-		bool RemoveModel(std::weak_ptr<Model> model, bool erase = false);
-		void UpdateModel(std::weak_ptr<Model> model);
-		void MapMaterial(std::weak_ptr<Mesh> mesh, std::weak_ptr<Material> mat);
-		void UnmapMaterial(std::weak_ptr<Mesh> mesh);
-		void UpdateBuffer(std::weak_ptr<Mesh> mesh);
+		void AddModel(SmartPtr<Model> model);
+		bool RemoveModel(SmartPtr<Model> model, bool erase = false);
+		void UpdateModel(SmartPtr<Model> model);
+		void MapMaterial(SmartPtr<Mesh> mesh, SmartPtr<Material> mat);
+		void UnmapMaterial(SmartPtr<Mesh> mesh);
+		void UpdateBuffer(SmartPtr<Mesh> mesh);
 
-		void AddCamera(std::shared_ptr<Camera> cam);
-		std::weak_ptr<Camera> GetCamera(size_t idx);
-		std::weak_ptr<Camera> GetActiveCamera() { return GetCamera(activeCameraIdx); }
+		void AddCamera(SmartPtr<Camera> cam);
+		SmartPtr<Camera> GetCamera(size_t idx);
+		SmartPtr<Camera> GetActiveCamera() { return GetCamera(activeCameraIdx); }
 
 		Shader* CreateShader(String name);
 		Shader& GetShader(String name);
 
-		std::shared_ptr<Material> CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping = {});
-		std::shared_ptr<Material> GetMaterial(String name);
+		SmartPtr<Material> CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping = {});
+		SmartPtr<Material> GetMaterial(String name);
 
 		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
 		Texture2D& GetDepthBufferTex() { return *device->GetDepthBufferTex(); }
@@ -69,16 +70,15 @@ namespace Game {
 	private:
 		bool isRendering = false;
 		bool isLoading[0xff];
-		concurrent_vector<std::shared_ptr<Camera>> cameras;
-		concurrent_unordered_map<String, std::shared_ptr<Material>> materials;
+		concurrent_vector<SmartPtr<Camera>> cameras;
+		concurrent_unordered_map<String, SmartPtr<Material>> materials;
 		concurrent_unordered_map<String, Shader*> shaders;
-		concurrent_unordered_map<Mesh*, std::weak_ptr<Material>> materialMap;
+		concurrent_unordered_map<SmartPtr<Mesh>, SmartPtr<Material>> materialMap;
 		size_t activeCameraIdx;
-		concurrent_unordered_map<Model*, bool> models; //that was a trick beacuse unordered_set doesn't work
+		concurrent_unordered_map<SmartPtr<Model>, bool> models; //that was a trick beacuse unordered_set doesn't work
 		concurrent_unordered_map<UI::IDrawable*, bool> texts;
-		concurrent_unordered_map<Mesh*, ConstantBufferData> transparentQ;
-		concurrent_unordered_map<Mesh*, Buffer*> indexBuffers;
-		concurrent_unordered_map<Mesh*, Buffer*> vertexBuffers;
+		concurrent_unordered_map<SmartPtr<Mesh>, Buffer*> indexBuffers;
+		concurrent_unordered_map<SmartPtr<Mesh>, Buffer*> vertexBuffers;
 		Buffer* constantBuffer;
 
 		struct RenderingMesh {

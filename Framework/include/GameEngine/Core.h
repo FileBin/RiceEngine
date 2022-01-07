@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "ScriptBase.h"
 #include "Stage.h"
+#include <functional>
 
 namespace Game {
 
@@ -15,6 +16,16 @@ namespace Game {
 	class Core {
 	public:
 		static void RunNew(ScriptBase* preInitScript);
+
+		template <class FnT = void(void), class... ArgsT>
+		static SmartPtr<std::thread> RunThread(std::function<FnT> func, ArgsT... args) {
+			return new std::thread([](std::function<FnT> _Fx, ArgsT... _Ax) {
+				try {
+					_Fx(_Ax...);
+				}
+				#include "../src/Util/ExeptionManager.h"
+				}, func, args...);
+		}
 
 		void AddScript(ScriptBase* script, Stage s);
 

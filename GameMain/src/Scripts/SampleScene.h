@@ -20,7 +20,7 @@ class SampleScene : public Scene {
 
 		auto& ren = GetRender();
 
-		auto cam = std::make_shared<Camera>();
+		SmartPtr<Camera> cam = new Camera();
 
 		cam->SetFov(90);
 		cam->SetClippingPlanes(.01, 1000.);

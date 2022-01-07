@@ -135,14 +135,17 @@ namespace Game {
 		return subMeshes.size();
 	}
 
-	std::weak_ptr<Mesh> Model::GetSubMesh(size_t idx){
-		return { subMeshes[idx] };
+	SmartPtr<Mesh> Model::GetSubMesh(size_t idx){
+		return subMeshes[idx];
 	}
 
 	Model::~Model() {
 		pPos = nullptr;
 		pRot = nullptr;
 		pScale = nullptr;
+		for (auto m : subMeshes) {
+			m.Release();
+		}
 		subMeshes.clear();
 	}
 
@@ -150,7 +153,7 @@ namespace Game {
 		subMeshes.resize(count);
 	}
 
-	void Model::SetSubMesh(std::shared_ptr<Mesh> subMesh, size_t idx) {
+	void Model::SetSubMesh(SmartPtr<Mesh> subMesh, size_t idx) {
 		subMeshes[idx] = subMesh;
 	}
 

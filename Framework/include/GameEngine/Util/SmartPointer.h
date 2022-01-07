@@ -2,48 +2,79 @@
 
 #include "exceptions.h"
 #include "../stdafx.h"
+#include <mutex>
 
-template<typename T = std::nullptr_t>
-class Ptr {
+namespace Game {
+	class g_Vars {
+	public:
+		static std::mutex smartPtrConstructorMutex;
+	};
+}
+
+template<typename T = void>
+class /*Not*/SmartPtr {
 private:
-	T** ppObject;
+	//std::mutex m_mutex;
+	std::shared_ptr<T*> ppObject;
 public:
 
-	Ptr(const Ptr& other) {
-
+	SmartPtr(const SmartPtr<T>& other) {
+		//std::lock_guard<std::mutex> lock(Game::g_Vars::smartPtrConstructorMutex);
+		ppObject = other.ppObject;
 	}
 
-	Ptr(T* obj) {
-		ppObject = new T*[1];
-		ppObject[0] = obj;
+	SmartPtr(T* obj = nullptr) {
+		ppObject = std::make_shared<T*>(obj);
 	}
 
-	~Ptr() {
-		delete ppObject;
-		ppObject = nullptr;
+	~SmartPtr() {
+		//std::lock_guard<std::mutex> lock(Game::g_Vars::smartPtrConstructorMutex);
+	}
+
+	bool IsNull() {
+		if (!ppObject)
+			THROW_REMOVED_EXCEPTION(ppObject.get());
+		return *ppObject.get() == nullptr;
 	}
 
 	void Release() {
-		if (!ppObject)
-			THROW_REMOVED_EXCEPTION(ppObject);
-		T* pointer = ppObject[0];
-		ppObject[0] = nullptr;
+		if (!ppObject.get())
+			THROW_REMOVED_EXCEPTION(ppObject.get());
+		T* pointer = *ppObject.get();
+		//std::lock_guard<std::mutex> lock(m_mutex);
+		*ppObject.get() = nullptr;
 		delete pointer;
 	}
 
-	T* Get() {
-		return ppObject[0];
+	T* Get() const {
+		if(!ppObject.get())
+			THROW_REMOVED_EXCEPTION(ppObject.get());
+		return *ppObject.get();
 	}
 
 	T** GetAddress() {
-		return ppObject;
+		return ppObject.get();
 	}
 
 	T* operator->() {
-		if (!ppObject)
-			THROW_REMOVED_EXCEPTION(ppObject);
-		if(!ppObject[0])
-			THROW_NULL_PTR_EXCEPTION(*this);
-		return ppObject[0];
+		if (!ppObject.get())
+			THROW_REMOVED_EXCEPTION(ppObject.get());
+		if (!*ppObject.get())
+			THROW_NULL_PTR_EXCEPTION(*ppObject.get());
+		return *ppObject.get();
+	}
+
+	const SmartPtr<T>& operator=(const SmartPtr<T>& other) {
+		ppObject = other.ppObject;
+		return *this;
+	}
+
+	T& operator*() {
+		return **ppObject.get();
 	}
 };
+
+template<typename T>
+bool operator==(const SmartPtr<T>& a, const SmartPtr<T>& b) {
+	return a.Get() == b.Get();
+}

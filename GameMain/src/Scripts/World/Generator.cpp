@@ -15,10 +15,10 @@ Model* Chunk::GenerateModel() {
 
     auto nMeshes = Voxel::GetMaterialCount();
 
-    auto meshes = std::vector<std::shared_ptr<Mesh>>(nMeshes);
+    auto meshes = std::vector<SmartPtr<Mesh>>(nMeshes);
 
     for (auto& m : meshes) {
-        m = std::make_shared<Mesh>();
+        m = new Mesh();
         m->layout = Vertex::GetLayout();
     }
 
@@ -113,10 +113,10 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
 
     size_t matIdx = 0;
 
-    auto meshes = std::vector<std::shared_ptr<Mesh>>(nMeshes);
+    auto meshes = std::vector<SmartPtr<Mesh>>(nMeshes);
 
     for (auto& m : meshes) {
-        m = std::make_shared<Mesh>();
+        m = new Mesh();
         m->layout = Vertex::GetLayout();
     }
 

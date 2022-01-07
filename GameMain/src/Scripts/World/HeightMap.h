@@ -8,11 +8,28 @@ class HeightMap {
 private:
     std::vector<dbl> map{};
     dbl minh, maxh;
+    long counter = 0l;
+    std::mutex mut;
 public:
     HeightMap(WorldGenerator& worldGenerator, Vector2i pos, bool generateNormals = false);
 
     ~HeightMap() {
         map.clear();
+    }
+
+    long GetCount() {
+        std::lock_guard lock(mut);
+        return counter;
+    }
+
+    void Increment() {
+        std::lock_guard lock(mut);
+        counter++;
+    }
+
+    void Decrement() {
+        std::lock_guard lock(mut);
+        counter--;
     }
 
     dbl Get(int x, int y);

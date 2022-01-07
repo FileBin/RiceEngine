@@ -28,7 +28,7 @@ class CameraMover : public MonoScript {
 	void Update() {
 		auto& ren = GetRender();
 		auto& en = GetEngine();
-		auto cam = ren.GetActiveCamera().lock();
+		auto cam = ren.GetActiveCamera();
 		auto mouse = InputManager::GetMousePos();
 
 		auto fwd = cam->rotation * Vector3::forward;

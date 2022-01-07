@@ -21,18 +21,18 @@ namespace Game {
 		setPosition(transform->position);
 	}
 	void SoundSource::play(char* name, float volume) {
-		ogg = soundManager->play_sound(name, volume, transform->position).lock();
+		ogg = soundManager->play_sound(name, volume, transform->position);
 		ogg->applyEffectChain(&effects);
 	}
 	void SoundSource::setPosition(Vector3f position) {
-		if (ogg != nullptr) {
+		if (!ogg.IsNull()) {
 			if (ogg->playing()) {
 				ogg->setPosition(position);
 			}
 		}
 	}
 	void SoundSource::setVolume(float volume) {
-		if (ogg != nullptr) {
+		if (!ogg.IsNull()) {
 			if (ogg->playing()) {
 				ogg->setVolume(volume, true);
 			}

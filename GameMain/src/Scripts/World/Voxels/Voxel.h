@@ -28,7 +28,7 @@ protected:
 	static concurrent_unordered_map <uint, std::function<Voxel*(VoxelData&, Vector3i&)>> builders;
 	static concurrent_unordered_map <uint, bool> voidMap;
 	static concurrent_unordered_map <uint, bool> transparentMap;
-	static concurrent_unordered_map <uint, std::shared_ptr<Game::Material>> materialMap;
+	static concurrent_unordered_map <uint, SmartPtr<Game::Material>> materialMap;
 public:
 	static Voxel* Build(VoxelData data, Vector3i position) {
 		auto it = builders.find(data.index);
@@ -55,7 +55,7 @@ public:
 	}
 
 	static size_t GetMaterialCount() { return materialMap.size(); }
-	static std::shared_ptr<Game::Material> GetMaterialAt(size_t idx) {
+	static SmartPtr<Game::Material> GetMaterialAt(size_t idx) {
 		auto it = materialMap.find(idx);
 		if (it != materialMap.end()) {
 			return it->second;

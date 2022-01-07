@@ -15,7 +15,7 @@ public:
 	void Start() {
 		txt = GetSceneObject().GetComponents<UI::Text>()[0];
 		auto ren = GetRender();
-		playerPos = &ren.GetActiveCamera().lock()->position;
+		playerPos = &ren.GetActiveCamera()->position;
 	}
 
 	void Update() {

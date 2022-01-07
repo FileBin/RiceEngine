@@ -9,7 +9,7 @@
 
 namespace Game {
 
-	SoundManager::SoundManager(std::weak_ptr<Camera> cam) {
+	SoundManager::SoundManager(SmartPtr<Camera> cam) {
 		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 		openALDevice = alcOpenDevice(nullptr); // default device
 		if (!openALDevice) {
@@ -45,7 +45,7 @@ namespace Game {
 	}
 
 	void SoundManager::update_thread() {
-		auto cam = camera.lock();
+		auto cam = camera;
 		while (true) {
 			setListenerPosition(cam->position);
 			setListenerOrientation(cam->rotation * Vector3::forward, cam->rotation * Vector3::up);
@@ -82,7 +82,7 @@ namespace Game {
 		Log::log(Log::INFO, L"----------\n");
 	}
 
-	void SoundManager::playOggStream(std::shared_ptr<OggStream> ogg) {
+	void SoundManager::playOggStream(SmartPtr<OggStream> ogg) {
 		if (!ogg->playback())
 			throw std::wstring(L"Ogg refused to play");
 		while (ogg->update())
@@ -102,7 +102,7 @@ namespace Game {
 	void SoundManager::music_thread() {
 		while (true) {
 			if (nextMusic.size() > 0) {
-				auto ogg = std::make_shared<OggStream>();
+				auto ogg = new OggStream();
 				try {
 					ogg->open(nextMusic);
 					ogg->setVolume(musicVolume, false);
@@ -122,7 +122,7 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::sound_thread(std::shared_ptr<OggStream> ogg, std::string path, float volume, Vector3f pos) {
+	void SoundManager::sound_thread(SmartPtr<OggStream> ogg, std::string path, float volume, Vector3f pos) {
 		try {
 			ogg->open(path);
 			ogg->setVolume(volume, true);
@@ -134,21 +134,21 @@ namespace Game {
 		}
 	}
 
-	 std::weak_ptr<OggStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
-		std::shared_ptr<OggStream> ogg;
+	 SmartPtr<OggStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
+		 SmartPtr<OggStream> ogg;
 		concurrency::create_task([&]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
 		return ogg;
 	}
 
 	void SoundManager::setMusicVolume(float volume) {
 		musicVolume = volume;
-		if (current_music_stream != nullptr) {
+		if (!current_music_stream.IsNull()) {
 			current_music_stream->setVolume(volume, false);
 		}
 	}
 
 	void SoundManager::play_music(const std::string name, bool force) {
-		if (current_music_stream != nullptr && force) {
+		if (!current_music_stream.IsNull() && force) {
 			current_music_stream->setVolume(0, false);
 			current_music_stream->closeOnNoVolume(true);
 		}

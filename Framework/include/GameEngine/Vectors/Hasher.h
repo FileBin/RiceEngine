@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Util/defines.h"
+#include "../Util/SmartPointer.h"
 
 struct Vector2;
 struct Vector2f;
@@ -104,4 +105,12 @@ template <> struct std::equal_to<Vector2i> {
 };
 
 #pragma endregion
+#pragma endregion
+
+#pragma region SmartPtr
+template <typename T> struct std::hash<SmartPtr<T>> {
+	size_t operator()(const SmartPtr<T>& a) const {
+		return hash<ULONG>()((ULONG)a.Get());
+	}
+};
 #pragma endregion
