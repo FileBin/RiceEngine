@@ -7,6 +7,7 @@
 #include "ScriptBase.h"
 #include "Stage.h"
 #include <functional>
+#include <ppltasks.h>
 
 namespace Game {
 
@@ -25,6 +26,15 @@ namespace Game {
 				}
 				#include "../src/Util/ExeptionManager.h"
 				}, func, args...);
+		}
+
+		static void RunTask(std::function<void(void)> func) {
+			 concurrency::create_task([&func]() {
+				try {
+					func();
+				}
+				#include "../src/Util/ExeptionManager.h"
+				});
 		}
 
 		void AddScript(ScriptBase* script, Stage s);

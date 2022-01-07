@@ -196,6 +196,10 @@ class ChunkGenerator : public MonoScript {
 
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
 			if (playerChunk != newPlayerChunk) {
+				int addedRadius = ceil((playerChunk - newPlayerChunk).Length());
+				world->UnloadChunks([&](Vector3i wpos) {
+					return CheckChunkVisible(wpos - newPlayerChunk, addedRadius);
+					});
 				playerChunk = newPlayerChunk;
 				while (!toLoad.empty()) toLoad.pop();
 				for (auto j = 0; j < nPos; j++) {
@@ -264,7 +268,7 @@ class ChunkGenerator : public MonoScript {
 						render->DeleteModel();
 						sRen.Unlock(thIdx);
 						//concurrency::create_task([&]() { world->UnloadChunk(pooledCh.pos); });
-						world->UnloadChunk(pooledCh.pos);
+						//world->UnloadChunk(pooledCh.pos);
 					}
 
 				}

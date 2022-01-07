@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <cmath>
+#include <queue>
 #include <concurrent_unordered_map.h>
 #include "WorldGenerator.h"
 #include "Chunk.h"
@@ -57,6 +58,26 @@ public:
 	static void Register(Engine& en, SceneRender& ren);
 
 	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
+
+	void UnloadChunks(std::function<bool(Vector3i)> predicate) {
+		std::queue<Vector3i> keys;
+		for (auto it = chunkMap.begin(); it != chunkMap.end(); it++) {
+			keys.push(it->first);
+		}
+		while (!keys.empty()) {
+			auto k = keys.front();
+			keys.pop();
+			if (!predicate(k)) {
+				auto it = chunkMap.find(k);
+				chunkMap.unsafe_erase(it);
+				it->second.Release();
+				auto hIt = heightMaps.find(ToTerrainPos(k));
+				if (hIt == heightMaps.end()) continue;
+				heightMaps.unsafe_erase(hIt);
+				hIt->second.Release();
+			}
+		}
+	}
 
 	void UnloadChunk(Vector3i chunkPos) {
 		auto it = chunkMap.find(chunkPos);
