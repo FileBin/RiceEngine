@@ -25,7 +25,7 @@ namespace Game {
 		ogg->applyEffectChain(&effects);
 	}
 	void SoundSource::play(FrequencyFunc f, double beginning, double end, float volume) {
-		ogg = soundManager->play_raw(f, beginning, end, volume, transform->position).lock();
+		ogg = soundManager->play_raw(f, beginning, end, volume, transform->position);
 		ogg->applyEffectChain(&effects);
 	}
 	void SoundSource::setPosition(Vector3f position) {

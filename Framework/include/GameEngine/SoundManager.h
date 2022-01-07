@@ -16,8 +16,8 @@ namespace Game {
 		~SoundManager();
 
 		void play_music(const std::string name, bool force);
-		std::weak_ptr<SoundStream> play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f position);
-		std::weak_ptr<SoundStream> play_sound(const std::string name, float volume, Vector3f position);
+		SmartPtr<SoundStream> play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f position);
+		SmartPtr<SoundStream> play_sound(const std::string name, float volume, Vector3f position);
 		void setMusicVolume(float volume);
 
 		void update_thread();
@@ -26,9 +26,10 @@ namespace Game {
 		void setListenerOrientation(Vector3f at, Vector3f up);
 
 	private:
-		void playOggStream(std::shared_ptr<OggStream> ogg);
+		void playSoundStream(SmartPtr<SoundStream> ogg);
 		void music_thread();
-		void sound_thread(std::shared_ptr<OggStream> ogg, std::string path, float volume, Vector3f position);
+		void sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f position);
+		void raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos);
 		void list_audio_devices(const ALCchar* devices);
 
 		Vector3f prevPos = {};
@@ -40,7 +41,7 @@ namespace Game {
 		ALCboolean contextMadeCurrent;
 		ALCcontext* openALContext;
 
-		std::shared_ptr<OggStream> current_music_stream;
+		SmartPtr<SoundStream> current_music_stream;
 		float musicVolume = 1;
 		std::string nextMusic;
 	};

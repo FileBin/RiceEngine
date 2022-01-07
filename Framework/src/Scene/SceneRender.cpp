@@ -213,11 +213,10 @@ namespace Game {
 
 
 	void SceneRender::MapMaterial(SmartPtr<Mesh> mesh, SmartPtr<Material> mat) {
-		auto msh = mesh;
 		auto m = mat;
 		if (m.IsNull())
 			return;
-		materialMap.insert({ msh, mat});
+		materialMap.insert({ mesh, mat});
 	}
 
 	void SceneRender::UnmapMaterial(SmartPtr<Mesh> mesh) {
