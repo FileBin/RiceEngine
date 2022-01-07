@@ -165,7 +165,7 @@
     <ClInclude Include="include\GameEngine\DX\Texture2D.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\OggStream.h">
+    <ClInclude Include="include\GameEngine\SoundStream.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\GameEngine\AlDevice.h">
@@ -290,7 +290,7 @@
     <ClCompile Include="src\DX\Texture2D.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\OggStream.cpp">
+    <ClCompile Include="src\Engine\SoundStream.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\Components\SoundSource.cpp">

@@ -11,12 +11,16 @@
 #include "Transform.h"
 
 namespace Game {
+
+	typedef char (*FrequencyFunc)(double);
+
 	class SoundSource : public Component {
 	public:
 		void OnInit();
 		virtual ~SoundSource() = 0;
 		void Update();
 		void play(char* name, float volume);
+		void play(FrequencyFunc f, double beginning, double end, float volume);
 		void setPosition(Vector3f newPos);
 		void setVolume(float volume);
 		void addEffect(SoundEffect *soundEffect);
