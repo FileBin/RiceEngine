@@ -24,6 +24,10 @@ namespace Game {
 		ogg = soundManager->play_sound(name, volume, transform->position).lock();
 		ogg->applyEffectChain(&effects);
 	}
+	void SoundSource::play(FrequencyFunc f, double beginning, double end, float volume) {
+		ogg = soundManager->play_raw(f, beginning, end, volume, transform->position).lock();
+		ogg->applyEffectChain(&effects);
+	}
 	void SoundSource::setPosition(Vector3f position) {
 		if (ogg != nullptr) {
 			if (ogg->playing()) {

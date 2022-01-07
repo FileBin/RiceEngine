@@ -190,7 +190,7 @@
     <ClInclude Include="include\GameEngine\Matrixes.h" />
     <ClInclude Include="include\GameEngine\Model.h" />
     <ClInclude Include="include\GameEngine\ModelRender.h" />
-    <ClInclude Include="include\GameEngine\OggStream.h" />
+    <ClInclude Include="include\GameEngine\SoundStream.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
     <ClInclude Include="include\GameEngine\Core.h" />
     <ClInclude Include="include\GameEngine\InputEvents.h" />
@@ -242,7 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DX\Texture2D.cpp" />
-    <ClCompile Include="src\Engine\OggStream.cpp" />
+    <ClCompile Include="src\Engine\SoundStream.cpp" />
     <ClCompile Include="src\Engine\SoundEffect.cpp" />
     <ClCompile Include="src\Engine\SoundManager.cpp" />
     <ClCompile Include="src\pch.cpp">

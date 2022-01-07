@@ -2,15 +2,20 @@
 #include <GameEngine\Core.h>
 #include <GameEngine\InputManager.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 using namespace Game;
 
 class MsaaTestScript : public ScriptBase {
-	bool playing = false;
 	void Run() {
 		auto& engine = GetEngine();
 		if (InputManager::GetKey(KeyCode::Button1)) {
 			//engine.SetMsaaLevel(1);
 			engine.getSoundManager().play_music("test", false);
+			/*engine.getSoundManager().play_raw([](
+				double time) -> char {
+					return 255 * sin((2 * M_PI * 440) / 44100 * time); }, 0, 10, 1, {0, 0, 0});*/
 		} else if (InputManager::GetKey(KeyCode::Button2)) {
 			//engine.SetMsaaLevel(2);
 		} else if (InputManager::GetKey(KeyCode::Button3)) {

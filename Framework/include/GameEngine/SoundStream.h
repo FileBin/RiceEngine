@@ -16,11 +16,15 @@
 #define BUFFER_SIZE (4096 * 4)
 
 namespace Game {
-    class OggStream : private AlDevice
+
+    typedef char (*FrequencyFunc)(double);
+
+    class SoundStream : private AlDevice
     {
     public:
 
-        void open(std::string path);
+        void playOgg(std::string path);
+        void playRaw(FrequencyFunc f, double beginning, double end);
         void release();
         bool playback();
         bool playing();
@@ -43,7 +47,7 @@ namespace Game {
     private:
 
         FILE* oggFile;
-        OggVorbis_File  oggStream;
+        OggVorbis_File oggStream;
         vorbis_info* vorbisInfo;
 
         ALuint buffers[2];
@@ -57,5 +61,12 @@ namespace Game {
 
         bool hasEffects;
         ALuint filter;
+
+        bool raw;
+        FrequencyFunc rawFunc;
+        int sampleRate;
+        double step;
+        long currentPos;
+        long targetPos;
     };
 }

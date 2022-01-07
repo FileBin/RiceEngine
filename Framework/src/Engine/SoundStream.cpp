@@ -1,11 +1,11 @@
 #include "pch.h"
-#include <GameEngine/OggStream.h>
+#include <GameEngine/SoundStream.h>
 
 char pcm[BUFFER_SIZE];
 
 namespace Game {
 
-    void OggStream::open(std::string path)
+    void SoundStream::playOgg(std::string path)
     {
         int result;
 
@@ -34,7 +34,19 @@ namespace Game {
         alSourcef(source, AL_GAIN, 0);
     }
 
-    void OggStream::applyEffectChain(std::vector<SoundEffect*> *effects) {
+    void SoundStream::playRaw(FrequencyFunc f, double beginning, double end)
+    {
+        raw = true;
+        rawFunc = f;
+        sampleRate = 44100;
+        targetPos = end * sampleRate;
+        currentPos = beginning * sampleRate;
+        step = 1.0 / sampleRate;
+        alCall(alGenBuffers, 2, buffers);
+        alCall(alGenSources, 1, &source);
+    }
+
+    void SoundStream::applyEffectChain(std::vector<SoundEffect*> *effects) {
         hasEffects = true;
 
         alGenFilters(1, &filter);
@@ -52,7 +64,7 @@ namespace Game {
         //for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
     }
 
-    void OggStream::setVolume(float volume, bool instant) {
+    void SoundStream::setVolume(float volume, bool instant) {
         targetVolume = volume;
         if (instant) {
             alSourcef(source, AL_GAIN, volume);
@@ -60,7 +72,7 @@ namespace Game {
         }
     }
 
-    void OggStream::setPosition(Vector3f position) {
+    void SoundStream::setPosition(Vector3f position) {
         alSource3f(source, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
         prevPos.x = position.x;
         prevPos.y = position.y;
@@ -68,15 +80,15 @@ namespace Game {
         alSource3f(source, AL_POSITION, position.x, position.y, position.z);
     }
 
-    void OggStream::setLooping(bool looping) {
+    void SoundStream::setLooping(bool looping) {
         alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
     }
 
-    void OggStream::setPitch(float pitch) {
+    void SoundStream::setPitch(float pitch) {
         alSourcef(source, AL_PITCH, pitch);
     }
 
-    void OggStream::release()
+    void SoundStream::release()
     {
         alSourceStop(source);
         empty();
@@ -90,7 +102,7 @@ namespace Game {
         ov_clear(&oggStream);
     }
 
-    bool OggStream::playback()
+    bool SoundStream::playback()
     {
         if (playing())
             return true;
@@ -107,7 +119,7 @@ namespace Game {
         return true;
     }
 
-    bool OggStream::playing()
+    bool SoundStream::playing()
     {
         if (source == 0) {
             return false;
@@ -120,7 +132,7 @@ namespace Game {
         return (state == AL_PLAYING);
     }
 
-    bool OggStream::update()
+    bool SoundStream::update()
     {
         int processed;
         bool active = true;
@@ -155,38 +167,43 @@ namespace Game {
         }
     }
 
-    bool OggStream::stream(ALuint buffer)
+    bool SoundStream::stream(ALuint buffer)
     {
-        int  size = 0;
-        int  section;
-        int  result;
+        if (!raw) {
+            int  size = 0;
+            int  section;
+            int  result;
 
-        while (size < BUFFER_SIZE)
-        {
-            result = ov_read(&oggStream, pcm + size, BUFFER_SIZE - size, 0, 2, 1, &section);
+            while (size < BUFFER_SIZE)
+            {
+                result = ov_read(&oggStream, pcm + size, BUFFER_SIZE - size, 0, 2, 1, &section);
 
-            if (result > 0)
-                size += result;
-            else
-                if (result < 0)
-                    throw errorString(result);
+                if (result > 0)
+                    size += result;
                 else
-                    break;
+                    if (result < 0)
+                        throw errorString(result);
+                    else
+                        break;
+            }
+
+            if (size == 0)
+                return false;
+
+            alCall(alBufferData, buffer, format, pcm, size, vorbisInfo->rate);
+
+            return true;
         }
-
-        if (size == 0)
-            return false;
-
-        alCall(alBufferData, buffer, format, pcm, size, vorbisInfo->rate);
-        
-        return true;
+        else {
+            return currentPos < targetPos;
+        }
     }
 
-    void OggStream::closeOnNoVolume(bool close) {
+    void SoundStream::closeOnNoVolume(bool close) {
         closeOnNoVol = close;
     }
 
-    void OggStream::empty()
+    void SoundStream::empty()
     {
         int queued;
 
@@ -199,7 +216,7 @@ namespace Game {
         }
     }
 
-    std::wstring OggStream::errorString(int code)
+    std::wstring SoundStream::errorString(int code)
     {
         switch (code)
         {

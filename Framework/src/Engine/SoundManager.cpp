@@ -82,7 +82,7 @@ namespace Game {
 		Log::log(Log::INFO, L"----------\n");
 	}
 
-	void SoundManager::playOggStream(std::shared_ptr<OggStream> ogg) {
+	void SoundManager::playSoundStream(std::shared_ptr<SoundStream> ogg) {
 		if (!ogg->playback())
 			throw std::wstring(L"Ogg refused to play");
 		while (ogg->update())
@@ -102,13 +102,13 @@ namespace Game {
 	void SoundManager::music_thread() {
 		while (true) {
 			if (nextMusic.size() > 0) {
-				auto ogg = std::make_shared<OggStream>();
+				auto ogg = std::make_shared<SoundStream>();
 				try {
-					ogg->open(nextMusic);
+					ogg->playOgg(nextMusic);
 					ogg->setVolume(musicVolume, false);
 					current_music_stream = ogg;
 					nextMusic.clear();
-					playOggStream(ogg);
+					playSoundStream(ogg);
 					current_music_stream = nullptr;
 				}
 				catch (std::wstring e) {
@@ -122,23 +122,41 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::sound_thread(std::shared_ptr<OggStream> ogg, std::string path, float volume, Vector3f pos) {
+	void SoundManager::sound_thread(std::shared_ptr<SoundStream> ogg, std::string path, float volume, Vector3f pos) {
 		try {
-			ogg->open(path);
+			ogg->playOgg(path);
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
-			playOggStream(ogg);
+			playSoundStream(ogg);
 		}
 		catch (std::wstring e) {
 			Log::log(Log::ERR, e);
 		}
 	}
 
-	 std::weak_ptr<OggStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
-		std::shared_ptr<OggStream> ogg;
+	void SoundManager::raw_sound_thread(std::shared_ptr<SoundStream> ogg, FrequencyFunc f, double beginning, double end, float volume, Vector3f pos) {
+		try {
+			ogg->playRaw(f, beginning, end);
+			ogg->setVolume(volume, true);
+			ogg->setPosition(pos);
+			playSoundStream(ogg);
+		}
+		catch (std::wstring e) {
+			Log::log(Log::ERR, e);
+		}
+	}
+
+	 std::weak_ptr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
+		std::shared_ptr<SoundStream> ogg = std::make_shared<SoundStream>();
 		concurrency::create_task([&]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
 		return ogg;
-	}
+	 }
+
+	 std::weak_ptr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos) {
+		 std::shared_ptr<SoundStream> ogg = std::make_shared<SoundStream>();
+		 concurrency::create_task([&]() {raw_sound_thread(ogg, f, beginning, end, volume, pos); });
+		 return ogg;
+	 }
 
 	void SoundManager::setMusicVolume(float volume) {
 		musicVolume = volume;
