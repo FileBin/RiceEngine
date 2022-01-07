@@ -28,7 +28,12 @@ namespace Game {
             std::string strstack{};
             for (int i = 0; i < frames; i++) {
                 SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol);
-                strstack += std::format("[{}]\t{} {:#x}\n", frames - i - 1, symbol->Name, symbol->Address);//'\n' << frames - i - 1 << ':' << symbol->Name << " " << (void*)symbol->Address;
+                IMAGEHLP_LINE64 line;
+                ZeroMemory(&line, sizeof(line));
+                line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+                DWORD dis;
+                SymGetLineFromAddr64(process, (DWORD64)(stack[i]), &dis, &line);
+                strstack += std::format("[{}]\t{} {:#x} at line {}\n", frames - i - 1, symbol->Name, symbol->Address, line.LineNumber);//'\n' << frames - i - 1 << ':' << symbol->Name << " " << (void*)symbol->Address;
             }
 
             free(symbol);
