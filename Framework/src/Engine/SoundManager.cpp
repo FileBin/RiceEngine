@@ -27,6 +27,8 @@ namespace Game {
 		camera = cam;
 		concurrency::create_task([this]() {music_thread(); });
 		concurrency::create_task([this]() {update_thread(); });
+
+		Log::log(Log::INFO, L"OpenAL init success");
 	}
 
 	SoundManager::~SoundManager() {
@@ -71,7 +73,7 @@ namespace Game {
 		const ALCchar* device = devices, * next = devices + 1;
 		size_t len = 0;
 
-		Log::log(Log::INFO, L"Devices list:");
+		Log::log(Log::INFO, L"OpenAL Devices list:");
 		Log::log(Log::INFO, L"----------");
 		while (device && *device != '\0' && next && *next != '\0') {
 			Log::log(Log::INFO, Util::Utf8ToWstring(std::string(device)));
@@ -147,14 +149,14 @@ namespace Game {
 	}
 
 	SmartPtr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
-		SmartPtr<SoundStream> ogg;
-		concurrency::create_task([&]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
+		SmartPtr<SoundStream> ogg = new SoundStream();;
+		concurrency::create_task([&, ogg]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
 		return ogg;
 	 }
 
 	SmartPtr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos) {
 		 SmartPtr<SoundStream> ogg = new SoundStream();
-		 concurrency::create_task([&]() { raw_sound_thread(ogg, f, beginning, end, volume, pos); });
+		 concurrency::create_task([&, ogg, f]() {raw_sound_thread(ogg, f, beginning, end, volume, pos); });
 		 return ogg;
 	 }
 

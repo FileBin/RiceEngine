@@ -24,7 +24,7 @@ namespace Game {
     public:
 
         void playOgg(std::string path);
-        void playRaw(FrequencyFunc f, double beginning, double end);
+        void playRaw(FrequencyFunc f, dbl beginning, dbl end);
         void release();
         bool playback();
         bool playing();
