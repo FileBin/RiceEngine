@@ -19,7 +19,8 @@ namespace Game {
 
 		void SetAspectRatio(double ratio) { aspectRatio = ratio; }
 		double GetAspectRatio() { return aspectRatio; }
-
+		Vector2 ToScreenPos(Vector3 point);
+		bool IsPointVisible(Vector3 point);
 		void SetClippingPlanes(double nearPlane, double farPlane) {
 			this->nearPlane = nearPlane;
 			this->farPlane = farPlane;

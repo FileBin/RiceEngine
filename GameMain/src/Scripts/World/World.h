@@ -45,21 +45,19 @@ public:
 private:
 	concurrent_unordered_map<Vector3i, SmartPtr<Chunk>> chunkMap{};
 	concurrent_unordered_map<Vector2i, SmartPtr<HeightMap>> heightMaps{};
-	bool lock = false;
+	std::mutex lock;
 	WorldGenerator& generator;
 #pragma endregion
 
 #pragma region publicFunctions
 public:
-	void Wait() { while (lock) Sleep(1); }
-	void Lock() { lock = true; }
-	void Unlock() { lock = false; }
 
 	static void Register(Engine& en, SceneRender& ren);
 
 	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
 
 	void UnloadChunks(std::function<bool(Vector3i)> predicate) {
+		std::lock_guard l(lock);
 		std::queue<Vector3i> keys;
 		for (auto it = chunkMap.begin(); it != chunkMap.end(); it++) {
 			keys.push(it->first);
@@ -80,6 +78,7 @@ public:
 	}
 
 	void UnloadChunk(Vector3i chunkPos) {
+		std::lock_guard l(lock);
 		auto it = chunkMap.find(chunkPos);
 		//if (it != chunkMap.end()) {
 			auto chunk = it->second;
@@ -113,6 +112,7 @@ public:
 	}
 
 	float GetAltitude(Vector3 pos) {
+		std::lock_guard l(lock);
 		auto chunkPos = TransformToChunkPos(pos);
 		auto hm = GetHeightMap(chunkPos);
 		Vector3i iPos = pos;
@@ -122,6 +122,7 @@ public:
 	}
 
 	int GetChunkAltitude(Vector3i chunkPos) {
+		std::lock_guard l(lock);
 		auto hm = GetHeightMap(chunkPos);
 		auto hmax = (chunkPos.y + 1.) * Chunk::ChunkSize;
 		auto hmin = (chunkPos.y) * Chunk::ChunkSize;
@@ -138,7 +139,6 @@ public:
 		//Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			Unlock();
 			return it->second->status;
 		}
 		//Unlock();
@@ -197,7 +197,10 @@ public:
 		Vector2i pos{ chunkPos.x, chunkPos.z };
 		auto it = heightMaps.find(pos);
 		if (it != heightMaps.end()) {
-			return it->second;
+			if (it->second.Get()) {
+				return it->second;
+			} else {
+			}
 		} else {
 			auto hm = CreateHeightMap(pos);
 			heightMaps.insert(heightMaps.end(), { pos, hm });
@@ -208,6 +211,7 @@ public:
 #pragma region PrivateFunctions
 private:
 	SmartPtr<Chunk> GenerateChunk(Vector3i chunkPos) {
+		std::lock_guard l(lock);
 		auto hm = GetHeightMap(chunkPos);
 		auto chunk = new Chunk(&generator, chunkPos, hm, this);
 		hm->Increment();

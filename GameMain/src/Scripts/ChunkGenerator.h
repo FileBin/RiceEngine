@@ -32,6 +32,16 @@ struct PooledChunk {
 	Vector3i pos = {0,0,0};
 	int lod = -1;
 	std::mutex* busy = nullptr;
+
+	void Swap(PooledChunk& other) {
+		std::swap(obj, other.obj);
+		std::swap(pos, other.pos);
+		std::swap(lod, other.lod);
+		auto p = busy;
+		busy = other.busy;
+		other.busy = p;
+	}
+
 	~PooledChunk() {
 		if (busy) {
 			busy->lock();
@@ -43,7 +53,7 @@ struct PooledChunk {
 class ChunkGenerator : public MonoScript {
 	vector<bool> loading{};
 	//Chunk* chunk;
-	int renderDistance = 6;
+	int renderDistance = 9;
 	World* world;
 	WorldGenerator* generator;
 
@@ -55,7 +65,7 @@ class ChunkGenerator : public MonoScript {
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[5] = { 0, 2, 3, 5, 6 };
+	int lodDistances[4] = { 2, 3, 5, 6 };
 
 	void Start() {
 #ifdef _DEBUG
@@ -90,22 +100,18 @@ class ChunkGenerator : public MonoScript {
 			o->AddComponent(new Transform());
 			o->AddComponent(render);
 			chunksPool.push_back({ o, pos, 10000, nullptr });
-			for (auto i = poolSize; i > 0; i--) {
-				if (chunksPool[i].pos.SqrLength() < chunksPool[i - 1].pos.SqrLength()) {
-					std::swap(chunksPool[i], chunksPool[i - 1]);
-				} else break;
-			}
+			chunksPool[poolSize].busy = new std::mutex();
 			poolSize++;
 		}
 		chunksPool.resize(poolSize);
-		for (auto& ch : chunksPool) {
+		ReorderPool();
+		/*for (auto& ch : chunksPool) {
 			ch.busy = new std::mutex();
-		}
+		}*/
 
 		threads.resize(nLodThreads);
-
 		for (size_t i = 0; i < nLodThreads; i++) {
-			threads[i] = Core::RunThread<void(size_t)>([this](size_t i) { LodLoaderThread(i); }, i);
+			threads[i] = Core::RunThread<void(size_t,int, int)>([this](size_t lod, int idx, int r) { LodLoaderThread(lod, idx, r); }, i, i, lodDistances[i]);
 		}
 
 		chunkLoaderThread = Core::RunThread<void()>([this]() { ChunkLoaderThread(); });
@@ -130,21 +136,20 @@ class ChunkGenerator : public MonoScript {
 
 	Vector3i playerChunk;
 
-	void LodLoaderThread(size_t lodIdx) {
-		int thIdx = lodIdx + 1;
+	void LodLoaderThread(size_t lodIdx, int thIdx, int radius) {
+		int nSkips = 0;
 		auto& sRen = GetScene().GetRender();
 		auto poolSize = chunksPool.size();
-		auto minD = lodDistances[lodIdx];
-		auto maxD = lodDistances[lodIdx + 1];
-		minD *= minD;
+		auto maxD = radius;
 		maxD *= maxD;
+		auto pPos = World::TransformToChunkPos(playerPos);
 		while (enabled) {
 			for (size_t i = 0; i < poolSize; i++) {
 				if (!enabled) return;
 				auto& pooledCh = chunksPool.at(i);
-				if (!pooledCh.busy->try_lock()) continue;
+				if (!pooledCh.busy->try_lock()) { nSkips++; continue; }
 				if (pooledCh.obj->isEnabled()) {
-					auto locPos = pooledCh.pos - playerChunk;
+					auto locPos = pooledCh.pos - World::TransformToChunkPos(playerPos);
 					auto sqrlen = locPos.SqrLength();
 					//if (sqrlen - maxD == 0) {
 						//if (rand() % 3 == 0) continue;
@@ -153,6 +158,7 @@ class ChunkGenerator : public MonoScript {
 						pooledCh.busy->unlock();
 						continue;
 					}
+					if (Skip(pooledCh.pos)) { pooledCh.busy->unlock(); nSkips++; continue; }
 					if (CheckChunkVisible(locPos)) {
 						int lod = lodIdx;
 #ifdef _DEBUG
@@ -163,8 +169,7 @@ class ChunkGenerator : public MonoScript {
 						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
-							//sRen.WaitRendering();
-							auto lock = sRen.Lock(thIdx);
+							std::lock_guard lock(sRen.Lock(thIdx));
 							render->SetModel(model);
 							pooledCh.lod = lod;
 						}
@@ -172,13 +177,22 @@ class ChunkGenerator : public MonoScript {
 				}
 				pooledCh.busy->unlock();
 			}
-			Sleep(10);
+			auto newPos = World::TransformToChunkPos(playerPos);
+			if (pPos == newPos) {
+				if (nSkips <= 0)
+					Sleep(200);
+			} else {
+				pPos = newPos;
+				Sleep(20 * lodIdx);
+			}
+			nSkips = 0;
 		}
 	}
 
 
 	void ChunkLoaderThread() {
-		int thIdx = nLodThreads + 1;
+		int nSkips = 0;
+		int thIdx = nLodThreads + 10;
 		auto& sRen = GetScene().GetRender();
 		auto poolSize = chunksPool.size();
 
@@ -206,10 +220,15 @@ class ChunkGenerator : public MonoScript {
 
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
 			if (playerChunk != newPlayerChunk) {
+				//ReorderPool();
+				nSkips++;
 				int addedRadius = ceil((playerChunk - newPlayerChunk).Length());
+				auto& l = sRen.Lock(thIdx);
+				l.lock();
 				world->UnloadChunks([&](Vector3i wpos) {
 					return !CheckChunkVisible(wpos - newPlayerChunk, addedRadius);
 					});
+				l.unlock();
 				playerChunk = newPlayerChunk;
 				while (!toLoad.empty()) toLoad.pop();
 				for (auto j = 0; j < nPos; j++) {
@@ -227,7 +246,7 @@ class ChunkGenerator : public MonoScript {
 				if (!enabled) return;
 				auto poolIdx = i;
 				auto& pooledCh = chunksPool.at(poolIdx);
-				if (!pooledCh.busy->try_lock()) continue;
+				if (!pooledCh.busy->try_lock()) { nSkips++; continue; }
 				auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 				auto transform = pooledCh.obj->GetComponents<Transform>()[0];
 				if (!pooledCh.obj->isEnabled()) {
@@ -241,7 +260,7 @@ class ChunkGenerator : public MonoScript {
 					auto model = ch->GetModel(lod);
 					pooledCh.lod = lod;
 					//sRen.WaitRendering();
-					auto lock = sRen.Lock(thIdx);
+					std::lock_guard lock(sRen.Lock(thIdx));
 					pooledCh.pos = chPos;
 					transform->position = World::TransformToWorldPos(chPos);
 					render->SetModel(model);
@@ -257,9 +276,9 @@ class ChunkGenerator : public MonoScript {
 						if (it != posStates.end())
 							posStates.erase(it);
 						//sRen.WaitRendering();
-						auto lock = sRen.Lock(thIdx);
+						std::lock_guard lock(sRen.Lock(thIdx));
 						pooledCh.obj->Disable();
-						render->DeleteModel();
+						//render->DeleteModel();
 						//concurrency::create_task([&]() { world->UnloadChunk(pooledCh.pos); });
 						//world->UnloadChunk(pooledCh.pos);
 					}
@@ -267,7 +286,10 @@ class ChunkGenerator : public MonoScript {
 				}
 				pooledCh.busy->unlock();
 			}
-			Sleep(10);
+			if (nSkips <= 0) {
+				Sleep(200);
+			}
+			nSkips = 0;
 		}
 	}
 
@@ -275,9 +297,29 @@ class ChunkGenerator : public MonoScript {
 		return chunkPos.Length() <= renderDistance + addedDistance;
 	}
 
+	bool Skip(Vector3i wChunkPos) {
+		int d = 1;
+		auto wPos = World::TransformToWorldPos(wChunkPos) + Vector3::one * Chunk::ChunkSize/2;
+		//d *= GetRender().GetActiveCamera()->ToScreenPos(wPos).Length() + 1;
+		auto depth = world->GetChunkAltitude(wChunkPos);
+		depth = Math::Clamp(-depth, 1, 4);
+		d *= depth;
+		return rand() % d != 0;
+	}
+
+	void ReorderPool() {
+		auto n = chunksPool.size();
+		for (auto j = 0; j < n; j++) {
+			for (auto i = j; i > 0; i--) {
+				if (chunksPool[i].pos.SqrLength() < chunksPool[i - 1].pos.SqrLength()) {
+					chunksPool[i].Swap(chunksPool[i - 1]);
+				} else break;
+			}
+		}
+	}
+
 	void OnDisable() {
 		enabled = false;
-		world->Unlock();
 		chunkLoaderThread->join();
 		chunkLoaderThread.Release();
 		for (auto& t : threads) {

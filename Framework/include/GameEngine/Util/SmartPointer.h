@@ -41,9 +41,11 @@ public:
 		if (!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
 		T* pointer = *ppObject.get();
-		//std::lock_guard<std::mutex> lock(m_mutex);
-		*ppObject.get() = nullptr;
-		delete pointer;
+		if (pointer) {
+			//std::lock_guard<std::mutex> lock(m_mutex);
+			*ppObject.get() = nullptr;
+			delete pointer;
+		}
 	}
 
 	T* Get() const {

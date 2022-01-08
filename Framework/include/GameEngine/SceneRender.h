@@ -28,7 +28,7 @@ namespace Game {
 		void Close();
 		void Resize();
 
-		std::lock_guard<std::mutex> Lock(size_t idx) { return std::lock_guard(isLoading[idx]); }
+		std::mutex& Lock(size_t idx) { return isLoading[idx]; }
 
 		void AddModel(SmartPtr<Model> model);
 		bool RemoveModel(SmartPtr<Model> model, bool erase = false);
@@ -59,7 +59,7 @@ namespace Game {
 		concurrent_vector<SmartPtr<Camera>> cameras;
 		concurrent_unordered_map<String, SmartPtr<Material>> materials;
 		concurrent_unordered_map<String, Shader*> shaders;
-		concurrent_unordered_map<SmartPtr<Mesh>, SmartPtr<Material>> materialMap;
+		concurrent_unordered_map<Mesh*, SmartPtr<Material>> materialMap;
 		size_t activeCameraIdx;
 		concurrent_unordered_map<SmartPtr<Model>, bool> models; //that was a trick beacuse unordered_set doesn't work
 		concurrent_unordered_map<UI::IDrawable*, bool> texts;

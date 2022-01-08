@@ -52,7 +52,7 @@ public:
     }
 
     ~Chunk() {
-        std::lock_guard guard(lock);
+        //std::lock_guard guard(lock);
         for (auto it : model) {
             it.Release();
         }

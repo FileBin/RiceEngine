@@ -64,7 +64,7 @@ namespace Game {
 				}
 				ren.RemoveModel(model);
 			}
-			model.Release();
+			//model.Release();
 		}
 		model = _model;
 		if (enabled) {

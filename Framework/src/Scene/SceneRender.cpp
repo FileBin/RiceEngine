@@ -21,6 +21,7 @@ namespace Game {
 		for (int i = 0; i < 0x100; i++) {
 			locks[i] = std::make_unique<std::lock_guard<std::mutex>>(isLoading[i]);
 		}
+		auto cam = cameras[activeCameraIdx];
 		queue<pair<SmartPtr<Mesh>, ConstantBufferData>> transparentQ;
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
@@ -28,10 +29,9 @@ namespace Game {
 		float time = clock() * .001;
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto model = it->first;
-
+			if (model.IsNull() || model->pPos == nullptr || model->pRot == nullptr || model->pScale == nullptr) continue;
 			ConstantBufferData cb = {};
 
-			auto cam = cameras[activeCameraIdx];
 			cb.World = Matrix4x4::TRS(*model->pPos, *model->pRot, *model->pScale);
 			cb.View = cam->GetTransformationMatrix();
 			cb.Projection = cam->GetProjectionMatrix();
@@ -45,7 +45,7 @@ namespace Game {
 			for (size_t j = 0; j < m; j++) {
 				auto mesh = model->GetSubMesh(j);
 
-				auto matIt = materialMap.find(mesh);
+				auto matIt = materialMap.find(mesh.Get());
 				if (matIt == materialMap.end()) continue;
 				auto mat = matIt->second;
 
@@ -84,7 +84,7 @@ namespace Game {
 			transparentQ.pop();
 			auto m = pair.first;
 
-			if (!m->CheckVisiblity(pair.second)) continue;
+			if (m.IsNull() || !m->CheckVisiblity(pair.second)) continue;
 
 			device->LoadBufferSubresource(constantBuffer, pair.second);
 			device->SetActiveVSConstantBuffer(constantBuffer);
@@ -101,7 +101,7 @@ namespace Game {
 			device->SetActiveVertexBuffer<Vertex>(vb);
 			device->SetActiveIndexBuffer(ib);
 
-			auto matIt = materialMap.find(m);
+			auto matIt = materialMap.find(m.Get());
 			if (matIt == materialMap.end()) continue;
 			auto mat = matIt->second;
 			device->SetActivePSConstantBuffer(mat->GetBuffer());
@@ -215,12 +215,11 @@ namespace Game {
 		auto m = mat;
 		if (m.IsNull())
 			return;
-		materialMap.insert({ mesh, mat});
+		materialMap.insert({ mesh.Get(), mat});
 	}
 
 	void SceneRender::UnmapMaterial(SmartPtr<Mesh> mesh) {
-		auto msh = mesh;
-		auto it = materialMap.find(msh);
+		auto it = materialMap.find(mesh.Get());
 		if (it != materialMap.end()) {
 			materialMap.unsafe_erase(it);
 		}

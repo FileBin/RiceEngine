@@ -87,7 +87,7 @@ namespace Game {
 				time = (steady_clock::now() - start).count() * .000001 * .001;
 				deltaTime = fixedDeltaTime + .000001*(steady_clock::now() - _time).count();
 				_time = steady_clock::now() + milliseconds(interval);
-
+				deltaTime = Math::Min(deltaTime, 300.);
 				this->deltaTime = deltaTime * .001;
 				this->fixedDeltaTime = fixedDeltaTime * .001;
 			} while (b);
