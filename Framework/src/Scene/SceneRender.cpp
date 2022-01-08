@@ -17,19 +17,17 @@ namespace Game {
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
 	}
 	bool SceneRender::Draw() {
-		while (CheckLoading())
-			Sleep(1);
-
+		std::unique_ptr<std::lock_guard<std::mutex>> locks[0x100];
+		for (int i = 0; i < 0x100; i++) {
+			locks[i] = std::make_unique<std::lock_guard<std::mutex>>(isLoading[i]);
+		}
 		queue<pair<SmartPtr<Mesh>, ConstantBufferData>> transparentQ;
-		isRendering = true;
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
 		auto n = models.size();
 		float time = clock() * .001;
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto model = it->first;
-
-			if (model.IsNull()) continue;
 
 			ConstantBufferData cb = {};
 
@@ -86,7 +84,7 @@ namespace Game {
 			transparentQ.pop();
 			auto m = pair.first;
 
-			if (m.IsNull() || !m->CheckVisiblity(pair.second)) continue;
+			if (!m->CheckVisiblity(pair.second)) continue;
 
 			device->LoadBufferSubresource(constantBuffer, pair.second);
 			device->SetActiveVSConstantBuffer(constantBuffer);
@@ -121,7 +119,6 @@ namespace Game {
 		}
 		device->End2D();
 
-		isRendering = false;
 		return true;
 	}
 
