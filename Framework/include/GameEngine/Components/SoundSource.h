@@ -24,6 +24,12 @@ namespace Game {
 		void setPosition(Vector3f newPos);
 		void setVolume(float volume);
 		void addEffect(SoundEffect *soundEffect);
+		SoundEffect* addEffect(ALenum effect);
+		void setLastAddedEffectPropertyf(ALenum property, ALfloat value);
+		void setLastAddedEffectPropertyi(ALenum property, ALint value);
+		void setLastAddedEffectPropertyfv(ALenum property, const ALfloat* values);
+		void setLastAddedEffectPropertyiv(ALenum property, const ALint* values);
+		void setLastAddedEffectEfxReverbPreset(EFXEAXREVERBPROPERTIES preset);
 	protected:
 		Scene& GetScene();
 		SceneRender& GetRender();

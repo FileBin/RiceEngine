@@ -58,6 +58,7 @@ namespace Game {
         float targetVolume = 1;
         float currentVolume = 0;
         Vector3f prevPos = {};
+        bool canCalculateVelocity = false;
 
         bool hasEffects;
         ALuint filter;

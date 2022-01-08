@@ -12,10 +12,15 @@ class MsaaTestScript : public ScriptBase {
 		auto& engine = GetEngine();
 		if (InputManager::GetKey(KeyCode::Button1)) {
 			//engine.SetMsaaLevel(1);
-			//engine.getSoundManager().play_music("test", false);
-			engine.getSoundManager().play_raw([](
+			std::vector<SoundEffect*> effects;
+			effects.push_back(new SoundEffect(Effect::AUTOWAH));
+			SmartPtr<SoundStream> stream = engine.getSoundManager().play_sound("test", 1, {100, 0, 0}, &effects);
+			
+			Sleep(100);
+			/*engine.getSoundManager().play_raw([](
 				double time) -> char {
-					return 127 * sin((2 * M_PI * 440 + 200 * abs(sin(abs(cos(abs(sin(time * 2)) * 2)) * 2))) * time); }, 0, 60, 1, { 0, 0, 0 });
+					return 127 * sin((2 * M_PI * 440 + 200 * abs(sin(abs(cos(abs(sin(time * 2)) * 2)) * 2))) * time); }, 0, 60, 1, { 0, 0, 0 });*/
+			
 		} else if (InputManager::GetKey(KeyCode::Button2)) {
 			//engine.SetMsaaLevel(2);
 		} else if (InputManager::GetKey(KeyCode::Button3)) {
