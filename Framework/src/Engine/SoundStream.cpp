@@ -54,6 +54,8 @@ namespace Game {
         alCall(alFilterf, filter, AL_BANDPASS_GAINHF, 0);
         alCall(alFilterf, filter, AL_BANDPASS_GAIN, 0);
         alCall(alSourcei, source, AL_DIRECT_FILTER, filter);
+        alCall(alSourcei, source, AL_DIRECT_FILTER, filter);
+        alCall(alSourcei, source, AL_ROOM_ROLLOFF_FACTOR, 1);
 
         if (effects->size() > 1) {
             for (size_t i = 1; i < effects->size(); i++) {

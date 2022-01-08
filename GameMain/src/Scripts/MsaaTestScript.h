@@ -14,7 +14,7 @@ class MsaaTestScript : public ScriptBase {
 			//engine.SetMsaaLevel(1);
 			std::vector<SoundEffect*> effects;
 			effects.push_back(new SoundEffect(Effect::AUTOWAH));
-			SmartPtr<SoundStream> stream = engine.getSoundManager().play_sound("test", 1, {100, 0, 0}, &effects);
+			SmartPtr<SoundStream> stream = engine.getSoundManager().play_sound("test", 1, {0, 0, 0}, &effects);
 			
 			Sleep(100);
 			/*engine.getSoundManager().play_raw([](
