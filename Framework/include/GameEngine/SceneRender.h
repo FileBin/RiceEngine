@@ -28,21 +28,7 @@ namespace Game {
 		void Close();
 		void Resize();
 
-		void Lock(size_t idx) { isLoading[idx] = true; }
-
-		bool CheckLoading() {
-			for (byte i = 0; i < 0xff; i++)
-				if (isLoading[i]) return true;
-			return false;
-		}
-
-		void Wait(bool& livingFactor) { while (livingFactor && (CheckLoading() || isRendering)) Sleep(1); }
-		void WaitRendering(bool& livingFactor) { while (livingFactor && isRendering) Sleep(1); }
-
-		void Wait() { while (isLoading || isRendering) Sleep(1); }
-		void WaitRendering() { while (isRendering) Sleep(1); }
-
-		void Unlock(size_t idx) { isLoading[idx] = false; }
+		std::lock_guard<std::mutex> Lock(size_t idx) { return std::lock_guard(isLoading[idx]); }
 
 		void AddModel(SmartPtr<Model> model);
 		bool RemoveModel(SmartPtr<Model> model, bool erase = false);
@@ -68,8 +54,8 @@ namespace Game {
 		void RemoveDrawable(UI::IDrawable* txt);
 
 	private:
-		bool isRendering = false;
-		bool isLoading[0xff];
+		std::mutex isRendering;
+		std::mutex isLoading[0x100];
 		concurrent_vector<SmartPtr<Camera>> cameras;
 		concurrent_unordered_map<String, SmartPtr<Material>> materials;
 		concurrent_unordered_map<String, Shader*> shaders;
