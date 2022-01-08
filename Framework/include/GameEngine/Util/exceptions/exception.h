@@ -28,7 +28,12 @@ namespace Game {
             std::string strstack{};
             for (int i = 0; i < frames; i++) {
                 SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol);
-                strstack += std::format("[{}]\t{} {:#x}\n", frames - i - 1, symbol->Name, symbol->Address);//'\n' << frames - i - 1 << ':' << symbol->Name << " " << (void*)symbol->Address;
+                IMAGEHLP_LINE64 line;
+                ZeroMemory(&line, sizeof(line));
+                line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+                DWORD dis;
+                SymGetLineFromAddr64(process, (DWORD64)(stack[i]), &dis, &line);
+                strstack += std::format("[{}]\t{} at line {}, address: {:#x}\n", frames - i - 1, symbol->Name, line.LineNumber, symbol->Address);//'\n' << frames - i - 1 << ':' << symbol->Name << " " << (void*)symbol->Address;
             }
 
             free(symbol);
@@ -52,9 +57,12 @@ namespace Game {
         const char* GetInfo() { return info; }
 
     protected:
-        void SetInfo(const char* info_) {
-            auto len = strlen(info_);
-            memcpy((void*)info, (void*)info_, len);
+        void SetInfo(std::string info_) {
+            if (info) free(info);
+            auto len = info_.size();
+            info = (char*)malloc(len + 1);
+            memcpy((void*)info, (void*)info_.c_str(), len);
+            info[len] = '\0';
         }
     };
 }

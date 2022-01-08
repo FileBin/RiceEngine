@@ -72,16 +72,23 @@ float3 norm(float2 pos)
 
 }
 
+float3 palette(float val, float p, float smoothing, float3 col) {
+    float3 col1 = lerp(col, .8, clamp((val + .005 - p) / (smoothing + .000001) + .1, 0, 1));
+    return lerp(col1, 1., clamp((val - p) / (smoothing + .000001) + .1, 0, 1));
+}
+
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     float2 res = Resolution.xy; //float2(800, 600);
     float3 n = input.norm;
     
-    float2 texcoord = input.world_pos.xz * .7;
+    float2 texcoord = input.world_pos.xz * .25;
     float3 nn = norm(texcoord);
     
-    float3 nx = nn.x * input.xAxis * .3;
-    float3 nz = nn.z * input.zAxis * .3;
+   // return float4(nn.xzy * .5 + .5, 1);
+    
+    float3 nx =-nn.x * input.xAxis * .3;
+    float3 nz =-nn.z * input.zAxis * .3;
     float3 ny = nn.y * input.norm;
     
     n = normalize(nx + ny + nz);
@@ -115,20 +122,29 @@ float4 main(PixelShaderInput input) : SV_TARGET
         s = 1;
     else
         s = 0;
-    col += s;
    
     float noise = waterN(texcoord);
+   // float Nmask = simplexNoise(texcoord * .005);
     depth = 1 - input.pos.z;
     depth *= (input.pos.w * input.pos.w);
     float val = dot(nn, float3(0, 1, 0));
     float3 wcol = col;
-    float k = .89;
-    if (val < k)
-        col = 1.;
-    else if (val < k + .05)
-        col = lerp(col,1.,.8);
-    col = lerp(col, wcol, clamp(depth, 0, 1));
+    float k = .997; //+ Nmask * .01;
+    
+    float antiAliasF = dot(n, float3(0, 1, 0));
+    antiAliasF = pow(antiAliasF, 10.);
+    antiAliasF = clamp(antiAliasF, .25, 1);
+    float smoothF = clamp(clamp(depth, 0, antiAliasF + .5) +  antiAliasF * depth * .2 - .2, .0005, 1.);
+    //return float4(smoothF.xxx, 1);
+    
+    //Waves
+    col = palette(val,
+    k, 
+    clamp(smoothF * .2 - .01, .001, .2),
+    col);
     float alpha = 1. - exp(-depthval * 10.);
+    
+    //Borders
     if (alpha - noise < .2)
     {
         col = 1.;
@@ -139,5 +155,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
         col = lerp(wcol, 1., .8);
         alpha = .8;
     }
+    col += s;
     return float4(col, alpha);
 }

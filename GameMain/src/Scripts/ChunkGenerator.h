@@ -37,7 +37,7 @@ struct PooledChunk {
 class ChunkGenerator : public MonoScript {
 	vector<bool> loading{};
 	//Chunk* chunk;
-	int renderDistance = 8;
+	int renderDistance = 6;
 	World* world;
 	WorldGenerator* generator;
 
@@ -49,7 +49,7 @@ class ChunkGenerator : public MonoScript {
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[5] = { 0, 3, 4, 5, 7 };
+	int lodDistances[5] = { 0, 2, 3, 5, 6 };
 
 	void Start() {
 #ifdef _DEBUG
@@ -138,7 +138,10 @@ class ChunkGenerator : public MonoScript {
 				if (pooledCh.obj->isEnabled()) {
 					auto locPos = pooledCh.pos - playerChunk;
 					auto sqrlen = locPos.SqrLength();
-					if (sqrlen < minD || sqrlen >= maxD) {
+					//if (sqrlen - maxD == 0) {
+						//if (rand() % 3 == 0) continue;
+					//}
+					if (sqrlen >= maxD) {
 						pooledCh.busy = false;
 						continue;
 					}
@@ -149,7 +152,7 @@ class ChunkGenerator : public MonoScript {
 #endif // _DEBUG
 
 						//lod = Math::Clamp(lod, 0, 3);
-						if (lod != pooledCh.lod) {
+						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 							sRen.WaitRendering();
@@ -196,6 +199,10 @@ class ChunkGenerator : public MonoScript {
 
 			auto newPlayerChunk = World::TransformToChunkPos(playerPos);
 			if (playerChunk != newPlayerChunk) {
+				int addedRadius = ceil((playerChunk - newPlayerChunk).Length());
+				world->UnloadChunks([&](Vector3i wpos) {
+					return !CheckChunkVisible(wpos - newPlayerChunk, addedRadius);
+					});
 				playerChunk = newPlayerChunk;
 				while (!toLoad.empty()) toLoad.pop();
 				for (auto j = 0; j < nPos; j++) {
@@ -226,6 +233,7 @@ class ChunkGenerator : public MonoScript {
 					auto ch = world->GetChunk(chPos);
 					toLoad.pop();
 					auto model = ch->GetModel(lod);
+					pooledCh.lod = lod;
 					sRen.WaitRendering();
 					sRen.Lock(thIdx);
 					pooledCh.pos = chPos;
@@ -239,22 +247,7 @@ class ChunkGenerator : public MonoScript {
 					sRen.Unlock(thIdx);
 				} else {
 					auto locPos = pooledCh.pos - playerChunk;
-					if (CheckChunkVisible(locPos)) {
-						/*int lod = floor(locPos.Length()) - 1;
-#ifdef _DEBUG
-						lod++;
-#endif // _DEBUG
-
-						lod = Math::Clamp(lod, 0, 3);
-						if (lod != pooledCh.lod) {
-							auto model = world->GetChunk(pooledCh.pos).GetModel(lod);
-							sRen.WaitRendering();
-							sRen.Lock(thIdx);
-							render->SetModel(model);
-							pooledCh.lod = lod;
-							sRen.Unlock(thIdx);
-						}*/
-					} else {
+					if (!CheckChunkVisible(locPos)) {
 						auto it = posStates.find(pooledCh.pos);
 						if (it != posStates.end())
 							posStates.erase(it);
@@ -264,7 +257,7 @@ class ChunkGenerator : public MonoScript {
 						render->DeleteModel();
 						sRen.Unlock(thIdx);
 						//concurrency::create_task([&]() { world->UnloadChunk(pooledCh.pos); });
-						world->UnloadChunk(pooledCh.pos);
+						//world->UnloadChunk(pooledCh.pos);
 					}
 
 				}

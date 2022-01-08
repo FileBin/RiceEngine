@@ -1,9 +1,9 @@
 catch (Exception& e) {
 	Log::log(Log::ERR, L"Not handled exception occured: {}", Util::Utf8ToWstring(typeid(e).name()));
-	Log::log(Log::ERR, L"What: {}", Util::Utf8ToWstring(e.what()));
-	Log::log(Log::ERR, L"AdditionalInfo: {}", Util::Utf8ToWstring(e.GetInfo()));
 	Log::log(Log::ERR, L"Line {}", std::to_wstring(e.GetLine()));
 	Log::log(Log::ERR, L"File: {}", Util::Utf8ToWstring(e.GetFile()));
+	Log::log(Log::ERR, L"What: {}", Util::Utf8ToWstring(e.what()));
+	Log::log(Log::ERR, L"AdditionalInfo: {}\n", Util::Utf8ToWstring(e.GetInfo()));
 	Log::log(Log::ERR, L"Stack trace:\n{}", Util::Utf8ToWstring(e.GetStack()));
 	Log::Close();
 	throw e;

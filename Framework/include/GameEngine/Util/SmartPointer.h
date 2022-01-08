@@ -32,7 +32,7 @@ public:
 	}
 
 	bool IsNull() {
-		if (!ppObject)
+		if (!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
 		return *ppObject.get() == nullptr;
 	}

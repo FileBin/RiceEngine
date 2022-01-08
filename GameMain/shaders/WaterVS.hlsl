@@ -60,6 +60,8 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
     float time = WV._14;
     WV._14 = 0;
     
+    output.light = mul(float4(light, 0), View);
+    
     float4 p = float4(pos.xyz, 1);
     float4 wp = mul(p, WV);
     p.y -= simplexNoise(wp.xz * .5 + time.xx * .4);

@@ -23,7 +23,7 @@ private:
     std::vector<SmartPtr<Model>> model { LOD_COUNT };
     World* world;
 
-    bool lock = false;
+    std::mutex lock;
 
     std::vector<VoxelData> voxels{};
     map<size_t, unordered_map<Vector3i, float>> transpDepth{};
@@ -52,15 +52,10 @@ public:
     }
 
     ~Chunk() {
-        voxels.clear();
+        std::lock_guard guard(lock);
         for (auto it : model) {
             it.Release();
         }
-        model.clear();
-        for (auto it : transpDepth) {
-            it.second.clear();
-        }
-        transpDepth.clear();
     }
 
     bool IsVoxelVoid(Vector3i voxelPos) {
@@ -85,8 +80,7 @@ public:
 
     VoxelData GetData(Vector3i pos) {
         auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
-        while (lock) Sleep(1);
-        lock = true;
+        std::lock_guard guard(lock);
         auto& data = voxels[idx];
         if (data.index == UINT32_MAX) {
             voxels[idx] = GenVoxelData(pos);
@@ -94,16 +88,14 @@ public:
                 auto transpData = GenVoxelData(pos, true);
                 SetTranspData(transpData, pos);
             }
-            lock = false;
             //SetVoxelData(data, pos);
         }
-        lock = false;
         return data;
     }
 
     Voxel& GetVoxel(Vector3i pos) {
         auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
-        while (lock) Sleep(1);
+        std::lock_guard guard(lock);
        // lock = true;
         Voxel* vox = nullptr;
         if (voxels[idx].index == UINT32_MAX) {
@@ -113,7 +105,6 @@ public:
         } else {
             vox = Voxel::Build(voxels[idx], pos);
         }
-        lock = false;
         return *vox;
     }
 
@@ -124,12 +115,9 @@ public:
         auto y = chunkPos.y;
         auto z = chunkPos.z;
 
-        while (lock) Sleep(1);
-        lock = true;
+        std::lock_guard guard(lock);
 
         voxels[(x * ChunkSize + y) * ChunkSize + z] = vox->GetData();
-
-        lock = false;
     }
 
     void SetVoxelData(VoxelData data, Vector3i chunkPos) {
@@ -137,12 +125,8 @@ public:
         auto y = chunkPos.y;
         auto z = chunkPos.z;
 
-        while (lock) Sleep(1);
-        lock = true;
-
+        std::lock_guard guard(lock);
         voxels[(x * ChunkSize + y) * ChunkSize + z] = data;
-
-        lock = false;
     }
 
     void SetTranspData(VoxelData data, Vector3i chunkPos) {

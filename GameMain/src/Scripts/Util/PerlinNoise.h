@@ -2,13 +2,11 @@
 
 #include <GameEngine\Util.h>
 #include <GameEngine\Vectors.h>
-#include <GameEngine\Math.h>
 #include <GameEngine\Vectors\Vector2i.h>
+#include "Util.h"
 
 namespace Utilites {
     using std::vector;
-
-    dbl Cosine(dbl x) { return -cos(x * Game::Math::PI) * .5 + .5; };
 
     int Hash(int x) {
         x += (x << 10);
