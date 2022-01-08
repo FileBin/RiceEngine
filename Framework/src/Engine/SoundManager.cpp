@@ -56,16 +56,16 @@ namespace Game {
 	}
 
 	void SoundManager::setListenerPosition(Vector3f position) {
-		alListener3f(AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+		alCall(alListener3f, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
 		prevPos.x = position.x;
 		prevPos.y = position.y;
 		prevPos.z = position.z;
-		alListener3f(AL_POSITION, position.x, position.y, position.z);
+		alCall(alListener3f, AL_POSITION, position.x, position.y, position.z);
 	}
 
 	void SoundManager::setListenerOrientation(Vector3f at, Vector3f up) {
 		ALfloat listenerOri[] = { at.x, at.y, at.z, up.x, up.y, up.z };
-		alListenerfv(AL_ORIENTATION, listenerOri);
+		alCall(alListenerfv, AL_ORIENTATION, listenerOri);
 	}
 
 	void SoundManager::list_audio_devices(const ALCchar* devices)

@@ -31,7 +31,7 @@ namespace Game {
 
         alCall(alGenBuffers, 2, buffers);
         alCall(alGenSources, 1, &source);
-        alSourcef(source, AL_GAIN, 0);
+        alCall(alSourcef, source, AL_GAIN, 0);
     }
 
     void SoundStream::playRaw(FrequencyFunc f, dbl beginning, dbl end)
@@ -49,48 +49,48 @@ namespace Game {
     void SoundStream::applyEffectChain(std::vector<SoundEffect*> *effects) {
         hasEffects = true;
 
-        alGenFilters(1, &filter);
-        alFilteri(filter, AL_FILTER_TYPE, AL_FILTER_BANDPASS);
-        alFilterf(filter, AL_BANDPASS_GAINHF, 0);
-        alFilterf(filter, AL_BANDPASS_GAIN, 0);
-        alSourcei(source, AL_DIRECT_FILTER, filter);
+        alCall(alGenFilters, 1, &filter);
+        alCall(alFilteri, filter, AL_FILTER_TYPE, AL_FILTER_BANDPASS);
+        alCall(alFilterf, filter, AL_BANDPASS_GAINHF, 0);
+        alCall(alFilterf, filter, AL_BANDPASS_GAIN, 0);
+        alCall(alSourcei, source, AL_DIRECT_FILTER, filter);
 
         if (effects->size() > 1) {
             for (size_t i = 1; i < effects->size(); i++) {
-                alAuxiliaryEffectSloti(effects->at(i - 1)->slotID, AL_EFFECTSLOT_TARGET_SOFT, effects->at(i)->slotID);
+                alCall(alAuxiliaryEffectSloti, effects->at(i - 1)->slotID, AL_EFFECTSLOT_TARGET_SOFT, effects->at(i)->slotID);
             }
         }
-        alSource3i(source, AL_AUXILIARY_SEND_FILTER, effects->at(0)->slotID, 0, NULL);
+        alCall(alSource3i, source, AL_AUXILIARY_SEND_FILTER, effects->at(0)->slotID, 0, NULL);
         //for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
     }
 
     void SoundStream::setVolume(float volume, bool instant) {
         targetVolume = volume;
         if (instant) {
-            alSourcef(source, AL_GAIN, volume);
+            alCall(alSourcef, source, AL_GAIN, volume);
             currentVolume = volume;
         }
     }
 
     void SoundStream::setPosition(Vector3f position) {
-        alSource3f(source, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+        alCall(alSource3f, source, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
         prevPos.x = position.x;
         prevPos.y = position.y;
         prevPos.z = position.z;
-        alSource3f(source, AL_POSITION, position.x, position.y, position.z);
+        alCall(alSource3f, source, AL_POSITION, position.x, position.y, position.z);
     }
 
     void SoundStream::setLooping(bool looping) {
-        alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
+        alCall(alSourcei, source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
     }
 
     void SoundStream::setPitch(float pitch) {
-        alSourcef(source, AL_PITCH, pitch);
+        alCall(alSourcef, source, AL_PITCH, pitch);
     }
 
     void SoundStream::release()
     {
-        alSourceStop(source);
+        alCall(alSourceStop, source);
         empty();
         alCall(alDeleteSources, 1, &source);
         alCall(alDeleteBuffers, 2, buffers);
@@ -113,8 +113,8 @@ namespace Game {
         if (!stream(buffers[1]))
             return false;
 
-        alSourceQueueBuffers(source, 2, buffers);
-        alSourcePlay(source);
+        alCall(alSourceQueueBuffers, source, 2, buffers);
+        alCall(alSourcePlay, source);
         
         return true;
     }
@@ -127,7 +127,7 @@ namespace Game {
 
         ALenum state;
 
-        alGetSourcei(source, AL_SOURCE_STATE, &state);
+        alCall(alGetSourcei, source, AL_SOURCE_STATE, &state);
 
         return (state == AL_PLAYING);
     }
@@ -139,14 +139,14 @@ namespace Game {
 
         if (currentVolume > targetVolume + 0.001f) {
             currentVolume -= 0.001f;
-            alSourcef(source, AL_GAIN, currentVolume);
+            alCall(alSourcef, source, AL_GAIN, currentVolume);
         }
         else if (currentVolume < targetVolume - 0.001f) {
             currentVolume += 0.001f;
-            alSourcef(source, AL_GAIN, currentVolume);
+            alCall(alSourcef, source, AL_GAIN, currentVolume);
         }
 
-        alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
+        alCall(alGetSourcei, source, AL_BUFFERS_PROCESSED, &processed);
 
         while (processed--)
         {
@@ -217,7 +217,7 @@ namespace Game {
     {
         int queued;
 
-        alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
+        alCall(alGetSourcei, source, AL_BUFFERS_QUEUED, &queued);
 
         while (queued--)
         {
