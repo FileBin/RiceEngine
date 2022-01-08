@@ -26,7 +26,7 @@ private:
     std::mutex lock;
 
     std::vector<VoxelData> voxels{};
-    map<size_t, unordered_map<Vector3i, float>> transpDepth{};
+    unordered_map<size_t, unordered_map<Vector3i, float>> transpDepth{};
     void Generate();
 
 public:
@@ -56,6 +56,9 @@ public:
         for (auto it : model) {
             it.Release();
         }
+        for (auto it : transpDepth) {
+            it.second.clear();
+        }
     }
 
     bool IsVoxelVoid(Vector3i voxelPos) {
@@ -67,14 +70,16 @@ public:
     }
 
     float GetTranspDepth(Vector3i pos, size_t index) {
-        auto it = transpDepth.find(index);
+        auto& mp = transpDepth.at(index);
+        return mp.at(pos);
+       /* auto it = transpDepth.find(index);
         if (it != transpDepth.end()) {
             auto mp = it->second;
             auto it2 = mp.find(pos);
             if (it2 != mp.end()) {
                 return it2->second;
             }
-        }
+        }*/
         THROW_EXCEPTION("TransparentVoxel not found");
     }
 

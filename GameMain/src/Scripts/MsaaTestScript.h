@@ -13,7 +13,8 @@ class MsaaTestScript : public ScriptBase {
 		if (InputManager::GetKey(KeyCode::Button1)) {
 			//engine.SetMsaaLevel(1);
 			std::vector<SoundEffect*> effects;
-			effects.push_back(new SoundEffect(Effect::AUTOWAH));
+			effects.push_back(new SoundEffect(Effect::REVERB));
+			effects.push_back(new SoundEffect(Effect::FREQUENCY_SHIFTER));
 			SmartPtr<SoundStream> stream = engine.getSoundManager().play_sound("test", 1, {0, 0, 0}, &effects);
 			
 			Sleep(100);

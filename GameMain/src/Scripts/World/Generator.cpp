@@ -106,81 +106,13 @@ Model* Chunk::GenerateModel() {
     return mod;
 }
 
-Model* Chunk::GenerateSmoothModel(size_t step) {
-    auto mod = new Model();
-    size_t s = Chunk::ChunkSize;
-    size_t loop = s * s * s;
+struct Piece/*OfShit*/ {
+    float d[8];
+    num matIdx = -1;
+    byte Case = 0;
 
-    auto nMeshes = Voxel::GetMaterialCount();
-
-    size_t matIdx = 0;
-
-    auto meshes = std::vector<SmartPtr<Mesh>>(nMeshes);
-
-    for (auto& m : meshes) {
-        m = new Mesh();
-        m->layout = Vertex::GetLayout();
-    }
-
-    bool transp = false;
-
-    Vector3 scale{};
-    scale.x = scale.y = scale.z = step;
-
-    function<void(num, num, num)> func = [&](num a, num b, num c) {
-        Vector3i inChunkPos;
-        inChunkPos.x = a - 1;
-        inChunkPos.y = b - 1;
-        inChunkPos.z = c - 1;
-
-        Vector3i offset = position * s;
-        Vector3i worldPos = inChunkPos + offset;
-
-        float d[8];
-        //auto norms = new Vector3[8];
-        byte _case = 0;
-        byte pow = 1;
-
-        for (byte i = 0; i < 8; i++) {
-            VoxelData vox;
-            auto lpos = inChunkPos + Tables::cubeVertices[i] * step;
-
-            if (!((lpos.x + 1) & (lpos.y + 1) & (lpos.z + 1))) {
-                auto wpos = worldPos + Tables::cubeVertices[i] * step;
-                vox = world->GetVoxelData(wpos);
-            } else {
-                vox = GetData(lpos);
-            }
-
-
-            float depth = vox.depth;
-            if (transp) {
-                if(Voxel::IsTransparent(vox.index)) {
-                    //depth = world->GetTransparentVoxelDepth(wpos, vox.index);
-                } else {
-                    depth = abs(depth);
-                }
-            }
-            d[i] = depth;
-            if (!Voxel::IsVoid(vox.index)) {
-                if (transp) {
-                    if (Voxel::IsTransparent(vox.index)) {
-                        matIdx = vox.index;
-                    }
-                } else {
-                    if (!Voxel::IsTransparent(vox.index)) {
-                        matIdx = vox.index;
-                    }
-                }
-            }
-            if (depth >= 0) {
-                _case += pow;
-            }
-            pow <<= 1; // *= 2
-        }
-
-        if (_case == 0x0 || _case == 0xff) return;
-
+    Mesh* CreateMesh(Vector3 pos,int step) {
+        if (Case == 0 || Case == 255) return new Mesh();
         function<Vector3(int)> edgeToVert = [&](int e) {
             const int* edge = Tables::edges[e];
             auto d1 = d[edge[0]];
@@ -196,10 +128,96 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
             Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]] * step, Tables::cubeVertices[edge[1]] * step, x);
             return p;
         };
-
-        vector<int> edges{};
-
+        Mesh* m = new Mesh();
+        const int* edges = Tables::triangualtionTable[Case];
+       // m.vertexBuffer.reserve(16);
+       // m.indexBuffer.reserve(16);
         for (byte i = 0; i < 16; i++) {
+            if (edges[i] == -1) break;
+            auto vert = edgeToVert(edges[i]);
+            vert += pos;
+            m->vertexBuffer.push_back({ vert, {} });
+            m->indexBuffer.push_back(i);
+        }
+        return m;
+    }
+};
+
+Model* Chunk::GenerateSmoothModel(size_t step) {
+    auto mod = new Model();
+    size_t s = Chunk::ChunkSize;
+    size_t loop = s * s * s;
+
+    auto nMeshes = Voxel::GetMaterialCount();
+
+    auto meshes = std::vector<SmartPtr<Mesh>>(nMeshes);
+
+    for (auto& m : meshes) {
+        m = new Mesh();
+        m->layout = Vertex::GetLayout();
+    }
+
+    Vector3 scale{};
+    scale.x = scale.y = scale.z = step;
+
+    function<void(num, num, num)> func = [&](num a, num b, num c) {
+        Vector3i inChunkPos;
+        inChunkPos.x = a - 1;
+        inChunkPos.y = b - 1;
+        inChunkPos.z = c - 1;
+
+        Vector3i offset = position * s;
+        Vector3i worldPos = inChunkPos + offset;
+
+        //auto norms = new Vector3[8];
+        Piece solid{};
+        Piece transparent[8];
+        byte pow = 1;
+
+        for (byte i = 0; i < 8; i++) {
+            VoxelData vox;
+            auto lpos = inChunkPos + Tables::cubeVertices[i] * step;
+            auto wpos = worldPos + Tables::cubeVertices[i] * step;
+            if (!((lpos.x + 1) & (lpos.y + 1) & (lpos.z + 1))) {
+                vox = world->GetVoxelData(wpos);
+            } else {
+                vox = GetData(lpos);
+            }
+            auto isT = Voxel::IsTransparent(vox.index);
+            auto isV = Voxel::IsVoid(vox.index);
+
+            float depth = vox.depth;
+            solid.d[i] = depth;
+            for (byte j = 0; j < 8; j++) {
+                auto& d = transparent[j].d[i];
+                if (isT) {
+                    if (!isV) {
+                        transparent[j].matIdx = vox.index;
+                    }
+                    d = world->GetTransparentVoxelDepth(wpos, vox.index);
+                } else {
+                    d = abs(depth);
+                }
+                if (d >= 0) {
+                    transparent[j].Case += pow;
+                }
+            }
+            if (!isV && !isT) {
+                    solid.matIdx = vox.index;
+            }
+            if (depth >= 0) {
+                solid.Case += pow;
+            }
+            pow <<= 1; // *= 2
+        }
+
+        //if (_case == 0x0 || _case == 0xff) return;
+
+        
+
+        //vector<int> edges{};
+
+       /* for (byte i = 0; i < 16; i++) {
             auto vert = Tables::triangualtionTable[_case][i];
             if (vert == -1)
                 break;
@@ -212,14 +230,21 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
         m.indexBuffer.resize(n);
         for (byte i = 0; i < n; i++) {
             auto vert = edgeToVert(edges[i]);
-            //var norm = edgeToNorm(edges[i]);
             vert += inChunkPos;
             m.vertexBuffer[i].position = vert;
             m.indexBuffer[i] = i;
-            /*if (ChunkLoader.Smooth)
-                m.Normals.Add(norm.normalized);*/
+        }*/
+        if (solid.matIdx > 0) {
+            auto& m = *solid.CreateMesh(inChunkPos, step);
+            meshes[solid.matIdx]->Combine(m);
+            delete& m;
         }
-        meshes[matIdx]->Combine(m);
+        for (byte i = 0; i < 8; i++) {
+            if (transparent[i].matIdx == -1) continue;
+            auto& m = *transparent[i].CreateMesh(inChunkPos, step);
+            meshes[transparent[i].matIdx]->Combine(m);
+            delete& m;
+        }
     };
 
     auto a = ChunkSize;

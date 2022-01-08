@@ -244,11 +244,11 @@ namespace Game {
 	}
 
 	Shader& SceneRender::GetShader(String name) {
-		auto it = shaders.find(name);
-		if (it != shaders.end()) {
-			return *it->second;
+		try {
+			return *shaders.at(name);
+		} catch (std::out_of_range) {
+			THROW_INVALID_ARG_EXCEPTION("name");
 		}
-		THROW_INVALID_ARG_EXCEPTION("name");
 	}
 
 	SmartPtr<Material> SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
@@ -257,11 +257,11 @@ namespace Game {
 		return mat;
 	}
 	SmartPtr<Material> SceneRender::GetMaterial(String name) {
-		auto it = materials.find(name);
-		if (it != materials.end()) {
-			return it->second;
+		try {
+			return materials.at(name);
+		} catch (std::out_of_range) {
+			THROW_INVALID_ARG_EXCEPTION("name");
 		}
-		THROW_INVALID_ARG_EXCEPTION("name");
 	}
 	void SceneRender::AddDrawable(UI::IDrawable* txt) {
 		texts.insert({ txt, true });

@@ -65,7 +65,7 @@ class ChunkGenerator : public MonoScript {
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[4] = { 2, 3, 5, 6 };
+	int lodDistances[4] = { 2, 4, 5, 6 };
 
 	void Start() {
 #ifdef _DEBUG

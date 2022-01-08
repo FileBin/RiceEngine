@@ -66,13 +66,13 @@ public:
 			auto k = keys.front();
 			keys.pop();
 			if (predicate(k)) {
-				auto it = chunkMap.find(k);
-				chunkMap.unsafe_erase(it);
-				it->second.Release();
-				auto hIt = heightMaps.find(ToTerrainPos(k));
-				if (hIt == heightMaps.end()) continue;
-				heightMaps.unsafe_erase(hIt);
-				hIt->second.Release();
+				chunkMap[k].Release();
+				chunkMap.unsafe_erase(k);
+				auto tP = ToTerrainPos(k);
+				auto& hm = heightMaps[tP];
+				if (hm.IsNull()) continue;
+				hm.Release();
+				heightMaps.unsafe_erase(tP);
 			}
 		}
 	}
@@ -88,7 +88,7 @@ public:
 			chunk.Release();
 			auto hIt = heightMaps.find(hmPos);
 			if (hIt != heightMaps.end()) {
-				auto hm = hIt->second;
+				auto& hm = hIt->second;
 				hm->Decrement();
 				SaveHeightMap(*hm);
 				heightMaps.unsafe_erase(hmPos);
@@ -156,14 +156,20 @@ public:
 	}
 
 	SmartPtr<Chunk> GetChunk(Vector3i chunkPos) {
-		auto it = chunkMap.find(chunkPos);
+		/*auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
 			return it->second;
 		} else {
 			auto ch = GenerateChunk(chunkPos);
 			chunkMap.insert(chunkMap.end(), { chunkPos, ch });
 			return ch;
+		}*/
+		auto& ch = chunkMap[chunkPos];
+		if (ch.IsNull()) {
+			ch = GenerateChunk(chunkPos);
+			//chunkMap.insert(chunkMap.end(), { chunkPos, ch });
 		}
+		return ch;
 	}
 
 	float GetTransparentVoxelDepth(Vector3i worldPos, size_t idx) {
@@ -195,7 +201,12 @@ public:
 
 	SmartPtr<HeightMap> GetHeightMap(Vector3i chunkPos) {
 		Vector2i pos{ chunkPos.x, chunkPos.z };
-		auto it = heightMaps.find(pos);
+		auto& hm = heightMaps[pos];
+		if (hm.IsNull()) {
+			hm = CreateHeightMap(pos);
+		}
+		return hm;
+		/*auto it = heightMaps.find(pos);
 		if (it != heightMaps.end()) {
 			if (it->second.Get()) {
 				return it->second;
@@ -205,7 +216,7 @@ public:
 			auto hm = CreateHeightMap(pos);
 			heightMaps.insert(heightMaps.end(), { pos, hm });
 			return hm;
-		}
+		}*/
 	}
 #pragma endregion
 #pragma region PrivateFunctions
