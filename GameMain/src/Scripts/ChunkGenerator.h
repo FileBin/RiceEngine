@@ -158,7 +158,7 @@ class ChunkGenerator : public MonoScript {
 						pooledCh.busy->unlock();
 						continue;
 					}
-					if (Skip(pooledCh.pos)) { pooledCh.busy->unlock(); nSkips++; continue; }
+					//if (Skip(pooledCh.pos)) { pooledCh.busy->unlock(); nSkips++; continue; }
 					if (CheckChunkVisible(locPos)) {
 						int lod = lodIdx;
 #ifdef _DEBUG
@@ -260,9 +260,9 @@ class ChunkGenerator : public MonoScript {
 					auto model = ch->GetModel(lod);
 					pooledCh.lod = lod;
 					//sRen.WaitRendering();
-					std::lock_guard lock(sRen.Lock(thIdx));
 					pooledCh.pos = chPos;
 					transform->position = World::TransformToWorldPos(chPos);
+					std::lock_guard lock(sRen.Lock(thIdx));
 					render->SetModel(model);
 					for (auto i = 0; i < Voxel::GetMaterialCount(); i++) {
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);

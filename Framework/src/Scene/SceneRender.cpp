@@ -60,9 +60,10 @@ namespace Game {
 
 				Buffer *ib, *vb;
 				auto iIt = indexBuffers.find(mesh);
-				if (iIt != indexBuffers.end()) {
+				auto vIt = vertexBuffers.find(mesh);
+				if (iIt != indexBuffers.end() && vIt != vertexBuffers.end()) {
 					ib = iIt->second;
-					vb = vertexBuffers.at(mesh);
+					vb = vIt->second;
 				} else {
 					continue;
 				}
