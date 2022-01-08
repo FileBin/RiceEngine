@@ -37,6 +37,7 @@ namespace Game {
         void setPropertyfv(ALenum property, const ALfloat* values);
         void setPropertyiv(ALenum property, const ALint* values);
         void setEfxReverbPreset(EFXEAXREVERBPROPERTIES preset);
+        void setReverbPreset(EFXEAXREVERBPROPERTIES preset);
         ALuint effectID;
         ALuint slotID;
     };

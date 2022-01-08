@@ -50,7 +50,7 @@ namespace Game {
 		auto cam = camera;
 		while (true) {
 			setListenerPosition(cam->position);
-			setListenerOrientation(cam->rotation * Vector3::forward, cam->rotation * Vector3::up);
+			setListenerOrientation(cam->rotation * Vector3::forward, cam->rotation * Vector3::down);
 			Sleep(30);
 		}
 	}
@@ -124,11 +124,14 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f pos) {
+	void SoundManager::sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f pos, std::vector<SoundEffect*>* effects) {
 		try {
 			ogg->playOgg(path);
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
+			if (effects != nullptr) {
+				ogg->applyEffectChain(effects);
+			}
 			playSoundStream(ogg);
 		}
 		catch (std::wstring e) {
@@ -136,11 +139,14 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos) {
+	void SoundManager::raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos, std::vector<SoundEffect*>* effects) {
 		try {
 			ogg->playRaw(f, beginning, end);
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
+			if (effects != nullptr) {
+				ogg->applyEffectChain(effects);
+			}
 			playSoundStream(ogg);
 		}
 		catch (std::wstring e) {
@@ -148,15 +154,15 @@ namespace Game {
 		}
 	}
 
-	SmartPtr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
+	SmartPtr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos, std::vector<SoundEffect*>* effects) {
 		SmartPtr<SoundStream> ogg = new SoundStream();;
-		concurrency::create_task([&, ogg]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
+		concurrency::create_task([&, ogg, name, volume, pos, effects]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos, effects); });
 		return ogg;
 	 }
 
-	SmartPtr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos) {
+	SmartPtr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos, std::vector<SoundEffect*>* effects) {
 		 SmartPtr<SoundStream> ogg = new SoundStream();
-		 concurrency::create_task([&, ogg, f]() {raw_sound_thread(ogg, f, beginning, end, volume, pos); });
+		 concurrency::create_task([&, ogg, f, beginning, end, volume, pos, effects]() {raw_sound_thread(ogg, f, beginning, end, volume, pos, effects); });
 		 return ogg;
 	 }
 

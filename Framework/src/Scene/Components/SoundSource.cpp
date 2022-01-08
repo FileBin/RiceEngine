@@ -21,12 +21,10 @@ namespace Game {
 		setPosition(transform->position);
 	}
 	void SoundSource::play(char* name, float volume) {
-		ogg = soundManager->play_sound(name, volume, transform->position);
-		ogg->applyEffectChain(&effects);
+		ogg = soundManager->play_sound(name, volume, transform->position, &effects);
 	}
 	void SoundSource::play(FrequencyFunc f, dbl beginning, dbl end, float volume) {
-		ogg = soundManager->play_raw(f, beginning, end, volume, transform->position);
-		ogg->applyEffectChain(&effects);
+		ogg = soundManager->play_raw(f, beginning, end, volume, transform->position, &effects);
 	}
 	void SoundSource::setPosition(Vector3f position) {
 		if (!ogg.IsNull()) {

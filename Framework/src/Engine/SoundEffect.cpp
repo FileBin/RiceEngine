@@ -57,4 +57,20 @@ namespace Game {
         alCall(alEffectf, effectID, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, preset.flRoomRolloffFactor);
         alCall(alEffecti, effectID, AL_EAXREVERB_DECAY_HFLIMIT, preset.iDecayHFLimit);
     }
+
+    void SoundEffect::setReverbPreset(EFXEAXREVERBPROPERTIES preset) {
+        alCall(alEffectf, effectID, AL_REVERB_DENSITY, preset.flDensity);
+        alCall(alEffectf, effectID, AL_REVERB_DIFFUSION, preset.flDiffusion);
+        alCall(alEffectf, effectID, AL_REVERB_GAIN, preset.flGain);
+        alCall(alEffectf, effectID, AL_REVERB_GAINHF, preset.flGainHF);
+        alCall(alEffectf, effectID, AL_REVERB_DECAY_TIME, preset.flDecayTime);
+        alCall(alEffectf, effectID, AL_REVERB_DECAY_HFRATIO, preset.flDecayHFRatio);
+        alCall(alEffectf, effectID, AL_REVERB_REFLECTIONS_GAIN, preset.flReflectionsGain);
+        alCall(alEffectf, effectID, AL_REVERB_REFLECTIONS_DELAY, preset.flReflectionsDelay);
+        alCall(alEffectf, effectID, AL_REVERB_LATE_REVERB_GAIN, preset.flLateReverbGain);
+        alCall(alEffectf, effectID, AL_REVERB_LATE_REVERB_DELAY, preset.flLateReverbDelay);
+        alCall(alEffectf, effectID, AL_REVERB_AIR_ABSORPTION_GAINHF, preset.flAirAbsorptionGainHF);
+        alCall(alEffectf, effectID, AL_REVERB_ROOM_ROLLOFF_FACTOR, preset.flRoomRolloffFactor);
+        alCall(alEffecti, effectID, AL_REVERB_DECAY_HFLIMIT, preset.iDecayHFLimit);
+    }
 }

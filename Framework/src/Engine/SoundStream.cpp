@@ -73,7 +73,12 @@ namespace Game {
     }
 
     void SoundStream::setPosition(Vector3f position) {
-        alCall(alSource3f, source, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+        if (canCalculateVelocity) {
+            alCall(alSource3f, source, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+        }
+        else {
+            canCalculateVelocity = true;
+        }
         prevPos.x = position.x;
         prevPos.y = position.y;
         prevPos.z = position.z;
