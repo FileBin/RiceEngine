@@ -110,7 +110,7 @@ template <> struct std::equal_to<Vector2i> {
 #pragma region SmartPtr
 template <typename T> struct std::hash<SmartPtr<T>> {
 	size_t operator()(const SmartPtr<T>& a) const {
-		return hash<ULONG>()((ULONG)a.Get());
+		return (size_t)std::hash<T*>()(a.Get());
 	}
 };
 #pragma endregion

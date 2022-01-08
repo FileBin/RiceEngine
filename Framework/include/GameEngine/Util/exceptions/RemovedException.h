@@ -16,14 +16,8 @@ namespace Game {
 		template<typename ptrT = void*>
 		RemovedException(ptrT whatPtr, int line_, const char* file_) : Exception("Pointer was removed", line_, file_), type(typeid(whatPtr)) {
 			ptr = (void*)whatPtr;
-			std::string info = "";
-			info.append("TypeInfo: ");
-			info.append(GetTypeInfo().name());
-			info.append("\n");
-			info.append("Pointer: ");
-			info.append(std::to_string((ULONG)GetPointer()));
-			info.append("\n");
-			SetInfo(info.c_str());
+			std::string info = std::format("TypeInfo: {}\nPointer: {:#x}\n", GetTypeInfo().name(), (DWORD64)GetPointer());
+			SetInfo(info);
 		}
 
 		std::type_index GetTypeInfo() { return type; }

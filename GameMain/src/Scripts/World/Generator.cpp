@@ -3,6 +3,8 @@
 #include "Chunk.h"
 #include "World.h"
 #include <Scripts\Util\Tables.h>
+#include "Scripts\Util\Util.h"
+#include <GameEngine\Math.h>
 
 using std::function, std::vector;
 
@@ -141,12 +143,20 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
 
         for (byte i = 0; i < 8; i++) {
             VoxelData vox;
-            auto pos = worldPos + Tables::cubeVertices[i] * step;
-            vox = world->GetVoxelData(pos);
+            auto lpos = inChunkPos + Tables::cubeVertices[i] * step;
+
+            if (!((lpos.x + 1) & (lpos.y + 1) & (lpos.z + 1))) {
+                auto wpos = worldPos + Tables::cubeVertices[i] * step;
+                vox = world->GetVoxelData(wpos);
+            } else {
+                vox = GetData(lpos);
+            }
+
+
             float depth = vox.depth;
             if (transp) {
                 if(Voxel::IsTransparent(vox.index)) {
-                    depth = world->GetTransparentVoxelDepth(pos, vox.index);
+                    //depth = world->GetTransparentVoxelDepth(wpos, vox.index);
                 } else {
                     depth = abs(depth);
                 }
@@ -177,6 +187,11 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
             auto d2 = d[edge[1]];
 
             auto x = GetPoint(d1, d2);
+
+            if (x < 0.03)
+                x = 0;
+            else if (x > 0.97)
+                x = 1;
 
             Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]] * step, Tables::cubeVertices[edge[1]] * step, x);
             return p;
@@ -216,9 +231,9 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
         }
     }
 
-    transp = true;
+   // transp = true;
 
-    step *= 4;
+    /*step *= 4;
     step = min(step, 8);
 
     for (int i = 0; i < a; i += step) {
@@ -227,7 +242,7 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
                 func(i, j, k);
             }
         }
-    }
+    }*/
 
     mod->SetSubMeshesCount(nMeshes);
     for (size_t i = 0; i < nMeshes; i++) {

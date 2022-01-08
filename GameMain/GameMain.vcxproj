@@ -173,6 +173,7 @@
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Scripts\Util\Util.cpp" />
     <ClCompile Include="src\Scripts\World\Generator.cpp" />
     <ClCompile Include="src\Scripts\World\World.cpp" />
   </ItemGroup>
@@ -188,6 +189,7 @@
     <ClInclude Include="src\Scripts\UI\DebugText.h" />
     <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />
     <ClInclude Include="src\Scripts\Util\Tables.h" />
+    <ClInclude Include="src\Scripts\Util\Util.h" />
     <ClInclude Include="src\Scripts\World\Chunk.h" />
     <ClInclude Include="src\Scripts\World\FlatGenerator.h" />
     <ClInclude Include="src\Scripts\World\HeightMap.h" />

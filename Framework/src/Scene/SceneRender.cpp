@@ -29,6 +29,8 @@ namespace Game {
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto model = it->first;
 
+			if (model.IsNull()) continue;
+
 			ConstantBufferData cb = {};
 
 			auto cam = cameras[activeCameraIdx];
@@ -84,7 +86,7 @@ namespace Game {
 			transparentQ.pop();
 			auto m = pair.first;
 
-			if (!m->CheckVisiblity(pair.second)) continue;
+			if (m.IsNull() || !m->CheckVisiblity(pair.second)) continue;
 
 			device->LoadBufferSubresource(constantBuffer, pair.second);
 			device->SetActiveVSConstantBuffer(constantBuffer);

@@ -67,7 +67,7 @@ public:
 		while (!keys.empty()) {
 			auto k = keys.front();
 			keys.pop();
-			if (!predicate(k)) {
+			if (predicate(k)) {
 				auto it = chunkMap.find(k);
 				chunkMap.unsafe_erase(it);
 				it->second.Release();
