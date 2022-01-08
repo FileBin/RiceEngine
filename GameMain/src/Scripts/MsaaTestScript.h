@@ -15,7 +15,7 @@ class MsaaTestScript : public ScriptBase {
 			//engine.getSoundManager().play_music("test", false);
 			engine.getSoundManager().play_raw([](
 				double time) -> char {
-					return 127 * sin((2 * M_PI * 440 + 200 * abs(sin(abs(cos(abs(sin(time * 2)) * 2)) * 2))) * time); }, 0, 10, 1, { 0, 0, 0 });
+					return 127 * sin((2 * M_PI * 440 + 200 * abs(sin(abs(cos(abs(sin(time * 2)) * 2)) * 2))) * time); }, 0, 60, 1, { 0, 0, 0 });
 		} else if (InputManager::GetKey(KeyCode::Button2)) {
 			//engine.SetMsaaLevel(2);
 		} else if (InputManager::GetKey(KeyCode::Button3)) {

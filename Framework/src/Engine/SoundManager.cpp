@@ -27,6 +27,8 @@ namespace Game {
 		camera = cam;
 		concurrency::create_task([this]() {music_thread(); });
 		concurrency::create_task([this]() {update_thread(); });
+
+		Log::log(Log::INFO, L"OpenAL init success");
 	}
 
 	SoundManager::~SoundManager() {
@@ -71,7 +73,7 @@ namespace Game {
 		const ALCchar* device = devices, * next = devices + 1;
 		size_t len = 0;
 
-		Log::log(Log::INFO, L"Devices list:");
+		Log::log(Log::INFO, L"OpenAL Devices list:");
 		Log::log(Log::INFO, L"----------");
 		while (device && *device != '\0' && next && *next != '\0') {
 			Log::log(Log::INFO, Util::Utf8ToWstring(std::string(device)));

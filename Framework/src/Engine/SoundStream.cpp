@@ -34,7 +34,7 @@ namespace Game {
         alSourcef(source, AL_GAIN, 0);
     }
 
-    void SoundStream::playRaw(FrequencyFunc f, double beginning, double end)
+    void SoundStream::playRaw(FrequencyFunc f, dbl beginning, dbl end)
     {
         raw = true;
         rawFunc = f;
