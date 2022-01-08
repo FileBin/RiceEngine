@@ -147,14 +147,14 @@ namespace Game {
 	}
 
 	SmartPtr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos) {
-		SmartPtr<SoundStream> ogg;
-		concurrency::create_task([&]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
+		SmartPtr<SoundStream> ogg = new SoundStream();;
+		concurrency::create_task([&, ogg]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos); });
 		return ogg;
 	 }
 
 	SmartPtr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos) {
 		 SmartPtr<SoundStream> ogg = new SoundStream();
-		 concurrency::create_task([&]() { raw_sound_thread(ogg, f, beginning, end, volume, pos); });
+		 concurrency::create_task([&, ogg, f]() {raw_sound_thread(ogg, f, beginning, end, volume, pos); });
 		 return ogg;
 	 }
 

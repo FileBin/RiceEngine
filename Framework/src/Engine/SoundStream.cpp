@@ -169,7 +169,20 @@ namespace Game {
 
     bool SoundStream::stream(ALuint buffer)
     {
-        if (!raw) {
+        if (raw) {
+            if (currentPos < targetPos) {
+                for (long i = 0; i < BUFFER_SIZE; i++) {
+                    pcm[i] = rawFunc(currentPos * step);
+                    currentPos++;
+                }
+                alCall(alBufferData, buffer, AL_FORMAT_MONO16, pcm, BUFFER_SIZE, sampleRate);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
             int  size = 0;
             int  section;
             int  result;
@@ -177,7 +190,7 @@ namespace Game {
             while (size < BUFFER_SIZE)
             {
                 result = ov_read(&oggStream, pcm + size, BUFFER_SIZE - size, 0, 2, 1, &section);
-
+                
                 if (result > 0)
                     size += result;
                 else
@@ -193,9 +206,6 @@ namespace Game {
             alCall(alBufferData, buffer, format, pcm, size, vorbisInfo->rate);
 
             return true;
-        }
-        else {
-            return currentPos < targetPos;
         }
     }
 
