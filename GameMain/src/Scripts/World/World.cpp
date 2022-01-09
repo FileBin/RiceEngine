@@ -44,7 +44,8 @@ void Chunk::Generate() {
 
 VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
     auto t = voxelPos + position * ChunkSize;
-    auto hmap = world->GetHeightMap(position);
+    if (hmap.IsNull())
+        hmap = world->GetHeightMap(position);
     std::lock_guard lock(hmap->GetMutex());
     if (hmap.IsNull())
         hmap = world->GetHeightMap(position);

@@ -20,6 +20,7 @@ class Chunk {
 private:
     WorldGenerator* gen;
     std::vector<SmartPtr<Model>> model { LOD_COUNT };
+    SmartPtr<HeightMap> hmap;
     World* world;
 
     std::mutex lock;
@@ -42,9 +43,10 @@ public:
         return 0;
     }
 
-    Chunk(WorldGenerator* gen, Vector3i pos, World* world) {
+    Chunk(WorldGenerator* gen, Vector3i pos, SmartPtr<HeightMap> _hmap, World* world) {
         voxels.resize((INT64)ChunkSize * ChunkSize * ChunkSize);
         this->gen = gen;
+        hmap = _hmap;
         this->position = pos;
         this->world = world;
     }
@@ -71,8 +73,8 @@ public:
     }
 
     float GetTranspDepth(Vector3i pos, size_t index) {
-        auto& mp = transpDepth.at(index);
-        return mp.at(pos);
+        auto& mp = transpDepth[index];
+        return mp[pos];
        /* auto it = transpDepth.find(index);
         if (it != transpDepth.end()) {
             auto mp = it->second;

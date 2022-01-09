@@ -9,10 +9,15 @@ struct PixelShaderInput
     float3 world_pos : POSITION4;
 };
 
-Texture2D tex;
-SamplerState samp;
+Texture2D depthBuf : register(t0);
 
-cbuffer CBuffer {
+Texture2D noiseTex : register(t1);
+SamplerState noiseSamp : register(s1);
+
+#define USE_TEXTURE 1
+
+cbuffer CBuffer : register(b0) 
+{
     float time;
     float4 Resolution;
 }
@@ -46,6 +51,9 @@ float noise(float2 pos)
 
 float simplexNoise(float2 uv)
 {
+    #if USE_TEXTURE
+    return noiseTex.Sample(noiseSamp, uv * .05) * .8;
+    #else
     float val = 0;
     val += noise(uv) * .75;
     val += noise(uv * 2) * .25;
@@ -53,6 +61,7 @@ float simplexNoise(float2 uv)
     val += noise(uv * 8) * .0625;
     val *= .8;
     return val;
+    #endif
 }
 
 float waterN(float2 texcoord)
@@ -72,29 +81,23 @@ float3 norm(float2 pos)
 
 }
 
-float3 palette(float val, float p, float smoothing, float3 col) {
-    float3 col1 = lerp(col, .8, clamp((val + .005 - p) / (smoothing + .000001) + .1, 0, 1));
-    return lerp(col1, 1., clamp((val - p) / (smoothing + .000001) + .1, 0, 1));
-}
-
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     float2 res = Resolution.xy; //float2(800, 600);
+    
     float3 n = input.norm;
     
-    float2 texcoord = input.world_pos.xz * .25;
+    float2 texcoord = input.world_pos.xz * .7;
     float3 nn = norm(texcoord);
     
-   // return float4(nn.xzy * .5 + .5, 1);
-    
-    float3 nx =-nn.x * input.xAxis * .3;
-    float3 nz =-nn.z * input.zAxis * .3;
+    float3 nx = nn.x * input.xAxis * .3;
+    float3 nz = nn.z * input.zAxis * .3;
     float3 ny = nn.y * input.norm;
     
     n = normalize(nx + ny + nz);
     
     int3 loc = int3(input.pos.xy, 0);
-    float depth = (tex.Load(loc));
+    float depth = (depthBuf.Load(loc));
     float pixelDepth = input.pos.z;
     if (pixelDepth > depth)
         return 0;
@@ -103,7 +106,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float depthval = pixelDepth * 10 * (input.pos.w * input.pos.w + depth * depth);
     
     float emission = .2;
-    float glossines = 32;
     float specular = 1.;
     float3 col = lerp(float3(.1, .15, .5), float3(.25, .55, .77), exp(-depthval));
    
@@ -114,37 +116,32 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float em = emission;
 	
     float spec = max(dot(reflect(light, n), -eye), 0);
-    spec = pow(spec, glossines + 1);
+    //glossiness 32
+    spec *= spec; //2
+    //spec *= spec; //4
+    //spec *= spec; //8
+    //spec *= spec; //16
+    //spec *= spec; //32
     float3 s = 1 - col;
     s *= spec;
     s *= specular;
-    if (length(s) > .5)
-        s = 1;
-    else
-        s = 0;
+    s = s.xxx + s.yyy + s.zzz;
+    s *= .3333333;
+    s = clamp((s-.5)*2000, 0., 1.);
+    col += s;
    
     float noise = waterN(texcoord);
-   // float Nmask = simplexNoise(texcoord * .005);
     depth = 1 - input.pos.z;
     depth *= (input.pos.w * input.pos.w);
     float val = dot(nn, float3(0, 1, 0));
     float3 wcol = col;
-    float k = .997; //+ Nmask * .01;
-    
-    float antiAliasF = dot(n, float3(0, 1, 0));
-    antiAliasF = pow(antiAliasF, 10.);
-    antiAliasF = clamp(antiAliasF, .25, 1);
-    float smoothF = clamp(clamp(depth, 0, antiAliasF + .5) +  antiAliasF * depth * .2 - .2, .0005, 1.);
-    //return float4(smoothF.xxx, 1);
-    
-    //Waves
-    col = palette(val,
-    k, 
-    clamp(smoothF * .2 - .01, .001, .2),
-    col);
+    float k = .89;
+    if (val < k)
+        col = 1.;
+    else if (val < k + .05)
+        col = lerp(col,1.,.8);
+    col = lerp(col, wcol, clamp(depth, 0, 1));
     float alpha = 1. - exp(-depthval * 10.);
-    
-    //Borders
     if (alpha - noise < .2)
     {
         col = 1.;
@@ -155,6 +152,5 @@ float4 main(PixelShaderInput input) : SV_TARGET
         col = lerp(wcol, 1., .8);
         alpha = .8;
     }
-    col += s;
     return float4(col, alpha);
 }

@@ -201,8 +201,7 @@ public:
 #pragma region PrivateFunctions
 private:
 	SmartPtr<Chunk> GenerateChunk(Vector3i chunkPos) {
-		//auto hm = GetHeightMap(chunkPos);
-		auto chunk = new Chunk(&generator, chunkPos, this);
+		auto chunk = new Chunk(&generator, chunkPos, GetHeightMap(chunkPos), this);
 		//hm->Increment();
 		return chunk;
 	}

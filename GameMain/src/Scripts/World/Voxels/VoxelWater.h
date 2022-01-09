@@ -22,9 +22,9 @@ struct VoxelWater : public Voxel {
 
     static SmartPtr<Material> CreateMaterial(SceneRender& ren) {
         auto shader = ren.GetShader(L"Water");
-
         auto mat = ren.CreateMaterial(L"Water", shader, { Var(L"time"), Var(L"resolution") });
         mat->AddTexture(&ren.GetDepthBufferTex());
+        mat->AddTexture(&ren.CreateTexture(L"img/perlin.png"));
         mat->renderType = RenderType::Transparent;
         mat->UpdateBuffer();
         return mat;
