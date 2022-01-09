@@ -73,11 +73,9 @@ public:
 				auto tP = ToTerrainPos(k);
 				auto hm = heightMaps[tP];
 				if (hm.IsNull()) continue;
-				hm->GetMutex().lock();
 				hmlock.lock();
 				heightMaps.unsafe_erase(tP);
 				hmlock.unlock();
-				hm->GetMutex().unlock();
 				hm.Release();
 			}
 		}

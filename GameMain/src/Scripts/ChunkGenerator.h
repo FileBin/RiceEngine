@@ -53,7 +53,7 @@ struct PooledChunk {
 class ChunkGenerator : public MonoScript {
 	vector<bool> loading{};
 	//Chunk* chunk;
-	int renderDistance = 9;
+	int renderDistance = 10;
 	World* world;
 	WorldGenerator* generator;
 

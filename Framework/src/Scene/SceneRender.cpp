@@ -24,10 +24,10 @@ namespace Game {
 		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale);
 		cb.View = cam.GetTransformationMatrix();
 		cb.Projection = cam.GetProjectionMatrix();
-		//cb.World.c41 = clock;
 
 		device->LoadBufferSubresource(constantBuffer, cb);
 		device->SetActiveVSConstantBuffer(constantBuffer);
+		device->SetActiveVSConstantBuffer(pMat->GetBuffer(), 1);
 
 		device->SetActiveVertexBuffer<Vertex>(pVertexBuffer.Get());
 		device->SetActiveIndexBuffer(pIndexBuffer.Get());

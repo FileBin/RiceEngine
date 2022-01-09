@@ -116,11 +116,11 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float em = emission;
 	
     float spec = max(dot(reflect(light, n), -eye), 0);
-    //glossiness 32
+    //glossiness 16
     spec *= spec; //2
-    //spec *= spec; //4
-    //spec *= spec; //8
-    //spec *= spec; //16
+    spec *= spec; //4
+    spec *= spec; //8
+    spec *= spec; //16
     //spec *= spec; //32
     float3 s = 1 - col;
     s *= spec;

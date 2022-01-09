@@ -5,6 +5,12 @@ cbuffer ConstantBuffer : register(b0)
     float4x4 Projection;
 }
 
+cbuffer CBuffer : register(b1)
+{
+    float time;
+    float4 Resolution;
+}
+
 struct PixelShaderInput
 {
     float4 pos : SV_POSITION;
@@ -57,8 +63,6 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
     float3 light = float3(2, -5, -1);
     light = normalize(light);
     float4x4 WV = World;
-    float time = WV._14;
-    WV._14 = 0;
     
     output.light = mul(float4(light, 0), View);
     
