@@ -8,18 +8,17 @@
 #include "Voxels/Voxel.h"
 #include "WorldGenerator.h"
 #include <GameEngine/Vectors/Hasher.h>
+#include "HeightMap.h"
 
 using namespace Game;
 using std::map, std::unordered_map;
 
-class HeightMap;
 class World;
 
 class Chunk {
 #define LOD_COUNT 5
 private:
     WorldGenerator* gen;
-    SmartPtr<HeightMap> hmap;
     std::vector<SmartPtr<Model>> model { LOD_COUNT };
     World* world;
 
@@ -43,15 +42,17 @@ public:
         return 0;
     }
 
-    Chunk(WorldGenerator* gen, Vector3i pos, SmartPtr<HeightMap> _map, World* world) {
+    Chunk(WorldGenerator* gen, Vector3i pos, World* world) {
         voxels.resize((INT64)ChunkSize * ChunkSize * ChunkSize);
         this->gen = gen;
         this->position = pos;
-        this->hmap = _map;
         this->world = world;
     }
 
     ~Chunk() {
+        std::lock_guard l(lock);
+       // hmap.Release();
+        voxels.clear();
         //std::lock_guard guard(lock);
         for (auto it : model) {
             it.Release();

@@ -26,6 +26,6 @@ namespace Game {
 		SmartPtr<Material> GetMaterial(size_t subMeshIdx) const;
 	private:
 		SmartPtr<Model> model;
-		concurrency::concurrent_vector<SmartPtr<Material>> materials{};
+		std::vector<SmartPtr<Material>> materials{};
 	};
 }

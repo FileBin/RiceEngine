@@ -169,7 +169,6 @@ class ChunkGenerator : public MonoScript {
 						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
-							std::lock_guard lock(sRen.Lock(thIdx));
 							render->SetModel(model);
 							pooledCh.lod = lod;
 						}
@@ -223,12 +222,9 @@ class ChunkGenerator : public MonoScript {
 				//ReorderPool();
 				nSkips++;
 				int addedRadius = ceil((playerChunk - newPlayerChunk).Length());
-				auto& l = sRen.Lock(thIdx);
-				l.lock();
 				world->UnloadChunks([&](Vector3i wpos) {
 					return !CheckChunkVisible(wpos - newPlayerChunk, addedRadius);
 					});
-				l.unlock();
 				playerChunk = newPlayerChunk;
 				while (!toLoad.empty()) toLoad.pop();
 				for (auto j = 0; j < nPos; j++) {
@@ -262,7 +258,6 @@ class ChunkGenerator : public MonoScript {
 					//sRen.WaitRendering();
 					pooledCh.pos = chPos;
 					transform->position = World::TransformToWorldPos(chPos);
-					std::lock_guard lock(sRen.Lock(thIdx));
 					render->SetModel(model);
 					for (auto i = 0; i < Voxel::GetMaterialCount(); i++) {
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);
@@ -276,7 +271,6 @@ class ChunkGenerator : public MonoScript {
 						if (it != posStates.end())
 							posStates.erase(it);
 						//sRen.WaitRendering();
-						std::lock_guard lock(sRen.Lock(thIdx));
 						pooledCh.obj->Disable();
 						//render->DeleteModel();
 						//concurrency::create_task([&]() { world->UnloadChunk(pooledCh.pos); });

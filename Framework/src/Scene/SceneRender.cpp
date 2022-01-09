@@ -16,117 +16,61 @@ namespace Game {
 	void SceneRender::BeginFrame() {
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
 	}
+
+	void SceneRender::RenderingMesh::Draw(SceneRender* ren, Camera& cam) {
+		auto device = ren->device;
+		auto constantBuffer = ren->constantBuffer.Get();
+		ConstantBufferData cb = {};
+		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale);
+		cb.View = cam.GetTransformationMatrix();
+		cb.Projection = cam.GetProjectionMatrix();
+		//cb.World.c41 = clock;
+
+		device->LoadBufferSubresource(constantBuffer, cb);
+		device->SetActiveVSConstantBuffer(constantBuffer);
+
+		device->SetActiveVertexBuffer<Vertex>(pVertexBuffer.Get());
+		device->SetActiveIndexBuffer(pIndexBuffer.Get());
+		device->SetActivePSConstantBuffer(pMat->GetBuffer());
+		device->SetActiveShader(pMat->GetShader());
+		device->SetPSTextures(pMat->GetTextures());
+
+		device->Draw();
+	}
+
 	bool SceneRender::Draw() {
 		std::unique_ptr<std::lock_guard<std::mutex>> locks[0x100];
-		for (int i = 0; i < 0x100; i++) {
-			locks[i] = std::make_unique<std::lock_guard<std::mutex>>(isLoading[i]);
-		}
-		auto cam = cameras[activeCameraIdx];
+		auto cam = *cameras[activeCameraIdx];
 		queue<pair<SmartPtr<Mesh>, ConstantBufferData>> transparentQ;
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
-		auto n = models.size();
-		float time = clock() * .001;
-		for (auto it = models.begin(); it != models.end(); it++) {
-			auto model = it->first;
-			if (model.IsNull() || model->pPos == nullptr || model->pRot == nullptr || model->pScale == nullptr) continue;
-			ConstantBufferData cb = {};
-
-			cb.World = Matrix4x4::TRS(*model->pPos, *model->pRot, *model->pScale);
-			cb.View = cam->GetTransformationMatrix();
-			cb.Projection = cam->GetProjectionMatrix();
-			cb.World.c41 = time;
-
-
-			device->LoadBufferSubresource(constantBuffer, cb);
-			device->SetActiveVSConstantBuffer(constantBuffer);
-
-			auto m = model->GetSubMeshesCount();
-			for (size_t j = 0; j < m; j++) {
-				auto mesh = model->GetSubMesh(j);
-
-				auto matIt = materialMap.find(mesh.Get());
-				if (matIt == materialMap.end()) continue;
-				auto mat = matIt->second;
-
-				if (mat.IsNull()) continue;
-
-				if (mat->renderType == RenderType::Transparent) {
-					transparentQ.push({ mesh, cb });
-					continue;
-				}
-
-				if (!mesh->CheckVisiblity(cb)) continue;
-
-				Buffer *ib, *vb;
-				auto iIt = indexBuffers.find(mesh);
-				auto vIt = vertexBuffers.find(mesh);
-				if (iIt != indexBuffers.end() && vIt != vertexBuffers.end()) {
-					ib = iIt->second;
-					vb = vIt->second;
-				} else {
-					continue;
-				}
-
-				device->SetActiveVertexBuffer<Vertex>(vb);
-				device->SetActiveIndexBuffer(ib);
-
-				device->SetActivePSConstantBuffer(mat->GetBuffer());
-				device->SetActiveShader(mat->GetShader());
-				device->SetPSTextures(mat->GetTextures());
-				
-				device->Draw();
-			}
+		//float time = clock() * .001;
+		m_mutex.lock();
+		for (auto& pair : renderingMeshes) {
+			pair.second->Draw(this, cam);
 		}
+
 		device->SetBlendState(true);
 		device->UnsetDepthBuffer();
-		while (!transparentQ.empty()) {
-			auto pair = transparentQ.front();
-			transparentQ.pop();
-			auto m = pair.first;
-
-			if (m.IsNull() || !m->CheckVisiblity(pair.second)) continue;
-
-			device->LoadBufferSubresource(constantBuffer, pair.second);
-			device->SetActiveVSConstantBuffer(constantBuffer);
-
-			Buffer* ib, * vb;
-			auto iIt = indexBuffers.find(m);
-			if (iIt != indexBuffers.end()) {
-				ib = iIt->second;
-				vb = vertexBuffers.at(m);
-			} else {
-				continue;
-			}
-
-			device->SetActiveVertexBuffer<Vertex>(vb);
-			device->SetActiveIndexBuffer(ib);
-
-			auto matIt = materialMap.find(m.Get());
-			if (matIt == materialMap.end()) continue;
-			auto mat = matIt->second;
-			device->SetActivePSConstantBuffer(mat->GetBuffer());
-			device->SetActiveShader(mat->GetShader());
-			device->SetPSTextures(mat->GetTextures());
-
-			device->Draw();
+		for (auto& pair : transparentMeshes) {
+			pair.second->Draw(this, cam);
 		}
+		m_mutex.unlock();
 
 		device->Begin2D();
-
-		for (auto pair : texts) {
-			auto& d = pair.first;
+		m_2dMutex.lock();
+		for (auto& d : drawables) {
 			d->Draw(device->GetWriteFactory(), device->GetDefFormat(), device->Get2DRenderTarget());
 		}
+		m_2dMutex.unlock();
 		device->End2D();
 
 		return true;
 	}
 
 	void SceneRender::Close() {
-		for (auto m : shaders) { delete m.second; }
-		for (auto m : indexBuffers) { _RELEASE(m.second); }
-		for (auto m : vertexBuffers) { _RELEASE(m.second); }
+		for (auto& m : shaders) { m.second.Release(); }
+		for (auto& m : materials) { m.second.Release(); }
 		_RELEASE(constantBuffer);
 	}
 
@@ -138,121 +82,137 @@ namespace Game {
 		}
 	}
 
-	void SceneRender::AddModel(SmartPtr<Model> model) {
-		auto mod = model;
-		auto n = mod->GetSubMeshesCount();
-
-		bool b = false;
-
+	void SceneRender::AddModel(SmartPtr<Model> model, std::vector<SmartPtr<Material>> materials) {
+		auto n = model->GetSubMeshesCount();
 		for (size_t i = 0; i < n; i++) {
-			auto mesh = mod->GetSubMesh(i);
-			if (mesh->indexBuffer.size() == 0) continue;
-			b = true;
-			auto vertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
-			auto indexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
+			auto mesh = model->GetSubMesh(i);
+			if (mesh->vertexBuffer.empty()) continue;
+			auto rMesh = new RenderingMesh();
+			rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+			rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+			rMesh->orig = mesh;
 
-			vertexBuffers.insert(vertexBuffers.end(), { mesh, vertexBuffer });
-			indexBuffers.insert(indexBuffers.end(), { mesh, indexBuffer });
-		}
-		if (b) {
-			models.insert(models.end(), { mod, true });
-		}
-	}
+			rMesh->pPos = model->pPos;
+			rMesh->pRot = model->pRot;
+			rMesh->pScale = model->pScale;
 
-	bool SceneRender::RemoveModel(SmartPtr<Model> model, bool del) {
-		auto it = models.find(model);
-		if (it != models.end()) {
-			//Wait();
-			//Lock();
-			auto model = it->first;
-			models.unsafe_erase(it);
-			auto n = model->GetSubMeshesCount();
-			for (size_t i = 0; i < n; i++) {
-				auto m = model->GetSubMesh(i);
-				auto vIt = vertexBuffers.find(m);
-				if (vIt != vertexBuffers.end()) {
-					vIt->second->Release();
-					vertexBuffers.unsafe_erase(vIt);
-				}
-				auto iIt = indexBuffers.find(m);
-				if (iIt != indexBuffers.end()) {
-					iIt->second->Release();
-					indexBuffers.unsafe_erase(iIt);
-				}
+			rMesh->pMat = materials[i];
+
+			std::lock_guard lock(m_mutex);
+
+			switch (rMesh->pMat->renderType) {
+			case RenderType::Solid:
+				renderingMeshes[mesh] = rMesh;
+				break;
+			case RenderType::Transparent:
+				transparentMeshes[mesh] = rMesh;
+				break;
+			default:
+				THROW_INVALID_ARG_EXCEPTION("material->rederType");
+				break;
 			}
-			//Unlock();
-			return true;
 		}
-		return false;
 	}
 
-	void SceneRender::UpdateModel(SmartPtr<Model> model) {
-		auto mod = model;
-		auto n = mod->GetSubMeshesCount();
-
+	void SceneRender::RemoveModel(SmartPtr<Model> model) {
+		auto n = model->GetSubMeshesCount();
 		for (size_t i = 0; i < n; i++) {
-			auto mesh = mod->GetSubMesh(i);
-
-			auto vertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
-			auto indexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE);
-			auto it = vertexBuffers.find(mesh);
-			if (it != vertexBuffers.end()) {
-				it->second = vertexBuffer;
-			} else {
-				vertexBuffers.insert(vertexBuffers.end(), { mesh, vertexBuffer });
-			}
-			it = indexBuffers.find(mesh);
-			if (it != indexBuffers.end()) {
-				it->second = indexBuffer;
-			} else {
-				indexBuffers.insert(indexBuffers.end(), { mesh, indexBuffer });
+			auto mesh = model->GetSubMesh(i);
+			std::lock_guard lock(m_mutex);
+			auto it = renderingMeshes.find(mesh);
+			if (it != renderingMeshes.end()) {
+				it->second.Release();
+				renderingMeshes.erase(it);
+				continue;
+			} 
+			it = transparentMeshes.find(mesh);
+			if (it != transparentMeshes.end()) {
+				it->second.Release();
+				transparentMeshes.erase(it);
 			}
 		}
 	}
 
+	void SceneRender::ChangeModel(SmartPtr<Model> removemodel, SmartPtr<Model> replace, std::vector<SmartPtr<Material>> materials) {
+		std::lock_guard lock(m_mutex);
+		auto n = removemodel->GetSubMeshesCount();
+		for (size_t i = 0; i < n; i++) {
+			auto mesh = removemodel->GetSubMesh(i);
+			auto it = renderingMeshes.find(mesh);
+			if (it != renderingMeshes.end()) {
+				it->second.Release();
+				renderingMeshes.erase(it);
+				continue;
+			}
+			it = transparentMeshes.find(mesh);
+			if (it != transparentMeshes.end()) {
+				it->second.Release();
+				transparentMeshes.erase(it);
+			}
+		}
+		n = replace->GetSubMeshesCount();
+		for (size_t i = 0; i < n; i++) {
+			auto mesh = replace->GetSubMesh(i);
+			if (mesh->vertexBuffer.empty()) continue;
+			auto rMesh = new RenderingMesh();
+			rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+			rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+			rMesh->orig = mesh;
 
+			rMesh->pPos = replace->pPos;
+			rMesh->pRot = replace->pRot;
+			rMesh->pScale = replace->pScale;
 
-	void SceneRender::MapMaterial(SmartPtr<Mesh> mesh, SmartPtr<Material> mat) {
-		auto m = mat;
-		if (m.IsNull())
-			return;
-		materialMap.insert({ mesh.Get(), mat});
-	}
+			rMesh->pMat = materials[i];
 
-	void SceneRender::UnmapMaterial(SmartPtr<Mesh> mesh) {
-		auto it = materialMap.find(mesh.Get());
-		if (it != materialMap.end()) {
-			materialMap.unsafe_erase(it);
+			switch (rMesh->pMat->renderType) {
+			case RenderType::Solid:
+				renderingMeshes[mesh] = rMesh;
+				break;
+			case RenderType::Transparent:
+				transparentMeshes[mesh] = rMesh;
+				break;
+			default:
+				THROW_INVALID_ARG_EXCEPTION("material->rederType");
+				break;
+			}
 		}
 	}
 
-	void SceneRender::UpdateBuffer(SmartPtr<Mesh> mesh) {
-		auto msh = mesh;
-		auto ib = indexBuffers.at(msh);
-		device->UpdateBufferData(ib, msh->indexBuffer);
-		auto vb = vertexBuffers.at(msh);
-		device->UpdateBufferData(vb, msh->vertexBuffer);
+	bool SceneRender::UpdateBuffers(SmartPtr<Mesh> mesh) {
+
+		auto it = renderingMeshes.find(mesh);
+		if (it == renderingMeshes.end()) {
+			it = transparentMeshes.find(mesh);
+			if (it == transparentMeshes.end())
+				return false;
+		}
+		std::lock_guard lock(m_mutex);
+		auto& rMesh = *it->second;
+		device->UpdateBufferData(rMesh.pIndexBuffer.Get(), mesh->indexBuffer);
+		device->UpdateBufferData(rMesh.pVertexBuffer.Get(), mesh->vertexBuffer);
+		return true;
 	}
 
 	void SceneRender::AddCamera(SmartPtr<Camera> cam) { cameras.push_back(cam); }
 
 	SmartPtr<Camera> SceneRender::GetCamera(size_t idx) { return { cameras[idx] }; }
 
-	Shader* SceneRender::CreateShader(String name) {
+	SmartPtr<Shader> SceneRender::CreateShader(String name) {
 		auto sh = new Shader(device);
 		shaders.insert({name, sh});
 		return sh;
 	}
 
-	Shader& SceneRender::GetShader(String name) {
+	SmartPtr<Shader> SceneRender::GetShader(String name) {
 		try {
-			return *shaders.at(name);
+			return shaders.at(name);
 		} catch (std::out_of_range) {
 			THROW_INVALID_ARG_EXCEPTION("name");
 		}
 	}
 
-	SmartPtr<Material> SceneRender::CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping) {
+	SmartPtr<Material> SceneRender::CreateMaterial(String name, SmartPtr<Shader> sh, std::vector<std::pair<String, size_t>> mapping) {
 		SmartPtr<Material> mat = new Material(*device, *sh, mapping);
 		materials.insert(materials.end(), { name, mat });
 		return mat;
@@ -265,12 +225,16 @@ namespace Game {
 		}
 	}
 	void SceneRender::AddDrawable(UI::IDrawable* txt) {
-		texts.insert({ txt, true });
+		std::lock_guard lock(m_2dMutex);
+		drawables.push_back(txt);
 	}
 	void SceneRender::RemoveDrawable(UI::IDrawable* txt) {
-		auto it = texts.find(txt);
-		if (it != texts.end()) {
-			texts.unsafe_erase(it);
+		for (auto it = drawables.begin(); it != drawables.end(); it++) {
+			if (it->Get() == txt) {
+				std::lock_guard lock(m_2dMutex);
+				drawables.erase(it);
+				break;
+			}
 		}
 	}
 }

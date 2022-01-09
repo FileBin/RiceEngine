@@ -21,8 +21,6 @@ namespace Game {
 		VertexLayout layout = Vertex::GetLayout();
 
 		~Mesh() {
-			vertexBuffer.clear();
-			indexBuffer.clear();
 			layout.clear();
 		}
 

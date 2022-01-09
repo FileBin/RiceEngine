@@ -7,6 +7,7 @@
 #include <concurrent_vector.h>
 #include <GameEngine\macros.h>
 #include <GameEngine\Vectors\Hasher.h>
+#include "Util\SmartPointer.h"
 
 
 namespace Game {
@@ -20,6 +21,22 @@ namespace Game {
 	}
 
 	class SceneRender : public RenderBase {
+	private:
+		class RenderingMesh {
+		public:
+			SmartPtr<Mesh> orig = nullptr;
+			SmartPtr<Vector3> pPos = nullptr;
+			SmartPtr<Vector3> pScale = nullptr;
+			SmartPtr<Quaternion> pRot = nullptr;
+			Microsoft::WRL::ComPtr<Buffer> pIndexBuffer = nullptr;
+			Microsoft::WRL::ComPtr<Buffer> pVertexBuffer = nullptr;
+			SmartPtr<Material> pMat = nullptr;
+			void Draw(SceneRender* ren, Camera& cam);
+			~RenderingMesh() {
+				pIndexBuffer->Release();
+				pVertexBuffer->Release();
+			}
+		};
 	public:
 
 		bool Init();
@@ -28,23 +45,19 @@ namespace Game {
 		void Close();
 		void Resize();
 
-		std::mutex& Lock(size_t idx) { return isLoading[idx]; }
-
-		void AddModel(SmartPtr<Model> model);
-		bool RemoveModel(SmartPtr<Model> model, bool erase = false);
-		void UpdateModel(SmartPtr<Model> model);
-		void MapMaterial(SmartPtr<Mesh> mesh, SmartPtr<Material> mat);
-		void UnmapMaterial(SmartPtr<Mesh> mesh);
-		void UpdateBuffer(SmartPtr<Mesh> mesh);
+		void AddModel(SmartPtr<Model> model, std::vector<SmartPtr<Material>> materials);
+		void RemoveModel(SmartPtr<Model> model);
+		void ChangeModel(SmartPtr<Model> removemodel, SmartPtr<Model> replace, std::vector<SmartPtr<Material>> materials);
+		bool UpdateBuffers(SmartPtr<Mesh> mesh);
 
 		void AddCamera(SmartPtr<Camera> cam);
 		SmartPtr<Camera> GetCamera(size_t idx);
 		SmartPtr<Camera> GetActiveCamera() { return GetCamera(activeCameraIdx); }
 
-		Shader* CreateShader(String name);
-		Shader& GetShader(String name);
+		SmartPtr<Shader> CreateShader(String name);
+		SmartPtr<Shader> GetShader(String name);
 
-		SmartPtr<Material> CreateMaterial(String name, Shader* sh, std::vector<std::pair<String, size_t>> mapping = {});
+		SmartPtr<Material> CreateMaterial(String name, SmartPtr<Shader> sh, std::vector<std::pair<String, size_t>> mapping = {});
 		SmartPtr<Material> GetMaterial(String name);
 
 		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
@@ -54,27 +67,13 @@ namespace Game {
 		void RemoveDrawable(UI::IDrawable* txt);
 
 	private:
-		std::mutex isRendering;
-		std::mutex isLoading[0x100];
-		concurrent_vector<SmartPtr<Camera>> cameras;
-		concurrent_unordered_map<String, SmartPtr<Material>> materials;
-		concurrent_unordered_map<String, Shader*> shaders;
-		concurrent_unordered_map<Mesh*, SmartPtr<Material>> materialMap;
 		size_t activeCameraIdx;
-		concurrent_unordered_map<SmartPtr<Model>, bool> models; //that was a trick beacuse unordered_set doesn't work
-		concurrent_unordered_map<UI::IDrawable*, bool> texts;
-		concurrent_unordered_map<SmartPtr<Mesh>, Buffer*> indexBuffers;
-		concurrent_unordered_map<SmartPtr<Mesh>, Buffer*> vertexBuffers;
-		Buffer* constantBuffer;
-
-		struct RenderingMesh {
-			Mesh* orig = nullptr;
-			Vector3* pPos = nullptr;
-			Vector3* pScale = nullptr;
-			Quaternion* pRot = nullptr;
-			Buffer* pIndexBuffer = nullptr;
-			Buffer* pVertexBuffer = nullptr;
-			Material* pMat = nullptr;
-		};
+		std::mutex m_mutex, m_2dMutex;
+		concurrency::concurrent_vector<SmartPtr<Camera>> cameras;
+		concurrency::concurrent_unordered_map<String, SmartPtr<Material>> materials;
+		concurrency::concurrent_unordered_map<String, SmartPtr<Shader>> shaders;
+		std::unordered_map<SmartPtr<Mesh>, SmartPtr<RenderingMesh>> renderingMeshes, transparentMeshes;
+		std::vector<SmartPtr<UI::IDrawable>> drawables;
+		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
 	};
 }

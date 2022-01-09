@@ -15,12 +15,7 @@ namespace Game {
 		model->pRot = &transform.rotation;
 		model->pScale = &transform.scale;
 		if (!model.IsNull()) {
-			ren.AddModel(model);
-			auto n = model->GetSubMeshesCount();
-			for (size_t i = 0; i < n; i++) {
-				auto mesh = model->GetSubMesh(i);
-				ren.MapMaterial(mesh, materials[i]);
-			}
+			ren.AddModel(model, materials);
 		}
 		enabled = true;
 	}
@@ -31,11 +26,6 @@ namespace Game {
 			model->pPos = nullptr;
 			model->pRot = nullptr;
 			model->pScale = nullptr;
-			auto n = model->GetSubMeshesCount();
-			for (size_t i = 0; i < n; i++) {
-				auto mesh = model->GetSubMesh(i);
-				ren.UnmapMaterial(mesh);
-			}
  			ren.RemoveModel(model);
 		}
 		enabled = false;
@@ -52,32 +42,17 @@ namespace Game {
 
 		auto n = _model->GetSubMeshesCount();
 		materials.resize(n);
-		if (!model.IsNull()) {
-			if (enabled) {
-				model->pPos = nullptr;
-				model->pRot = nullptr;
-				model->pScale = nullptr;
-				auto n = model->GetSubMeshesCount();
-				for (size_t i = 0; i < n; i++) {
-					auto mesh = model->GetSubMesh(i);
-					ren.UnmapMaterial(mesh);
-				}
-				ren.RemoveModel(model);
+		if (enabled) {
+			_model->pPos = &transform.position;
+			_model->pRot = &transform.rotation;
+			_model->pScale = &transform.scale;
+			if (model.Get()) {
+				ren.ChangeModel(model, _model, materials);
+			} else {
+				ren.AddModel(_model, materials);
 			}
-			//model.Release();
 		}
 		model = _model;
-		if (enabled) {
-			model->pPos = &transform.position;
-			model->pRot = &transform.rotation;
-			model->pScale = &transform.scale;
-			ren.AddModel(model);
-			for (size_t i = 0; i < n; i++) {
-				auto mesh = this->model->GetSubMesh(i);
-				ren.MapMaterial(mesh, materials[i]);
-			}
-			//ren.UpdateModel(this->model);
-		}
 	}
 	SmartPtr<Model> ModelRender::GetModel() const { return model; }
 	SmartPtr<Material> ModelRender::GetMaterial(size_t subMeshIdx) const { return materials[subMeshIdx]; }

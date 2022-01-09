@@ -14,21 +14,23 @@ public:
     HeightMap(WorldGenerator& worldGenerator, Vector2i pos, bool generateNormals = false);
 
     ~HeightMap() {
-        map.clear();
+        std::lock_guard lock(mut);
     }
 
+    std::mutex& GetMutex() { return mut; }
+
     long GetCount() {
-        std::lock_guard lock(mut);
+        //std::lock_guard lock(mut);
         return counter;
     }
 
     void Increment() {
-        std::lock_guard lock(mut);
+        //std::lock_guard lock(mut);
         counter++;
     }
 
     void Decrement() {
-        std::lock_guard lock(mut);
+        //std::lock_guard lock(mut);
         counter--;
     }
 

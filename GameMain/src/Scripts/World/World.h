@@ -45,7 +45,8 @@ public:
 private:
 	concurrent_unordered_map<Vector3i, SmartPtr<Chunk>> chunkMap{};
 	concurrent_unordered_map<Vector2i, SmartPtr<HeightMap>> heightMaps{};
-	std::mutex lock;
+	std::mutex hmlock;
+	std::mutex chunkLock;
 	WorldGenerator& generator;
 #pragma endregion
 
@@ -57,7 +58,6 @@ public:
 	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
 
 	void UnloadChunks(std::function<bool(Vector3i)> predicate) {
-		std::lock_guard l(lock);
 		std::queue<Vector3i> keys;
 		for (auto it = chunkMap.begin(); it != chunkMap.end(); it++) {
 			keys.push(it->first);
@@ -67,18 +67,23 @@ public:
 			keys.pop();
 			if (predicate(k)) {
 				chunkMap[k].Release();
+				chunkLock.lock();
 				chunkMap.unsafe_erase(k);
+				chunkLock.unlock();
 				auto tP = ToTerrainPos(k);
-				auto& hm = heightMaps[tP];
+				auto hm = heightMaps[tP];
 				if (hm.IsNull()) continue;
-				hm.Release();
+				hm->GetMutex().lock();
+				hmlock.lock();
 				heightMaps.unsafe_erase(tP);
+				hmlock.unlock();
+				hm->GetMutex().unlock();
+				hm.Release();
 			}
 		}
 	}
 
 	void UnloadChunk(Vector3i chunkPos) {
-		std::lock_guard l(lock);
 		auto it = chunkMap.find(chunkPos);
 		//if (it != chunkMap.end()) {
 			auto chunk = it->second;
@@ -112,7 +117,6 @@ public:
 	}
 
 	float GetAltitude(Vector3 pos) {
-		std::lock_guard l(lock);
 		auto chunkPos = TransformToChunkPos(pos);
 		auto hm = GetHeightMap(chunkPos);
 		Vector3i iPos = pos;
@@ -122,7 +126,6 @@ public:
 	}
 
 	int GetChunkAltitude(Vector3i chunkPos) {
-		std::lock_guard l(lock);
 		auto hm = GetHeightMap(chunkPos);
 		auto hmax = (chunkPos.y + 1.) * Chunk::ChunkSize;
 		auto hmin = (chunkPos.y) * Chunk::ChunkSize;
@@ -135,39 +138,25 @@ public:
 	}
 
 	Chunk::Status GetChunkStatus(Vector3i chunkPos) {
-		//Wait();
-		//Lock();
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
 			return it->second->status;
 		}
-		//Unlock();
 		return Chunk::NotCreated;
 	}
 
 	void SetChunkStatus(Vector3i chunkPos, Chunk::Status status) {
 		auto it = chunkMap.find(chunkPos);
 		if (it != chunkMap.end()) {
-			//Wait();
-			//Lock();
 			it->second->status = status;
-			//Unlock();
 		}
 	}
 
 	SmartPtr<Chunk> GetChunk(Vector3i chunkPos) {
-		/*auto it = chunkMap.find(chunkPos);
-		if (it != chunkMap.end()) {
-			return it->second;
-		} else {
-			auto ch = GenerateChunk(chunkPos);
-			chunkMap.insert(chunkMap.end(), { chunkPos, ch });
-			return ch;
-		}*/
+		std::lock_guard lock(chunkLock);
 		auto& ch = chunkMap[chunkPos];
 		if (ch.IsNull()) {
 			ch = GenerateChunk(chunkPos);
-			//chunkMap.insert(chunkMap.end(), { chunkPos, ch });
 		}
 		return ch;
 	}
@@ -201,31 +190,20 @@ public:
 
 	SmartPtr<HeightMap> GetHeightMap(Vector3i chunkPos) {
 		Vector2i pos{ chunkPos.x, chunkPos.z };
+		std::lock_guard lock(hmlock);
 		auto& hm = heightMaps[pos];
 		if (hm.IsNull()) {
 			hm = CreateHeightMap(pos);
 		}
 		return hm;
-		/*auto it = heightMaps.find(pos);
-		if (it != heightMaps.end()) {
-			if (it->second.Get()) {
-				return it->second;
-			} else {
-			}
-		} else {
-			auto hm = CreateHeightMap(pos);
-			heightMaps.insert(heightMaps.end(), { pos, hm });
-			return hm;
-		}*/
 	}
 #pragma endregion
 #pragma region PrivateFunctions
 private:
 	SmartPtr<Chunk> GenerateChunk(Vector3i chunkPos) {
-		std::lock_guard l(lock);
-		auto hm = GetHeightMap(chunkPos);
-		auto chunk = new Chunk(&generator, chunkPos, hm, this);
-		hm->Increment();
+		//auto hm = GetHeightMap(chunkPos);
+		auto chunk = new Chunk(&generator, chunkPos, this);
+		//hm->Increment();
 		return chunk;
 	}
 

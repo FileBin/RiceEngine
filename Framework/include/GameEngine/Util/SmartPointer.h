@@ -40,10 +40,9 @@ public:
 	void Release() {
 		if (!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
-		T* pointer = *ppObject.get();
-		if (pointer) {
-			//std::lock_guard<std::mutex> lock(m_mutex);
-			*ppObject.get() = nullptr;
+		if (!IsNull()) {
+			T* pointer = *ppObject;
+			*ppObject = nullptr;
 			delete pointer;
 		}
 	}
@@ -52,10 +51,6 @@ public:
 		if(!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
 		return *ppObject.get();
-	}
-
-	T** GetAddress() {
-		return ppObject.get();
 	}
 
 	T* operator->() {

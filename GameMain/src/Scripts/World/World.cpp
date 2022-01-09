@@ -5,6 +5,7 @@
 #include "World.h"
 
 HeightMap::HeightMap(WorldGenerator& worldGenerator, Vector2i pos, bool generateNormals) {
+    std::lock_guard lock(mut);
     auto n = Chunk::ChunkSize;
     map.resize((num)n * n);
     //normalMap = new NormalMap();
@@ -43,9 +44,10 @@ void Chunk::Generate() {
 
 VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
     auto t = voxelPos + position * ChunkSize;
-    if(hmap.IsNull()) {
+    auto hmap = world->GetHeightMap(position);
+    std::lock_guard lock(hmap->GetMutex());
+    if (hmap.IsNull())
         hmap = world->GetHeightMap(position);
-    }
     auto altitude = t.y - hmap->Get(voxelPos.x, voxelPos.z);
     return gen->GetVoxelData(t, altitude, transp);
 }

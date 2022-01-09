@@ -19,8 +19,8 @@ struct VoxelSand : public Voxel {
     }
 
     static SmartPtr<Material> CreateMaterial(SceneRender& ren) {
-        auto& shader = ren.GetShader(L"Diffuse");
-        auto mat = ren.CreateMaterial(L"Sand", &shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
+        auto shader = ren.GetShader(L"Diffuse");
+        auto mat = ren.CreateMaterial(L"Sand", shader, { Var(L"time"), Var(L"color"), Var(L"egst")});
         mat->SetVar<Vector4f>(L"color", color);
         mat->SetVar<Vector4f>(L"egst", EGST);
         mat->UpdateBuffer();
