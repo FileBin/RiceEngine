@@ -179,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Scenes\PhysicsTest.h" />
     <ClInclude Include="src\Scripts.h" />
     <ClInclude Include="src\Scripts\CameraMoverScript.h" />
     <ClInclude Include="src\Scripts\ChunkGenerator.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SampleScene.h" />
     <ClInclude Include="src\Scripts\UI\DebugText.h" />
+    <ClInclude Include="src\Scripts\Util\MeshGenerator.h" />
     <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />
     <ClInclude Include="src\Scripts\Util\Tables.h" />
     <ClInclude Include="src\Scripts\Util\Util.h" />

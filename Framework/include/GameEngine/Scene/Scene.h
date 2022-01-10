@@ -3,7 +3,8 @@
 #include "../SceneRender.h"
 #include <vector>
 #include "../ScriptBase.h"
-#include <GameEngine/SoundManager.h>
+#include "../SoundManager.h"
+#include "../Physics/PhysicsEngine.h"
 
 namespace Game {
 	class MonoScript;
@@ -16,9 +17,11 @@ namespace Game {
 
 		void Init(Engine* en) { engine = en; }
 
-		virtual void Initialize() { soundManager = new SoundManager(render->GetActiveCamera()); }
-
-		SceneRender& GetRender() { return *render; }
+		virtual void Initialize() { 
+			soundManager = new SoundManager(render->GetActiveCamera()); 
+			physicsEngine = new Physics::PhysicsEngine();
+			physicsEngine->Init();
+		}
 
 		void Close() {
 			root->Disable();
@@ -41,14 +44,16 @@ namespace Game {
 		SceneObject& GetObjectByName(String name);
 
 		SceneObject* Instaniate();
-		Engine& GetEngine();
-		SoundManager& GetSoundManager();
+		Engine& GetEngine() const;
+		SoundManager& GetSoundManager() const;
+		SceneRender& GetRender() const { return *render; }
+		const SmartPtr<Physics::PhysicsEngine> GetPhysEngine() const;
 
 		SoundManager* soundManager;
 	private:
 		SceneObject* root;
 		SceneRender* render;
-
+		SmartPtr<Physics::PhysicsEngine> physicsEngine;
 		Engine* engine;
 		
 		class InitScript : public ScriptBase {

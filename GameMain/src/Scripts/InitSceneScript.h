@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "SampleScene.h"
+#include "../Scenes/PhysicsTest.h"
 #include "MsaaTestScript.h"
 
 #include <GameEngine\ScriptBase.h>
@@ -13,7 +14,8 @@ class InitSceneScript : public ScriptBase {
 	void Run() {
 		auto& engine = GetEngine();
 
-		engine.LoadScene(new SampleScene());
+		engine.LoadScene(new PhysicsScene());
+		//engine.LoadScene(new SampleScene());
 
 		engine.RegisterScript(new MsaaTestScript());
 	}

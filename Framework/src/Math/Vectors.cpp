@@ -246,6 +246,13 @@ Vector3 Vector3::Normalized() {
     return { x * l, y * l, z * l };
 }
 
+void Vector3::Normalize() {
+    auto l = Math::Qrsqrt(SqrLength());
+    x *= l;
+    y *= l;
+    z *= l;
+}
+
 double Vector3::Dot(Vector3 A, Vector3 b) {
     return A.x * b.x + A.y * b.y + A.z * b.z;
 }
@@ -291,7 +298,7 @@ Vector3 Vector3::operator*=(Quaternion q) {
     return *this;
 }
 
-Vector3 Vector3::operator-() {
+Vector3 Vector3::operator-() const {
     return { -x,-y,-z };
 }
 

@@ -219,6 +219,9 @@
     <ClInclude Include="include\GameEngine\Physics\ICollider.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameEngine\Components\Rigidbody.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Log.cpp">
@@ -309,6 +312,12 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\PhysicsEngine.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\Rigidbody.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

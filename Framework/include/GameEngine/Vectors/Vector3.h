@@ -19,9 +19,11 @@ public:
 	Vector3& operator/=(dbl v);
 	Vector3 operator*=(Quaternion q);
 	dbl& operator[](size_t idx);
-	Vector3 operator-();
+	Vector3 operator-() const;
 
 	Vector3 Normalized();
+
+	void Normalize();
 
 	static dbl Dot(Vector3 a, Vector3 b);
 	static Vector3 Cross(Vector3 a, Vector3 b);
