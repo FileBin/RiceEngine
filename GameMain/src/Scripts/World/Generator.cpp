@@ -120,9 +120,9 @@ struct Piece/*OfShit*/ {
 
             auto x = GetPoint(d1, d2);
 
-            if (x < 0.03)
+            if (x < 0.01)
                 x = 0;
-            else if (x > 0.97)
+            else if (x > 0.99)
                 x = 1;
 
             Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]] * step, Tables::cubeVertices[edge[1]] * step, x);
@@ -169,7 +169,6 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
         Vector3i offset = position * s;
         Vector3i worldPos = inChunkPos + offset;
 
-        //auto norms = new Vector3[8];
         Piece solid{};
         Piece transparent[8];
         byte pow = 1;
@@ -211,29 +210,6 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
             pow <<= 1; // *= 2
         }
 
-        //if (_case == 0x0 || _case == 0xff) return;
-
-        
-
-        //vector<int> edges{};
-
-       /* for (byte i = 0; i < 16; i++) {
-            auto vert = Tables::triangualtionTable[_case][i];
-            if (vert == -1)
-                break;
-            edges.push_back(vert);
-        }
-        Mesh m{};
-        auto n = edges.size();
-        if (n == 0) return;
-        m.vertexBuffer.resize(n);
-        m.indexBuffer.resize(n);
-        for (byte i = 0; i < n; i++) {
-            auto vert = edgeToVert(edges[i]);
-            vert += inChunkPos;
-            m.vertexBuffer[i].position = vert;
-            m.indexBuffer[i] = i;
-        }*/
         if (solid.matIdx > 0) {
             auto& m = *solid.CreateMesh(inChunkPos, step);
             meshes[solid.matIdx]->Combine(m);

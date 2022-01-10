@@ -53,7 +53,7 @@ public:
 		return *ppObject.get();
 	}
 
-	T* operator->() {
+	T* operator->() const {
 		if (!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
 		if (!*ppObject.get())

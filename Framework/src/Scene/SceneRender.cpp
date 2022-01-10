@@ -25,6 +25,8 @@ namespace Game {
 		cb.View = cam.GetTransformationMatrix();
 		cb.Projection = cam.GetProjectionMatrix();
 
+		if (orig.IsNull() || !orig->CheckVisiblity(cb)) return;
+
 		device->LoadBufferSubresource(constantBuffer, cb);
 		device->SetActiveVSConstantBuffer(constantBuffer);
 		device->SetActiveVSConstantBuffer(pMat->GetBuffer(), 1);

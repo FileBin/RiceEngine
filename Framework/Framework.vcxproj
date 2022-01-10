@@ -190,6 +190,9 @@
     <ClInclude Include="include\GameEngine\Matrixes.h" />
     <ClInclude Include="include\GameEngine\Model.h" />
     <ClInclude Include="include\GameEngine\ModelRender.h" />
+    <ClInclude Include="include\GameEngine\Physics\ICollider.h" />
+    <ClInclude Include="include\GameEngine\Physics\IRigidBody.h" />
+    <ClInclude Include="include\GameEngine\Physics\PhysicsEngine.h" />
     <ClInclude Include="include\GameEngine\SoundStream.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
     <ClInclude Include="include\GameEngine\Core.h" />
@@ -242,6 +245,7 @@
     <ClInclude Include="src\Util\ExeptionManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Physics\PhysicsEngine.cpp" />
     <ClCompile Include="src\DX\Texture2D.cpp" />
     <ClCompile Include="src\Engine\SoundStream.cpp" />
     <ClCompile Include="src\Engine\SoundEffect.cpp" />
