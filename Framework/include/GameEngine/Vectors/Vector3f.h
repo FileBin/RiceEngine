@@ -20,6 +20,9 @@ public:
 
 	Vector3f Normalized();
 
+	void Normalize();
+	void Qnormalize();
+
 	static dbl Dot(Vector3f a, Vector3f b);
 	static Vector3f Cross(Vector3f a, Vector3f b);
 	static Vector3f Lerp(Vector3f a, Vector3f b, dbl t);

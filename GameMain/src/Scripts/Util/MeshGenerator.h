@@ -74,7 +74,7 @@ public:
 
                 auto depth = sdFunc(lpos);
                 d[i] = depth;
-                if (depth >= 0)
+                if (depth > 0)
                     _case += pow;
                 pow <<= 1; // *= 2
             }

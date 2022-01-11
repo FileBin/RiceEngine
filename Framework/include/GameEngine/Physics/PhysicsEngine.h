@@ -33,7 +33,7 @@ namespace Game::Physics {
 		SmartPtr<std::thread> updateThread;
 		bool alive = false;
 		bool init = false;
-		float timeScale = .1;
+		float timeScale = 1;
 	public:
 		void SetTPS(float tps) { m_tps = tps; }
 		float GetTPS() { return m_tps; }

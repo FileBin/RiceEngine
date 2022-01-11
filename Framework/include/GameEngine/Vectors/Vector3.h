@@ -24,10 +24,12 @@ public:
 	Vector3 Normalized();
 
 	void Normalize();
+	void Qnormalize();
 
 	static dbl Dot(Vector3 a, Vector3 b);
 	static Vector3 Cross(Vector3 a, Vector3 b);
 	static Vector3 Lerp(Vector3 a, Vector3 b, dbl t);
+	static Vector3 ProjectOnPlane(Vector3 vec, Vector3 planeNormal);
 	dbl SqrLength();
 	dbl Length();
 

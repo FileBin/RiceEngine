@@ -81,14 +81,16 @@ namespace Game {
 			};
 			auto v1 = triangle[1]->position - triangle[2]->position;
 			auto v2 = triangle[2]->position - triangle[0]->position;
-			auto n = Vector3f::Cross(v1, v2).Normalized();
+			auto n = Vector3f::Cross(v1, v2);
+			n.Qnormalize();
+
 			triangle[0]->normal += n;
 			triangle[1]->normal += n;
 			triangle[2]->normal += n;
 		}
 		for (size_t i = 0; i < vertexBuffer.size(); i++) {
 			auto& n = vertexBuffer[i].normal;
-			n = n.Normalized();
+			n.Qnormalize();
 		}
 	}
 

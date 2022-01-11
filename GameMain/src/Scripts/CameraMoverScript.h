@@ -1,6 +1,12 @@
 ﻿#pragma once
 
 #include <GameEngine\Components\MonoScript.h>
+#include <GameEngine\Components\Transform.h>
+#include <GameEngine\Components\ModelRender.h>
+#include <GameEngine\Components\Rigidbody.h>
+
+#include "Util\MeshGenerator.h"
+
 #include <GameEngine\Vectors.h>
 #include <GameEngine\Engine.h>
 #include <GameEngine\Scene\Scene.h>
@@ -18,10 +24,23 @@ class CameraMover : public MonoScript {
 
 	Vector3 speed = {0,0,0};
 
+	SmartPtr<Material> mat;
+
+	SmartPtr<Mesh> sphereMesh;
+
 	void Start() {
 		auto& scene = GetScene();
 		auto& en = GetEngine();
 		hwnd = en.GetHWND();
+
+		auto& ren = scene.GetRender();
+
+		mat = ren.CreateMaterial(L"SphereMat", ren.GetShader(L"Diffuse"), { Var(L"time"), Var(L"color"), Var(L"egst") });
+		mat->SetVar<Vector4f>(L"color", { .6f, .6f, .5f, 1.f });
+		mat->SetVar<Vector4f>(L"egst", { 0.3f, 2.f, 0.8f, 1.f });
+		mat->UpdateBuffer();
+
+		sphereMesh = MeshGenerator::GenerateMesh([](Vector3 p) { return p.Length() - 1.; }, { 8,8,8 });
 	}
 
 
@@ -47,7 +66,7 @@ class CameraMover : public MonoScript {
 		if (InputManager::GetKey(KeyCode::Shift)) { mv.y -= 1; }
 		if (InputManager::GetKey(KeyCode::Space)) { mv.y += 1; }
 
-		mv = mv.Normalized();
+		mv.Qnormalize();
 		mv *= cam->rotation;
 
 		double dt = en.GetDeltaTime();
@@ -56,7 +75,9 @@ class CameraMover : public MonoScript {
 
 		speed += mv * dt;
 
-		Vector3 damp = speed.Normalized() * 15. * dt;
+		Vector3 damp = speed;
+		damp.Qnormalize();
+		damp *= 15. * dt;
 
 		if(damp.SqrLength() > speed.SqrLength()){
 			damp = speed;
@@ -86,17 +107,45 @@ class CameraMover : public MonoScript {
 			lock = true;
 		}
 
-		MoveVertices();
+		SpawnSpheres();
 	}
 
-	void MoveVertices() {
-		/*auto& en = GetEngine();
-		auto& model = modelRender->GetModel();
-		auto& mesh = model.GetSubMesh(0);
-		mesh.vertexBuffer[19].position.x =
-			mesh.vertexBuffer[10].position.x =
-			mesh.vertexBuffer[0].position.x += cos(en.GetTime()) * en.GetDeltaTime();
+	bool click = false;
 
-		GetRender().UpdateBuffer(&mesh);*/
+	void SpawnSpheres() {
+		if (InputManager::GetKey(KeyCode::L)) {
+			if (!click) {
+				click = true;
+				SpawnSphere();
+			}
+		} else {
+			click = false;
+		}
+	}
+
+	void SpawnSphere() {
+		//Sphere Init
+		auto& scene = GetScene();
+		auto& ren = GetRender();
+		auto cam = ren.GetActiveCamera();
+		auto sphere = scene.Instaniate();
+		sphere->SetName(L"Sphere");
+		auto sphereTr = new Transform();
+		auto sphereBody = new Rigidbody();
+		sphereBody->SetVelocity(cam->rotation * Vector3::forward * 3.);
+		sphere->AddComponent(sphereTr);
+		sphere->AddComponent(sphereBody);
+		sphereTr->position = cam->position;
+		auto mr = new ModelRender();
+		sphere->AddComponent(mr);
+
+		auto model = new Model();
+		model->SetSubMeshesCount(1);
+		model->SetSubMesh(new Mesh(*sphereMesh), 0);
+
+		mr->SetModel(model);
+		mr->SetMaterial(mat, 0);
+
+		sphere->Enable();
 	}
 };

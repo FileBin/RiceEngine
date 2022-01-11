@@ -19,11 +19,12 @@ namespace Game {
 			const dbl ep = 0.0000001;
 			const dbl re = 10000000.;
 			Vector3 n = {
-				d - sdFunc(newPos + Vector3::right * ep),
-				d - sdFunc(newPos + Vector3::up * ep),
-				d - sdFunc(newPos + Vector3::forward * ep) };
+				sdFunc(newPos + Vector3::right * ep) - d,
+				sdFunc(newPos + Vector3::up * ep) - d,
+				sdFunc(newPos + Vector3::forward * ep) - d };
 			n *= re;
 			n.Normalize();
+			velocity = Vector3::ProjectOnPlane(velocity, n);
 			motion += n * delta;
 			newPos = position + motion;
 		}
