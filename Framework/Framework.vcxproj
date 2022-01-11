@@ -177,8 +177,10 @@
   <ItemGroup>
     <ClInclude Include="include\GameEngine\AlDevice.h" />
     <ClInclude Include="include\GameEngine\Camera.h" />
+    <ClInclude Include="include\GameEngine\Components\Collider.h" />
     <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\MonoScript.h" />
+    <ClInclude Include="include\GameEngine\Components\Rigidbody.h" />
     <ClInclude Include="include\GameEngine\Components\SoundSource.h" />
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
@@ -254,7 +256,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Physics\Rigidbody.cpp" />
+    <ClCompile Include="src\Scene\Components\Collider.cpp" />
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
+    <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp" />
     <ClCompile Include="src\Scene\Components\SoundSource.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />

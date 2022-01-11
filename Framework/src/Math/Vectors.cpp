@@ -242,8 +242,22 @@ double Vector3::SqrLength() {
 }
 
 Vector3 Vector3::Normalized() {
-    auto l = Math::Qrsqrt(SqrLength());
+    auto l = 1 / sqrt(SqrLength());
     return { x * l, y * l, z * l };
+}
+
+void Vector3::Normalize() {
+    auto l = 1 / sqrt(SqrLength());
+    x *= l;
+    y *= l;
+    z *= l;
+}
+
+void Vector3::Qnormalize() {
+    auto l = Math::Qrsqrt(SqrLength());
+    x *= l;
+    y *= l;
+    z *= l;
 }
 
 double Vector3::Dot(Vector3 A, Vector3 b) {
@@ -269,6 +283,10 @@ Vector3 Vector3::Lerp(Vector3 a, Vector3 b, dbl t) {
     return a * (1 - t) + b * t;
 }
 
+Vector3 Vector3::ProjectOnPlane(Vector3 vec, Vector3 planeNormal) {
+    return vec - planeNormal * Dot(vec, planeNormal);
+}
+
 Vector3& Vector3::operator=(Vector3f& v) {
     x = v.x;
     y = v.y;
@@ -291,7 +309,7 @@ Vector3 Vector3::operator*=(Quaternion q) {
     return *this;
 }
 
-Vector3 Vector3::operator-() {
+Vector3 Vector3::operator-() const {
     return { -x,-y,-z };
 }
 
@@ -440,8 +458,22 @@ double Vector3f::SqrLength() {
 }
 
 Vector3f Vector3f::Normalized() {
-    float l = Math::Qrsqrt(SqrLength());
+    float l = 1 / sqrt(SqrLength());
     return { x * l, y * l, z * l };
+}
+
+void Vector3f::Normalize() {
+    float l = 1 / sqrt(SqrLength());
+    x *= l;
+    y *= l;
+    z *= l;
+}
+
+void Vector3f::Qnormalize() {
+    float l = Math::Qrsqrt(SqrLength());
+    x *= l;
+    y *= l;
+    z *= l;
 }
 
 double Vector3f::Dot(Vector3f a, Vector3f b) {

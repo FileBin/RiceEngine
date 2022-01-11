@@ -136,7 +136,7 @@ class ChunkGenerator : public MonoScript {
 
 	Vector3i playerChunk;
 
-	void LodLoaderThread(size_t lodIdx, int thIdx, int radius) {
+	void LodLoaderThread(const size_t lodIdx, int thIdx, int radius) {
 		int nSkips = 0;
 		auto& sRen = GetScene().GetRender();
 		auto poolSize = chunksPool.size();

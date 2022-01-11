@@ -47,6 +47,8 @@
     <ClInclude Include="src\Scripts\UI\DebugText.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Scripts\Util\Util.h" />
+    <ClInclude Include="src\Scenes\PhysicsTest.h" />
+    <ClInclude Include="src\Scripts\Util\MeshGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />

@@ -24,9 +24,13 @@ namespace Game {
 
 	SceneObject* Scene::Instaniate() { return root->Instaniate(); }
 
-	SoundManager& Scene::GetSoundManager() { return *soundManager; }
+	SoundManager& Scene::GetSoundManager() const { return *soundManager; }
 
-	Engine& Scene::GetEngine() { return *engine; }
+	const SmartPtr<Physics::PhysicsEngine> Scene::GetPhysEngine() const {
+		return physicsEngine;
+	}
+
+	Engine& Scene::GetEngine() const { return *engine; }
 
 	void Scene::InitScript::Run() {
 		scene->Initialize();
