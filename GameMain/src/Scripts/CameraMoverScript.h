@@ -85,18 +85,5 @@ class CameraMover : public MonoScript {
 			ShowCursor(false);
 			lock = true;
 		}
-
-		MoveVertices();
-	}
-
-	void MoveVertices() {
-		/*auto& en = GetEngine();
-		auto& model = modelRender->GetModel();
-		auto& mesh = model.GetSubMesh(0);
-		mesh.vertexBuffer[19].position.x =
-			mesh.vertexBuffer[10].position.x =
-			mesh.vertexBuffer[0].position.x += cos(en.GetTime()) * en.GetDeltaTime();
-
-		GetRender().UpdateBuffer(&mesh);*/
 	}
 };
