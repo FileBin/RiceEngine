@@ -16,7 +16,7 @@ using std::map, std::unordered_map;
 class World;
 
 class Chunk {
-#define LOD_COUNT 5
+#define LOD_COUNT 4
 private:
     WorldGenerator* gen;
     std::vector<SmartPtr<Model>> model { LOD_COUNT };

@@ -47,30 +47,6 @@ class PhysicsScene : public Scene {
 		auto debugText = Instaniate();
 		debugText->SetName(L"DebugText");
 
-		/*//Sphere Init
-		auto sphere = Instaniate();
-		sphere->SetName(L"Sphere");
-		auto sphereTr = new Transform();
-		auto sphereBody = new Rigidbody();
-		sphereBody->SetVelocity({ 15,0,0 });
-		sphere->AddComponent(sphereTr);
-		sphere->AddComponent(sphereBody);
-		sphereTr->position = { 0,0,7 };
-		auto mr = new ModelRender();
-		sphere->AddComponent(mr);
-
-		auto model = new Model();
-		model->SetSubMeshesCount(1);
-		model->SetSubMesh(MeshGenerator::GenerateMesh([](Vector3 p) { return p.Length() - 1.; }), 0);
-
-		auto mat = ren.CreateMaterial(L"SphereMat", diff, { Var(L"time"), Var(L"color"), Var(L"egst") });
-		mat->SetVar<Vector4f>(L"color", { .6f, .6f, .5f, 1.f });
-		mat->SetVar<Vector4f>(L"egst", { 0.3f, 2.f, 0.8f, 1.f });
-		mat->UpdateBuffer();
-
-		mr->SetModel(model);
-		mr->SetMaterial(mat, 0);*/
-
 		//Plane Init
 		auto plane = Instaniate();
 		plane->SetName(L"Plane");
@@ -85,10 +61,9 @@ class PhysicsScene : public Scene {
 				}); };
 		//auto planeCol = new CustomCollider();
 
-		auto planeMesh = MeshGenerator::GenerateMesh(planeSd, { 10,10,10 }, { -20,-20,-20 }, { 20,20,20 });
+		auto planeMesh = MeshGenerator::GenerateMesh(planeSd, { 32,32,32 }, { -20,-20,-20 }, { 20,20,20 });
 
 		auto planeCol = new MeshCollider();
-		planeCol->SetMesh(*planeMesh);
 		//planeCol->SetFunc(planeSd);
 		auto mr = new ModelRender();
 		plane->AddComponent(mr);
@@ -98,6 +73,8 @@ class PhysicsScene : public Scene {
 		auto model = new Model();
 		model->SetSubMeshesCount(1);
 		model->SetSubMesh(planeMesh, 0);
+
+		planeCol->SetModel(model);
 
 
 		auto mat = ren.CreateMaterial(L"PlaneMat", diff, { Var(L"time"), Var(L"color"), Var(L"egst") });

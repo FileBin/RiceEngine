@@ -5,6 +5,7 @@
 #include <GameEngine\Scene\Scene.h>
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Components\Transform.h>
+#include <GameEngine\Components\MeshCollider.h>
 
 #include "World\World.h"
 #include "World\FlatGenerator.h"
@@ -98,6 +99,7 @@ class ChunkGenerator : public MonoScript {
 			auto o = scene.Instaniate();
 			auto render = new ModelRender();
 			o->AddComponent(new Transform());
+			o->AddComponent(new MeshCollider());
 			o->AddComponent(render);
 			chunksPool.push_back({ o, pos, 10000, nullptr });
 			chunksPool[poolSize].busy = new std::mutex();
@@ -169,7 +171,14 @@ class ChunkGenerator : public MonoScript {
 						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
+							auto collider = pooledCh.obj->GetComponents<MeshCollider>()[0];
+							collider->Disable();
+							collider->SetModel(model.Get());
+							collider->Enable();
 							render->SetModel(model);
+							if (lod == 0) {
+
+							}
 							pooledCh.lod = lod;
 						}
 					}

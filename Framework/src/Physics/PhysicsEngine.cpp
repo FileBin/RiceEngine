@@ -30,11 +30,11 @@ namespace Game::Physics {
 		updateThread = Core::RunThread<void(void)>([this]() {
 			dbl fixedDeltaTime = 1 / m_tps;
 			dbl deltaTime = fixedDeltaTime;
-			long interval = fixedDeltaTime*1000.;
+			long interval = fixedDeltaTime*1000. * 1000. - 10;
 			while (alive) {
 				auto frameStart = steady_clock::now();
 				Update(deltaTime);
-				std::this_thread::sleep_until(frameStart + milliseconds(interval));
+				std::this_thread::sleep_until(frameStart + microseconds(interval));
 				deltaTime = .001 * .000001 * (steady_clock::now() - frameStart).count();
 				init = true;
 			}

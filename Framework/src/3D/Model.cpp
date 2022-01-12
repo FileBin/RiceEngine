@@ -107,7 +107,7 @@ namespace Game {
 			min.y = Math::Min(min.y, vert.position.y);
 			min.z = Math::Min(min.z, vert.position.z);
 
-			min.x = Math::Max(max.x, vert.position.x);
+			max.x = Math::Max(max.x, vert.position.x);
 			max.y = Math::Max(max.y, vert.position.y);
 			max.z = Math::Max(max.z, vert.position.z);
 			//max = max.ApplyFunc([&vert](float x, size_t idx) { return Math::Max(x, vert.position[idx]); });
