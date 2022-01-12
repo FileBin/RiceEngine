@@ -26,7 +26,7 @@ namespace Game {
 			n.Normalize();
 			auto d = Vector3::Dot(velocity, n);
 			//auto l = velocity.Length();
-			velocity -= n * d * 2;
+			velocity -= n * d * 2.;
 			/*if (abs(d) < l * .11) {
 				velocity.Normalize();
 				velocity *= l;

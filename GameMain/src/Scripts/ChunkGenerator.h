@@ -172,13 +172,10 @@ class ChunkGenerator : public MonoScript {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 							auto collider = pooledCh.obj->GetComponents<MeshCollider>()[0];
-							collider->Disable();
+							//collider->Disable();
 							collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
-							collider->Enable();
+							//collider->Enable();
 							render->SetModel(model);
-							if (lod == 0) {
-
-							}
 							pooledCh.lod = lod;
 						}
 					}

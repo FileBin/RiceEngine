@@ -9,7 +9,6 @@ namespace Game {
 	}
 
 	void MeshCollider::SetModel(Model* m, int ignoredMat) {
-		_DELETE(physMesh);
 		auto n = m->GetSubMeshesCount();
 		auto combined = new Mesh();
 		for (auto i = 0; i < n; i++) {
@@ -17,7 +16,15 @@ namespace Game {
 			combined->Combine(*m->GetSubMesh(i));
 		}
 		combined->ReclaculateBounds();
-		physMesh = new PhysMesh(*combined);
+		auto pm = new PhysMesh(*combined);
+		if (enabled) {
+			std::lock_guard lock(engine->GetUpdateMutex());
+			_DELETE(physMesh);
+			physMesh = pm;
+		} else {
+			_DELETE(physMesh);
+			physMesh = pm;
+		}
 		delete combined;
 
 	}

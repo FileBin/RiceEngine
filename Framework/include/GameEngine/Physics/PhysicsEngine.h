@@ -44,6 +44,7 @@ namespace Game::Physics {
 		void Init();
 		void Update(dbl dt);
 		const Frame GetBackFrame();
+		std::mutex& GetUpdateMutex() { return updateMutex; }
 		~PhysicsEngine() { alive = false; }
 	private:
 		dbl sdFunc(Vector3 pos, size_t uuid);
