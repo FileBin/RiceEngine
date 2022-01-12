@@ -47,12 +47,12 @@ namespace Game {
 			void build(Mesh& m);
 
 			PhysMesh(Mesh& m);
-			PhysMesh(Model& m);
 		} *physMesh;
 	public:
 		MeshCollider() : Collider() {};
 		void SetMesh(Mesh* m);
 		void SetModel(Model* m);
+		void SetModel(Model* m, int ignoredMat);
 		dbl sdFunc(Vector3 p);
 	};
 }

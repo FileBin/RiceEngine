@@ -15,7 +15,7 @@ using namespace std::this_thread;
 namespace Game {
 
 	void Core::RunNew(ScriptBase* script) {
-		SetThreadPriority(GetCurrentThread(), 2);
+		SetThreadPriority(GetCurrentThread(), 3);
 		Core engine;
 		try {
 			engine.AddScript(script, Stage::PreInit);
