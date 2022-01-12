@@ -6,6 +6,10 @@
 #include <GameEngine\Components\UI\Text.h>
 #include <GameEngine\Components\Rigidbody.h>
 #include <GameEngine\Components\Collider.h>
+#include <GameEngine\Components\CustomCollider.h>
+#include <GameEngine\Components\MeshCollider.h>
+#include <GameEngine\Util\DistanceEstimator.h>
+
 #include "../Scripts/Util/MeshGenerator.h"
 
 #include "..\Scripts\CameraMoverScript.h"
@@ -74,8 +78,18 @@ class PhysicsScene : public Scene {
 		Vector3 planeN;
 		planeN = { 0,1,0 };
 		planeN.Normalize();
-		std::function<dbl(Vector3)> planeSd = [planeN](Vector3 p) { return Math::Max(Vector3::Dot(p, planeN), 10 - p.Length()); };
-		auto planeCol = new Collider(planeSd);
+		std::function<dbl(Vector3)> planeSd = [planeN](Vector3 p) { 
+			return opIntersect({
+				Vector3::Dot(p, planeN),
+				10 - (p - Vector3(0,-9,0)).Length(),
+				}); };
+		//auto planeCol = new CustomCollider();
+
+		auto planeMesh = MeshGenerator::GenerateMesh(planeSd, { 10,10,10 }, { -20,-20,-20 }, { 20,20,20 });
+
+		auto planeCol = new MeshCollider();
+		planeCol->SetMesh(*planeMesh);
+		//planeCol->SetFunc(planeSd);
 		auto mr = new ModelRender();
 		plane->AddComponent(mr);
 		plane->AddComponent(planeTr);
@@ -83,7 +97,8 @@ class PhysicsScene : public Scene {
 
 		auto model = new Model();
 		model->SetSubMeshesCount(1);
-		model->SetSubMesh(MeshGenerator::GenerateMesh(planeSd, { 100,100,100 }, { -50,-100,-100 }, { 50,50,50 }), 0);
+		model->SetSubMesh(planeMesh, 0);
+
 
 		auto mat = ren.CreateMaterial(L"PlaneMat", diff, { Var(L"time"), Var(L"color"), Var(L"egst") });
 		mat->SetVar<Vector4f>(L"color", { 1.f, .4f, .6f, 1.f });

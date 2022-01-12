@@ -67,7 +67,7 @@ namespace Game {
 			eventKey(KeyIndex, false);
 			break;
 		case WM_LBUTTONDOWN:
-			eventMouse(MouseKey::Left, true);
+ 			eventMouse(MouseKey::Left, true);
 			eventKey(KeyCode::MouseLeft, true);
 			break;
 		case WM_LBUTTONUP:

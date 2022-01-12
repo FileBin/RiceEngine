@@ -16,15 +16,21 @@ namespace Game {
 		dbl delta = radius - d;
 
 		if (delta > 0) {
-			const dbl ep = 0.0000001;
-			const dbl re = 10000000.;
+			constexpr dbl ep = 0.0000001;
+			constexpr dbl re = 10000000.;
 			Vector3 n = {
 				sdFunc(newPos + Vector3::right * ep) - d,
 				sdFunc(newPos + Vector3::up * ep) - d,
 				sdFunc(newPos + Vector3::forward * ep) - d };
 			n *= re;
 			n.Normalize();
-			velocity = Vector3::ProjectOnPlane(velocity, n);
+			auto d = Vector3::Dot(velocity, n);
+			//auto l = velocity.Length();
+			velocity -= n * d * 2;
+			/*if (abs(d) < l * .11) {
+				velocity.Normalize();
+				velocity *= l;
+			}*/
 			motion += n * delta;
 			newPos = position + motion;
 		}

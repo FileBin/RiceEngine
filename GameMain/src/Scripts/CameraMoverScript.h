@@ -40,7 +40,7 @@ class CameraMover : public MonoScript {
 		mat->SetVar<Vector4f>(L"egst", { 0.3f, 2.f, 0.8f, 1.f });
 		mat->UpdateBuffer();
 
-		sphereMesh = MeshGenerator::GenerateMesh([](Vector3 p) { return p.Length() - 1.; }, { 8,8,8 });
+		sphereMesh = MeshGenerator::GenerateMesh([](Vector3 p) { return p.Length() - 1.; }, { 4,4,4 });
 	}
 
 
@@ -100,20 +100,19 @@ class CameraMover : public MonoScript {
 			pos.x = fmod(pos.x, 360);
 			auto yrot = Quaternion::FromAxisAngle(Vector3::up, pos.x);
 			cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
+			SpawnSpheres();
 
 		} else if (InputManager::GetKey(KeyCode::MouseLeft)) {
 			InputManager::SetMousePos(center);
 			ShowCursor(false);
 			lock = true;
 		}
-
-		SpawnSpheres();
 	}
 
 	bool click = false;
 
 	void SpawnSpheres() {
-		if (InputManager::GetKey(KeyCode::L)) {
+		if (InputManager::GetKey(KeyCode::MouseRight)) {
 			if (!click) {
 				click = true;
 				SpawnSphere();
@@ -132,7 +131,7 @@ class CameraMover : public MonoScript {
 		sphere->SetName(L"Sphere");
 		auto sphereTr = new Transform();
 		auto sphereBody = new Rigidbody();
-		sphereBody->SetVelocity(cam->rotation * Vector3::forward * 3.);
+		sphereBody->SetVelocity(cam->rotation * Vector3::forward * 10.);
 		sphere->AddComponent(sphereTr);
 		sphere->AddComponent(sphereBody);
 		sphereTr->position = cam->position;

@@ -10,3 +10,7 @@ typedef ID3D11Buffer Buffer;
 typedef long long num;
 typedef double dbl;
 typedef unsigned int uint;
+
+struct Vector3;
+
+typedef std::function<dbl(Vector3)> SDFunc;

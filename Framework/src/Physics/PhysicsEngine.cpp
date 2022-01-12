@@ -61,13 +61,12 @@ namespace Game::Physics {
 	dbl PhysicsEngine::sdFunc(Vector3 pos, size_t idx) {
 		auto d = DBL_MAX;
 		for (const auto& p : colliders) {
-			if (p.first == idx) continue;
 			d = Math::Min(d, p.second->sdFunc(pos));
 		}
-		for (const auto& p : bodies) {
+		/*for (const auto& p : bodies) {
 			if (p.first == idx) continue;
 			d = Math::Min(d, p.second->sdFunc(pos));
-		}
+		}*/
 		return d;
 	}
 

@@ -25,7 +25,7 @@ public:
 
 	static dbl Dot(Vector3f a, Vector3f b);
 	static Vector3f Cross(Vector3f a, Vector3f b);
-	static Vector3f Lerp(Vector3f a, Vector3f b, dbl t);
+	static Vector3f Lerp(Vector3f a, Vector3f b, float t);
 	dbl SqrLength();
 	dbl Length();
 };

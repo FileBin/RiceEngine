@@ -11,6 +11,7 @@ public:
 	Vector3(dbl x, dbl y) : x(x), y(y) {}
 	Vector3(dbl x, dbl y, dbl z) : x(x), y(y), z(z) {}
 	Vector3(const Vector3i& vec);
+	Vector3(const Vector3f& vec);
 
 	Vector3& operator=(Vector3f& v);
 	Vector3& operator-=(Vector3 v);

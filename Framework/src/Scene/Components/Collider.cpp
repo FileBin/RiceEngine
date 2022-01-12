@@ -3,9 +3,9 @@
 
 namespace Game {
 
-	Collider::Collider(std::function<dbl(Vector3)> sd_func) {
+	/*Collider::Collider(std::function<dbl(Vector3)> sd_func) {
 		sd = sd_func;
-	}
+	}*/
 
 	void Collider::OnEnable() {
 		auto& obj = GetSceneObject();
@@ -20,7 +20,7 @@ namespace Game {
 		engine->RemoveRigidBody(UUID);
 	}
 
-	dbl Collider::sdFunc(Vector3 p) {
+	/*dbl Collider::sdFunc(Vector3 p) {
 		return sd(p);
-	}
+	}*/
 }

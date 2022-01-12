@@ -218,9 +218,15 @@ bool operator==(Vector2f a, Vector2f b) {
 
 #pragma region Vector3
 Vector3::Vector3(const Vector3i& v) {
-    x = (double)v.x;
-    y = (double)v.y;
-    z = (double)v.z;
+    x = (dbl)v.x;
+    y = (dbl)v.y;
+    z = (dbl)v.z;
+}
+
+Vector3::Vector3(const Vector3f& v) {
+    x = (dbl)v.x;
+    y = (dbl)v.y;
+    z = (dbl)v.z;
 }
 
 double& Vector3::operator[](size_t idx) {
@@ -485,7 +491,7 @@ Vector3f operator-(Vector3f a, Vector3f b) {
 }
 
 Vector3f operator*(Quaternion q, Vector3f v) {
-    return v * Matrix4x4::Rotation(q);
+    return (Vector3)v * Matrix4x4::Rotation(q);
 }
 
 Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
@@ -495,7 +501,7 @@ Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
         left.x * right.y - left.y * right.x };
 }
 
-Vector3f Vector3f::Lerp(Vector3f a, Vector3f b, dbl t) {
+Vector3f Vector3f::Lerp(Vector3f a, Vector3f b, float t) {
     return a * (1 - t) + b * t;
 }
 

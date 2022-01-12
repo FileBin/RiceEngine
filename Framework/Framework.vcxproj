@@ -178,6 +178,8 @@
     <ClInclude Include="include\GameEngine\AlDevice.h" />
     <ClInclude Include="include\GameEngine\Camera.h" />
     <ClInclude Include="include\GameEngine\Components\Collider.h" />
+    <ClInclude Include="include\GameEngine\Components\CustomCollider.h" />
+    <ClInclude Include="include\GameEngine\Components\MeshCollider.h" />
     <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\MonoScript.h" />
     <ClInclude Include="include\GameEngine\Components\Rigidbody.h" />
@@ -217,6 +219,7 @@
     <ClInclude Include="include\GameEngine\Util.h" />
     <ClInclude Include="include\GameEngine\Util3D.h" />
     <ClInclude Include="include\GameEngine\Util\defines.h" />
+    <ClInclude Include="include\GameEngine\Util\DistanceEstimator.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\IndexOutOfRangeException.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\InvalidArgException.h" />
@@ -247,6 +250,7 @@
     <ClInclude Include="src\Util\ExeptionManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Physics\MeshCollider.cpp" />
     <ClCompile Include="src\Physics\PhysicsEngine.cpp" />
     <ClCompile Include="src\DX\Texture2D.cpp" />
     <ClCompile Include="src\Engine\SoundStream.cpp" />
@@ -281,6 +285,7 @@
     <ClCompile Include="src\Scene\Components\ModelRender.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Scene\SceneObject.cpp" />
+    <ClCompile Include="src\Util\DistanceEstimator.cpp" />
     <ClCompile Include="src\Util\Util.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
