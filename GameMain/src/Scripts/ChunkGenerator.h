@@ -54,7 +54,7 @@ struct PooledChunk {
 class ChunkGenerator : public MonoScript {
 public:
 	//Chunk* chunk;
-	int renderDistance = 10;
+	int renderDistance = 8;
 	World* world;
 	WorldGenerator* generator;
 
@@ -66,7 +66,7 @@ public:
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[4] = { 2, 4, 5, 6 };
+	int lodDistances[4] = { 4, 5, 6, 7 };
 
 	void Start() {
 #ifdef _DEBUG
@@ -75,10 +75,10 @@ public:
 
 		auto& scene = GetScene();
 
-		playerPos.y = 30;
+		playerPos.y = 0;
 
 		//generator = new FlatGenerator(25.);
-		generator = new StandartGenerator(WorldSeed::Default(), 20, -20, .3, .5, .5);
+		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
 		world = new World(generator, &scene.GetRender());
 
 		auto a = renderDistance * 2 + 1;
