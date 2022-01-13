@@ -5,6 +5,10 @@
 #include <unordered_set>
 #include "../Vectors.h"
 #include "../Vectors/Hasher.h"
+#include "HitInfo.h"
+
+#define PHYS_FIXED_STEP 8
+
 namespace Game::Physics {
 	class PhysicsEngine {
 	private:
@@ -25,7 +29,7 @@ namespace Game::Physics {
 		};
 	private:
 		size_t lastUUID = 0;
-		float m_tps = 25;
+		float m_tps = 20;
 		Frame frontFrame, backFrame;
 		std::unordered_map<size_t, SmartPtr<IRigidbody>> bodies{};
 		std::unordered_map<size_t, SmartPtr<ICollider>> colliders{};
@@ -43,11 +47,14 @@ namespace Game::Physics {
 		void RemoveCollider(size_t UUID);
 		void Init();
 		void Update(dbl dt);
+
 		const Frame GetBackFrame();
+		bool Raycast(Vector3 origin, Vector3 direction, OUT HitInfo& info, size_t maxIterations = 64, dbl eps = .01, dbl maxDist = 300.);
+
 		std::mutex& GetUpdateMutex() { return updateMutex; }
 		~PhysicsEngine() { alive = false; }
 	private:
-		dbl sdFunc(Vector3 pos, size_t uuid);
+		dbl sdFunc(Vector3 pos);
 		void SwapFrames();
 		void CaptureFrame(dbl deltaTime);
 	};

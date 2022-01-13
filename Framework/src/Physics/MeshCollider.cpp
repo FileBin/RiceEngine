@@ -89,10 +89,10 @@ namespace Game {
 #define FAST_GENERATE 1
 
 	void MeshCollider::PhysMesh::build(Mesh& m) {
-		Log::log(Log::Debug, L"GenerationPhysMesh...");
-		auto clock = std::chrono::steady_clock::now();
-		bounds.Min = (Vector3)m.bounds.Min - Vector3::one * 4;
-		bounds.Max = (Vector3)m.bounds.Max + Vector3::one * 4;
+		//Log::log(Log::Debug, L"GenerationPhysMesh...");
+		//auto clock = std::chrono::steady_clock::now();
+		bounds.Min = (Vector3)m.bounds.Min - Vector3::one * PHYS_FIXED_STEP;
+		bounds.Max = (Vector3)m.bounds.Max + Vector3::one * PHYS_FIXED_STEP;
 		auto n = m.indexBuffer.size() / 3;
 		triangles.resize(n);
 		for (size_t i = 0; i < n; i++) {
@@ -128,8 +128,8 @@ namespace Game {
 #endif
 			}
 		}
-		Log::log(Log::INFO, L"Generation took: {}ms", (std::chrono::steady_clock::now() - clock).count() * .001 * .001);
-		Log::log(Log::Debug, L"GenerationPhysMesh...end");
+		//Log::log(Log::INFO, L"Generation took: {}ms", (std::chrono::steady_clock::now() - clock).count() * .001 * .001);
+		//Log::log(Log::Debug, L"GenerationPhysMesh...end");
 	}
 
 	MeshCollider::PhysMesh::PhysMesh(Mesh& m) {

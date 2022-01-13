@@ -46,7 +46,7 @@ namespace Game::Physics {
 		std::lock_guard lock(updateMutex);
 		for (const auto& p : bodies) {
 			auto rb = p.second;
-			rb->Move(timeScale * dt, [this, p](Vector3 pos) { return sdFunc(pos, p.first); });
+			rb->Move(timeScale * dt, [this, p](Vector3 pos) { return sdFunc(pos); });
 		}
 		CaptureFrame(dt);
 		SwapFrames();
@@ -59,8 +59,8 @@ namespace Game::Physics {
 		return backFrame;
 	}
 
-	dbl PhysicsEngine::sdFunc(Vector3 pos, size_t idx) {
-		auto d = DBL_MAX;
+	dbl PhysicsEngine::sdFunc(Vector3 pos) {
+		auto d = std::numeric_limits<dbl>().infinity();
 		for (const auto& p : colliders) {
 			d = Math::Min(d, p.second->sdFunc(pos));
 		}
@@ -86,6 +86,30 @@ namespace Game::Physics {
 			frontFrame.SetPosition(p.first, rb->GetPosition());
 			frontFrame.SetVelocity(p.first, rb->GetVelocity() * (dbl)timeScale);
 		}
+	}
+
+	bool PhysicsEngine::Raycast(Vector3 origin, Vector3 dir, OUT HitInfo& info, size_t maxIters, dbl eps, dbl maxD) {
+		Vector3 pos = origin;
+		dbl dist = 0;
+		for (size_t i = 0; i < maxIters; i++) {
+			updateMutex.lock();
+			auto d = sdFunc(pos);
+			updateMutex.unlock();
+			if (d >= DBL_MAX) d = PHYS_FIXED_STEP;
+			dist += d;
+			pos += dir * d;
+			if (d <= eps) {
+				info.dist = d;
+				updateMutex.lock();
+				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos);
+				updateMutex.unlock();
+				info.pos = pos;
+				return true;
+			} else if (dist >= maxD) {
+				break;
+			}
+		}
+		return false;
 	}
 
 	const Vector3 PhysicsEngine::Frame::GetPosition(size_t uuid) const {

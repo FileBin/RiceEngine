@@ -121,6 +121,7 @@ class ChunkGenerator : public MonoScript {
 
 	void Update() {
 		auto& en = GetEngine();
+		auto physEngine = GetScene().GetPhysEngine();
 		auto& ren = GetRender();
 		auto waterMat = ren.GetMaterial(L"Water");
 		waterMat->SetVar(L"time", (float)en.GetTime());
@@ -132,8 +133,12 @@ class ChunkGenerator : public MonoScript {
 		auto playerChunk = World::TransformToChunkPos(newPos);
 		if (playerChunk != World::TransformToChunkPos(playerPos)) {
 			playerPos = newPos;
-			Log::log(Log::INFO, L"ChunkStatus: {}", (int)world->GetChunkStatus(playerChunk));
+			//Log::log(Log::INFO, L"ChunkStatus: {}", (int)world->GetChunkStatus(playerChunk));
 		}
+
+		HitInfo info;
+		if (physEngine->Raycast(newPos, ren.GetActiveCamera()->rotation * Vector3::forward, info))
+			Log::log(Log::INFO, L"{:.3f}, {:.3f}, {:.3f}", info.pos.x, info.pos.y, info.pos.z);
 	}
 
 	Vector3i playerChunk;
@@ -153,28 +158,20 @@ class ChunkGenerator : public MonoScript {
 				if (pooledCh.obj->isEnabled()) {
 					auto locPos = pooledCh.pos - World::TransformToChunkPos(playerPos);
 					auto sqrlen = locPos.SqrLength();
-					//if (sqrlen - maxD == 0) {
-						//if (rand() % 3 == 0) continue;
-					//}
 					if (sqrlen >= maxD) {
 						pooledCh.busy->unlock();
 						continue;
 					}
-					//if (Skip(pooledCh.pos)) { pooledCh.busy->unlock(); nSkips++; continue; }
 					if (CheckChunkVisible(locPos)) {
 						int lod = lodIdx;
 #ifdef _DEBUG
 						lod++;
 #endif // _DEBUG
-
-						//lod = Math::Clamp(lod, 0, 3);
 						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 							auto collider = pooledCh.obj->GetComponents<MeshCollider>()[0];
-							//collider->Disable();
 							collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
-							//collider->Enable();
 							render->SetModel(model);
 							pooledCh.lod = lod;
 						}
@@ -261,7 +258,6 @@ class ChunkGenerator : public MonoScript {
 					toLoad.pop();
 					auto model = ch->GetModel(lod);
 					pooledCh.lod = lod;
-					//sRen.WaitRendering();
 					pooledCh.pos = chPos;
 					transform->position = World::TransformToWorldPos(chPos);
 					render->SetModel(model);
@@ -276,11 +272,7 @@ class ChunkGenerator : public MonoScript {
 						auto it = posStates.find(pooledCh.pos);
 						if (it != posStates.end())
 							posStates.erase(it);
-						//sRen.WaitRendering();
 						pooledCh.obj->Disable();
-						//render->DeleteModel();
-						//concurrency::create_task([&]() { world->UnloadChunk(pooledCh.pos); });
-						//world->UnloadChunk(pooledCh.pos);
 					}
 
 				}

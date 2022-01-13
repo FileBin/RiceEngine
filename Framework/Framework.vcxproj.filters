@@ -234,6 +234,9 @@
     <ClInclude Include="include\GameEngine\Components\CustomCollider.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameEngine\Physics\HitInfo.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Log.cpp">

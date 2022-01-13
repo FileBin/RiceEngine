@@ -194,6 +194,7 @@
     <ClInclude Include="include\GameEngine\Matrixes.h" />
     <ClInclude Include="include\GameEngine\Model.h" />
     <ClInclude Include="include\GameEngine\ModelRender.h" />
+    <ClInclude Include="include\GameEngine\Physics\HitInfo.h" />
     <ClInclude Include="include\GameEngine\Physics\ICollider.h" />
     <ClInclude Include="include\GameEngine\Physics\IRigidBody.h" />
     <ClInclude Include="include\GameEngine\Physics\PhysicsEngine.h" />

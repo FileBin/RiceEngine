@@ -13,11 +13,11 @@ using namespace Game;
 class InitSceneScript : public ScriptBase {
 	void Run() {
 		auto& engine = GetEngine();
-#ifdef _DEBUG
-		engine.LoadScene(new PhysicsScene());
-#else
+//#ifdef _DEBUG
+	//	engine.LoadScene(new PhysicsScene());
+//#else
 		engine.LoadScene(new SampleScene());
-#endif
+//#endif
 
 		engine.RegisterScript(new MsaaTestScript());
 	}
