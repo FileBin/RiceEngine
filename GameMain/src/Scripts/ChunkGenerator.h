@@ -54,7 +54,7 @@ struct PooledChunk {
 class ChunkGenerator : public MonoScript {
 public:
 	//Chunk* chunk;
-	int renderDistance = 8;
+	int renderDistance = 12;
 	World* world;
 	WorldGenerator* generator;
 
@@ -66,7 +66,7 @@ public:
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[4] = { 4, 5, 6, 7 };
+	int lodDistances[4] = { 4, 5, 7, 9 };
 
 	void Start() {
 #ifdef _DEBUG
@@ -164,9 +164,6 @@ public:
 					}
 					if (CheckChunkVisible(locPos)) {
 						int lod = lodIdx;
-#ifdef _DEBUG
-						lod++;
-#endif // _DEBUG
 						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
 							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];

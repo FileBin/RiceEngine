@@ -123,7 +123,6 @@ namespace Game::Physics {
 			k = Math::Clamp01(k);
 
 			return Vector3::Lerp(data.prevPos, data.pos, k);
-			return data.prevPos + data.velo * k * deltaTime;
 		} catch (std::out_of_range) {
 			THROW_INDEX_OUT_OF_RANGE_EXCEPTION;
 		}

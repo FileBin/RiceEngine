@@ -17,10 +17,6 @@ namespace Game {
 	}
 
 	void Collider::OnDisable() {
-		engine->RemoveRigidBody(UUID);
+  		engine->RemoveCollider(UUID);
 	}
-
-	/*dbl Collider::sdFunc(Vector3 p) {
-		return sd(p);
-	}*/
 }
