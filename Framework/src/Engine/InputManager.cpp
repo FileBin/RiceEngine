@@ -28,7 +28,9 @@ namespace Game {
 	}
 
 	bool InputManager::GetKey(KeyCode key) {
-		return instance->keyStates[(size_t)key];
+		if (instance->active)
+			return instance->keyStates[(size_t)key];
+		return false;
 	}
 
 	const Vector2 InputManager::GetMousePos() {
@@ -36,6 +38,7 @@ namespace Game {
 	}
 
 	Vector2 InputManager::GetMouseDelta() {
+		if (!instance->lockMouse) return Vector2::zero;
 		return instance->mouseDelta;
 	}
 
@@ -111,9 +114,46 @@ namespace Game {
 		}
 	}
 
+	void InputManager::LockMouse() {
+		if (instance->active) {
+			if (!instance->lockMouse) {
+				instance->lockMouse = true;
+				ShowCursor(false);
+			}
+		}
+	}
+
+	void InputManager::UnlockMouse() {
+		if (instance->active) {
+			if (instance->lockMouse) {
+				instance->lockMouse = false;
+				ShowCursor(true);
+			}
+		}
+	}
+
+	void InputManager::SetActive(bool active) {
+		if (!active) UnlockMouse();
+		instance->active = active;
+	}
+
 	void InputManager::Update(){
+		if (active) {
+			if (lockMouse) {
+				Vector2 center;
+				center.x = windowRect.right - windowRect.left;
+				center.y = windowRect.bottom - windowRect.top;
+				center *= .5;
+				SetMousePos(center);
+				if (GetKey(KeyCode::Escape)) {
+					UnlockMouse();
+				}
+			}
+		}
+
 		mouseDelta = { 0,0 };
 	}
+
 
 	void InputManager::eventKey(KeyCode key, bool state) {
 		keyStates[static_cast<size_t>(key)] = state;

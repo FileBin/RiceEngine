@@ -19,7 +19,12 @@ namespace Game {
 		void SetRect(const RECT &winRect);
 		void UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam);
 		void Update();
+		static void LockMouse();
+		static void UnlockMouse();
+		static void SetActive(bool active = true);
 	private:
+		bool active = true;
+		bool lockMouse = false;
 		bool* keyStates;
 		bool* mouseStates;
 		short mouseScrollDelta = 0, mouseWheel = 0;

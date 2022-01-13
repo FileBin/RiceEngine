@@ -9,6 +9,9 @@
 #include "WorldGenerator.h"
 #include <GameEngine/Vectors/Hasher.h>
 #include "HeightMap.h"
+#include <GameEngine\SceneRender.h>
+#include <GameEngine\Components\MeshCollider.h>
+#include <GameEngine\Components\ModelRender.h>
 
 using namespace Game;
 using std::map, std::unordered_map;
@@ -30,6 +33,9 @@ private:
     void Generate();
 
 public:
+    SmartPtr<ModelRender> render;
+    SmartPtr<MeshCollider> collider;
+
     enum Status { Invalid = -3, Unloaded, NotCreated, NotLoaded = 0, Loading, Operating, Loaded } status = NotLoaded;
 
     static const int ChunkSize;
@@ -170,6 +176,33 @@ public:
         auto idx = 1 << lod;
         if (model[lod].Get()) return { model[lod] };
         return model[lod] = GenerateSmoothModel(idx);
+    }
+
+    void UpdateModel(SceneRender& ren,size_t lod = 0) {
+        auto idx = 1 << lod;
+        auto& _model = model[lod];
+        bool alreadyLoaded = !_model.IsNull();
+        auto otherM = GenerateSmoothModel(idx);
+        render->SetModel(otherM);
+        _model.Release();
+        collider->SetModel(otherM, VoxelTypeIndex::V_WATER);
+       /* if (alreadyLoaded) {
+            auto n = otherM->GetSubMeshesCount();
+            _model->SetSubMeshesCount(n);
+            for (auto i = 0; i < n; i++) {
+                auto otherMesh = otherM->GetSubMesh(i);
+                auto mesh = _model->GetSubMesh(i);
+                mesh->indexBuffer = otherMesh->indexBuffer;
+                mesh->vertexBuffer = otherMesh->vertexBuffer;
+                if (alreadyLoaded) {
+
+                   // ren.UpdateBuffers(mesh);
+                }
+            }
+            delete otherM;
+        } else {
+            _model = otherM;
+        }*/
     }
     Model* GenerateModel();
     Model* GenerateSmoothModel(size_t step = 4);

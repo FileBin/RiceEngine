@@ -185,6 +185,7 @@
     <ClInclude Include="src\Scripts\ChunkGenerator.h" />
     <ClInclude Include="src\Scripts\InitSceneScript.h" />
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
+    <ClInclude Include="src\Scripts\PlayerHandler.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SampleScene.h" />
     <ClInclude Include="src\Scripts\UI\DebugText.h" />

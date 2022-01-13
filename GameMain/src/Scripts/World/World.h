@@ -48,14 +48,16 @@ private:
 	std::mutex hmlock;
 	std::mutex chunkLock;
 	WorldGenerator& generator;
+	SmartPtr<SceneRender> ren;
 #pragma endregion
 
 #pragma region publicFunctions
 public:
 
-	static void Register(Engine& en, SceneRender& ren);
-
-	World(WorldGenerator* gen, SceneRender* ren) : generator(*gen) { Voxel::Register(*ren); }
+	World(WorldGenerator* gen, SceneRender* _ren) : generator(*gen) {
+		ren = _ren;
+		Voxel::Register(*ren); 
+	}
 
 	void UnloadChunks(std::function<bool(Vector3i)> predicate) {
 		std::queue<Vector3i> keys;
@@ -112,6 +114,41 @@ public:
 			}
 		}
 		return chunks;
+	}
+
+	void EraseVoxels(SDFunc func, Vector3i minPos, Vector3i maxPos) {
+		auto n = maxPos.x;
+		auto m = maxPos.y;
+		auto p = maxPos.z;
+		for (auto i = minPos.x; i <= n; i++) {
+			for (auto j = minPos.y; j <= m; j++) {
+				for (auto k = minPos.z; k <= p; k++) {
+					auto vpos = Vector3i(i, j, k);
+					auto data = GetVoxelData(vpos);
+					auto d = -func(vpos);
+					if (d > data.depth) {
+						//data.index = VoxelTypeIndex::V_VOID;
+						data.depth = d;
+						SetVoxelData(data, vpos);
+					}
+				}
+			}
+		}
+		maxPos = TransformToChunkPos(maxPos);
+		minPos = TransformToChunkPos(minPos);
+
+		n = maxPos.x;
+		m = maxPos.y;
+		p = maxPos.z;
+
+		for (auto i = minPos.x; i <= n; i++) {
+			for (auto j = minPos.y; j <= m; j++) {
+				for (auto k = minPos.z; k <= p; k++) {
+					auto ch = GetChunk({ i,j,k });
+					ch->UpdateModel(*ren);
+				}
+			}
+		}
 	}
 
 	float GetAltitude(Vector3 pos) {
@@ -184,6 +221,13 @@ public:
 		auto chunk = TransformToChunkPos(voxelPos);
 		vox = vox - chunk * Chunk::ChunkSize;
 		return GetChunk(chunk)->GetData(vox);
+	}
+
+	void SetVoxelData(VoxelData data, Vector3i voxelPos) {
+		Vector3i& vox = voxelPos;
+		auto chunk = TransformToChunkPos(voxelPos);
+		vox = vox - chunk * Chunk::ChunkSize;
+		GetChunk(chunk)->SetVoxelData(data, vox);
 	}
 
 	SmartPtr<HeightMap> GetHeightMap(Vector3i chunkPos) {

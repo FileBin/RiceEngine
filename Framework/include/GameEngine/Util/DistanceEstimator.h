@@ -8,5 +8,6 @@ namespace Game::Util {
 	dbl opJoin(dbl a, dbl b);
 	dbl sdPlane(Vector3 p, Vector3 n);
 	dbl sdLine(Vector3 p, Vector3 a, Vector3 b);
+	dbl sdSphere(Vector3 p, dbl r);
 	dbl sdTorus(Vector3 pos, dbl radius, dbl thickness);
 }

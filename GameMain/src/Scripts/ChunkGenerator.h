@@ -52,7 +52,7 @@ struct PooledChunk {
 };
 
 class ChunkGenerator : public MonoScript {
-	vector<bool> loading{};
+public:
 	//Chunk* chunk;
 	int renderDistance = 10;
 	World* world;
@@ -78,7 +78,7 @@ class ChunkGenerator : public MonoScript {
 		playerPos.y = 30;
 
 		//generator = new FlatGenerator(25.);
-		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
+		generator = new StandartGenerator(WorldSeed::Default(), 20, -20, .3, .5, .5);
 		world = new World(generator, &scene.GetRender());
 
 		auto a = renderDistance * 2 + 1;
@@ -136,9 +136,9 @@ class ChunkGenerator : public MonoScript {
 			//Log::log(Log::INFO, L"ChunkStatus: {}", (int)world->GetChunkStatus(playerChunk));
 		}
 
-		HitInfo info;
+		/*HitInfo info;
 		if (physEngine->Raycast(newPos, ren.GetActiveCamera()->rotation * Vector3::forward, info))
-			Log::log(Log::INFO, L"{:.3f}, {:.3f}, {:.3f}", info.pos.x, info.pos.y, info.pos.z);
+			Log::log(Log::INFO, L"{:.3f}, {:.3f}, {:.3f}", info.pos.x, info.pos.y, info.pos.z);*/
 	}
 
 	Vector3i playerChunk;
@@ -248,6 +248,7 @@ class ChunkGenerator : public MonoScript {
 				if (!pooledCh.busy->try_lock()) { nSkips++; continue; }
 				auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 				auto transform = pooledCh.obj->GetComponents<Transform>()[0];
+				auto collider = pooledCh.obj->GetComponents<MeshCollider>()[0];
 				if (!pooledCh.obj->isEnabled()) {
 					if (toLoad.empty()) {
 						pooledCh.busy->unlock();
@@ -257,6 +258,8 @@ class ChunkGenerator : public MonoScript {
 					auto ch = world->GetChunk(chPos);
 					toLoad.pop();
 					auto model = ch->GetModel(lod);
+					ch->collider = collider;
+					ch->render = render;
 					pooledCh.lod = lod;
 					pooledCh.pos = chPos;
 					transform->position = World::TransformToWorldPos(chPos);
@@ -264,6 +267,7 @@ class ChunkGenerator : public MonoScript {
 					for (auto i = 0; i < Voxel::GetMaterialCount(); i++) {
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);
 					}
+					collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
 					pooledCh.obj->Enable();
 					posStates.insert({ pooledCh.pos, true });
 				} else {

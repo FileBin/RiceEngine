@@ -37,6 +37,7 @@ namespace Game::Physics {
 				Update(deltaTime);
 				std::this_thread::sleep_until(frameStart + microseconds(interval));
 				deltaTime = .001 * .000001 * (steady_clock::now() - frameStart).count();
+				deltaTime = Math::Min(deltaTime, fixedDeltaTime * 2);
 				init = true;
 			}
 			});
@@ -84,6 +85,7 @@ namespace Game::Physics {
 		for (const auto& p : bodies) {
 			auto rb = p.second;
 			frontFrame.SetPosition(p.first, rb->GetPosition());
+			frontFrame.SetPrevPosition(p.first, backFrame.GetRawPosition(p.first));
 			frontFrame.SetVelocity(p.first, rb->GetVelocity() * (dbl)timeScale);
 		}
 	}
@@ -99,11 +101,11 @@ namespace Game::Physics {
 			dist += d;
 			pos += dir * d;
 			if (d <= eps) {
+				info.pos = pos;
 				info.dist = d;
 				updateMutex.lock();
 				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos);
 				updateMutex.unlock();
-				info.pos = pos;
 				return true;
 			} else if (dist >= maxD) {
 				break;
@@ -117,12 +119,26 @@ namespace Game::Physics {
 			using namespace std::chrono;
 			const auto& data = rbData.at(uuid);
 			auto k = (steady_clock::now() - timePoint).count() * .000001 * .001;
-			return data.pos + data.velo * k;
+			k /= deltaTime;
+			k = Math::Clamp01(k);
+
+			return Vector3::Lerp(data.prevPos, data.pos, k);
+			return data.prevPos + data.velo * k * deltaTime;
 		} catch (std::out_of_range) {
 			THROW_INDEX_OUT_OF_RANGE_EXCEPTION;
 		}
 	}
 
-	void PhysicsEngine::Frame::SetPosition(size_t uuid, Vector3 pos) { rbData[uuid].pos = pos; }
+	Vector3 PhysicsEngine::Frame::GetRawPosition(size_t uuid) {
+		return rbData[uuid].pos;
+	}
+
+	void PhysicsEngine::Frame::SetPosition(size_t uuid, Vector3 pos) {
+		rbData[uuid].pos = pos;
+	}
+
+	void PhysicsEngine::Frame::SetPrevPosition(size_t uuid, Vector3 pos) {
+		rbData[uuid].prevPos = pos;
+	}
 	void PhysicsEngine::Frame::SetVelocity(size_t uuid, Vector3 velo) { rbData[uuid].velo = velo; }
 }

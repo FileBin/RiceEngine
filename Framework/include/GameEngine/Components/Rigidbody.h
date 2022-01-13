@@ -18,6 +18,8 @@ namespace Game {
 		SmartPtr<PhysicsEngine> engine;
 		size_t UUID = -1;
 
+		dbl bounciness = 0;
+
 		std::mutex engineMutex;
 
 		//temporary

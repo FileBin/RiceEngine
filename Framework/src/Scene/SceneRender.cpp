@@ -157,8 +157,8 @@ namespace Game {
 			auto mesh = replace->GetSubMesh(i);
 			if (mesh->vertexBuffer.empty()) continue;
 			auto rMesh = new RenderingMesh();
-			rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
-			rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+			rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
+			rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
 			rMesh->orig = mesh;
 
 			rMesh->pPos = replace->pPos;
@@ -182,17 +182,18 @@ namespace Game {
 	}
 
 	bool SceneRender::UpdateBuffers(SmartPtr<Mesh> mesh) {
-
+		std::lock_guard lock(m_mutex);
 		auto it = renderingMeshes.find(mesh);
 		if (it == renderingMeshes.end()) {
 			it = transparentMeshes.find(mesh);
 			if (it == transparentMeshes.end())
 				return false;
 		}
-		std::lock_guard lock(m_mutex);
-		auto& rMesh = *it->second;
-		device->UpdateBufferData(rMesh.pIndexBuffer.Get(), mesh->indexBuffer);
-		device->UpdateBufferData(rMesh.pVertexBuffer.Get(), mesh->vertexBuffer);
+		auto rMesh = it->second;
+		rMesh->pIndexBuffer->Release();
+		rMesh->pVertexBuffer->Release();
+		rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
+		rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
 		return true;
 	}
 

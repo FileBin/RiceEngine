@@ -16,8 +16,8 @@ namespace Game {
 		dbl delta = radius - d;
 
 		if (delta > 0) {
-			constexpr dbl ep = 0.0000001;
-			constexpr dbl re = 10000000.;
+			constexpr dbl ep = 0.1;
+			constexpr dbl re = 10.;
 			Vector3 n = {
 				sdFunc(newPos + Vector3::right * ep) - d,
 				sdFunc(newPos + Vector3::up * ep) - d,
@@ -26,7 +26,7 @@ namespace Game {
 			n.Normalize();
 			auto d = Vector3::Dot(velocity, n);
 			//auto l = velocity.Length();
-			velocity -= n * d * 2.;
+			velocity -= n * d * (1. + bounciness);
 			/*if (abs(d) < l * .11) {
 				velocity.Normalize();
 				velocity *= l;

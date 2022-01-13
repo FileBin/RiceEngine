@@ -15,14 +15,16 @@ namespace Game::Physics {
 		struct Frame {
 		private:
 			struct Data {
-				Vector3 pos, velo;
+				Vector3 pos, prevPos, velo;
 			};
 			std::unordered_map<size_t, Data> rbData;
 			std::chrono::steady_clock::time_point timePoint;
 			dbl deltaTime;
 		public:
 			const Vector3 GetPosition(size_t UUID) const;
+			Vector3 GetRawPosition(size_t UUID);
 			void SetPosition(size_t, Vector3);
+			void SetPrevPosition(size_t, Vector3);
 			void SetVelocity(size_t, Vector3);
 			void SetTime() { timePoint = std::chrono::steady_clock::now(); }
 			void SetDeltaTime(dbl dt) { deltaTime = dt; }
@@ -49,7 +51,7 @@ namespace Game::Physics {
 		void Update(dbl dt);
 
 		const Frame GetBackFrame();
-		bool Raycast(Vector3 origin, Vector3 direction, OUT HitInfo& info, size_t maxIterations = 64, dbl eps = .01, dbl maxDist = 300.);
+		bool Raycast(Vector3 origin, Vector3 direction, OUT HitInfo& info, size_t maxIterations = 128, dbl eps = .1, dbl maxDist = 300.);
 
 		std::mutex& GetUpdateMutex() { return updateMutex; }
 		~PhysicsEngine() { alive = false; }

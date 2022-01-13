@@ -107,10 +107,7 @@ namespace Game {
 	bool Core::frame() {
 		wnd->RunEvent();
 
-#ifndef _DEBUG
-		if (!wnd->IsActive())
-			return true;
-#endif
+		wnd->inputmgr->SetActive(wnd->IsActive());
 
 		if (wnd->IsExit())
 			return false;
@@ -165,7 +162,7 @@ namespace Game {
 			closeScripts.push_back(script);
 			break;
 		default:
-			ThrowIfFailed(E_INVALIDARG);
+			THROW_INVALID_ARG_EXCEPTION("Core::Stage");
 			break;
 		}
 	}

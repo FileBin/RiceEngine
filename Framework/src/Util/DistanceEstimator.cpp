@@ -35,6 +35,10 @@ namespace Game::Util {
 		return (pa - ba * h).Length();
 	}
 
+	dbl sdSphere(Vector3 p, dbl r) {
+		return p.Length() - r;
+	}
+
 	dbl sdTorus(Vector3 pos, dbl radius, dbl thickness) {
 		Vector2 q = { sqrt(pos.x * pos.x + pos.z * pos.z) - radius, pos.y };
 		return q.Length() - thickness;
