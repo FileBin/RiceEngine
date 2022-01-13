@@ -10,27 +10,23 @@ namespace Game {
 	}
 
 	void MeshCollider::SetModel(Model* m, int ignoredMat) {
-		concurrency::create_task([this, m, ignoredMat]() {
-			auto n = m->GetSubMeshesCount();
-			auto combined = new Mesh();
-			for (auto i = 0; i < n; i++) {
-				if (i == ignoredMat) continue;
-				combined->Combine(*m->GetSubMesh(i));
-			}
-			combined->ReclaculateBounds();
-			auto pm = new PhysMesh(*combined);
-			if (enabled) {
-				std::lock_guard lock(engine->GetUpdateMutex());
-				_DELETE(physMesh);
-				physMesh = pm;
-			} else {
-				_DELETE(physMesh);
-				physMesh = pm;
-			}
-			delete combined;
-			}
-		);
-
+		auto n = m->GetSubMeshesCount();
+		auto combined = new Mesh();
+		for (auto i = 0; i < n; i++) {
+			if (i == ignoredMat) continue;
+			combined->Combine(*m->GetSubMesh(i));
+		}
+		combined->ReclaculateBounds();
+		auto pm = new PhysMesh(*combined);
+		if (enabled) {
+			std::lock_guard lock(engine->GetUpdateMutex());
+			_DELETE(physMesh);
+			physMesh = pm;
+		} else {
+			_DELETE(physMesh);
+			physMesh = pm;
+		}
+		delete combined;
 	}
 
 	dbl MeshCollider::sdFunc(Vector3 p) {
