@@ -31,7 +31,7 @@ namespace Game {
 			Microsoft::WRL::ComPtr<Buffer> pIndexBuffer = nullptr;
 			Microsoft::WRL::ComPtr<Buffer> pVertexBuffer = nullptr;
 			SmartPtr<Material> pMat = nullptr;
-			void Draw(SceneRender* ren, Camera& cam);
+			void Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, bool ckeckVisiblity = true);
 			~RenderingMesh() {
 				pIndexBuffer->Release();
 				pVertexBuffer->Release();
@@ -44,6 +44,8 @@ namespace Game {
 		bool Draw();
 		void Close();
 		void Resize();
+
+		void SetupSkybox(SmartPtr<Material> skyboxMat);
 
 		void AddModel(SmartPtr<Model> model, std::vector<SmartPtr<Material>> materials);
 		void RemoveModel(SmartPtr<Model> model);
@@ -75,5 +77,11 @@ namespace Game {
 		std::unordered_map<SmartPtr<Mesh>, SmartPtr<RenderingMesh>> renderingMeshes, transparentMeshes;
 		std::vector<SmartPtr<UI::IDrawable>> drawables;
 		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
+
+		//default
+		SmartPtr<RenderingMesh> skyBox;
+		SmartPtr<Material> skyboxMaterial;
+
+		Mesh* CreateSkyBoxMesh();
 	};
 }

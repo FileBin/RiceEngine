@@ -8,24 +8,46 @@
 #include <GameEngine\Components\UI\IDrawable.h>
 
 namespace Game {
-	using std::queue;
+
 	bool SceneRender::Init() {
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
+
 		return true;
 	}
-	void SceneRender::BeginFrame() {
-		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
+
+	void Game::SceneRender::SetupSkybox(SmartPtr<Material> skyboxMat) {
+		skyBox = new RenderingMesh();
+
+		auto mesh = CreateSkyBoxMesh();
+
+		skyBox->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
+		skyBox->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
+		skyBox->orig = mesh;
+		skyBox->pMat = skyboxMaterial = skyboxMat;
+		skyBox->pPos = new Vector3();
+		skyBox->pRot = new Quaternion();
+		skyBox->pScale = new Vector3(1, 1, 1);
 	}
 
-	void SceneRender::RenderingMesh::Draw(SceneRender* ren, Camera& cam) {
+	void SceneRender::BeginFrame() {
+		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
+		if (!skyBox.IsNull()) {
+			auto cam = cameras[activeCameraIdx];
+			skyBox->Draw(this, Matrix4x4::Rotation(cam->rotation.Opposite()), cam->GetProjectionMatrix(), false);
+			device->ClearZBuffer();
+		}
+	}
+
+	void SceneRender::RenderingMesh::Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, bool check) {
 		auto device = ren->device;
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
-		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale);
-		cb.View = cam.GetTransformationMatrix();
-		cb.Projection = cam.GetProjectionMatrix();
+		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale); // TODO: values must be getted from the transform
+		cb.View = View;
+		cb.Projection = Projection;
 
-		if (orig.IsNull() || !orig->CheckVisiblity(cb)) return;
+		if (check)
+			if (orig.IsNull() || !orig->CheckVisiblity(cb)) return;
 
 		device->LoadBufferSubresource(constantBuffer, cb);
 		device->SetActiveVSConstantBuffer(constantBuffer);
@@ -41,21 +63,21 @@ namespace Game {
 	}
 
 	bool SceneRender::Draw() {
-		std::unique_ptr<std::lock_guard<std::mutex>> locks[0x100];
 		auto cam = *cameras[activeCameraIdx];
-		queue<pair<SmartPtr<Mesh>, ConstantBufferData>> transparentQ;
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
-		//float time = clock() * .001;
+
+		Matrix4x4f mV = cam.GetTransformationMatrix();
+		Matrix4x4f mP = cam.GetProjectionMatrix();
 		m_mutex.lock();
 		for (auto& pair : renderingMeshes) {
-			pair.second->Draw(this, cam);
+			pair.second->Draw(this, mV, mP);
 		}
 
 		device->SetBlendState(true);
 		device->UnsetDepthBuffer();
 		for (auto& pair : transparentMeshes) {
-			pair.second->Draw(this, cam);
+			pair.second->Draw(this, mV, mP);
 		}
 		m_mutex.unlock();
 
@@ -239,5 +261,65 @@ namespace Game {
 				break;
 			}
 		}
+	}
+	Mesh* SceneRender::CreateSkyBoxMesh() {
+		Mesh* mesh = new Mesh();
+
+		constexpr dbl onesixth = 1. / 6.;
+
+		constexpr dbl eps = 0.00698;
+
+		Vector2f texcoords[4] = {
+			{ (float)(onesixth * (1. - eps)), (float)(1. - eps) },
+			{ (float)(eps*onesixth), (float)(1. - eps) },
+			{ (float)(eps*onesixth), (float)eps },
+			{ (float)(onesixth*(1. - eps)), (float)eps },
+		};
+
+		auto quad = Mesh::quad;
+		quad.Translate({ 0, 0, -.5f });//-Z
+
+		for (auto i = 0; i < 4; i++) {
+			quad.vertexBuffer[i].texcoord = texcoords[i];
+		}
+
+		mesh->Combine(quad);
+
+		for (auto i = 1; i < 4; i++) {
+			quad.Rotate(Quaternion::FromAxisAngle(Vector3::up, 90)); //+Z, +-X
+
+			for (auto j = 0; j < 4; j++) {
+				quad.vertexBuffer[j].texcoord = texcoords[j];
+				quad.vertexBuffer[j].texcoord.x += onesixth * i;
+			}
+
+			mesh->Combine(quad);
+		}
+
+		quad = Mesh::quad;
+		quad.Translate({ 0, 0, -.5f });
+		quad.Rotate(Quaternion::FromAxisAngle(Vector3::right, -90)); //-Y
+
+		for (auto i = 0; i < 4; i++) {
+			quad.vertexBuffer[i].texcoord = texcoords[i];
+			quad.vertexBuffer[i].texcoord.x += onesixth * 4;
+		}
+
+		mesh->Combine(quad);
+
+		quad = Mesh::quad;
+		quad.Translate({ 0, 0, -.5f });
+		quad.Rotate(Quaternion::FromAxisAngle(Vector3::right, 90)); //+Y
+
+		for (auto i = 0; i < 4; i++) {
+			quad.vertexBuffer[i].texcoord = texcoords[i];
+			quad.vertexBuffer[i].texcoord.x += onesixth * 5;
+		}
+
+		mesh->Combine(quad);
+		mesh->ReclaculateBounds();
+		mesh->RecalculateNormals();
+
+		return mesh;
 	}
 }

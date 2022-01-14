@@ -34,16 +34,21 @@ class SampleScene : public Scene {
 
 		ren.AddCamera(cam);
 
-		auto sh = ren.CreateShader(L"Diffuse");
+		auto diff = ren.CreateShader(L"Diffuse");
 
-		sh->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
-		sh->LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+		diff->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
+		diff->LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
 
-		sh = ren.CreateShader(L"Water");
+		auto sh = ren.CreateShader(L"Water");
 		sh->usesDepthBuffer = true;
 
 		sh->LoadVertexShader(Util::ReadFile(L"WaterVS.cso"));
 		sh->LoadPixelShader(Util::ReadFile(L"WaterShader.cso"));
+
+		auto skyShader = ren.CreateShader(L"SkyShader");
+
+		skyShader->LoadVertexShader(Util::ReadFile(L"SkyBoxVertex.cso"));
+		skyShader->LoadPixelShader(Util::ReadFile(L"SkyBoxPixel.cso"));
 
 		auto chunkGen = new ChunkGenerator();
 		auto camMover = new CameraMover();
@@ -59,6 +64,15 @@ class SampleScene : public Scene {
 		player->AddComponent(new Rigidbody());
 		player->AddComponent(playerH);
 
+		auto skymat = ren.CreateMaterial(L"SkyboxMaterial", skyShader, {});
+
+		auto& skyTex = ren.CreateTexture(L"img/sky_finger.png");
+
+		skymat->AddTexture(&skyTex);
+
+		skymat->UpdateBuffer();
+
+		ren.SetupSkybox(skymat);
 
 		auto txt = new UI::Text();
 		txt->SetText(L"SUS");

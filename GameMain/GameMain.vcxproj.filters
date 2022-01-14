@@ -6,6 +6,8 @@
     <FxCompile Include="shaders\TexturedShader.hlsl" />
     <FxCompile Include="shaders\WaterShader.hlsl" />
     <FxCompile Include="shaders\WaterVS.hlsl" />
+    <FxCompile Include="shaders\SkyBoxPixel.hlsl" />
+    <FxCompile Include="shaders\SkyBoxVertex.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

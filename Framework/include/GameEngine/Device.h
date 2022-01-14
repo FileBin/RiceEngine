@@ -82,7 +82,8 @@ namespace Game {
 
 		void Draw();
 
-		void ClearFrame(Color color = Color(0,0,0));
+		void ClearFrame(Color color = Color(0, 0, 0));
+		void ClearZBuffer();
 		void SwapBuffers();
 
 		Texture2D* GetDepthBufferTex() { return depthTexture; }

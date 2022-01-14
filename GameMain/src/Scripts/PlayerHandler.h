@@ -64,16 +64,31 @@ public:
 		HitInfo hit;
 		grounded = physEn->Raycast(transform->position, Vector3::down, hit, 32, .6, 1.);
 
+		auto tangent = Vector3::Dot(Vector3::up, hit.norm);
+
 		auto vel = playerBody->GetVelocity();
+		auto speed = vel.Length();
 		auto targetvel = mv * 10.;
 		auto deltavel = targetvel - vel;
-		deltavel = Vector3::ProjectOnPlane(deltavel, Vector3::up);
+		if (!grounded) {
+			deltavel = Vector3::ProjectOnPlane(deltavel, Vector3::up);
+		}
+
+		bool stop = mv.Length() < .5 && grounded;
+
+		if (stop) {
+			deltavel *= Math::Lerp(.1, 1., Math::Clamp01(5. * (tangent - .7)));
+		}
+
+		if (!stop) {
+			deltavel *= .1;
+		}
 
 		if (InputManager::GetKey(KeyCode::Space)) {
 			if (grounded) vel.y = 10;
 		}
 
-		playerBody->SetVelocity(vel + deltavel * .1);
+		playerBody->SetVelocity(vel + deltavel);
 
 		//cam rotation
 		auto delta = InputManager::GetMouseDelta();
@@ -81,9 +96,8 @@ public:
 		delta = delta * .2;
 
 		pos += delta;
-		pos.y = min(max(pos.y, -90), 90);
+		pos.y = Math::Clamp(pos.y, -90., 90.);
 		pos.x = fmod(pos.x, 360);
-		//auto yrot = Quaternion::FromAxisAngle(Vector3::up, pos.x);
 		cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 		cam->position = transform->position + Vector3::up;
 
@@ -124,13 +138,13 @@ public:
 		if (!updating) {
 			HitInfo info;
 			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .1, 5.)) {
-				info.pos += info.norm * 1.1;
-				SDFunc func = [info](Vector3 p) {return sdSphere(p - info.pos, 2); };
-				Vector3i minPos = info.pos - Vector3::one * 3;
+				info.pos += info.norm * 1.4;
+				SDFunc func = [info](Vector3 p) { return sdSphere(p - info.pos, 2); };
+				Vector3i minPos = info.pos - Vector3::one * 5;
 				Core::RunTask([this, func, minPos]() {
 					updating = true;
 					auto time = steady_clock::now();
-					chunkGen->world->EraseVoxels(func, minPos, minPos + Vector3i(6, 6, 6));
+					chunkGen->world->EraseVoxels(func, minPos, minPos + Vector3i(10, 10, 10));
 					std::this_thread::sleep_until(time + milliseconds(timeout));
 					updating = false;
 					});

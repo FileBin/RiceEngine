@@ -406,6 +406,10 @@ namespace Game {
 		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 		float c[] = { color.r,color.g,color.b,color.A };
 		context->ClearRenderTargetView(renderTarget, c);
+		ClearZBuffer();
+	}
+
+	void Device::ClearZBuffer() {
 		context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 	}
 

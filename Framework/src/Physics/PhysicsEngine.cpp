@@ -99,17 +99,17 @@ namespace Game::Physics {
 			updateMutex.unlock();
 			if (d >= DBL_MAX) d = PHYS_FIXED_STEP;
 			dist += d;
-			pos += dir * d;
 			if (d <= eps) {
-				info.pos = pos;
+				info.pos = pos + dir * d;
 				info.dist = d;
 				updateMutex.lock();
-				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos, eps);
+				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos);
 				updateMutex.unlock();
 				return true;
 			} else if (dist >= maxD) {
 				break;
 			}
+			pos += dir * d;
 		}
 		return false;
 	}
