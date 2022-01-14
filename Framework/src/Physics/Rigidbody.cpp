@@ -10,7 +10,17 @@ namespace Game {
 		std::lock_guard lock(engineMutex);
 		velocity += gravity * deltaTime;
 		auto motion = velocity * deltaTime;
+
+		dbl d0 = sdFunc(position);
+
+		auto motionL = motion.Length();
+
+		if (d0 < motionL) {
+			motion *= d0 / motionL;
+		}
+
 		auto newPos = position + motion;
+
 		dbl d = sdFunc(newPos);
 
 		dbl delta = radius - d;
