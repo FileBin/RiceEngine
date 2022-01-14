@@ -50,7 +50,9 @@ VoxelData Chunk::GenVoxelData(Vector3i voxelPos, bool transp) {
     if (hmap.IsNull())
         hmap = world->GetHeightMap(position);
     auto altitude = t.y - hmap->Get(voxelPos.x, voxelPos.z);
-    return gen->GetVoxelData(t, altitude, transp);
+    auto data = gen->GetVoxelData(t, altitude, transp);
+    if (abs(data.depth) < .25) data.depth = 0;
+    return data;
 }
 
 #include "Voxels\VoxelVoid.h"

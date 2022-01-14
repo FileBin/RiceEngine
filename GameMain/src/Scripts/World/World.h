@@ -116,6 +116,46 @@ public:
 		return chunks;
 	}
 
+	void RegenarateModels(Vector3i vmin, Vector3i vmax) {
+		auto maxPos = TransformToChunkPos(vmax);
+		auto minPos = TransformToChunkPos(vmin);
+
+		auto n = maxPos.x;
+		auto m = maxPos.y;
+		auto p = maxPos.z;
+
+		for (auto i = minPos.x; i <= n; i++) {
+			for (auto j = minPos.y; j <= m; j++) {
+				for (auto k = minPos.z; k <= p; k++) {
+					auto ch = GetChunk({ i,j,k });
+					ch->UpdateModel(*ren);
+				}
+			}
+		}
+	}
+
+	void AddVoxels(SDFunc func, Vector3i minPos, Vector3i maxPos, VoxelTypeIndex index) {
+		auto n = maxPos.x;
+		auto m = maxPos.y;
+		auto p = maxPos.z;
+		for (auto i = minPos.x; i <= n; i++) {
+			for (auto j = minPos.y; j <= m; j++) {
+				for (auto k = minPos.z; k <= p; k++) {
+					auto vpos = Vector3i(i, j, k);
+					auto data = GetVoxelData(vpos);
+					auto d = func(vpos);
+					if (d < data.depth) {
+						if (d <= 0)
+							data.index = index;
+						data.depth = d;
+						SetVoxelData(data, vpos);
+					}
+				}
+			}
+		}
+		RegenarateModels(minPos, maxPos);
+	}
+
 	void EraseVoxels(SDFunc func, Vector3i minPos, Vector3i maxPos) {
 		auto n = maxPos.x;
 		auto m = maxPos.y;
@@ -127,28 +167,15 @@ public:
 					auto data = GetVoxelData(vpos);
 					auto d = -func(vpos);
 					if (d > data.depth) {
-						//data.index = VoxelTypeIndex::V_VOID;
+						if (d > 0)
+							data.index = VoxelTypeIndex::V_VOID;
 						data.depth = d;
 						SetVoxelData(data, vpos);
 					}
 				}
 			}
 		}
-		maxPos = TransformToChunkPos(maxPos);
-		minPos = TransformToChunkPos(minPos);
-
-		n = maxPos.x;
-		m = maxPos.y;
-		p = maxPos.z;
-
-		for (auto i = minPos.x; i <= n; i++) {
-			for (auto j = minPos.y; j <= m; j++) {
-				for (auto k = minPos.z; k <= p; k++) {
-					auto ch = GetChunk({ i,j,k });
-					ch->UpdateModel(*ren);
-				}
-			}
-		}
+		RegenarateModels(minPos, maxPos);
 	}
 
 	float GetAltitude(Vector3 pos) {

@@ -29,7 +29,7 @@ namespace Game {
 		}
 
 		static void RunTask(std::function<void(void)> func) {
-			 concurrency::create_task([&func]() {
+			 concurrency::create_task([func]() {
 				try {
 					func();
 				}

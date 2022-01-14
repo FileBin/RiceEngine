@@ -24,6 +24,8 @@ class PlayerHandler : public MonoScript {
 
 	SmartPtr<Rigidbody> playerBody;
 	SmartPtr<Transform> transform;
+
+	bool grounded = false;
 public:
 	SmartPtr<ChunkGenerator> chunkGen;
 	std::chrono::steady_clock::time_point click_time = std::chrono::steady_clock::now();
@@ -58,13 +60,18 @@ public:
 		mv *= yrot;
 
 		double dt = en.GetDeltaTime();
+		auto physEn = GetScene().GetPhysEngine();
+		HitInfo hit;
+		grounded = physEn->Raycast(transform->position, Vector3::down, hit, 32, .6, 1.);
 
 		auto vel = playerBody->GetVelocity();
 		auto targetvel = mv * 10.;
 		auto deltavel = targetvel - vel;
 		deltavel = Vector3::ProjectOnPlane(deltavel, Vector3::up);
 
-		if (InputManager::GetKey(KeyCode::Space)) { if (abs(vel.y) < 1) vel.y = 10; }
+		if (InputManager::GetKey(KeyCode::Space)) {
+			if (grounded) vel.y = 10;
+		}
 
 		playerBody->SetVelocity(vel + deltavel * .1);
 
@@ -82,31 +89,51 @@ public:
 
 		if (InputManager::GetKey(KeyCode::MouseLeft)) {
 			InputManager::LockMouse();
-
-			//if ((steady_clock::now() - click_time) > milliseconds(100)) {
-				//click_time = steady_clock::now();
-				EraseVoxels();
-			//}
+			EraseVoxels();
+		} else if (InputManager::GetKey(KeyCode::MouseRight)) {
+			AddVoxels();
 		}
 	}
 
-	bool updatating = false;
+	bool updating = false;
+	long timeout = 100;
+
+	void AddVoxels() {
+		auto physEn = GetScene().GetPhysEngine();
+		auto cam = GetRender().GetActiveCamera();
+		if (!updating) {
+			HitInfo info;
+			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .1, 5.)) {
+				info.pos -= info.norm * 1.5;
+				SDFunc func = [info](Vector3 p) {return sdSphere(p - info.pos, 2); };
+				Vector3i minPos = info.pos - Vector3::one * 3;
+				Core::RunTask([this, func, minPos]() {
+					updating = true;
+					auto time = steady_clock::now();
+					chunkGen->world->AddVoxels(func, minPos, minPos + Vector3i(6, 6, 6), VoxelTypeIndex::V_SAND);
+					std::this_thread::sleep_until(time + milliseconds(timeout));
+					updating = false;
+					});
+			}
+		}
+	}
 
 	void EraseVoxels() {
 		auto physEn = GetScene().GetPhysEngine();
 		auto cam = GetRender().GetActiveCamera();
-		HitInfo info;
-		if (!updatating) {
+		if (!updating) {
+			HitInfo info;
 			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .1, 5.)) {
-				info.pos -= info.norm * 1.1;
+				info.pos += info.norm * 1.1;
 				SDFunc func = [info](Vector3 p) {return sdSphere(p - info.pos, 2); };
 				Vector3i minPos = info.pos - Vector3::one * 3;
-				create_task([this, func, minPos]() {
-					updatating = true;
+				Core::RunTask([this, func, minPos]() {
+					updating = true;
+					auto time = steady_clock::now();
 					chunkGen->world->EraseVoxels(func, minPos, minPos + Vector3i(6, 6, 6));
-					updatating = false;
+					std::this_thread::sleep_until(time + milliseconds(timeout));
+					updating = false;
 					});
-				Log::log(Log::INFO, L"sus");
 			}
 		}
 	}

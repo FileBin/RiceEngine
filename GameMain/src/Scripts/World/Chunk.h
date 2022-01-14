@@ -139,6 +139,8 @@ public:
         auto y = chunkPos.y;
         auto z = chunkPos.z;
 
+        if (abs(data.depth) < .1) data.depth = 0;
+
         std::lock_guard guard(lock);
         voxels[(x * ChunkSize + y) * ChunkSize + z] = data;
     }

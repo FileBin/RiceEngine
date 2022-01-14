@@ -66,7 +66,7 @@ public:
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[4] = { 4, 5, 7, 9 };
+	int lodDistances[4] = { 4, 6, 7, 10 };
 
 	void Start() {
 #ifdef _DEBUG
