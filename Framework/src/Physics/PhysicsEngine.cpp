@@ -104,7 +104,7 @@ namespace Game::Physics {
 				info.pos = pos;
 				info.dist = d;
 				updateMutex.lock();
-				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos);
+				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos, eps);
 				updateMutex.unlock();
 				return true;
 			} else if (dist >= maxD) {

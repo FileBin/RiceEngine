@@ -9,7 +9,7 @@ namespace Game
 	public:
 		static double Abs(double x) { return abs(x); }
 
-		static Vector3 GetNorm(std::function<double(Vector3)> func, Vector3 pos);
+		static Vector3 GetNorm(std::function<double(Vector3)> func, Vector3 pos, dbl eps = .00001);
 
 		static double Asin(double x) { return ToDegrees(asin(x)); }
 		static double Acos(double x) { return ToDegrees(acos(x)); }
