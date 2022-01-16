@@ -8,6 +8,8 @@
     <FxCompile Include="shaders\WaterVS.hlsl" />
     <FxCompile Include="shaders\SkyBoxPixel.hlsl" />
     <FxCompile Include="shaders\SkyBoxVertex.hlsl" />
+    <FxCompile Include="shaders\PostProcessVS.hlsl" />
+    <FxCompile Include="shaders\SamplePostProcess.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -52,6 +54,7 @@
     <ClInclude Include="src\Scenes\PhysicsTest.h" />
     <ClInclude Include="src\Scripts\Util\MeshGenerator.h" />
     <ClInclude Include="src\Scripts\PlayerHandler.h" />
+    <ClInclude Include="src\Scripts\SamplePostProcess.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />

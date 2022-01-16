@@ -12,6 +12,15 @@ namespace Game {
 	bool SceneRender::Init() {
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 
+		postProcessingQuad = new RenderingMesh();
+		postProcessingQuad->pIndexBuffer = device->CreateBuffer<UINT>({ 2,1,0,0,3,2 }, D3D11_BIND_INDEX_BUFFER);
+		postProcessingQuad->pVertexBuffer = device->CreateBuffer<Vertex>({
+				{ {-1.f, -1.f, 0 } },
+				{ {1.f, -1.f, 0 } },
+				{ {1.f, 1.f, 0 } },
+				{ {-1.f, 1.f, 0 } },
+			}, D3D11_BIND_VERTEX_BUFFER);
+
 		return true;
 	}
 
@@ -66,16 +75,15 @@ namespace Game {
 		auto cam = *cameras[activeCameraIdx];
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
-
+		device->UseDepthBuffer(true);
 		Matrix4x4f mV = cam.GetTransformationMatrix();
 		Matrix4x4f mP = cam.GetProjectionMatrix();
 		m_mutex.lock();
 		for (auto& pair : renderingMeshes) {
 			pair.second->Draw(this, mV, mP);
 		}
-
 		device->SetBlendState(true);
-		device->UnsetDepthBuffer();
+		device->CopyBuffers();
 		for (auto& pair : transparentMeshes) {
 			pair.second->Draw(this, mV, mP);
 		}
@@ -90,6 +98,21 @@ namespace Game {
 		device->End2D();
 
 		return true;
+	}
+
+	void SceneRender::PostProcess(Material* mat) {
+		device->CopyBuffers();
+
+		device->SetActiveVertexBuffer<Vertex>(postProcessingQuad->pVertexBuffer.Get());
+		device->SetActiveIndexBuffer(postProcessingQuad->pIndexBuffer.Get());
+		device->SetActiveVSConstantBuffer(mat->GetBuffer());
+		device->SetActivePSConstantBuffer(mat->GetBuffer());
+		device->SetPSTextures(mat->GetTextures());
+
+		device->SetActiveShader(mat->GetShader());
+
+		device->UseDepthBuffer(false);
+		device->Draw();
 	}
 
 	void SceneRender::Close() {
@@ -269,7 +292,7 @@ namespace Game {
 
 		constexpr dbl eps = 0.00698;
 
-		Vector2f texcoords[4] = {
+		const Vector2f texcoords[4] = {
 			{ (float)(onesixth * (1. - eps)), (float)(1. - eps) },
 			{ (float)(eps*onesixth), (float)(1. - eps) },
 			{ (float)(eps*onesixth), (float)eps },

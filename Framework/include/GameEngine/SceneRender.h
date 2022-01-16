@@ -64,9 +64,12 @@ namespace Game {
 
 		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
 		Texture2D& GetDepthBufferTex() { return *device->GetDepthBufferTex(); }
+		Texture2D& GetRenderTargetTex() { return *device->GetRenderTargetTex(); }
 
 		void AddDrawable(UI::IDrawable* txt);
 		void RemoveDrawable(UI::IDrawable* txt);
+
+		void PostProcess(Material* mat);
 
 	private:
 		size_t activeCameraIdx;
@@ -79,7 +82,7 @@ namespace Game {
 		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
 
 		//default
-		SmartPtr<RenderingMesh> skyBox;
+		SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
 		SmartPtr<Material> skyboxMaterial;
 
 		Mesh* CreateSkyBoxMesh();

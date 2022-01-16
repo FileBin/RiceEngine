@@ -9,12 +9,15 @@ struct PixelShaderInput
     float3 world_pos : POSITION4;
 };
 
-Texture2D depthBuf : register(t0);
+Texture2DMS<float, 16> depthBuf : register(t0);
 
 Texture2D noiseTex : register(t1);
 SamplerState noiseSamp : register(s1);
 
 #define USE_TEXTURE 1
+
+#define NEAR .01
+#define FAR 1000
 
 cbuffer CBuffer : register(b0) 
 {
@@ -81,6 +84,18 @@ float3 norm(float2 pos)
 
 }
 
+float GetDepthBufferValue(int3 loc)
+{
+    return depthBuf.Load(loc.xy, 0);
+}
+
+float ConvToDepth(float z_b)
+{
+    float z_n = 2.0 * z_b - 1.0;
+    float z_e = 2.0 * NEAR * FAR / (FAR + NEAR - z_n * (FAR - NEAR));
+    return z_e;
+}
+
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     float2 res = Resolution.xy; //float2(800, 600);
@@ -97,13 +112,15 @@ float4 main(PixelShaderInput input) : SV_TARGET
     n = normalize(nx + ny + nz);
     
     int3 loc = int3(input.pos.xy, 0);
-    float depth = (depthBuf.Load(loc));
+    float depth = GetDepthBufferValue(loc);
     float pixelDepth = input.pos.z;
     if (pixelDepth > depth)
         return 0;
+    depth = ConvToDepth(depth);
+    pixelDepth = ConvToDepth(pixelDepth);
     pixelDepth = depth - pixelDepth;
     
-    float depthval = pixelDepth * 10 * (input.pos.w * input.pos.w + depth * depth);
+    float depthval = pixelDepth * .05;
     
     float emission = .2;
     float specular = 1.;

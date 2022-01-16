@@ -120,9 +120,9 @@ namespace Game {
 		RunScripts(preRenderScripts);
 		render->BeginFrame();
 		stage = Stage::Render;
-		RunScripts(renderScripts);
 		if (!render->Draw())
 			return false;
+		RunScripts(renderScripts);
 		render->EndFrame();
 		stage = Stage::PostRender;
 		RunScripts(postRenderScripts);

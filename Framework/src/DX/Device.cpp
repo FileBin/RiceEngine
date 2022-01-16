@@ -100,6 +100,7 @@ namespace Game {
 		_create2d();
 		ReCreateSwapChain();
 		depthTexture = new Texture2D(&depthBufferRes, device);
+		renderTexture = new Texture2D(&renderTargetRes, device);
 
 		D3D11_VIEWPORT vp;
 		vp.Width = size.x;
@@ -205,23 +206,89 @@ namespace Game {
 		return S_OK;
 	}
 
+	void Device::ReCreateSwapChain(Vector2 screenSize) {
+		DXGI_SWAP_CHAIN_DESC sd;
+		ZeroMemory(&sd, sizeof(sd));
+		sd.BufferCount = 1;
+		sd.BufferDesc.Width = lround(screenSize.x);
+		sd.BufferDesc.Height = lround(screenSize.y);
+		//sd.BufferDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM; //nonhdr
+		sd.BufferDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT; //hdr
+		sd.BufferDesc.Scaling = DXGI_MODE_SCALING::DXGI_MODE_SCALING_CENTERED;
+		sd.BufferDesc.RefreshRate.Numerator = 60;
+		sd.BufferDesc.RefreshRate.Denominator = 1;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.OutputWindow = hwnd;
+
+		sd.SampleDesc.Count = msaaLevel;
+		sd.SampleDesc.Quality = 0;
+		sd.Windowed = true;
+
+		_RELEASE(swapChain);
+
+		ThrowIfFailed(factory->CreateSwapChain(device, &sd, &swapChain));
+
+		_RELEASE(renderTargetTex);
+		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&renderTargetTex));
+
+		_RELEASE(renderTarget);
+		ThrowIfFailed(device->CreateRenderTargetView(renderTargetTex, NULL, &renderTarget));
+
+		D3D11_TEXTURE2D_DESC rtDesc;
+		rtDesc.Format = sd.BufferDesc.Format;
+		rtDesc.SampleDesc.Count = msaaLevel;
+		rtDesc.SampleDesc.Quality = 0;
+		rtDesc.MipLevels = 1;
+		rtDesc.ArraySize = 1;
+		rtDesc.Width = sd.BufferDesc.Width;
+		rtDesc.Height = sd.BufferDesc.Height;
+		rtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		rtDesc.Usage = D3D11_USAGE_DEFAULT;
+		rtDesc.CPUAccessFlags = 0;
+		rtDesc.MiscFlags = 0;
+
+		_RELEASE(secondRTtex);
+		ThrowIfFailed(device->CreateTexture2D(&rtDesc, 0, &secondRTtex));
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+		ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
+		//setup the description of the shader resource view
+		shaderResourceViewDesc.Format = rtDesc.Format;
+		shaderResourceViewDesc.ViewDimension = msaaLevel > 1 ? D3D11_SRV_DIMENSION::D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
+		shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+		shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+		_RELEASE(renderTargetRes);
+		//create the shader resource view.
+		ThrowIfFailed(device->CreateShaderResourceView(secondRTtex, &shaderResourceViewDesc, &renderTargetRes));
+
+		_createDepthStencil(screenSize);
+		_create2dRT();
+	}
+
 	void Device::_createDepthStencil(Vector2 size) {
 		D3D11_TEXTURE2D_DESC dsDesc;
-		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
+		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT;
 		dsDesc.SampleDesc.Count = msaaLevel;
 		dsDesc.SampleDesc.Quality = 0;
 		dsDesc.MipLevels = 1;
 		dsDesc.ArraySize = 1;
 		dsDesc.Width = lround(size.x);
 		dsDesc.Height = lround(size.y);
-		dsDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+		dsDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		dsDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 		dsDesc.CPUAccessFlags = 0;
 		dsDesc.MiscFlags = 0;
 
+		_RELEASE(depthStencilTex);
 		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &depthStencilTex));
 
-		_RELEASE(depthStencil);
+		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
+		dsDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+		_RELEASE(secondDSTex);
+		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &secondDSTex));
+
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC dwdesc;
 		ZeroMemory(&dwdesc, sizeof(dwdesc));
@@ -229,9 +296,7 @@ namespace Game {
 		dwdesc.ViewDimension = msaaLevel > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 		dwdesc.Texture2D.MipSlice = 0;
 
-		dsDesc.SampleDesc.Count = 1;
-		ThrowIfFailed(device->CreateTexture2D(&dsDesc, 0, &nonMsDT));
-
+		_RELEASE(depthStencil);
 		ThrowIfFailed(device->CreateDepthStencilView(depthStencilTex, &dwdesc, &depthStencil));
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -242,8 +307,9 @@ namespace Game {
 		shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 		shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
+		_RELEASE(depthBufferRes);
 		//create the shader resource view.
-		device->CreateShaderResourceView(depthStencilTex, &shaderResourceViewDesc, &depthBufferRes);
+		ThrowIfFailed(device->CreateShaderResourceView(secondDSTex, &shaderResourceViewDesc, &depthBufferRes));
 
 		D3D11_DEPTH_STENCIL_DESC Desc;
 
@@ -271,38 +337,71 @@ namespace Game {
 
 		// Create depth stencil state
 		device->CreateDepthStencilState(&Desc, &pDSState);
+		Desc.DepthEnable = false;
+		device->CreateDepthStencilState(&Desc, &notUseDepth);
 	}
 
-	void Device::ReCreateSwapChain(Vector2 screenSize) {
-		DXGI_SWAP_CHAIN_DESC sd;
-		ZeroMemory(&sd, sizeof(sd));
-		sd.BufferCount = 1;
-		sd.BufferDesc.Width = screenSize.x;
-		sd.BufferDesc.Height = screenSize.y;
-		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		sd.BufferDesc.Scaling = DXGI_MODE_SCALING::DXGI_MODE_SCALING_CENTERED;
-		sd.BufferDesc.RefreshRate.Numerator = 60;
-		sd.BufferDesc.RefreshRate.Denominator = 1;
-		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sd.OutputWindow = hwnd;
+	void Device::CopyBuffers() {
+		context->OMSetRenderTargets(0, 0, 0);
 
-		sd.SampleDesc.Count = msaaLevel;
-		sd.SampleDesc.Quality = 0;
-		sd.Windowed = true;
+		context->CopyResource(secondDSTex, depthStencilTex);
+		context->CopyResource(secondRTtex, renderTargetTex);
+	}
 
-		_RELEASE(swapChain);
+	void Device::Draw() {
+		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 
-		ThrowIfFailed(factory->CreateSwapChain(device, &sd, &swapChain));
+		//context->OMSetDepthStencilState(pDSState, 1);
+		context->RSSetState(state);
+		context->DrawIndexed(indexCount, 0, 0);
+	}
 
-		ID3D11Texture2D* pBackBuffer = nullptr;
-		ThrowIfFailed(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer));
+	void Device::ClearFrame(Color color) {
+		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
+		float c[] = { color.r,color.g,color.b,color.A };
+		context->ClearRenderTargetView(renderTarget, c);
+		ClearZBuffer();
+	}
 
+	void Device::ClearZBuffer() {
+		context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+	}
+
+	void Game::Device::UseDepthBuffer(bool usage) {
+		if (!usage)
+			context->OMSetDepthStencilState(notUseDepth, 1);
+		else
+			context->OMSetDepthStencilState(pDSState, 1);
+	}
+
+	void Device::SwapBuffers() {
+		swapChain->Present(0, 0);
+	}
+
+	void Device::Resize() {
+		context->OMSetRenderTargets(0, 0, 0);
+
+		_RELEASE(depthStencil);
 		_RELEASE(renderTarget);
-		ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, &renderTarget));
-		_RELEASE(pBackBuffer);
+		_RELEASE(renderTarget2d);
 
-		_createDepthStencil(screenSize);
-		_create2dRT();
+			Vector2 size;
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+		size.x = rect.right - rect.left;
+		size.y = rect.bottom - rect.top;
+		if (size.SqrLength() < 1) {
+			size = { 640, 480 };
+		}
+		ReCreateSwapChain(size);
+		D3D11_VIEWPORT vp;
+		vp.Width = size.x;
+		vp.Height = size.y;
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		context->RSSetViewports(1, &vp);
 	}
 
 	Texture2D* Device::CreateTexture(String path) {
@@ -393,54 +492,4 @@ namespace Game {
 		ThrowIfFailed(device->CreateInputLayout(layout.data(), layout.size(), shaderData.data(), shaderData.size(), &l));
 		return l;
 	}
-
-	void Device::Draw() {
-		context->OMSetDepthStencilState(pDSState, 1);
-		context->RSSetState(state);
-		context->DrawIndexed(indexCount, 0, 0);
-
-		context->ResolveSubresource(nonMsDT, 0, depthStencilTex, 0, DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT);
-	}
-
-	void Device::ClearFrame(Color color) {
-		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
-		float c[] = { color.r,color.g,color.b,color.A };
-		context->ClearRenderTargetView(renderTarget, c);
-		ClearZBuffer();
-	}
-
-	void Device::ClearZBuffer() {
-		context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-	}
-
-	void Device::SwapBuffers() {
-		swapChain->Present(0, 0);
-	}
-
-	void Device::Resize() {
-		context->OMSetRenderTargets(0, 0, 0);
-
-		_RELEASE(depthStencil)
-		_RELEASE(renderTarget)
-		_RELEASE(renderTarget2d)
-
-		Vector2 size;
-		RECT rect;
-		GetClientRect(hwnd, &rect);
-		size.x = rect.right - rect.left;
-		size.y = rect.bottom - rect.top;
-		if (size.SqrLength() < 1) {
-			size = { 640, 480 };
-		}
-		ReCreateSwapChain(size);
-		D3D11_VIEWPORT vp;
-		vp.Width = size.x;
-		vp.Height = size.y;
-		vp.MinDepth = 0.0f;
-		vp.MaxDepth = 1.0f;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		context->RSSetViewports(1, &vp);
-	}
-
 }

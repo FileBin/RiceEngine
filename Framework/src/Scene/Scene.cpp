@@ -20,6 +20,12 @@ namespace Game {
 		root->AddComponent(script);
 	}
 
+	void Scene::AddScript(RenderScript* script) {
+		script->render = render;
+		renderScripts.push_back(script);
+	}
+
+
 	SceneObject& Scene::GetObjectByName(String name) { return root->GetObjectByName(name); }
 
 	SceneObject* Scene::Instaniate() { return root->Instaniate(); }
@@ -34,6 +40,10 @@ namespace Game {
 
 	void Scene::InitScript::Run() {
 		scene->Initialize();
+		scene->PostInit();
+		for (auto& script : scene->renderScripts) {
+			GetEngine().RegisterScript(script, Stage::Render);
+		}
 		scene->root->Enable();
 		scene->root->Start();
 	}
@@ -47,5 +57,6 @@ namespace Game {
 	}
 	void Scene::CloseScript::Run() {
 		scene->Close();
+		//TODO: makeUnregisterScripts
 	}
 }

@@ -5,6 +5,7 @@
 #include "../ScriptBase.h"
 #include "../SoundManager.h"
 #include "../Physics/PhysicsEngine.h"
+#include "../RenderScript.h"
 
 namespace Game {
 	class MonoScript;
@@ -17,8 +18,10 @@ namespace Game {
 
 		void Init(Engine* en) { engine = en; }
 
-		virtual void Initialize() { 
-			soundManager = new SoundManager(render->GetActiveCamera()); 
+		virtual void Initialize() = 0;
+
+		void PostInit() {
+			soundManager = new SoundManager(render->GetActiveCamera());
 			physicsEngine = new Physics::PhysicsEngine();
 			physicsEngine->Init();
 		}
@@ -40,6 +43,7 @@ namespace Game {
 		}
 
 		void AddScript(MonoScript* script);
+		void AddScript(RenderScript* script);
 
 		SceneObject& GetObjectByName(String name);
 
@@ -55,6 +59,8 @@ namespace Game {
 		SceneRender* render;
 		SmartPtr<Physics::PhysicsEngine> physicsEngine;
 		Engine* engine;
+
+		std::vector<RenderScript*> renderScripts{};
 		
 		class InitScript : public ScriptBase {
 		public:

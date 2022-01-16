@@ -16,8 +16,8 @@ namespace Game {
 		~SoundManager();
 
 		void play_music(const std::string name, bool force);
-		SmartPtr<SoundStream> play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f position, std::vector<SoundEffect*>* effects);
-		SmartPtr<SoundStream> play_sound(const std::string name, float volume, Vector3f position, std::vector<SoundEffect*>* effects);
+		SmartPtr<SoundStream> play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f position, std::vector<SoundEffect*> effects = {});
+		SmartPtr<SoundStream> play_sound(const std::string name, float volume, Vector3f position, std::vector<SoundEffect*> effects);
 		void setMusicVolume(float volume);
 
 		void update_thread();
@@ -28,8 +28,8 @@ namespace Game {
 	private:
 		void playSoundStream(SmartPtr<SoundStream> ogg);
 		void music_thread();
-		void sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f position, std::vector<SoundEffect*>* effects);
-		void raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos, std::vector<SoundEffect*>* effects);
+		void sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f position, std::vector<SoundEffect*> effects);
+		void raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos, std::vector<SoundEffect*> effects = {});
 		void list_audio_devices(const ALCchar* devices);
 
 		Vector3f prevPos = {};

@@ -93,7 +93,7 @@ public:
 		//cam rotation
 		auto delta = InputManager::GetMouseDelta();
 
-		delta = delta * .2;
+		delta = delta * dt * 10.;
 
 		pos += delta;
 		pos.y = Math::Clamp(pos.y, -90., 90.);

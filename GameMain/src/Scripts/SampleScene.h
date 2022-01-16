@@ -10,6 +10,7 @@
 #include "ChunkGenerator.h"
 #include "UI\DebugText.h"
 #include "PlayerHandler.h"
+#include "SamplePostProcess.h"
 
 using namespace Game;
 
@@ -44,6 +45,17 @@ class SampleScene : public Scene {
 
 		sh->LoadVertexShader(Util::ReadFile(L"WaterVS.cso"));
 		sh->LoadPixelShader(Util::ReadFile(L"WaterShader.cso"));
+
+		auto postsh = ren.CreateShader(L"PostProcess");
+		postsh->usesDepthBuffer = true;
+
+		postsh->LoadVertexShader(Util::ReadFile(L"PostProcessVS.cso"));
+		postsh->LoadPixelShader(Util::ReadFile(L"SamplePostProcess.cso"));
+
+		auto postMat = ren.CreateMaterial(L"PostMaterial", postsh, {});
+
+		postMat->AddTexture(&ren.GetRenderTargetTex());
+		postMat->AddTexture(&ren.GetDepthBufferTex());
 
 		auto skyShader = ren.CreateShader(L"SkyShader");
 
@@ -80,6 +92,6 @@ class SampleScene : public Scene {
 		debugText->AddComponent(txt);
 		debugText->AddComponent(new DebugText());
 
-		Scene::Initialize(); // call super initialize method to initialize sound manager with a valid camera reference
+		AddScript(new SamplePostProcess());
 	}
 };
