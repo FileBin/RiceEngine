@@ -57,6 +57,16 @@ class SampleScene : public Scene {
 		postMat->AddTexture(&ren.GetRenderTargetTex());
 		postMat->AddTexture(&ren.GetDepthBufferTex());
 
+		auto UnderWaterSh = ren.CreateShader(L"Underwater");
+
+		UnderWaterSh->LoadVertexShader(Util::ReadFile(L"PostProcessVS.cso"));
+		UnderWaterSh->LoadPixelShader(Util::ReadFile(L"Underwater.cso"));
+
+	    postMat = ren.CreateMaterial(L"Underwater", UnderWaterSh, {});
+
+		postMat->AddTexture(&ren.GetRenderTargetTex());
+		postMat->AddTexture(&ren.GetDepthBufferTex());
+
 		auto skyShader = ren.CreateShader(L"SkyShader");
 
 		skyShader->LoadVertexShader(Util::ReadFile(L"SkyBoxVertex.cso"));
@@ -92,6 +102,8 @@ class SampleScene : public Scene {
 		debugText->AddComponent(txt);
 		debugText->AddComponent(new DebugText());
 
-		AddScript(new SamplePostProcess());
+		auto postProcessScript = new SamplePostProcess();
+		postProcessScript->generator = chunkGen;
+		AddScript(postProcessScript);
 	}
 };

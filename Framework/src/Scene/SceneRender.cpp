@@ -103,6 +103,8 @@ namespace Game {
 	void SceneRender::PostProcess(Material* mat) {
 		device->CopyBuffers();
 
+		device->SetBlendState(false);
+
 		device->SetActiveVertexBuffer<Vertex>(postProcessingQuad->pVertexBuffer.Get());
 		device->SetActiveIndexBuffer(postProcessingQuad->pIndexBuffer.Get());
 		device->SetActiveVSConstantBuffer(mat->GetBuffer());

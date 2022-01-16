@@ -36,28 +36,31 @@ float4 main(float4 pos : SV_POSITION) : SV_TARGET
     int2 pixelCoords = pos.xy;
     float numSamples = 0;
     float4 col = 0;
-    //float4 col = SampleRenderTarget(pixelCoords);
-    float focusFact = GetDepth(pixelCoords) - FOCUS;
-    focusFact = abs(focusFact);
-    focusFact -= 10.;
-    focusFact *= .1;
-    focusFact = exp(focusFact);
-    //focusFact -= 5;
-    focusFact = clamp(focusFact, 0.f, MAX_SAMPLES);
-    for (int i = -focusFact; i <= focusFact; i++)
+    
+    for (int i = -4; i <= 4; i++)
     {
-        for (int j = -focusFact; j <= focusFact; j++)
+        for (int j = -4; j <= 4; j++)
         {
-            col += SampleRenderTarget(pixelCoords + int2(i, j));
+            float4 c = SampleRenderTarget(pixelCoords + int2(i, j));
+            float depth = GetDepth(pixelCoords + int2(i, j));
+    
+            float3 waterColor = lerp(float3(.1, .15, .5), float3(.25, .55, .77), exp(-depth * .05));
+    
+            float fog = depth * .1;
+    
+            c.xy = pow(c.xy, 1.5);
+    
+            c.xyz = lerp(c.xyz, waterColor, clamp(fog, 0.f, 1.f));
+            c.w = 1;
+            col += c;
             numSamples++;
         }
     }
+   
     
     col.xyz /= numSamples;
 
     col.xyz = pow(col.xyz, 2.);
-    
-    
     
     col.a = 1;
     return col;

@@ -106,12 +106,12 @@ Model* Chunk::GenerateModel() {
     return mod;
 }
 
-struct Piece/*OfShit*/ {
+struct Piece {
     float d[8];
     num matIdx = -1;
     byte Case = 0;
 
-    Mesh* CreateMesh(Vector3 pos,int step) {
+    Mesh* CreateMesh(Vector3 pos, int step, bool doubleSided=false) {
         if (Case == 0 || Case == 255) return new Mesh();
         function<Vector3(int)> edgeToVert = [&](int e) {
             const int* edge = Tables::edges[e];
@@ -138,6 +138,11 @@ struct Piece/*OfShit*/ {
             vert += pos;
             m->vertexBuffer.push_back({ vert, {} });
             m->indexBuffer.push_back(i);
+        }
+        if (doubleSided) {
+            for (int i = m->indexBuffer.size()-1; i >= 0; i--) {
+                m->indexBuffer.push_back(m->indexBuffer[i]);
+            }
         }
         return m;
     }
@@ -217,7 +222,7 @@ Model* Chunk::GenerateSmoothModel(size_t step) {
         }
         for (byte i = 0; i < 8; i++) {
             if (transparent[i].matIdx == -1) continue;
-            auto& m = *transparent[i].CreateMesh(inChunkPos, step);
+            auto& m = *transparent[i].CreateMesh(inChunkPos, step, true);
             meshes[transparent[i].matIdx]->Combine(m);
             delete& m;
         }

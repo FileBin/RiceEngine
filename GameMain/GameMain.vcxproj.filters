@@ -10,6 +10,7 @@
     <FxCompile Include="shaders\SkyBoxVertex.hlsl" />
     <FxCompile Include="shaders\PostProcessVS.hlsl" />
     <FxCompile Include="shaders\SamplePostProcess.hlsl" />
+    <FxCompile Include="shaders\Underwater.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
