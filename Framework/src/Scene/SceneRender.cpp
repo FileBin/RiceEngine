@@ -55,7 +55,7 @@ namespace Game {
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
 		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale); // TODO: values must be getted from the transform
-		cb.View = View;
+		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
 
 		if (check)

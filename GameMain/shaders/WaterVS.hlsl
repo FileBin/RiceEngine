@@ -1,7 +1,7 @@
 cbuffer ConstantBuffer : register(b0)
 {
     float4x4 World;
-    float4x4 View;
+    float4x4 WV;
     float4x4 Projection;
 }
 
@@ -62,21 +62,16 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
 
     float3 light = float3(2, -5, -1);
     light = normalize(light);
-    float4x4 WV = World;
     
-    output.light = mul(float4(light, 0), View);
+    output.light = mul(float4(light, 0), WV);
     
     float4 p = float4(pos.xyz, 1);
-    float4 wp = mul(p, WV);
+    float4 wp = mul(p, World);
     p.y -= simplexNoise(wp.xz * .5 + time.xx * .4);
 
     output.pos = p;
     output.pos = mul(output.pos, WV);
     output.world_pos = wp;
-    
-    WV = mul(WV, View);
-
-    output.pos = mul(output.pos, View);
     output.pos = mul(output.pos, Projection);
 
     output.norm = mul(float4(0, 1, 0, 0), WV);

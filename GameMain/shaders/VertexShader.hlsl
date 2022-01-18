@@ -1,7 +1,7 @@
 cbuffer ConstantBuffer : register(b0)
 {
     float4x4 World;
-    float4x4 View;
+    float4x4 WV;
     float4x4 Projection;
 }
 
@@ -26,19 +26,16 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
     light = normalize(light);
 
     output.pos = float4(pos.xyz, 1.0f);
-    output.pos = mul(output.pos, World);
-    output.world_pos = output.pos;
-    output.lPos = mul(output.pos - norm*.002f, LVP); //Shadow Projection With Normal Bias
+    output.world_pos = mul(output.pos, World);
+    output.lPos = mul(float4(output.world_pos, 1) - norm * .002f, LVP); //Shadow Projection With Normal Bias
 
-    output.pos = mul(output.pos, View);
+    output.pos = mul(output.pos, WV);
     output.viewPos = output.pos;
     output.pos = mul(output.pos, Projection);
 
-    output.norm = mul(norm.xyz, World);
-    output.world_norm = output.norm;
-    output.norm = mul(output.norm, View);
+    output.world_norm = mul(norm.xyz, World);
+    output.norm = mul(norm.xyz, WV);
     
-    float3x4 WV = mul(World, View);
     output.light = mul(light, WV);
    
 

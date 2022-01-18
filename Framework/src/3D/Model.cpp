@@ -118,7 +118,7 @@ namespace Game {
 		auto corners = bounds.GetPoints();
 		auto boxSize = bounds.GetSize().SqrLength() * 5;
 		WVP.World.c41 = WVP.World.c42 = WVP.World.c43 = 0;
-		auto matrix = WVP.World * WVP.View;
+		auto matrix = WVP.WorldView;
 		for (size_t i = 0; i < 9; i++) {
 			auto proj = corners[i] * matrix;
 			if (proj.SqrLength() < boxSize) return true;
