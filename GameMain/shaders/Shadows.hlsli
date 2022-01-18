@@ -23,7 +23,7 @@ float3 GetLight(float4 lPos)
     lPos.y = lPos.y / -2 + 0.5;
     float2 pixelCoords = lPos.xy;
     
-    float e = .0015f;
+    float e = .004f;
     float samples = 8;
    
     

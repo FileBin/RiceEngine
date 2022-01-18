@@ -27,7 +27,7 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
 
     output.pos = float4(pos.xyz, 1.0f);
     output.world_pos = mul(output.pos, World);
-    output.lPos = mul(float4(output.world_pos, 1) - norm * .002f, LVP); //Shadow Projection With Normal Bias
+    output.lPos = mul(float4(output.world_pos, 1) - norm * .003f, LVP); //Shadow Projection With Normal Bias
 
     output.pos = mul(output.pos, WV);
     output.viewPos = output.pos;
