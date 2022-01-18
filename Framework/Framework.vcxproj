@@ -267,6 +267,7 @@
     <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp" />
     <ClCompile Include="src\Scene\Components\SoundSource.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
+    <ClCompile Include="src\Scene\LightManager.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />
     <ClCompile Include="src\Scene\Component.cpp" />
     <ClCompile Include="src\3D\Camera.cpp" />

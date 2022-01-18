@@ -10,6 +10,8 @@ struct Matrix4x4 {
 public:
 
 	static Matrix4x4 Perspective(double fov, double aspect = 1, double nearPlane = .001, double farPlane = 1000.);
+	static Matrix4x4 Ortographic(Vector2 size, double nearPlane = .001, double farPlane = 1000.);
+	static Matrix4x4 Ortographic(Vector3 size);
 
 	static Matrix4x4 Translation(Vector3 v);
 	static Matrix4x4 Scale(Vector3 v);

@@ -77,6 +77,11 @@ namespace Game {
 
 		ID3D11InputLayout* CreateInputLayout(VertexLayout layout, data_t shaderData);
 
+		D3D11_VIEWPORT GetDefaultVP() { return defaultVp; }
+		void SetVPDefault() { context->RSSetViewports(1, &defaultVp); }
+		void SetRenderTargetsDefault() { context->OMSetRenderTargets(1, &renderTarget, depthStencil); }
+		void SetVP(D3D11_VIEWPORT vp) { context->RSSetViewports(1, &vp); }
+		void SetRSState(bool culling = true);
 		void Draw();
 
 		void CopyBuffers();
@@ -88,6 +93,9 @@ namespace Game {
 
 		Texture2D* GetDepthBufferTex() { return depthTexture; }
 		Texture2D* GetRenderTargetTex() { return renderTexture; }
+
+		ID3D11DeviceContext* GetContext() { return context; }
+		ID3D11Device* GetD3dDevice() { return device; }
 
 		void Resize();
 		void ReCreateSwapChain() { ReCreateSwapChain(Util::GetWindowScreenSize(hwnd)); }
@@ -113,7 +121,7 @@ namespace Game {
 		ID3D11RenderTargetView* renderTarget = nullptr;
 		ID3D11DepthStencilView* depthStencil = nullptr;
 		ID3D11Texture2D* renderTargetTex = nullptr, *depthStencilTex = nullptr, *secondRTtex = nullptr, *secondDSTex = nullptr;
-		ID3D11RasterizerState* state = nullptr;
+		ID3D11RasterizerState* rs_state = nullptr, *dblSidedState = nullptr;
 		ID3D11DepthStencilState* pDSState, *notUseDepth;
 		ID3D11BlendState* transparentState, *solidState;
 		ID3D11ShaderResourceView* depthBufferRes = nullptr, *renderTargetRes = nullptr;
@@ -128,6 +136,8 @@ namespace Game {
 
 		D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 		D3D_FEATURE_LEVEL featureLvl = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0;
+
+		D3D11_VIEWPORT defaultVp;
 
 		HRESULT _createBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer** outbuf, D3D11_USAGE usage, UINT bindFlags, UINT cpuFlags);
 		HRESULT _updateBuffer(void* pData, size_t nData, size_t stride, ID3D11Buffer* buf);

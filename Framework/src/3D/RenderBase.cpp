@@ -9,6 +9,7 @@ namespace Game {
 	RenderBase::~RenderBase() {}
 
 	void RenderBase::BeginFrame() {
+		device->SetRenderTargetsDefault();
 		device->ClearFrame();
 	}
 

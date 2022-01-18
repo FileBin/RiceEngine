@@ -6,7 +6,6 @@ Texture2DMS<float, SAMPLES> depthBuffer : register(t1);
 
 #define NEAR .01
 #define FAR 1000
-#define FOCUS 20.f
 #define MAX_SAMPLES 4.f
 
 float4 SampleRenderTarget(int2 pixelCoords)
@@ -44,9 +43,9 @@ float4 main(float4 pos : SV_POSITION) : SV_TARGET
             float4 c = SampleRenderTarget(pixelCoords + int2(i, j));
             float depth = GetDepth(pixelCoords + int2(i, j));
     
-            float3 waterColor = lerp(float3(.1, .15, .5), float3(.25, .55, .77), exp(-depth * .05));
+            float3 waterColor = lerp(float3(.2, .35, .7), float3(.25, .55, .77), saturate(1-depth * .05));
     
-            float fog = depth * .1;
+            float fog = pow(depth*.2, .3);
     
             c.xy = pow(c.xy, 1.5);
     

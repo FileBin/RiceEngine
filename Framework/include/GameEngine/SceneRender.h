@@ -9,6 +9,7 @@
 #include <GameEngine\Vectors\Hasher.h>
 #include "Util\SmartPointer.h"
 
+struct Matrix4x4f;
 
 namespace Game {
 	using namespace concurrency;
@@ -16,12 +17,16 @@ namespace Game {
 	class Model;
 	class Camera;
 	struct Mesh;
+
 	namespace UI {
 		__interface IDrawable;
 	}
 
 	class SceneRender : public RenderBase {
 	private:
+#pragma region Classes
+		class LightManager;
+
 		class RenderingMesh {
 		public:
 			SmartPtr<Mesh> orig = nullptr;
@@ -31,12 +36,45 @@ namespace Game {
 			Microsoft::WRL::ComPtr<Buffer> pIndexBuffer = nullptr;
 			Microsoft::WRL::ComPtr<Buffer> pVertexBuffer = nullptr;
 			SmartPtr<Material> pMat = nullptr;
-			void Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, bool ckeckVisiblity = true);
+			void Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, LightManager* mgr = nullptr, bool checkVisiblity = true);
+
+			void DrawShadow(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection);
+
 			~RenderingMesh() {
 				pIndexBuffer->Release();
 				pVertexBuffer->Release();
 			}
 		};
+
+		class LightManager {
+			struct LightBuffer {
+				Matrix4x4f LVP = Matrix4x4f::identity;
+				Vector4f ambient;
+				Vector4f diffuse;
+			} buf;
+			SmartPtr<Texture2D> shadowAtlas;
+			Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTex;
+			Microsoft::WRL::ComPtr<ID3D11DepthStencilView> DSV;
+			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SRV;
+			Microsoft::WRL::ComPtr<Buffer> lightBuffer, constantBuffer;
+			SceneRender* sceneRender;
+
+			size_t numCascades;
+			Vector3 lightDirection;
+			dbl shadowDistance = 300;
+			size_t shadowMapRes;
+			std::vector<dbl> shadowMapSizes;
+		public:
+			void Init(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 300, size_t shadowMapRes = 1024);
+			void RenderShadowMap(Vector3 playerPos);
+
+			Texture2D* GetShadowMap() { return shadowAtlas.Get(); }
+			Buffer* GetBuffer() { return lightBuffer.Get(); }
+			
+		} lightManager;
+#pragma endregion
+
+		friend class LightManager;
 	public:
 
 		bool Init();
@@ -84,7 +122,6 @@ namespace Game {
 		//default
 		SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
 		SmartPtr<Material> skyboxMaterial;
-
 		Mesh* CreateSkyBoxMesh();
 	};
 }

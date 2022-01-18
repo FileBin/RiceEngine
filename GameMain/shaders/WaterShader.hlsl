@@ -22,6 +22,7 @@ SamplerState noiseSamp : register(s1);
 cbuffer CBuffer : register(b0) 
 {
     float time;
+    bool mode;
     float4 Resolution;
 }
 
@@ -158,16 +159,24 @@ float4 main(PixelShaderInput input) : SV_TARGET
     else if (val < k + .05)
         col = lerp(col,1.,.8);
     col = lerp(col, wcol, clamp(depth, 0, 1));
-    float alpha = 1. - exp(-depthval * 10.);
-    if (alpha - noise < .2)
+    float alpha;
+    if (!mode)
     {
-        col = 1.;
-        alpha = 1;
+        alpha = 1. - exp(-depthval * 10.);
+        if (alpha - noise < .2)
+        {
+            col = 1.;
+            alpha = 1;
+        }
+        else if (alpha - noise < .3)
+        {
+            col = lerp(wcol, 1., .8);
+            alpha = .8;
+        }
     }
-    else if (alpha - noise < .3)
+    else
     {
-        col = lerp(wcol, 1., .8);
-        alpha = .8;
+        alpha = .5;
     }
     return float4(col, alpha);
 }

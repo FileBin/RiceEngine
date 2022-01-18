@@ -155,8 +155,8 @@ namespace Game {
 	}
 
 
-	void InputManager::eventKey(KeyCode key, bool state) {
-		keyStates[static_cast<size_t>(key)] = state;
+	void InputManager::eventKey(KeyCode key, bool rs_state) {
+		keyStates[static_cast<size_t>(key)] = rs_state;
 	}
 
 	void InputManager::eventCursor() {
@@ -170,8 +170,8 @@ namespace Game {
 		mousePos.y = Position.y;
 	}
 
-	void InputManager::eventMouse(MouseKey key, bool state) {
-		mouseStates[static_cast<size_t>(key)] = state;
+	void InputManager::eventMouse(MouseKey key, bool rs_state) {
+		mouseStates[static_cast<size_t>(key)] = rs_state;
 	}
 
 	void InputManager::eventMouseWheel(short value) {

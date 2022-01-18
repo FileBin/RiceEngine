@@ -102,14 +102,13 @@ namespace Game {
 		depthTexture = new Texture2D(&depthBufferRes, device);
 		renderTexture = new Texture2D(&renderTargetRes, device);
 
-		D3D11_VIEWPORT vp;
+		D3D11_VIEWPORT& vp = defaultVp;
 		vp.Width = size.x;
 		vp.Height = size.y;
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
-		context->RSSetViewports(1, &vp);
 
 		D3D11_RASTERIZER_DESC rsdesc;
 
@@ -120,7 +119,10 @@ namespace Game {
 		
 		rsdesc.AntialiasedLineEnable = true;
 
-		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &state));
+		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &rs_state));
+
+		rsdesc.CullMode = D3D11_CULL_NONE;
+		ThrowIfFailed(device->CreateRasterizerState(&rsdesc, &dblSidedState));
 
 		//enable blending
 		D3D11_BLEND_DESC omDesc;
@@ -166,11 +168,6 @@ namespace Game {
 		auto hr = S_OK;
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
-		if (cFlags == 0) {
-			bd.Usage = D3D11_USAGE_DEFAULT;
-		} else {
-			bd.Usage = D3D11_USAGE_DYNAMIC;
-		}
 		if (pData == nullptr) {
 			bd.ByteWidth = stride;
 		} else {
@@ -178,6 +175,7 @@ namespace Game {
 		}
 		bd.BindFlags = bFlags;
 		bd.CPUAccessFlags = cFlags;
+		bd.Usage = usage;
 
 		if (pData != nullptr) {
 			D3D11_SUBRESOURCE_DATA Data;
@@ -335,7 +333,7 @@ namespace Game {
 		Desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR;
 		Desc.BackFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 
-		// Create depth stencil state
+		// Create depth stencil rs_state
 		device->CreateDepthStencilState(&Desc, &pDSState);
 		Desc.DepthEnable = false;
 		device->CreateDepthStencilState(&Desc, &notUseDepth);
@@ -348,16 +346,19 @@ namespace Game {
 		context->CopyResource(secondRTtex, renderTargetTex);
 	}
 
-	void Device::Draw() {
-		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
+	void Device::SetRSState(bool culling) {
+		if (culling) {
+			context->RSSetState(rs_state);
+		} else {
+			context->RSSetState(dblSidedState);
+		}
+	}
 
-		//context->OMSetDepthStencilState(pDSState, 1);
-		context->RSSetState(state);
+	void Device::Draw() {
 		context->DrawIndexed(indexCount, 0, 0);
 	}
 
 	void Device::ClearFrame(Color color) {
-		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 		float c[] = { color.r,color.g,color.b,color.A };
 		context->ClearRenderTargetView(renderTarget, c);
 		ClearZBuffer();
@@ -394,7 +395,7 @@ namespace Game {
 			size = { 640, 480 };
 		}
 		ReCreateSwapChain(size);
-		D3D11_VIEWPORT vp;
+		D3D11_VIEWPORT& vp = defaultVp;
 		vp.Width = size.x;
 		vp.Height = size.y;
 		vp.MinDepth = 0.0f;

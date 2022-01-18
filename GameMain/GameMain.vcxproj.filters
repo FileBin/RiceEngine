@@ -61,4 +61,8 @@
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
     <FxCompile Include="shaders\VertexShader.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\Shadows.hlsli" />
+    <None Include="shaders\LightBuffer.hlsli" />
+  </ItemGroup>
 </Project>

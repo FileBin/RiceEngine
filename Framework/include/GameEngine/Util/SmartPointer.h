@@ -48,9 +48,13 @@ public:
 	}
 
 	T* Get() const {
-		if(!ppObject.get())
+		if (!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
 		return *ppObject.get();
+	}
+
+	T** GetAddress() const {
+		return ppObject.get();
 	}
 
 	T* operator->() const {

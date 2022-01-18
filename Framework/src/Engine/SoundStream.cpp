@@ -132,11 +132,11 @@ namespace Game {
             return false;
         }
 
-        ALenum state;
+        ALenum rs_state;
 
-        alCall(alGetSourcei, source, AL_SOURCE_STATE, &state);
+        alCall(alGetSourcei, source, AL_SOURCE_STATE, &rs_state);
 
-        return (state == AL_PLAYING);
+        return (rs_state == AL_PLAYING);
     }
 
     bool SoundStream::update()

@@ -9,6 +9,8 @@ namespace Game {
 
 	Matrix4x4 Camera::GetProjectionMatrix() {
 		return Matrix4x4::Perspective(fov, aspectRatio, nearPlane, farPlane);
+
+		//return Matrix4x4::Ortographic(Vector3::one * 10);
 	}
 
 	Vector2 Camera::ToScreenPos(Vector3 p) {

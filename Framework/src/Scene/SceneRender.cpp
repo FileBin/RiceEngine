@@ -10,6 +10,8 @@
 namespace Game {
 
 	bool SceneRender::Init() {
+		lightManager.Init(this, { 250 });
+
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 
 		postProcessingQuad = new RenderingMesh();
@@ -39,15 +41,16 @@ namespace Game {
 	}
 
 	void SceneRender::BeginFrame() {
+		device->SetRenderTargetsDefault();
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
 		if (!skyBox.IsNull()) {
 			auto cam = cameras[activeCameraIdx];
-			skyBox->Draw(this, Matrix4x4::Rotation(cam->rotation.Opposite()), cam->GetProjectionMatrix(), false);
+			skyBox->Draw(this, Matrix4x4::Rotation(cam->rotation.Opposite()), cam->GetProjectionMatrix(), nullptr, false);
 			device->ClearZBuffer();
 		}
 	}
 
-	void SceneRender::RenderingMesh::Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, bool check) {
+	void SceneRender::RenderingMesh::Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, LightManager* lightMgr, bool check) {
 		auto device = ren->device;
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
@@ -66,7 +69,13 @@ namespace Game {
 		device->SetActiveIndexBuffer(pIndexBuffer.Get());
 		device->SetActivePSConstantBuffer(pMat->GetBuffer());
 		device->SetActiveShader(pMat->GetShader());
-		device->SetPSTextures(pMat->GetTextures());
+		auto textures = pMat->GetTextures();
+		if (lightMgr != nullptr) {
+			device->SetPSTexture2D(lightMgr->GetShadowMap(), 13);
+			device->SetActiveVSConstantBuffer(lightMgr->GetBuffer(), 13);
+			device->SetActivePSConstantBuffer(lightMgr->GetBuffer(), 13);
+		}
+		device->SetPSTextures(textures);
 
 		device->Draw();
 	}
@@ -79,11 +88,18 @@ namespace Game {
 		Matrix4x4f mV = cam.GetTransformationMatrix();
 		Matrix4x4f mP = cam.GetProjectionMatrix();
 		m_mutex.lock();
+		device->SetRSState(false);
+		lightManager.RenderShadowMap(cam.position);
+
+		device->SetVPDefault();
+		device->SetRenderTargetsDefault();
+		device->SetRSState();
 		for (auto& pair : renderingMeshes) {
-			pair.second->Draw(this, mV, mP);
+			pair.second->Draw(this, mV, mP, &lightManager);
 		}
 		device->SetBlendState(true);
 		device->CopyBuffers();
+		device->SetRenderTargetsDefault();
 		for (auto& pair : transparentMeshes) {
 			pair.second->Draw(this, mV, mP);
 		}
@@ -102,6 +118,8 @@ namespace Game {
 
 	void SceneRender::PostProcess(Material* mat) {
 		device->CopyBuffers();
+		device->SetVPDefault();
+		device->SetRenderTargetsDefault();
 
 		device->SetBlendState(false);
 

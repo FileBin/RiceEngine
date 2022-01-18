@@ -12,10 +12,10 @@ catch (Exception& e) {
 	Log::log(Log::ERR, L"What: {}", Util::Utf8ToWstring(e.what()));
 	Log::Close();
 	throw e;
-} catch (HRESULT hr) {
+}/* catch (HRESULT hr) {
 	_com_error err(hr);
 	Log::log(Log::ERR, L"HRESULT Error occured: ");
-	Log::log(Log::ERR, L"Desc: {}", err.Description().GetBSTR());
+	//Log::log(Log::ERR, L"Desc: {}", err.Description().GetBSTR());
 	Log::log(Log::ERR, L"Message: {}", err.ErrorMessage());
 	Log::Close();
 	wchar_t* desc = err.Description().GetBSTR();
@@ -24,4 +24,4 @@ catch (Exception& e) {
 	Log::log(Log::ERR, L"Unknown runtime error occured: ");
 	Log::Close();
 	throw "err";
-}
+}*/

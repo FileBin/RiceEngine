@@ -30,9 +30,9 @@ namespace Game {
 		short mouseScrollDelta = 0, mouseWheel = 0;
 		Vector2 mousePos = Vector2(), mouseDelta = Vector2();
 		RECT windowRect;
-		void eventKey(KeyCode key, bool state);
+		void eventKey(KeyCode key, bool rs_state);
 		void eventCursor();
-		void eventMouse(MouseKey key, bool state);
+		void eventMouse(MouseKey key, bool rs_state);
 		void eventMouseWheel(short value);
 	};
 }

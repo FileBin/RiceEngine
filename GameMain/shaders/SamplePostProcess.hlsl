@@ -38,10 +38,13 @@ float4 main(float4 pos : SV_POSITION) : SV_TARGET
     float4 col = 0;
     //float4 col = SampleRenderTarget(pixelCoords);
     float focusFact = GetDepth(pixelCoords) - FOCUS;
-    focusFact = abs(focusFact);
-    focusFact -= 10.;
-    focusFact *= .1;
+    if(focusFact>0)
+        focusFact /= FAR - FOCUS;
+    else
+        focusFact = - focusFact / FOCUS;
     focusFact = exp(focusFact);
+    focusFact -= .5;
+    //focusFact *= .1;
     //focusFact -= 5;
     focusFact = clamp(focusFact, 0.f, MAX_SAMPLES);
     for (int i = -focusFact; i <= focusFact; i++)

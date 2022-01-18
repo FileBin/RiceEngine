@@ -28,6 +28,26 @@ Matrix4x4 Matrix4x4::Perspective(double fov, double aspect, double nearPlane, do
     };
 }
 
+Matrix4x4 Matrix4x4::Ortographic(Vector2 size, double nearPlane, double farPlane) {
+    double nearmfar = farPlane - nearPlane;
+
+    return {
+        2 / size.x, 0, 0, 0,
+        0, 2 / size.y, 0, 0,
+        0, 0, 2 / nearmfar, -(farPlane + nearPlane) / nearmfar,
+        0, 0, 0, 1
+    };
+}
+
+Matrix4x4 Matrix4x4::Ortographic(Vector3 size) {
+    return {
+        2/size.x, 0, 0, 0,
+        0, 2/size.y, 0, 0,
+        0, 0, 1/size.z, .5,
+        0, 0, 0, 1
+    };
+}
+
 Matrix4x4 Matrix4x4::Translation(Vector3 v) {
     return {
         1,0,0,v.x,

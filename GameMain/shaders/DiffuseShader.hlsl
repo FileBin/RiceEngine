@@ -1,8 +1,11 @@
+#include "Shadows.hlsli"
+
 struct PixelShaderInput
 {
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
     float4 viewPos : POSITION0;
+    float4 lPos : TEXCOORD0;
     float3 light : POSITION2;
     float3 world_pos : POSITION3;
     float3 world_norm : POSITION4;
@@ -61,6 +64,8 @@ float4 main(PixelShaderInput input) : SV_TARGET{
 	float3 s = 1 - col;
 	s *= spec;
     col += s * shadow * specular;
+    
+    col *= GetLight(input.lPos);
 
     return float4(col, incolor.w);
 }

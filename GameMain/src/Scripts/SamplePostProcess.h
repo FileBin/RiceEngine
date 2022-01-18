@@ -14,8 +14,14 @@ public:
 		SmartPtr<Material> mat;
 		if (waterDepth < -.9f) {
 			mat = render->GetMaterial(L"Underwater");
+			auto waterMat = render->GetMaterial(L"Water");
+			waterMat->SetVar(L"mode", true);
+			waterMat->UpdateBuffer();
 		} else {
 			mat = render->GetMaterial(L"PostMaterial");
+			auto waterMat = render->GetMaterial(L"Water");
+			waterMat->SetVar(L"mode", false);
+			waterMat->UpdateBuffer();
 		}
 		render->PostProcess(mat.Get());
 	}
