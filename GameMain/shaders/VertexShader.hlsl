@@ -13,10 +13,9 @@ struct PixelShaderInput
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
     float4 viewPos : POSITION0;
-    float4 lPos : POSITION1;
-    float3 light : POSITION2;
-    float3 world_pos : POSITION3;
-    float3 world_norm : POSITION4;
+    float4 lPos : TEXCOORD0;
+    float3 light : POSITION1;
+    float3 world_pos : POSITION2;
 };
 
 PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
@@ -34,7 +33,6 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
     output.viewPos = output.pos;
     output.pos = mul(output.pos, Projection);
 
-    output.world_norm = mul(norm.xyz, World);
     output.norm = mul(norm.xyz, WV);
     
     output.light = mul(light, WV);

@@ -5,12 +5,10 @@ struct PixelShaderInput
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
     float4 viewPos : POSITION0;
-    float4 lPos : POSITION1;
-    float3 light : POSITION2;
-    float3 world_pos : POSITION3;
-    float3 world_norm : POSITION4;
+    float4 lPos : TEXCOORD0;
+    float3 light : POSITION1;
+    float3 world_pos : POSITION2;
 };
-
 cbuffer CBuffer
 {
     float time;
@@ -24,26 +22,12 @@ float rand(float w_x, float w_y)
     return x - floor(x);
 }
 
-float4 main(PixelShaderInput input) : SV_TARGET{
+float4 main(PixelShaderInput input) : SV_TARGET {
     float3 n = input.norm;
-    float3 w_n = normalize(input.world_norm);
 
 	float emission = egst.x;
     float glossines = egst.y;
     float specular = egst.z;
-
-    float add = 0;
-    switch (egst.w)
-    {
-    case 8:
-        float com1 = w_n.z * sin(time * rand(w_n.x, w_n.z) * 2);
-        com1 = max(com1, 0);
-        float com2 = w_n.x * cos(time * rand(w_n.z, w_n.x));
-        com2 = max(com2, 0);
-        add = pow((com1 + com2) * 5, 0.5);
-        specular = specular * 0.2 + add;
-        break;
-    }
    
 	float3 eye = normalize(input.viewPos.xyz);
 

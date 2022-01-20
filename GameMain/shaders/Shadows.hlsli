@@ -15,8 +15,8 @@ float LoadShadowMap(int2 pos)
 
 float SampleShadowMap(float2 pixelCoords, float bias)
 {
-    float2 fpos = floor(pixelCoords);
-    float2 v = float2(0, 1);
+    int2 fpos = floor(pixelCoords);
+    int2 v = int2(0, 1);
     float2x2 samples;
     samples._11 = LoadShadowMap(fpos) + bias;
     samples._12 = LoadShadowMap(fpos + v.yx) + bias;
@@ -50,8 +50,10 @@ float3 GetLight(float4 lPos)
     int nSamples = 4;
     float e = .5f;
     
+    [unroll(9)]
     for (int i = -nSamples; i <= nSamples; i++)
     {
+        [unroll(9)]
         for (int j = -nSamples; j <= nSamples; j++)
         {
             #if INTERPOLATE_SHADOWS

@@ -190,6 +190,7 @@
     <ClInclude Include="include\GameEngine\Device.h" />
     <ClInclude Include="include\GameEngine\DX\Texture2D.h" />
     <ClInclude Include="include\GameEngine\Engine.h" />
+    <ClInclude Include="include\GameEngine\LoadingScreenRender.h" />
     <ClInclude Include="include\GameEngine\Material.h" />
     <ClInclude Include="include\GameEngine\Matrixes.h" />
     <ClInclude Include="include\GameEngine\Model.h" />

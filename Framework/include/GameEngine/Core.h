@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "stdafx.h"
-#include "RenderBase.h"
+#include "LoadingScreenRender.h"
 #include "Log.h"
 #include "Window.h"
 #include "ScriptBase.h"
