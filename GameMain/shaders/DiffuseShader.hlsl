@@ -5,7 +5,7 @@ struct PixelShaderInput
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
     float4 viewPos : POSITION0;
-    float4 lPos : TEXCOORD0;
+    float4 lPos : POSITION1;
     float3 light : POSITION2;
     float3 world_pos : POSITION3;
     float3 world_norm : POSITION4;

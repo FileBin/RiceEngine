@@ -29,6 +29,6 @@ namespace Game {
 	};
 
 	struct ConstantBufferData {
-		Matrix4x4f World = Matrix4x4f::identity, WorldView = Matrix4x4f::identity, Projection = Matrix4x4f::identity;
+		Matrix4x4f World = Matrix4x4f::identity, WorldView = Matrix4x4f::identity, Projection = Matrix4x4f::identity, LightWVP = Matrix4x4f::identity;
 	};
 }

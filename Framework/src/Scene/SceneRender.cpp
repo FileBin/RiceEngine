@@ -10,7 +10,7 @@
 namespace Game {
 
 	bool SceneRender::Init() {
-		lightManager.Init(this, { 250 });
+		lightManager.Init(this, { 150 });
 
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 
@@ -57,7 +57,10 @@ namespace Game {
 		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale); // TODO: values must be getted from the transform
 		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
-
+		cb.LightWVP = Matrix4x4f::identity;
+		if (lightMgr != nullptr) {
+			cb.LightWVP = cb.World * lightMgr->GetMatrixLVP();
+		}
 		if (check)
 			if (orig.IsNull() || !orig->CheckVisiblity(cb)) return;
 

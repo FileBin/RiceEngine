@@ -69,7 +69,7 @@ namespace Game {
 		auto ViewMatrix = Matrix4x4::TRS(-playerPos, rotation, Vector3::one);
 
 		LightBuffer cb;
-		cb.LVP = ViewMatrix * Matrix4x4::Ortographic({ shadowMapSizes[0], shadowMapSizes[0], d });
+		LVP = ViewMatrix * Matrix4x4::Ortographic({ shadowMapSizes[0], shadowMapSizes[0], d });
 		cb.ambient.x = cb.ambient.y = cb.ambient.z = .3f;
 		cb.diffuse.x = cb.diffuse.y = cb.diffuse.z = cb.diffuse.w = cb.ambient.w = 1.f;
 
@@ -102,6 +102,7 @@ namespace Game {
 		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale); // TODO: values must be getted from the transform
 		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
+		cb.LightWVP = Matrix4x4f::identity;
 		device->SetPrimitiveTopology();
 		device->LoadBufferSubresource(constantBuffer, cb);
 		device->SetActiveVSConstantBuffer(constantBuffer);

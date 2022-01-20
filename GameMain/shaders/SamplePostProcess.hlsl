@@ -35,17 +35,15 @@ float4 main(float4 pos : SV_POSITION) : SV_TARGET
     
     int2 pixelCoords = pos.xy;
     float numSamples = 0;
-    float4 col = 0;
-    //float4 col = SampleRenderTarget(pixelCoords);
-    float focusFact = GetDepth(pixelCoords) - FOCUS;
+    //float4 col = 0;
+    float4 col = SampleRenderTarget(pixelCoords);
+    /*float focusFact = GetDepth(pixelCoords) - FOCUS;
     if(focusFact>0)
         focusFact /= FAR - FOCUS;
     else
         focusFact = - focusFact / FOCUS;
     focusFact = exp(focusFact);
     focusFact -= .5;
-    //focusFact *= .1;
-    //focusFact -= 5;
     focusFact = clamp(focusFact, 0.f, MAX_SAMPLES);
     for (int i = -focusFact; i <= focusFact; i++)
     {
@@ -56,7 +54,7 @@ float4 main(float4 pos : SV_POSITION) : SV_TARGET
         }
     }
     
-    col.xyz /= numSamples;
+    col.xyz /= numSamples;*/
 
     col.xyz = pow(col.xyz, 2.);
     

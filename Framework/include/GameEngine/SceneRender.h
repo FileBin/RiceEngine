@@ -48,7 +48,6 @@ namespace Game {
 
 		class LightManager {
 			struct LightBuffer {
-				Matrix4x4f LVP = Matrix4x4f::identity;
 				Vector4f ambient;
 				Vector4f diffuse;
 			} buf;
@@ -64,9 +63,12 @@ namespace Game {
 			dbl shadowDistance = 300;
 			size_t shadowMapRes;
 			std::vector<dbl> shadowMapSizes;
+			Matrix4x4f LVP = Matrix4x4f::identity;
 		public:
 			void Init(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 300, size_t shadowMapRes = 1024);
 			void RenderShadowMap(Vector3 playerPos);
+
+			Matrix4x4f GetMatrixLVP() { return LVP; }
 
 			Texture2D* GetShadowMap() { return shadowAtlas.Get(); }
 			Buffer* GetBuffer() { return lightBuffer.Get(); }
