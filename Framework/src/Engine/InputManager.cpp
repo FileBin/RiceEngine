@@ -7,7 +7,7 @@ namespace Game {
 
 	InputManager* instance = nullptr;
 
-	InputManager* InputManager::Init() {
+	InputManager* InputManager::PreInit() {
 		if (instance == nullptr) {
 			instance = new InputManager();
 			return instance;

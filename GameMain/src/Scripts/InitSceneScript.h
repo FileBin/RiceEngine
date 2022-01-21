@@ -7,6 +7,7 @@
 #include <GameEngine\ScriptBase.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Util3D.h>
+#include <GameEngine\DefaultLoadingScreenRender.h>
 
 using namespace Game;
 

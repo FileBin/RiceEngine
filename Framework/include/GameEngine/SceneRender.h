@@ -8,6 +8,8 @@
 #include <GameEngine\macros.h>
 #include <GameEngine\Vectors\Hasher.h>
 #include "Util\SmartPointer.h"
+#include "Scene\IPostProcess.h"
+#include <unordered_set>
 
 struct Matrix4x4f;
 
@@ -65,8 +67,8 @@ namespace Game {
 			std::vector<dbl> shadowMapSizes;
 			Matrix4x4f LVP = Matrix4x4f::identity;
 		public:
-			void Init(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 300, size_t shadowMapRes = 1024);
-			void RenderShadowMap(Vector3 playerPos);
+			void PreInit(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 300, size_t shadowMapRes = 1024);
+			void RenderShadowMap(Vector3 playerPos, std::vector<RenderingMesh*>& meshes);
 
 			Matrix4x4f GetMatrixLVP() { return LVP; }
 
@@ -111,13 +113,17 @@ namespace Game {
 
 		void PostProcess(Material* mat);
 
+		void AddPostProcessScript(IPostProcess* ppscript) { ppscripts.insert(ppscript); }
+		void RemovePostProcessScript(IPostProcess* ppscript) { ppscripts.erase(ppscript); }
+
 	private:
 		size_t activeCameraIdx;
-		std::mutex m_mutex, m_2dMutex;
+		std::mutex m_mutex, m_2dMutex, m_removeMutex;
 		concurrency::concurrent_vector<SmartPtr<Camera>> cameras;
 		concurrency::concurrent_unordered_map<String, SmartPtr<Material>> materials;
 		concurrency::concurrent_unordered_map<String, SmartPtr<Shader>> shaders;
 		std::unordered_map<SmartPtr<Mesh>, SmartPtr<RenderingMesh>> renderingMeshes, transparentMeshes;
+		std::unordered_set<SmartPtr<IPostProcess>> ppscripts;
 		std::vector<SmartPtr<UI::IDrawable>> drawables;
 		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
 

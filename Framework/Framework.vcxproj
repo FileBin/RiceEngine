@@ -187,6 +187,7 @@
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Text.h" />
+    <ClInclude Include="include\GameEngine\DefaultLoadingScreenRender.h" />
     <ClInclude Include="include\GameEngine\Device.h" />
     <ClInclude Include="include\GameEngine\DX\Texture2D.h" />
     <ClInclude Include="include\GameEngine\Engine.h" />
@@ -198,7 +199,7 @@
     <ClInclude Include="include\GameEngine\Physics\ICollider.h" />
     <ClInclude Include="include\GameEngine\Physics\IRigidBody.h" />
     <ClInclude Include="include\GameEngine\Physics\PhysicsEngine.h" />
-    <ClInclude Include="include\GameEngine\RenderScript.h" />
+    <ClInclude Include="include\GameEngine\Scene\IPostProcess.h" />
     <ClInclude Include="include\GameEngine\SoundStream.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
     <ClInclude Include="include\GameEngine\Core.h" />

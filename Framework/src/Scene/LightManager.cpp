@@ -5,7 +5,7 @@
 #include <GameEngine\Model.h>
 
 namespace Game {
-	void SceneRender::LightManager::Init(SceneRender* ren, std::vector<dbl> atlasSizes, dbl shadowDist, size_t shadowMapSize) {
+	void SceneRender::LightManager::PreInit(SceneRender* ren, std::vector<dbl> atlasSizes, dbl shadowDist, size_t shadowMapSize) {
 		auto d3dDevice = ren->device->GetD3dDevice();
 
 		shadowMapRes = shadowMapSize;
@@ -55,7 +55,7 @@ namespace Game {
 		lightBuffer = ren->device->CreateBuffer<LightBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
 	}
 
-	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos) {
+	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, std::vector<RenderingMesh*>& meshes) {
 		auto context = sceneRender->device->GetContext();
 		ID3D11RenderTargetView* pNullView = nullptr;
 		context->OMSetRenderTargets(1, &pNullView, DSV.Get());
@@ -88,8 +88,8 @@ namespace Game {
 			vp.MaxDepth = 1.f;
 			sceneRender->device->SetVP(vp);
 
-			for (auto& pair : sceneRender->renderingMeshes) {
-				pair.second->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
+			for (auto& m : meshes) {
+				m->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
 			}
 		}
 		context->OMSetRenderTargets(0, 0, 0);

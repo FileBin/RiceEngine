@@ -5,7 +5,6 @@
 #include "../ScriptBase.h"
 #include "../SoundManager.h"
 #include "../Physics/PhysicsEngine.h"
-#include "../RenderScript.h"
 
 namespace Game {
 	class MonoScript;
@@ -16,14 +15,21 @@ namespace Game {
 
 		virtual ~Scene() = 0;
 
-		void Init(Engine* en) { engine = en; }
+		void PreInit(Engine* en) {
+			engine = en;
+			render->Init();
+		}
 
-		virtual void Initialize() = 0;
+		virtual void Init() = 0;
 
 		void PostInit() {
 			soundManager = new SoundManager(render->GetActiveCamera());
 			physicsEngine = new Physics::PhysicsEngine();
-			physicsEngine->Init();
+			physicsEngine->PreInit();
+			Resize();
+			root->Enable();
+			root->Start();
+			init = true;
 		}
 
 		void Close() {
@@ -33,17 +39,20 @@ namespace Game {
 			delete render;
 		}
 
-		std::vector<ScriptBase*> GetScripts() {
-			return {
-				initScript,
-				preUpdateScript,
-				updateScript,
-				closeScript
-			};
+		void Render() {
+			root->PreUpdate();
+			root->Update();
+			render->BeginFrame();
+			render->Draw();
+		}
+
+		void Resize() {
+			if (init)
+				render->Resize();
 		}
 
 		void AddScript(MonoScript* script);
-		void AddScript(RenderScript* script);
+		void RemoveScript(MonoScript* script);
 
 		SceneObject& GetObjectByName(String name);
 
@@ -53,42 +62,15 @@ namespace Game {
 		SceneRender& GetRender() const { return *render; }
 		const SmartPtr<Physics::PhysicsEngine> GetPhysEngine() const;
 
-		SoundManager* soundManager;
+		bool isLoaded() { return init; }
+
 	private:
+		bool init = false;
+
 		SceneObject* root;
 		SceneRender* render;
 		SmartPtr<Physics::PhysicsEngine> physicsEngine;
 		Engine* engine;
-
-		std::vector<RenderScript*> renderScripts{};
-		
-		class InitScript : public ScriptBase {
-		public:
-			Scene* scene = nullptr;
-			bool init = false;
-			void Run();
-			virtual ~InitScript() {};
-		} *initScript;
-
-		class PreUpdateScript : public ScriptBase {
-		public:
-			Scene* scene = nullptr;
-			void Run();
-			virtual ~PreUpdateScript() {};
-		} *preUpdateScript;
-
-		class UpdateScript : public ScriptBase {
-		public:
-			Scene* scene = nullptr;
-			void Run();
-			virtual ~UpdateScript() {};
-		} *updateScript;
-
-		class CloseScript : public ScriptBase {
-		public:
-			Scene* scene = nullptr;
-			bool init = false;
-			void Run();
-		} *closeScript;
+		SoundManager* soundManager;
 	};
 }

@@ -31,7 +31,7 @@ namespace Game {
 
 	private:
 		double fov;
-		double aspectRatio;
+		double aspectRatio = 1;
 		double nearPlane = 0.01, farPlane = 1000.f;
 	};
 }

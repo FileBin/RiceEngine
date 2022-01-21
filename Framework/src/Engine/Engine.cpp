@@ -12,7 +12,6 @@ namespace Game {
 		if (d != nullptr && c != nullptr) {
 			device = d;
 			core = c;
-			stage = s;
 		} else {
 			THROW_EXCEPTION("Engine can't be created, because device reference is null!");
 		}
@@ -54,19 +53,20 @@ namespace Game {
 		return *sh;
 	}
 
-	void Engine::SetRender(RenderBase* render) { core->SetRender(render); }
+	void Engine::SetRender(LoadingScreenRenderBase* render) { core->render = render; }
 
-	SoundManager& Engine::getSoundManager() { return scene->GetSoundManager(); };
+	SoundManager& Engine::getSoundManager() { return core->activeScene->GetSoundManager(); };
 
 	void Engine::LoadScene(Scene* scene) {
-		auto& c = *core;
-		c.SetRender(&scene->GetRender());
-		scene->Init(this);
-		this->scene = scene;
-		auto s = scene->GetScripts();
-		c.AddScript(s[0], Stage::PostInit);
-		c.AddScript(s[1], Stage::Update);
-		c.AddScript(s[2], Stage::Update);
-		c.AddScript(s[3], Stage::Close);
+		if (!core->activeScene.IsNull()) {
+			core->activeScene->Close();
+		}
+		core->activeScene = scene;
+		scene->GetRender().SetDevice(core->device);
+		scene->PreInit(this);
+		Core::RunTask([scene]() {
+			scene->Init();
+			scene->PostInit(); 
+			});
 	}
 }

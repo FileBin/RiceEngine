@@ -9,11 +9,11 @@ namespace Game {
 	class ScriptBase {
 	public:
 		ScriptBase() {}
-		void Init(Engine** engine, RenderBase** render);
+		void PreInit(Engine** engine, RenderBase** render);
 
 		virtual ~ScriptBase() = 0;
 
-		virtual void Initialize() {}
+		virtual void Init() {}
 		virtual void Run() = 0;
 		virtual void Finalize() {}
 	protected:

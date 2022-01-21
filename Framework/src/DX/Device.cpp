@@ -69,7 +69,7 @@ namespace Game {
 		renderTarget2d->EndDraw();
 	}
 
-#pragma region Initialize
+#pragma region Init
 	void Device::_init(size_t adapterIdx) {
 		Vector2 size = Util::GetWindowScreenSize(hwnd);
 
@@ -155,7 +155,7 @@ namespace Game {
 		}
 	}
 
-	void Device::Initialize(HWND hwnd, size_t idx) {
+	void Device::Init(HWND hwnd, size_t idx) {
 		Log::log(Log::INFO,L"Device initialization...");
 		this->hwnd = hwnd;		
 		_init(idx);
@@ -358,8 +358,8 @@ namespace Game {
 		context->DrawIndexed(indexCount, 0, 0);
 	}
 
-	void Device::ClearFrame(Color color) {
-		float c[] = { color.r,color.g,color.b,color.A };
+	void Device::ClearFrame(D2D1::ColorF color) {
+		float c[] = { color.r,color.g,color.b,color.a };
 		context->ClearRenderTargetView(renderTarget, c);
 		ClearZBuffer();
 	}

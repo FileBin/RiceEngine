@@ -15,7 +15,7 @@ FbxNode* getRootNode(std::string file) {
 	manager->SetIOSettings(ioSettings);
 
 	FbxImporter* importer = FbxImporter::Create(manager, "");
-	importer->Initialize(file.c_str(), -1, manager->GetIOSettings());
+	importer->Init(file.c_str(), -1, manager->GetIOSettings());
 
 	FbxScene* scene = FbxScene::Create(manager, "tempName");
 

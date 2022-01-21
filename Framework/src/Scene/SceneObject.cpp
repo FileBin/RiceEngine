@@ -3,6 +3,7 @@
 #include <GameEngine\Scene\Component.h>
 #include <GameEngine\stdafx.h>
 #include <GameEngine\Util\exceptions.h>
+#include <GameEngine\Scene\Scene.h>
 
 namespace Game {
 	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
@@ -86,8 +87,13 @@ namespace Game {
 	}
 
 	void SceneObject::AddComponent(Component* c) {
-		c->Init(this);
-		components.push_back(c);
+		c->PreInit(this);
+		components.insert(c);
+	}
+
+	void SceneObject::RemoveComponent(Component* c) {
+		c->Disable();
+		components.erase(c);
 	}
 
 	SceneObject* SceneObject::Instaniate() {

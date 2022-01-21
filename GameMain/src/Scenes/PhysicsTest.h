@@ -18,7 +18,7 @@
 using namespace Game;
 
 class PhysicsScene : public Scene {
-	void Initialize() {
+	void Init() {
 
 		auto& ren = GetRender();
 
@@ -93,6 +93,6 @@ class PhysicsScene : public Scene {
 		debugText->AddComponent(new DebugText());
 
 
-		Scene::Initialize(); // call super initialize method to initialize sound manager with a valid camera reference
+		Scene::Init(); // call super initialize method to initialize sound manager with a valid camera reference
 	}
 };

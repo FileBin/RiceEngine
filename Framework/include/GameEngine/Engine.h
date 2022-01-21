@@ -10,6 +10,7 @@ namespace Game {
 	class RenderBase;
 	class Material;
 	class Scene;
+	class LoadingScreenRenderBase;
 
 	class Engine
 	{
@@ -23,7 +24,7 @@ namespace Game {
 
 		void SetMsaaLevel(size_t level);
 
-		void SetRender(RenderBase* render);
+		void SetRender(LoadingScreenRenderBase* render);
 
 		void LoadScene(Scene* scene);
 
@@ -44,7 +45,5 @@ namespace Game {
 		Device** device = nullptr;
 		Core* core;
 		size_t msaaLevel = 1;
-		Stage* stage;
-		Scene* scene;
 	};
 }

@@ -3,6 +3,7 @@
 #include "../Util.h"
 #include <vector>
 #include <concurrent_vector.h>
+#include <unordered_set>
 #include "Component.h"
 
 namespace Game {
@@ -41,6 +42,7 @@ namespace Game {
 		bool TryGetObjectByName(String& name, SceneObject* &object);
 
 		void AddComponent(Component* component);
+		void RemoveComponent(Component* component);
 		SceneObject* Instaniate();
 
 		void SetName(String name) { this->name = name; }
@@ -51,7 +53,7 @@ namespace Game {
 		bool enabled = false;
 		Scene* scene = nullptr;
 		String name = L"";
-		concurrent_vector<Component*> components{};
+		std::unordered_set<Component*> components{};
 		concurrent_vector<SceneObject*> children{};
 	};
 }

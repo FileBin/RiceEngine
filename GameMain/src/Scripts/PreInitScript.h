@@ -13,6 +13,8 @@ class PreInitScript : public ScriptBase {
 		Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
 		engine.SetMsaaLevel(4);
 
+		engine.SetRender(new DefaultLoadingScreenRender());
+
 		engine.RegisterScript(new InitSceneScript(), Stage::Init);
 	}
 };

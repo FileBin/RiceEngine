@@ -6,11 +6,6 @@
 #include "Vectors/Quaternion.h"
 
 namespace Game {
-	struct Color {
-		float r, g, b, A;
-		Color(float red, float green, float blue) : r(red), g(green), b(blue), A(1) {}
-		Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), A(alpha) {}
-	};
 
 	struct Vertex {
 		Vector3f position = { 0,0,0 };

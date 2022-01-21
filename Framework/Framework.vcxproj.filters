@@ -234,10 +234,13 @@
     <ClInclude Include="include\GameEngine\Physics\HitInfo.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\RenderScript.h">
+    <ClInclude Include="include\GameEngine\LoadingScreenRender.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\LoadingScreenRender.h">
+    <ClInclude Include="include\GameEngine\DefaultLoadingScreenRender.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Scene\IPostProcess.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

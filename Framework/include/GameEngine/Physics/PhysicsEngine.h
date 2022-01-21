@@ -47,7 +47,7 @@ namespace Game::Physics {
 		void RemoveRigidBody(size_t UUID);
 		size_t AddCollider(ICollider* collider);
 		void RemoveCollider(size_t UUID);
-		void Init();
+		void PreInit();
 		void Update(dbl dt);
 
 		const Frame GetBackFrame();

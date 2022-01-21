@@ -19,7 +19,7 @@ namespace Game {
 		Core engine;
 		try {
 			engine.AddScript(script, Stage::PreInit);
-			engine.Initialize();
+			engine.Init();
 			engine.Run();
 			engine.Close();
 		}
@@ -30,13 +30,13 @@ namespace Game {
 	Core::Core() {}
 
 	Core::~Core() {}
-	bool Core::Initialize() {
+	bool Core::Init() {
 		fps = 60;
 		engine = new Engine(&device, this, &stage);
 		device = new Device();
 		stage = Stage::PreInit;
 		RunScripts(preInitScripts);
-		Log::Init();
+		Log::PreInit();
 		wnd = new Window();
 
 		if (!wnd) {
@@ -51,14 +51,14 @@ namespace Game {
 		}
 
 		auto hwnd = wnd->GetHWND();
-		device->Initialize(hwnd);
+		device->Init(hwnd);
 
 		stage = Stage::Init;
 		RunScripts(initScripts);
 
 		render->SetDevice(device);
 		if (!render->Init()) {
-			Log::log(Log::ERR, L"Render device could not be initialized");
+			Log::log(Log::ERR, L"Render could not be initialized");
 			return false;
 		}
 		init = true;
@@ -80,7 +80,7 @@ namespace Game {
 				stage = Stage::Update;
 				RunScripts(updateScripts);
 				wnd->inputmgr->Update();
-				b = frame();
+				b = RunFrame();
 				engine->PostUpdate();
 
 				sleep_until(_time);
@@ -104,7 +104,7 @@ namespace Game {
 		Log::Close();
 	}
 
-	bool Core::frame() {
+	bool Core::RunFrame() {
 		wnd->RunEvent();
 
 		wnd->inputmgr->SetActive(wnd->IsActive());
@@ -115,17 +115,18 @@ namespace Game {
 		if (wnd->IsResize()) {
 			device->Resize();
 			render->Resize();
+			if (!activeScene.IsNull()) {
+				activeScene->Resize();
+			}
 		}
-		stage = Stage::PreRender;
-		RunScripts(preRenderScripts);
-		render->BeginFrame();
-		stage = Stage::Render;
-		if (!render->Draw())
-			return false;
-		RunScripts(renderScripts);
+		if (activeScene.IsNull() || !activeScene->isLoaded()) {
+			render->BeginFrame();
+			render->Draw({});
+		} else {
+			activeScene->Render();
+		}
 		render->EndFrame();
-		stage = Stage::PostRender;
-		RunScripts(postRenderScripts);
+
 		return true;
 	}
 
@@ -134,8 +135,8 @@ namespace Game {
 	}
 
 	void Core::AddScript(ScriptBase* script, Stage stage) {
-		script->Init(&engine, &render);
-		script->Initialize();
+		script->PreInit(&engine, reinterpret_cast<RenderBase**>(&render));
+		script->Init();
 		switch (stage) {
 		case Stage::PreInit:
 			preInitScripts.push_back(script);
@@ -145,15 +146,6 @@ namespace Game {
 			break;
 		case Stage::PostInit:
 			postInitScripts.push_back(script);
-			break;
-		case Stage::PreRender:
-			preRenderScripts.push_back(script);
-			break;
-		case Stage::Render:
-			renderScripts.push_back(script);
-			break;
-		case Stage::PostRender:
-			postRenderScripts.push_back(script);
 			break;
 		case Stage::Update:
 			updateScripts.push_back(script);

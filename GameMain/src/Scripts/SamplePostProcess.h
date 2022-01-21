@@ -1,14 +1,17 @@
 #pragma once
 #include <GameEngine\Core.h>
 #include <GameEngine\InputManager.h>
-#include <GameEngine\RenderScript.h>
 
 using namespace Game;
 
-class SamplePostProcess : public RenderScript {
+class SamplePostProcess : public MonoScript, public IPostProcess {
 public:
 	ChunkGenerator* generator;
-	void Run() {
+	void OnEnable() {
+		GetScene().GetRender().AddPostProcessScript(this);
+	}
+	void PostProcess() {
+		auto render = &GetRender();
 		auto playerPos = render->GetActiveCamera()->position;
 		auto waterDepth = generator->world->GetTransparentVoxelDepth((Vector3i)playerPos, VoxelTypeIndex::V_WATER);
 		SmartPtr<Material> mat;
@@ -24,5 +27,9 @@ public:
 			waterMat->UpdateBuffer();
 		}
 		render->PostProcess(mat.Get());
+	}
+
+	void OnDisable() {
+		GetScene().GetRender().AddPostProcessScript(this);
 	}
 };

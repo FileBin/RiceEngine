@@ -21,7 +21,7 @@ namespace Game {
 	}
 
 	bool Window::Create(const DescWindow& desc) {
-		inputmgr = InputManager::Init();
+		inputmgr = InputManager::PreInit();
 		Log::log(Log::Debug, L"Window Create");
 		this->desc = desc;
 

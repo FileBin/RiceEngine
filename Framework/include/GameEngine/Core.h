@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "ScriptBase.h"
 #include "Stage.h"
+#include "Scene\Scene.h"
 #include <functional>
 #include <ppltasks.h>
 
@@ -39,8 +40,10 @@ namespace Game {
 
 		void AddScript(ScriptBase* script, Stage s);
 
-		void SetRender(RenderBase* render) { this->render = render; }
-		void SetFps(double fps) { this->fps = fps; }
+		void LoadScene(Scene* _scene) {
+			activeScene = _scene;
+		}
+		void SetFps(double _fps) { fps = _fps; }
 
 		double GetFixedDeltaTime() { return fixedDeltaTime; }
 		double GetDeltaTime() { return deltaTime; }
@@ -48,25 +51,26 @@ namespace Game {
 	private:
 		Core();
 		~Core();
+		friend class Engine;
 
-		bool Initialize();
+		bool Init();
 		void Run();
 		void Close();
 
-		bool frame();
+		bool RunFrame();
 		void RunScripts(std::vector<ScriptBase*>& scripts);
 
-		Stage stage;
+		Stage stage = (Stage)0;
+		SmartPtr<Scene> activeScene;
 
 		Window* wnd = nullptr;
-		RenderBase* render = nullptr;
+		LoadingScreenRenderBase* render = nullptr;
 		Device* device = nullptr;
 		Engine* engine = nullptr;
-		bool init;
+		bool init = false;
 		double fps = 60.;
-		double fixedDeltaTime, deltaTime, time;
+		double fixedDeltaTime = 0, deltaTime = 0, time = 0;
 		std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
-			preRenderScripts, renderScripts, postRenderScripts,
 			updateScripts, closeScripts;
 
 	};

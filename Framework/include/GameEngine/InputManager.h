@@ -6,7 +6,7 @@
 namespace Game {
 	class InputManager {
 	public:
-		static InputManager* Init();
+		static InputManager* PreInit();
 		InputManager();
 		~InputManager();
 

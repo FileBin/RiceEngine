@@ -19,7 +19,7 @@ namespace Game {
 		ID2D1RenderTarget* Get2DRenderTarget() { return renderTarget2d; }
 		IDWriteTextFormat* GetDefFormat() { return textFormat; }
 
-		void Initialize(HWND hwnd, size_t videoCardIdx = 0);
+		void Init(HWND hwnd, size_t videoCardIdx = 0);
 
 		template<typename T>
 		ID3D11Buffer* CreateBuffer(std::vector<T> data = {},
@@ -86,7 +86,7 @@ namespace Game {
 
 		void CopyBuffers();
 
-		void ClearFrame(Color color = Color(0, 0, 0));
+		void ClearFrame(D2D1::ColorF color = D2D1::ColorF::Black);
 		void ClearZBuffer();
 		void UseDepthBuffer(bool usage);
 		void SwapBuffers();

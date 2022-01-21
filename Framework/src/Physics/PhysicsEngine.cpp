@@ -24,7 +24,7 @@ namespace Game::Physics {
 		colliders.erase(UUID);
 	}
 
-	void PhysicsEngine::Init() {
+	void PhysicsEngine::PreInit() {
 		using namespace std::chrono;
 		alive = true;
 		updateThread = Core::RunThread<void(void)>([this]() {

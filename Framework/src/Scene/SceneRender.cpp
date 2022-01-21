@@ -10,7 +10,7 @@
 namespace Game {
 
 	bool SceneRender::Init() {
-		lightManager.Init(this, { 150 });
+		lightManager.PreInit(this, { 150 });
 
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
 
@@ -91,22 +91,41 @@ namespace Game {
 		Matrix4x4f mV = cam.GetTransformationMatrix();
 		Matrix4x4f mP = cam.GetProjectionMatrix();
 		m_mutex.lock();
+
+		std::vector<RenderingMesh*> rM;
+		std::vector<RenderingMesh*> tM;
+
+		rM.reserve(renderingMeshes.size());
+		tM.reserve(transparentMeshes.size());
+		for (auto& mesh : renderingMeshes) {
+			rM.push_back(mesh.second.Get());
+		}
+
+		for (auto& mesh : transparentMeshes) {
+			tM.push_back(mesh.second.Get());
+		}
+
 		device->SetRSState(false);
-		lightManager.RenderShadowMap(cam.position);
+		lightManager.RenderShadowMap(cam.position, rM);
 
 		device->SetVPDefault();
 		device->SetRenderTargetsDefault();
 		device->SetRSState();
-		for (auto& pair : renderingMeshes) {
-			pair.second->Draw(this, mV, mP, &lightManager);
+		for (auto& m : rM) {
+			m->Draw(this, mV, mP, &lightManager);
 		}
 		device->SetBlendState(true);
 		device->CopyBuffers();
 		device->SetRenderTargetsDefault();
-		for (auto& pair : transparentMeshes) {
-			pair.second->Draw(this, mV, mP);
+		for (auto& m : tM) {
+			m->Draw(this, mV, mP);
 		}
+
 		m_mutex.unlock();
+
+		for (auto pps : ppscripts) {
+			pps->PostProcess();
+		}
 
 		device->Begin2D();
 		m_2dMutex.lock();

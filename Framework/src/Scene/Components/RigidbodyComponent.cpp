@@ -15,8 +15,8 @@ namespace Game {
 	}
 	void Rigidbody::Update() {
 		try {
-			const auto frame = engine->GetBackFrame();
-			transform->position = frame.GetPosition(UUID);
+			const auto RunFrame = engine->GetBackFrame();
+			transform->position = RunFrame.GetPosition(UUID);
 		} catch (IndexOutOfRangeException) {
 
 		}

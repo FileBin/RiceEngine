@@ -3,7 +3,7 @@
 #include "RenderBase.h"
 
 namespace Game {
-	class LoadingScreenRender : public RenderBase {
+	class LoadingScreenRenderBase : public RenderBase {
 	public:
 		struct LoadingData {
 			dbl percent;
@@ -17,7 +17,7 @@ namespace Game {
 		virtual void Close() = 0;
 		virtual void Resize() = 0;
 
-		bool Draw() { Draw({}); };
+		bool Draw() { return Draw({}); };
 	};
 }
 

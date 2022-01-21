@@ -14,7 +14,7 @@ namespace Game {
 	Log* Log::instance = nullptr;
 	Log::Localization Log::locale = {};
 
-	void Log::Init() {
+	void Log::PreInit() {
 		if (!instance) {
 			instance = new Log();
 		} else

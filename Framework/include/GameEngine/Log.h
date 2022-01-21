@@ -18,7 +18,7 @@ namespace Game {
 			static Localization LoadFromJSON(String filename);
 		} static locale;
 	
-		static void Init();
+		static void PreInit();
 		static void LoadLocalization(Localization locale);
 
 		enum LogLevel {NONE = 0, INFO = 1, Debug = 2, WARNING = 3, ERR = 4, CRITICAl = 5};

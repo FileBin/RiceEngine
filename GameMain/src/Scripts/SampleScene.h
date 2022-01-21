@@ -15,7 +15,7 @@
 using namespace Game;
 
 class SampleScene : public Scene {
-	void Initialize() {
+	void Init() {
 		auto debugText = Instaniate();
 		debugText->SetName(L"DebugText");
 		auto chunk = Instaniate();

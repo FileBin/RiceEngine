@@ -5,11 +5,6 @@ namespace Game {
 	Scene::Scene() {
 		engine = nullptr;
 		soundManager = nullptr;
-		initScript = new InitScript();
-		preUpdateScript = new PreUpdateScript();
-		updateScript = new UpdateScript();
-		closeScript = new CloseScript();
-		initScript->scene = preUpdateScript->scene = updateScript->scene = closeScript->scene = this;
 		root = new SceneObject(this);
 		render = new SceneRender();
 	}
@@ -18,11 +13,6 @@ namespace Game {
 	
 	void Scene::AddScript(MonoScript* script) {
 		root->AddComponent(script);
-	}
-
-	void Scene::AddScript(RenderScript* script) {
-		script->render = render;
-		renderScripts.push_back(script);
 	}
 
 
@@ -37,26 +27,4 @@ namespace Game {
 	}
 
 	Engine& Scene::GetEngine() const { return *engine; }
-
-	void Scene::InitScript::Run() {
-		scene->Initialize();
-		scene->PostInit();
-		for (auto& script : scene->renderScripts) {
-			GetEngine().RegisterScript(script, Stage::Render);
-		}
-		scene->root->Enable();
-		scene->root->Start();
-	}
-
-	void Scene::PreUpdateScript::Run() {
-		scene->root->PreUpdate();
-	}
-
-	void Scene::UpdateScript::Run() {
-		scene->root->Update();
-	}
-	void Scene::CloseScript::Run() {
-		scene->Close();
-		//TODO: makeUnregisterScripts
-	}
 }

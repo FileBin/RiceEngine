@@ -5,7 +5,7 @@ namespace Game {
 
 	class Component {
 	public:
-		void Init(SceneObject* parent);
+		void PreInit(SceneObject* parent);
 
 		virtual ~Component() = 0;
 
