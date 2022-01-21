@@ -35,9 +35,7 @@ namespace Game {
 		skyBox->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
 		skyBox->orig = mesh;
 		skyBox->pMat = skyboxMaterial = skyboxMat;
-		skyBox->pPos = new Vector3();
-		skyBox->pRot = new Quaternion();
-		skyBox->pScale = new Vector3(1, 1, 1);
+		skyBox->transform = new Transform();
 	}
 
 	void SceneRender::BeginFrame() {
@@ -54,7 +52,7 @@ namespace Game {
 		auto device = ren->device;
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
-		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale); // TODO: values must be getted from the transform
+		cb.World = transform->GetTransformationMatrix(); // TODO: values must be getted from the transform
 		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
 		cb.LightWVP = Matrix4x4f::identity;
@@ -92,36 +90,25 @@ namespace Game {
 		Matrix4x4f mP = cam.GetProjectionMatrix();
 		m_mutex.lock();
 
-		std::vector<RenderingMesh*> rM;
-		std::vector<RenderingMesh*> tM;
-
-		rM.reserve(renderingMeshes.size());
-		tM.reserve(transparentMeshes.size());
-		for (auto& mesh : renderingMeshes) {
-			rM.push_back(mesh.second.Get());
-		}
-
-		for (auto& mesh : transparentMeshes) {
-			tM.push_back(mesh.second.Get());
-		}
+		updateMeshes();
+		
+		m_mutex.unlock();
 
 		device->SetRSState(false);
-		lightManager.RenderShadowMap(cam.position, rM);
+		lightManager.RenderShadowMap(cam.position, renderingMeshes);
 
 		device->SetVPDefault();
 		device->SetRenderTargetsDefault();
 		device->SetRSState();
-		for (auto& m : rM) {
-			m->Draw(this, mV, mP, &lightManager);
+		for (auto& m : renderingMeshes) {
+			m.second->Draw(this, mV, mP, &lightManager);
 		}
 		device->SetBlendState(true);
 		device->CopyBuffers();
 		device->SetRenderTargetsDefault();
-		for (auto& m : tM) {
-			m->Draw(this, mV, mP);
+		for (auto& m : transparentMeshes) {
+			m.second->Draw(this, mV, mP);
 		}
-
-		m_mutex.unlock();
 
 		for (auto pps : ppscripts) {
 			pps->PostProcess();
@@ -171,104 +158,83 @@ namespace Game {
 		}
 	}
 
-	void SceneRender::AddModel(SmartPtr<Model> model, std::vector<SmartPtr<Material>> materials) {
-		auto n = model->GetSubMeshesCount();
-		for (size_t i = 0; i < n; i++) {
-			auto mesh = model->GetSubMesh(i);
-			if (mesh->vertexBuffer.empty()) continue;
-			auto rMesh = new RenderingMesh();
-			rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
-			rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
-			rMesh->orig = mesh;
+	void SceneRender::updateMeshes() {
 
-			rMesh->pPos = model->pPos;
-			rMesh->pRot = model->pRot;
-			rMesh->pScale = model->pScale;
+		//add Models
+		while (!addQ.empty()) {
+			auto ren = addQ.front().first;
+			auto tr = addQ.front().second;
+			addQ.pop();
+			auto n = ren->GetModel()->GetSubMeshesCount();
+			for (size_t i = 0; i < n; i++) {
+				auto mesh = ren->GetModel()->GetSubMesh(i).Get();
+				if (mesh->vertexBuffer.empty()) continue;
+				auto rMesh = new RenderingMesh();
+				rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+				rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+				rMesh->orig = mesh;
 
-			rMesh->pMat = materials[i];
+				rMesh->transform = tr;
 
-			std::lock_guard lock(m_mutex);
+				rMesh->pMat = ren->GetMaterial(i);
 
-			switch (rMesh->pMat->renderType) {
-			case RenderType::Solid:
-				renderingMeshes[mesh] = rMesh;
-				break;
-			case RenderType::Transparent:
-				transparentMeshes[mesh] = rMesh;
-				break;
-			default:
-				THROW_INVALID_ARG_EXCEPTION("material->rederType");
-				break;
+				switch (rMesh->pMat->renderType) {
+				case RenderType::Solid:
+					renderingMeshes[mesh] = rMesh;
+					break;
+				case RenderType::Transparent:
+					transparentMeshes[mesh] = rMesh;
+					break;
+				default:
+					THROW_INVALID_ARG_EXCEPTION("material->rederType");
+					break;
+				}
 			}
+		}
+
+		//removeModels
+		while (!removeQ.empty()) {
+			auto m = removeQ.front();
+			removeQ.pop();
+			auto rm = renderingMeshes[m];
+			if (!rm.IsNull())
+				rm.Release();
+			renderingMeshes.erase(m);
+			rm = transparentMeshes[m];
+			if (!rm.IsNull())
+				rm.Release();
+			transparentMeshes.erase(m);
 		}
 	}
 
-	void SceneRender::RemoveModel(SmartPtr<Model> model) {
-		auto n = model->GetSubMeshesCount();
-		for (size_t i = 0; i < n; i++) {
-			auto mesh = model->GetSubMesh(i);
-			std::lock_guard lock(m_mutex);
-			auto it = renderingMeshes.find(mesh);
-			if (it != renderingMeshes.end()) {
-				it->second.Release();
-				renderingMeshes.erase(it);
-				continue;
-			} 
-			it = transparentMeshes.find(mesh);
-			if (it != transparentMeshes.end()) {
-				it->second.Release();
-				transparentMeshes.erase(it);
-			}
-		}
-	}
-
-	void SceneRender::ChangeModel(SmartPtr<Model> removemodel, SmartPtr<Model> replace, std::vector<SmartPtr<Material>> materials) {
+	void SceneRender::AddModel(ModelRender* ren, Transform* tr) {
 		std::lock_guard lock(m_mutex);
-		auto n = removemodel->GetSubMeshesCount();
+		addQ.push({ ren,tr });
+	}
+
+	void SceneRender::RemoveModel(Model* model) {
+		std::lock_guard lock(m_mutex);
+		auto n = model->GetSubMeshesCount();
 		for (size_t i = 0; i < n; i++) {
-			auto mesh = removemodel->GetSubMesh(i);
+			auto mesh = model->GetSubMesh(i).Get();
 			auto it = renderingMeshes.find(mesh);
 			if (it != renderingMeshes.end()) {
-				it->second.Release();
-				renderingMeshes.erase(it);
+				removeQ.push(mesh);
 				continue;
 			}
 			it = transparentMeshes.find(mesh);
 			if (it != transparentMeshes.end()) {
-				it->second.Release();
-				transparentMeshes.erase(it);
-			}
-		}
-		n = replace->GetSubMeshesCount();
-		for (size_t i = 0; i < n; i++) {
-			auto mesh = replace->GetSubMesh(i);
-			if (mesh->vertexBuffer.empty()) continue;
-			auto rMesh = new RenderingMesh();
-			rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
-			rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
-			rMesh->orig = mesh;
-
-			rMesh->pPos = replace->pPos;
-			rMesh->pRot = replace->pRot;
-			rMesh->pScale = replace->pScale;
-
-			rMesh->pMat = materials[i];
-
-			switch (rMesh->pMat->renderType) {
-			case RenderType::Solid:
-				renderingMeshes[mesh] = rMesh;
-				break;
-			case RenderType::Transparent:
-				transparentMeshes[mesh] = rMesh;
-				break;
-			default:
-				THROW_INVALID_ARG_EXCEPTION("material->rederType");
-				break;
+				removeQ.push(mesh);
 			}
 		}
 	}
 
-	bool SceneRender::UpdateBuffers(SmartPtr<Mesh> mesh) {
+	void SceneRender::ChangeModel(ModelRender* ren, Transform* tr, Model* removemodel) {
+		RemoveModel(removemodel);
+		AddModel(ren, tr);
+	}
+
+	bool SceneRender::UpdateBuffers(Mesh* mesh) {
 		std::lock_guard lock(m_mutex);
 		auto it = renderingMeshes.find(mesh);
 		if (it == renderingMeshes.end()) {

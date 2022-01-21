@@ -11,12 +11,12 @@ namespace Game {
 		engine = scene.GetPhysEngine();
 		UUID = engine->AddRigidBody(this);
 		transform = obj.GetComponents<Transform>()[0];
-		position = transform->position;
+		position = transform->GetPosition();
 	}
 	void Rigidbody::Update() {
 		try {
 			const auto RunFrame = engine->GetBackFrame();
-			transform->position = RunFrame.GetPosition(UUID);
+			transform->SetPosition(RunFrame.GetPosition(UUID));
 		} catch (IndexOutOfRangeException) {
 
 		}

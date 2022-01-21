@@ -13,7 +13,7 @@ namespace Game {
 		engine = scene.GetPhysEngine();
 		UUID = engine->AddCollider(this);
 		transform = obj.GetComponents<Transform>()[0];
-		position = transform->position;
+		position = transform->GetPosition();
 	}
 
 	void Collider::OnDisable() {

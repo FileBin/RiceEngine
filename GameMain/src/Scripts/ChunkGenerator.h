@@ -259,7 +259,7 @@ public:
 					ch->render = render;
 					pooledCh.lod = lod;
 					pooledCh.pos = chPos;
-					transform->position = World::TransformToWorldPos(chPos);
+					transform->SetPosition(World::TransformToWorldPos(chPos));
 					render->SetModel(model);
 					for (auto i = 0; i < Voxel::GetMaterialCount(); i++) {
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);

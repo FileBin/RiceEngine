@@ -7,7 +7,7 @@ catch (Exception& e) {
 	Log::log(Log::ERR, L"Stack trace:\n{}", Util::Utf8ToWstring(e.GetStack()));
 	Log::Close();
 	throw e;
-} catch (std::exception& e) {
+} /*catch (std::exception& e) {
 	Log::log(Log::ERR, L"std::exception occured: {}", Util::Utf8ToWstring(typeid(e).name()));
 	Log::log(Log::ERR, L"What: {}", Util::Utf8ToWstring(e.what()));
 	Log::Close();

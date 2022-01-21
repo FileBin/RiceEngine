@@ -55,12 +55,11 @@ namespace Game {
 		lightBuffer = ren->device->CreateBuffer<LightBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
 	}
 
-	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, std::vector<RenderingMesh*>& meshes) {
+	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, RenderingMeshCollection& meshes) {
 		auto context = sceneRender->device->GetContext();
 		ID3D11RenderTargetView* pNullView = nullptr;
 		context->OMSetRenderTargets(1, &pNullView, DSV.Get());
 		context->ClearDepthStencilView(DSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-		//sceneRender->device->ClearZBuffer();
 
 		Vector3 translation = -playerPos;
 		Quaternion rotation = Quaternion::LookAt(Vector3::zero, lightDirection).Opposite();
@@ -89,7 +88,7 @@ namespace Game {
 			sceneRender->device->SetVP(vp);
 
 			for (auto& m : meshes) {
-				m->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
+				m.second->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
 			}
 		}
 		context->OMSetRenderTargets(0, 0, 0);
@@ -99,7 +98,7 @@ namespace Game {
 		auto device = ren->device;
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
-		cb.World = Matrix4x4::TRS(*pPos, *pRot, *pScale); // TODO: values must be getted from the transform
+		cb.World = transform->GetTransformationMatrix(); // TODO: values must be getted from the transform
 		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
 		cb.LightWVP = Matrix4x4f::identity;

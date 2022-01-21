@@ -154,7 +154,7 @@ public:
 		sphereBody->SetVelocity(cam->rotation * Vector3::forward * 10.);
 		sphere->AddComponent(sphereTr);
 		sphere->AddComponent(sphereBody);
-		sphereTr->position = cam->position;
+		sphereTr->SetPosition(cam->position);
 		auto mr = new ModelRender();
 		sphere->AddComponent(mr);
 

@@ -142,9 +142,6 @@ namespace Game {
 	}
 
 	Model::~Model() {
-		pPos = nullptr;
-		pRot = nullptr;
-		pScale = nullptr;
 		for (auto m : subMeshes) {
 			m.Release();
 		}

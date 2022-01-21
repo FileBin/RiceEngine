@@ -62,7 +62,7 @@ public:
 		double dt = en.GetDeltaTime();
 		auto physEn = GetScene().GetPhysEngine();
 		HitInfo hit;
-		grounded = physEn->Raycast(transform->position, Vector3::down, hit, 32, .6, 1.);
+		grounded = physEn->Raycast(transform->GetPosition(), Vector3::down, hit, 32, .6, 1.);
 
 		auto tangent = Vector3::Dot(Vector3::up, hit.norm);
 
@@ -99,7 +99,7 @@ public:
 		pos.y = Math::Clamp(pos.y, -90., 90.);
 		pos.x = fmod(pos.x, 360);
 		cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
-		cam->position = transform->position + Vector3::up;
+		cam->position = transform->GetPosition() + Vector3::up;
 
 		if (InputManager::GetKey(KeyCode::MouseLeft)) {
 			InputManager::LockMouse();

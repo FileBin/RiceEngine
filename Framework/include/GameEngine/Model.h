@@ -57,10 +57,6 @@ namespace Game {
 		}
 
 		~Model();
-
-		Vector3* pPos;
-		Quaternion* pRot;
-		Vector3* pScale;
 	private:
 		std::vector<SmartPtr<Mesh>> subMeshes = {};
 	};
