@@ -26,10 +26,9 @@ namespace Game {
 			soundManager = new SoundManager(render->GetActiveCamera());
 			physicsEngine = new Physics::PhysicsEngine();
 			physicsEngine->PreInit();
-			Resize();
 			root->Enable();
-			root->Start();
 			init = true;
+			Resize();
 		}
 
 		void Close() {

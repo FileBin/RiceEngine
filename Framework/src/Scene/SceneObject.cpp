@@ -14,25 +14,40 @@ namespace Game {
 	}
 
 	void SceneObject::Enable() {
+		flags |= (UINT)Flags::NEED_ENABLE;
+	}
+
+	void SceneObject::Disable() {
+		flags |= (UINT)Flags::NEED_DISABLE;
+	}
+
+	void SceneObject::ForceEnable() {
 		if (enabled) return;
 		enabled = true;
 		for (auto c : components) {
 			c->Enable();
 		}
-		for (auto o : children) {
-			o->Enable();
-		}
-	}
-
-	void SceneObject::Start() {
 		for (auto c : components) {
 			c->Start();
 		}
 		for (auto o : children) {
-			o->Start();
+			o->ForceEnable();
 		}
 	}
+
 	void SceneObject::PreUpdate() {
+		auto en = flags & (UINT)Flags::NEED_ENABLE;
+		auto dis = flags & (UINT)Flags::NEED_DISABLE;
+		if (en ^ dis) {
+			if (en) {
+				ForceEnable();
+				flags ^= en;
+			} else if (dis) {
+				ForceDisable();
+				flags ^= dis;
+			}
+		}
+
 		for (auto c : components) {
 			c->PreUpdate();
 		}
@@ -49,14 +64,14 @@ namespace Game {
 			o->Update();
 		}
 	}
-	void SceneObject::Disable() {
+	void SceneObject::ForceDisable() {
 		if (!enabled) return;
 		enabled = false;
 		for (auto c : components) {
 			c->Disable();
 		}
 		for (auto o : children) {
-			o->Disable();
+			o->ForceDisable();
 		}
 	}
 

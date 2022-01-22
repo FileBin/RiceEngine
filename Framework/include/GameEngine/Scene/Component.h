@@ -20,10 +20,9 @@ namespace Game {
 		virtual void OnDisable() {};
 
 		bool isEnabled() { return enabled; }
-
+		SceneObject& GetSceneObject();
 	protected:
 		bool enabled = false;
-		SceneObject& GetSceneObject();
 	private:
 		SceneObject* obj = nullptr;
 	};

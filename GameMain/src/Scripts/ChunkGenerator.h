@@ -265,7 +265,7 @@ public:
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);
 					}
 					collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
-					pooledCh.obj->Enable();
+					pooledCh.obj->ForceEnable();
 					posStates.insert({ pooledCh.pos, true });
 				} else {
 					auto locPos = pooledCh.pos - playerChunk;
@@ -281,6 +281,8 @@ public:
 			}
 			if (nSkips <= 0) {
 				Sleep(200);
+			} else {
+				Sleep(20);
 			}
 			nSkips = 0;
 		}

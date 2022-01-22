@@ -49,7 +49,7 @@ namespace Game {
 			}
 		};
 
-		typedef std::unordered_map<Mesh*, SmartPtr<RenderingMesh>> RenderingMeshCollection;
+		typedef std::unordered_map<SmartPtr<Mesh>, SmartPtr<RenderingMesh>> RenderingMeshCollection;
 
 		class LightManager {
 			struct LightBuffer {
@@ -132,7 +132,7 @@ namespace Game {
 		std::vector<SmartPtr<UI::IDrawable>> drawables;
 		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
 
-		std::queue<Mesh*> removeQ;
+		std::queue<SmartPtr<Mesh>> removeQ;
 		std::queue<std::pair<ModelRender*, Transform*>> addQ;
 
 		//default

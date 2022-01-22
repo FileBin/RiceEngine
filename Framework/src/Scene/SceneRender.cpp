@@ -52,7 +52,7 @@ namespace Game {
 		auto device = ren->device;
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
-		cb.World = transform->GetTransformationMatrix(); // TODO: values must be getted from the transform
+		cb.World = transform->GetTransformationMatrix();
 		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
 		cb.LightWVP = Matrix4x4f::identity;
@@ -159,6 +159,26 @@ namespace Game {
 	}
 
 	void SceneRender::updateMeshes() {
+		/*for (auto it : renderingMeshes) {
+			if (it.first.IsNull()) removeQ.push(it.first);
+		}
+
+		for (auto it : transparentMeshes) {
+			if (it.first.IsNull()) removeQ.push(it.first);
+		}*/
+		//removeModels
+		while (!removeQ.empty()) {
+			auto m = removeQ.front();
+			removeQ.pop();
+			auto rm = renderingMeshes[m];
+			if (!rm.IsNull())
+				rm.Release();
+			renderingMeshes.erase(m);
+			rm = transparentMeshes[m];
+			if (!rm.IsNull())
+				rm.Release();
+			transparentMeshes.erase(m);
+		}
 
 		//add Models
 		while (!addQ.empty()) {
@@ -167,11 +187,11 @@ namespace Game {
 			addQ.pop();
 			auto n = ren->GetModel()->GetSubMeshesCount();
 			for (size_t i = 0; i < n; i++) {
-				auto mesh = ren->GetModel()->GetSubMesh(i).Get();
+				auto mesh = ren->GetModel()->GetSubMesh(i);
 				if (mesh->vertexBuffer.empty()) continue;
 				auto rMesh = new RenderingMesh();
-				rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
-				rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+				rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
+				rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
 				rMesh->orig = mesh;
 
 				rMesh->transform = tr;
@@ -191,20 +211,6 @@ namespace Game {
 				}
 			}
 		}
-
-		//removeModels
-		while (!removeQ.empty()) {
-			auto m = removeQ.front();
-			removeQ.pop();
-			auto rm = renderingMeshes[m];
-			if (!rm.IsNull())
-				rm.Release();
-			renderingMeshes.erase(m);
-			rm = transparentMeshes[m];
-			if (!rm.IsNull())
-				rm.Release();
-			transparentMeshes.erase(m);
-		}
 	}
 
 	void SceneRender::AddModel(ModelRender* ren, Transform* tr) {
@@ -216,7 +222,7 @@ namespace Game {
 		std::lock_guard lock(m_mutex);
 		auto n = model->GetSubMeshesCount();
 		for (size_t i = 0; i < n; i++) {
-			auto mesh = model->GetSubMesh(i).Get();
+			auto mesh = model->GetSubMesh(i);
 			auto it = renderingMeshes.find(mesh);
 			if (it != renderingMeshes.end()) {
 				removeQ.push(mesh);

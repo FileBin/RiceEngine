@@ -13,14 +13,23 @@ namespace Game {
 
 	class SceneObject  {
 	public:
+		enum class Flags {
+			NONE = 0x0,
+			NEED_ENABLE = 0x1,
+			NEED_DISABLE = 0x2,
+		};
+
 		SceneObject (Scene* scene);
 		~SceneObject();
 
+		UINT flags;
+
 		void Enable();
-		void Start();
+		void ForceEnable();
 		void PreUpdate();
 		void Update();
 		void Disable(); 
+		void ForceDisable();
 
 		bool isEnabled() { return enabled; }
 

@@ -31,7 +31,7 @@ public:
 		//std::lock_guard<std::mutex> lock(Game::g_Vars::smartPtrConstructorMutex);
 	}
 
-	bool IsNull() {
+	bool IsNull() const {
 		if (!ppObject.get())
 			THROW_REMOVED_EXCEPTION(ppObject.get());
 		return *ppObject.get() == nullptr;

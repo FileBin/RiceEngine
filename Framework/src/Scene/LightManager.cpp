@@ -95,10 +95,11 @@ namespace Game {
 	}
 
 	void SceneRender::RenderingMesh::DrawShadow(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection) {
+		if (orig.IsNull()) return;
 		auto device = ren->device;
 		auto constantBuffer = ren->constantBuffer.Get();
 		ConstantBufferData cb = {};
-		cb.World = transform->GetTransformationMatrix(); // TODO: values must be getted from the transform
+		cb.World = transform->GetTransformationMatrix();
 		cb.WorldView = cb.World * View;
 		cb.Projection = Projection;
 		cb.LightWVP = Matrix4x4f::identity;

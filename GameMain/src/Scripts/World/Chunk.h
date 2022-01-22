@@ -59,6 +59,9 @@ public:
 
     ~Chunk() {
         std::lock_guard l(lock);
+        if (!render.IsNull()) {
+            //render->Disable();
+        }
        // hmap.Release();
         voxels.clear();
         //std::lock_guard guard(lock);
