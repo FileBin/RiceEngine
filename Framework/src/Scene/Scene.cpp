@@ -18,7 +18,8 @@ namespace Game {
 
 	SceneObject& Scene::GetObjectByName(String name) { return root->GetObjectByName(name); }
 
-	SceneObject* Scene::Instaniate() { return root->Instaniate(); }
+	SceneObject* Scene::Instaniate(SceneObject* orig) { return root->Instantiate(orig); }
+	SceneObject* Scene::Instaniate() { return root->Instantiate(); }
 
 	SoundManager& Scene::GetSoundManager() const { return *soundManager; }
 

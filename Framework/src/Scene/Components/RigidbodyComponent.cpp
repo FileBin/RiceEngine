@@ -26,7 +26,7 @@ namespace Game {
 	}
 
 	void Rigidbody::SetVelocity(Vector3 velo) {
-		std::lock_guard lock(engineMutex);
+		std::unique_lock lock(engineMutex);
 		velocity = velo;
 	}
 }

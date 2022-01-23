@@ -176,6 +176,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\GameEngine\AlDevice.h" />
+    <ClInclude Include="include\GameEngine\AssetManager.h" />
     <ClInclude Include="include\GameEngine\Camera.h" />
     <ClInclude Include="include\GameEngine\Components\Collider.h" />
     <ClInclude Include="include\GameEngine\Components\CustomCollider.h" />

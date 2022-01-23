@@ -6,21 +6,21 @@
 namespace Game::Physics {
 
 	size_t PhysicsEngine::AddRigidBody(IRigidbody* rigidbody) {
-		std::lock_guard lock(updateMutex);
+		std::unique_lock lock(updateMutex);
 		bodies[lastUUID] = rigidbody;
 		return lastUUID++;
 	}
 	void PhysicsEngine::RemoveRigidBody(size_t UUID) { 
-		std::lock_guard lock(updateMutex);
+		std::unique_lock lock(updateMutex);
 		bodies.erase(UUID);
 	}
 	size_t PhysicsEngine::AddCollider(ICollider* collider) {
-		std::lock_guard lock(updateMutex);
+		std::unique_lock lock(updateMutex);
 		colliders[lastUUID] = collider;
 		return lastUUID++;
 	}
 	void PhysicsEngine::RemoveCollider(size_t UUID) {
-		std::lock_guard lock(updateMutex);
+		std::unique_lock lock(updateMutex);
 		colliders.erase(UUID);
 	}
 
@@ -44,7 +44,7 @@ namespace Game::Physics {
 	}
 
 	void PhysicsEngine::Update(dbl dt) {
-		std::lock_guard lock(updateMutex);
+		std::unique_lock lock(updateMutex);
 		for (const auto& p : bodies) {
 			auto rb = p.second;
 			rb->Move(timeScale * dt, [this, p](Vector3 pos) { return sdFunc(pos); });
@@ -54,7 +54,7 @@ namespace Game::Physics {
 	}
 
 	const PhysicsEngine::Frame PhysicsEngine::GetBackFrame() {
-		std::lock_guard lock(swapMutex);
+		std::shared_lock lock(swapMutex);
 		while (!init)
 			Sleep(1);
 		return backFrame;
@@ -73,7 +73,7 @@ namespace Game::Physics {
 	}
 
 	void PhysicsEngine::SwapFrames() {
-		std::lock_guard lock(swapMutex);
+		std::unique_lock lock(swapMutex);
 		auto temp = backFrame;
 		backFrame = frontFrame;
 		frontFrame = temp;

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "SampleScene.h"
+#include "../Scenes/SampleScene.h"
 #include "../Scenes/PhysicsTest.h"
 #include "MsaaTestScript.h"
 

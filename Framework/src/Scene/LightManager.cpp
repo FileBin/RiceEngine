@@ -13,7 +13,7 @@ namespace Game {
 		sceneRender = ren;
 		shadowMapSizes = atlasSizes;
 		numCascades = atlasSizes.size();
-		lightDirection = { -1,-5,1 };
+		lightDirection = { -2,-5,4 };
 
 		D3D11_TEXTURE2D_DESC dsDesc;
 		dsDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
@@ -55,6 +55,14 @@ namespace Game {
 		lightBuffer = ren->device->CreateBuffer<LightBuffer>({}, D3D11_BIND_CONSTANT_BUFFER);
 	}
 
+	void SceneRender::LightManager::UpdateBuffer() {
+		LightBuffer cb;
+		cb.ambient.x = 0x41 / 255.f; cb.ambient.y = 0x42 / 255.f; cb.ambient.z = 0x47 / 255.f;
+		cb.diffuse.x = cb.diffuse.y = cb.diffuse.z = cb.diffuse.w = cb.ambient.w = 1.f;
+		cb.lightDir = { (float)lightDirection.x, (float)lightDirection.y, (float)lightDirection.z , 0 };
+		sceneRender->device->LoadBufferSubresource(lightBuffer.Get(), cb);
+	}
+
 	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, RenderingMeshCollection& meshes) {
 		auto context = sceneRender->device->GetContext();
 		ID3D11RenderTargetView* pNullView = nullptr;
@@ -65,14 +73,9 @@ namespace Game {
 		Quaternion rotation = Quaternion::LookAt(Vector3::zero, lightDirection).Opposite();
 		auto d = shadowDistance / 2;
 
-		auto ViewMatrix = Matrix4x4::TRS(-playerPos, rotation, Vector3::one);
+		auto ViewMatrix = Matrix4x4::Translation(translation) * Matrix4x4::TRS(Vector3::zero, rotation, Vector3::one);
 
-		LightBuffer cb;
 		LVP = ViewMatrix * Matrix4x4::Ortographic({ shadowMapSizes[0], shadowMapSizes[0], d });
-		cb.ambient.x = cb.ambient.y = cb.ambient.z = .3f;
-		cb.diffuse.x = cb.diffuse.y = cb.diffuse.z = cb.diffuse.w = cb.ambient.w = 1.f;
-
-		sceneRender->device->LoadBufferSubresource(lightBuffer.Get(), cb);
 
 		for (size_t i = 0; i < numCascades; i++) {
 			auto size = shadowMapSizes[i];

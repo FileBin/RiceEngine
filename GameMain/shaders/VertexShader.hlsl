@@ -22,7 +22,7 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
 {
     PixelShaderInput output = (PixelShaderInput) 0;
 
-    float3 light = float3(2, -5, -1);
+    float3 light = lightDirection;
     light = normalize(light);
 
     output.pos = float4(pos.xyz, 1.0f);

@@ -13,5 +13,12 @@ SamplerState samp;
 float4 main(PixelShaderInput input) : SV_TARGET {
     float4 texcol = tex.Sample(samp, input.texcoord);
     
+    float sunf = dot(input.light, -normalize(input.viewPos.xyz));
+    sunf -= .95;
+    sunf *= 30.;
+    sunf = saturate(sunf);
+    
+    texcol = lerp(texcol, 1.f, sunf);
+    
     return texcol; //float4(input.texcoord, .0f, 1.0f);
 }

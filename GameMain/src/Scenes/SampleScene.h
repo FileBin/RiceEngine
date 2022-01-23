@@ -6,11 +6,11 @@
 #include <GameEngine\Components\UI\Text.h>
 #include <GameEngine\Components\Rigidbody.h>
 
-#include "CameraMoverScript.h"
-#include "ChunkGenerator.h"
-#include "UI\DebugText.h"
-#include "PlayerHandler.h"
-#include "SamplePostProcess.h"
+#include "../Scripts/CameraMoverScript.h"
+#include "../Scripts/ChunkGenerator.h"
+#include "../Scripts/UI/DebugText.h"
+#include "../Scripts/PlayerHandler.h"
+#include "../Scripts/SamplePostProcess.h"
 
 using namespace Game;
 
@@ -73,10 +73,10 @@ class SampleScene : public Scene {
 		skyShader->LoadPixelShader(Util::ReadFile(L"SkyBoxPixel.cso"));
 
 		auto chunkGen = new ChunkGenerator();
-		auto camMover = new CameraMover();
+		//auto camMover = new CameraMover();
 		auto playerH = new PlayerHandler();
 
-		camMover->chunkGen = chunkGen;
+		//camMover->chunkGen = chunkGen;
 		playerH->chunkGen = chunkGen;
 
 		//AddScript(camMover);
@@ -85,6 +85,26 @@ class SampleScene : public Scene {
 		player->AddComponent(new Transform());
 		player->AddComponent(new Rigidbody());
 		player->AddComponent(playerH);
+
+		/*auto sphere = player->Instantiate();
+		auto sphereTransform = new Transform();
+		sphereTransform->SetPosition({1,-1,3});
+		sphere->AddComponent(sphereTransform);
+		auto mr = new ModelRender();
+		sphere->AddComponent(mr);
+
+		auto sphereModel = new Model();
+		sphereModel->SetSubMeshesCount(1);
+		sphereModel->SetSubMesh(MeshGenerator::GenerateMesh([](Vector3 p) { return Util::sdSphere(p, 1.); }, { 8,8,8 }), 0);
+
+		mr->SetModel(sphereModel);
+		auto sphereMat = ren.CreateMaterial(L"SphereMat", diff, { Var(L"time"), Var(L"color"), Var(L"egst") });
+
+		sphereMat->SetVar<Vector4f>(L"color", {.4,.4,.4,1.});
+		sphereMat->SetVar<Vector4f>(L"egst", { .3,0,0,0 });
+		sphereMat->UpdateBuffer();
+
+		mr->SetMaterial(sphereMat, 0);*/
 
 		auto skymat = ren.CreateMaterial(L"SkyboxMaterial", skyShader, {});
 

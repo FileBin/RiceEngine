@@ -55,6 +55,7 @@ namespace Game {
 
 		SceneObject& GetObjectByName(String name);
 
+		SceneObject* Instaniate(SceneObject* orig);
 		SceneObject* Instaniate();
 		Engine& GetEngine() const;
 		SoundManager& GetSoundManager() const;

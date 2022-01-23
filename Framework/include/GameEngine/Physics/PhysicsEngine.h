@@ -35,7 +35,7 @@ namespace Game::Physics {
 		Frame frontFrame, backFrame;
 		std::unordered_map<size_t, SmartPtr<IRigidbody>> bodies{};
 		std::unordered_map<size_t, SmartPtr<ICollider>> colliders{};
-		std::mutex swapMutex, updateMutex;
+		std::shared_mutex swapMutex, updateMutex;
 		SmartPtr<std::thread> updateThread;
 		bool alive = false;
 		bool init = false;
@@ -53,7 +53,7 @@ namespace Game::Physics {
 		const Frame GetBackFrame();
 		bool Raycast(Vector3 origin, Vector3 direction, OUT HitInfo& info, size_t maxIterations = 128, dbl eps = .1, dbl maxDist = 300.);
 
-		std::mutex& GetUpdateMutex() { return updateMutex; }
+		std::shared_mutex& GetUpdateMutex() { return updateMutex; }
 		~PhysicsEngine() { alive = false; }
 	private:
 		dbl sdFunc(Vector3 pos);

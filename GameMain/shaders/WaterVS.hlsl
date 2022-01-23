@@ -5,6 +5,8 @@ cbuffer ConstantBuffer : register(b0)
     float4x4 Projection;
 }
 
+#include "LightBuffer.hlsli"
+
 cbuffer CBuffer : register(b1)
 {
     float time;
@@ -60,7 +62,7 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
 {
     PixelShaderInput output = (PixelShaderInput) 0;
 
-    float3 light = float3(2, -5, -1);
+    float3 light = lightDirection;
     light = normalize(light);
     
     output.light = mul(float4(light, 0), WV);

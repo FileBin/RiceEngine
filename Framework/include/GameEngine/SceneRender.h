@@ -55,6 +55,7 @@ namespace Game {
 			struct LightBuffer {
 				Vector4f ambient;
 				Vector4f diffuse;
+				Vector4f lightDir;
 			} buf;
 			SmartPtr<Texture2D> shadowAtlas;
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTex;
@@ -70,7 +71,8 @@ namespace Game {
 			std::vector<dbl> shadowMapSizes;
 			Matrix4x4f LVP = Matrix4x4f::identity;
 		public:
-			void PreInit(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 300, size_t shadowMapRes = 1024);
+			void UpdateBuffer();
+			void PreInit(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 600, size_t shadowMapRes = 1024);
 			void RenderShadowMap(Vector3 playerPos, RenderingMeshCollection& meshes);
 
 			Matrix4x4f GetMatrixLVP() { return LVP; }
@@ -125,8 +127,8 @@ namespace Game {
 		size_t activeCameraIdx;
 		std::mutex m_mutex, m_2dMutex, m_removeMutex;
 		concurrency::concurrent_vector<SmartPtr<Camera>> cameras;
-		concurrency::concurrent_unordered_map<String, SmartPtr<Material>> materials;
-		concurrency::concurrent_unordered_map<String, SmartPtr<Shader>> shaders;
+		std::unordered_map<String, SmartPtr<Material>> materials;
+		std::unordered_map<String, SmartPtr<Shader>> shaders;
 		RenderingMeshCollection renderingMeshes, transparentMeshes;
 		std::unordered_set<SmartPtr<IPostProcess>> ppscripts;
 		std::vector<SmartPtr<UI::IDrawable>> drawables;

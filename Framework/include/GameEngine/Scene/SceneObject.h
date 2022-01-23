@@ -17,23 +17,15 @@ namespace Game {
 			NONE = 0x0,
 			NEED_ENABLE = 0x1,
 			NEED_DISABLE = 0x2,
+			NEED_DESTROY = 0x40000000,
 		};
 
 		SceneObject (Scene* scene);
 		~SceneObject();
 
-		UINT flags;
-
-		void Enable();
-		void ForceEnable();
-		void PreUpdate();
-		void Update();
-		void Disable(); 
-		void ForceDisable();
-
 		bool isEnabled() { return enabled; }
 
-		concurrent_vector<SceneObject*> GetChildren();
+		std::vector<SceneObject*> GetChildren();
 
 		template<typename T>
 		std::vector<T*> GetComponents() {
@@ -48,22 +40,60 @@ namespace Game {
 		}
 
 		SceneObject& GetObjectByName(String name);
+		SceneObject& GetParent() { return *parent; }
 		bool TryGetObjectByName(String& name, SceneObject* &object);
 
 		void AddComponent(Component* component);
 		void RemoveComponent(Component* component);
-		SceneObject* Instaniate();
+
+		SceneObject* Instantiate(SceneObject* orig);
+		SceneObject* Instantiate();
+		void RemoveChild(SceneObject* whatObj);
+
+		void Destroy();
 
 		void SetName(String name) { this->name = name; }
 		Scene& GetScene();
 
+		void SetActive(bool _active) {
+			active = _active; 
+			if (active) {
+				Enable();
+			} else {
+				Disable();
+			}
+		}
+
+		void SetActiveImmediate(bool _active) {
+			active = _active;
+			if (active) {
+				ForceEnable();
+			} else {
+				ForceDisable();
+			}
+		}
+		bool GetActive() { return active; }
+
 	private:
-		bool init = false;
+
+		friend class Scene;
+
+		void Enable();
+		void ForceEnable();
+		void PreUpdate();
+		void Update();
+		void Disable();
+		void ForceDisable();
+
+		UINT flags;
+
+		bool active = true;
 		bool enabled = false;
 		Scene* scene = nullptr;
+		SceneObject* parent;
 		String name = L"";
 		std::unordered_set<Component*> components{};
-		concurrent_vector<SceneObject*> children{};
+		std::unordered_set<SceneObject*> children{};
 	};
 }
 

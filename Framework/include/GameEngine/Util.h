@@ -11,4 +11,5 @@ namespace Game::Util {
 	String Utf8ToWstring(const std::string& str);
 	std::string ToStdString(const String& s);
 	Vector2 GetWindowScreenSize(HWND hwnd);
+	D2D1::ColorF GetColByHex(UINT hex);
 }

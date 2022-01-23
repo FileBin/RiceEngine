@@ -553,6 +553,23 @@ bool operator==(Vector3f a, Vector3f b) {
 }
 #pragma endregion
 
+#pragma region Vector4f
+Vector4f::Vector4f(float _x, float _y, float _z, float _w) {
+    x = _x;
+    y = _y;
+    z = _z;
+    w = _w;
+}
+
+Vector4f::Vector4f(const D2D1::ColorF& color) {
+    x = color.r;
+    y = color.g;
+    z = color.b;
+    w = color.a;
+}
+#pragma endregion
+
+
 #pragma region Quaternion
 Quaternion operator*(Quaternion A, double b) {
     return { A.x * b, A.y * b, A.z * b, A.w * b };

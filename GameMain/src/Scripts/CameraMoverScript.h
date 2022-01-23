@@ -165,6 +165,6 @@ public:
 		mr->SetModel(model);
 		mr->SetMaterial(mat, 0);
 
-		sphere->Enable();
+		sphere->SetActive(true);
 	}
 };

@@ -9,15 +9,15 @@ private:
     std::vector<dbl> map{};
     dbl minh, maxh;
     long counter = 0l;
-    std::mutex mut;
+    std::shared_mutex mut;
 public:
     HeightMap(WorldGenerator& worldGenerator, Vector2i pos, bool generateNormals = false);
 
     ~HeightMap() {
-        std::lock_guard lock(mut);
+        std::unique_lock lock(mut);
     }
 
-    std::mutex& GetMutex() { return mut; }
+    std::shared_mutex& GetMutex() { return mut; }
 
     long GetCount() {
         //std::lock_guard lock(mut);

@@ -41,6 +41,7 @@ namespace Game {
 	void SceneRender::BeginFrame() {
 		device->SetRenderTargetsDefault();
 		device->ClearFrame({ 0.1f, 0.15f, 0.6f, 1.f });
+		lightManager.UpdateBuffer();
 		if (!skyBox.IsNull()) {
 			auto cam = cameras[activeCameraIdx];
 			skyBox->Draw(this, Matrix4x4::Rotation(cam->rotation.Opposite()), cam->GetProjectionMatrix(), nullptr, false);
@@ -219,17 +220,18 @@ namespace Game {
 	}
 
 	void SceneRender::RemoveModel(Model* model) {
-		std::lock_guard lock(m_mutex);
 		auto n = model->GetSubMeshesCount();
 		for (size_t i = 0; i < n; i++) {
-			auto mesh = model->GetSubMesh(i);
+			auto mesh = model->GetSubMesh(i).Get();
 			auto it = renderingMeshes.find(mesh);
 			if (it != renderingMeshes.end()) {
+				std::lock_guard lock(m_mutex);
 				removeQ.push(mesh);
 				continue;
 			}
 			it = transparentMeshes.find(mesh);
 			if (it != transparentMeshes.end()) {
+				std::lock_guard lock(m_mutex);
 				removeQ.push(mesh);
 			}
 		}

@@ -5,12 +5,20 @@
 #include <GameEngine\Util\exceptions.h>
 #include <GameEngine\Scene\Scene.h>
 
+#define suicide delete this
+
 namespace Game {
 	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
 
 	SceneObject::~SceneObject() {
-		for (auto c : components) delete c;
-		for (auto o : children) delete o;
+		parent->RemoveChild(this);
+		ForceDisable();
+		for (auto c : components) {
+			_DELETE(c);
+		}
+		for (auto o : children) {
+			_DELETE(o);
+		}
 	}
 
 	void SceneObject::Enable() {
@@ -31,22 +39,27 @@ namespace Game {
 			c->Start();
 		}
 		for (auto o : children) {
-			o->ForceEnable();
+			if (o->active)
+				o->ForceEnable();
 		}
 	}
 
 	void SceneObject::PreUpdate() {
 		auto en = flags & (UINT)Flags::NEED_ENABLE;
 		auto dis = flags & (UINT)Flags::NEED_DISABLE;
+		auto destroy = flags & (UINT)Flags::NEED_DESTROY;
+		if (destroy) {
+			suicide;
+			return;
+		}
 		if (en ^ dis) {
 			if (en) {
 				ForceEnable();
-				flags ^= en;
 			} else if (dis) {
 				ForceDisable();
-				flags ^= dis;
 			}
 		}
+		flags = 0;
 
 		for (auto c : components) {
 			c->PreUpdate();
@@ -56,6 +69,7 @@ namespace Game {
 		}
 	}
 	void SceneObject::Update() {
+		if (!active) return;
 		if (!enabled) return;
 		for (auto c : components) {
 			c->Update();
@@ -76,7 +90,14 @@ namespace Game {
 	}
 
 	Scene& SceneObject::GetScene() { return *scene; }
-	concurrent_vector<SceneObject*> SceneObject::GetChildren() { return children; }
+	vector<SceneObject*> SceneObject::GetChildren() { 
+		std::vector<SceneObject*> vec;
+		vec.reserve(children.size());
+		for (auto ch : children) {
+			vec.push_back(ch);
+		}
+		return vec; 
+	}
 
 	SceneObject& SceneObject::GetObjectByName(String name) {
 		SceneObject* o = nullptr;
@@ -111,9 +132,22 @@ namespace Game {
 		components.erase(c);
 	}
 
-	SceneObject* SceneObject::Instaniate() {
-		auto o = new SceneObject(scene);
-		children.push_back(o);
+	SceneObject* SceneObject::Instantiate(SceneObject* o) {
+		if (o == nullptr) THROW_NULL_PTR_EXCEPTION(o);
+		o->parent = this;
+		children.insert(o);
 		return o;
+	}
+
+	SceneObject* SceneObject::Instantiate() {
+		return Instantiate(new SceneObject(scene));
+	}
+
+	void SceneObject::RemoveChild(SceneObject* o) {
+		children.erase(o);
+	}
+
+	void SceneObject::Destroy() {
+		flags |= (UINT)Flags::NEED_DESTROY;
 	}
 }

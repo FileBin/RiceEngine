@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <GameEngine\stdafx.h>
 #include "Voxels/Voxel.h"
 #include "WorldGenerator.h"
 #include <GameEngine/Vectors/Hasher.h>
@@ -26,7 +27,7 @@ private:
     SmartPtr<HeightMap> hmap;
     World* world;
 
-    std::mutex lock;
+    std::shared_mutex lock;
 
     std::vector<VoxelData> voxels{};
     unordered_map<size_t, unordered_map<Vector3i, float>> transpDepth{};
@@ -58,7 +59,7 @@ public:
     }
 
     ~Chunk() {
-        std::lock_guard l(lock);
+        std::unique_lock l(lock);
         if (!render.IsNull()) {
             //render->Disable();
         }
@@ -97,7 +98,7 @@ public:
 
     VoxelData GetData(Vector3i pos) {
         auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
-        std::lock_guard guard(lock);
+        std::shared_lock guard(lock);
         auto& data = voxels[idx];
         if (data.index == UINT32_MAX) {
             voxels[idx] = GenVoxelData(pos);
@@ -112,7 +113,7 @@ public:
 
     Voxel& GetVoxel(Vector3i pos) {
         auto idx = ((INT64)pos.x * ChunkSize + pos.y) * ChunkSize + pos.z;
-        std::lock_guard guard(lock);
+        std::shared_lock guard(lock);
        // lock = true;
         Voxel* vox = nullptr;
         if (voxels[idx].index == UINT32_MAX) {
@@ -132,7 +133,7 @@ public:
         auto y = chunkPos.y;
         auto z = chunkPos.z;
 
-        std::lock_guard guard(lock);
+        std::unique_lock guard(lock);
 
         voxels[(x * ChunkSize + y) * ChunkSize + z] = vox->GetData();
     }
@@ -144,7 +145,8 @@ public:
 
         if (abs(data.depth) < .1) data.depth = 0;
 
-        std::lock_guard guard(lock);
+        std::unique_lock guard(lock);
+
         voxels[(x * ChunkSize + y) * ChunkSize + z] = data;
     }
 
@@ -191,7 +193,7 @@ public:
         render->SetModel(otherM);
         _model.Release();
         collider->SetModel(otherM, VoxelTypeIndex::V_WATER);
-       /* if (alreadyLoaded) {
+        /*if (alreadyLoaded) {
             auto n = otherM->GetSubMeshesCount();
             _model->SetSubMeshesCount(n);
             for (auto i = 0; i < n; i++) {

@@ -9,7 +9,6 @@
 
 
 namespace Game {
-	std::mutex g_Vars::smartPtrConstructorMutex{};
 
 	namespace Util {
 		void ThrowIfFailed(HRESULT hr) {
@@ -48,6 +47,13 @@ namespace Game {
 			size.x = rc.right - rc.left;
 			size.y = rc.bottom - rc.top;
 			return size;
+		}
+		D2D1::ColorF GetColByHex(UINT hex) {
+			byte a = hex;
+			byte b = hex >> 8;
+			byte g = hex >> 16;
+			byte r = hex >> 24;
+			return D2D1::ColorF(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
 		}
 	}
 }

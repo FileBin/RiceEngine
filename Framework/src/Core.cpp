@@ -31,7 +31,7 @@ namespace Game {
 
 	Core::~Core() {}
 	bool Core::Init() {
-		fps = 60;
+		fps = 600;
 		engine = new Engine(&device, this, &stage);
 		device = new Device();
 		stage = Stage::PreInit;

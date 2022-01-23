@@ -25,6 +25,8 @@ float rand(float w_x, float w_y)
 float4 main(PixelShaderInput input) : SV_TARGET {
     float3 n = input.norm;
 
+    //return LoadShadowMap(input.pos.xy);
+    
 	float emission = egst.x;
     float glossines = egst.y;
     float specular = egst.z;

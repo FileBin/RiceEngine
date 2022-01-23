@@ -27,7 +27,7 @@
     <ClInclude Include="src\Scripts\InitSceneScript.h" />
     <ClInclude Include="src\Scripts\MsaaTestScript.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
-    <ClInclude Include="src\Scripts\SampleScene.h" />
+    <ClInclude Include="src\Scenes\SampleScene.h" />
     <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />
     <ClInclude Include="src\Scripts\Util\Tables.h" />
     <ClInclude Include="src\Scripts\World\Chunk.h" />

@@ -305,21 +305,21 @@ const int Tables::triangualtionTable[][16] {
 
 #pragma region VoxelColors
 
-const Vector4f VoxelGrass::color = { 0.2f, 0.4f, 0.2f, 1.f };
-const Vector4f VoxelDirt::color = { 0.2f, 0.1f, 0.f, 1.f };
-const Vector4f VoxelStone::color = { 0.3f, 0.3f, 0.3f, 1.f };
-const Vector4f VoxelSnow::color = { 1.f, 1.f, 1.f, 1.f };
-const Vector4f VoxelDarkStone::color = { 0.2f, 0.2f, 0.2f, 1.f };
-const Vector4f VoxelDarkGrass::color = { 0.2f, 0.4f, 0.2f, 1.f };
-const Vector4f VoxelSand::color = { 0.88f, 0.74f, 0.4f, 1.f };
-const Vector4f VoxelWater::color = { 0.3f, 0.2f, 0.7f, 0.7f };
+const Vector4f VoxelGrass::color = GetColByHex(0x609850ff);
+const Vector4f VoxelDirt::color = GetColByHex(0x63441eff);
+const Vector4f VoxelStone::color = GetColByHex(0x586673ff);
+const Vector4f VoxelSnow::color = GetColByHex(0xf2f8f8ff);
+const Vector4f VoxelDarkStone::color = GetColByHex(0x424147ff);
+const Vector4f VoxelDarkGrass::color = GetColByHex(0x407835ff);
+const Vector4f VoxelSand::color = GetColByHex(0xfaf1cbff);
+const Vector4f VoxelWater::color = GetColByHex(0x31c3ecff);
 
 #pragma endregion
 
 #pragma region VoxelEGSTMaps
 
 const Vector4f VoxelGrass::EGST =     { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_GRASS };
-const Vector4f VoxelDirt::EGST =      { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_DIRT };
+const Vector4f VoxelDirt::EGST =      { 0.3f, 0.2f, 0.24f,  VoxelTypeIndex::V_DIRT };
 const Vector4f VoxelStone::EGST =     { 0.3f, 0.2f, 0.65f, VoxelTypeIndex::V_STONE };
 const Vector4f VoxelSnow::EGST =      { 0, 1, 2,           VoxelTypeIndex::V_SNOW };
 const Vector4f VoxelDarkStone::EGST = { 0.3f, 0.2f, 0.4f,  VoxelTypeIndex::V_DARK_STONE };

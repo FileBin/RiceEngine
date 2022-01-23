@@ -188,7 +188,7 @@
     <ClInclude Include="src\Scripts\PlayerHandler.h" />
     <ClInclude Include="src\Scripts\PreInitScript.h" />
     <ClInclude Include="src\Scripts\SamplePostProcess.h" />
-    <ClInclude Include="src\Scripts\SampleScene.h" />
+    <ClInclude Include="src\Scenes\SampleScene.h" />
     <ClInclude Include="src\Scripts\UI\DebugText.h" />
     <ClInclude Include="src\Scripts\Util\MeshGenerator.h" />
     <ClInclude Include="src\Scripts\Util\PerlinNoise.h" />

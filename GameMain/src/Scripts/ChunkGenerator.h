@@ -101,15 +101,13 @@ public:
 			o->AddComponent(new Transform());
 			o->AddComponent(new MeshCollider());
 			o->AddComponent(render);
+			o->SetActiveImmediate(false);
 			chunksPool.push_back({ o, pos, 10000, nullptr });
 			chunksPool[poolSize].busy = new std::mutex();
 			poolSize++;
 		}
 		chunksPool.resize(poolSize);
 		ReorderPool();
-		/*for (auto& ch : chunksPool) {
-			ch.busy = new std::mutex();
-		}*/
 
 		threads.resize(nLodThreads);
 		for (size_t i = 0; i < nLodThreads; i++) {
@@ -265,7 +263,7 @@ public:
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);
 					}
 					collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
-					pooledCh.obj->ForceEnable();
+					pooledCh.obj->SetActiveImmediate(true);
 					posStates.insert({ pooledCh.pos, true });
 				} else {
 					auto locPos = pooledCh.pos - playerChunk;
@@ -273,7 +271,7 @@ public:
 						auto it = posStates.find(pooledCh.pos);
 						if (it != posStates.end())
 							posStates.erase(it);
-						pooledCh.obj->Disable();
+						pooledCh.obj->SetActive(false);
 					}
 
 				}

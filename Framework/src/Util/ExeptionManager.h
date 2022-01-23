@@ -1,3 +1,8 @@
+#ifdef _DEBUG
+catch (nullptr_t){
+
+}
+#else
 catch (Exception& e) {
 	Log::log(Log::ERR, L"Not handled exception occured: {}", Util::Utf8ToWstring(typeid(e).name()));
 	Log::log(Log::ERR, L"Line {}", std::to_wstring(e.GetLine()));
@@ -25,3 +30,4 @@ catch (Exception& e) {
 	Log::Close();
 	throw "err";
 }*/
+#endif

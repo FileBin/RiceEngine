@@ -20,7 +20,7 @@ namespace Game {
 
 		dbl bounciness = 0;
 
-		std::mutex engineMutex;
+		std::shared_mutex engineMutex;
 
 		//temporary
 		dbl radius = 1;

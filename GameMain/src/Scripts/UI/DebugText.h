@@ -19,7 +19,8 @@ public:
 	}
 
 	void Update() {
-		txt->SetText(std::format(L"X: {:.2f}\nY: {:.2f}\nZ: {:.2f}", playerPos->x, playerPos->y, playerPos->z));
+		dbl fps = 1. / GetEngine().GetDeltaTime();
+		txt->SetText(std::format(L"FPS:{:.0f}\nX: {:.2f}\nY: {:.2f}\nZ: {:.2f}", fps, playerPos->x, playerPos->y, playerPos->z));
 	}
 };
 

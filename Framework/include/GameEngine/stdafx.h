@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <format>
 #include <fstream>
+#include <shared_mutex>
 
 #include <string>
 #include <list>

@@ -7,7 +7,7 @@ namespace Game {
 	using namespace Physics;
 
 	Vector3 Rigidbody::Move(dbl deltaTime, std::function<dbl(Vector3)> sdFunc) {
-		std::lock_guard lock(engineMutex);
+		std::unique_lock lock(engineMutex);
 		auto motion = velocity * deltaTime;
 
 		dbl d0 = sdFunc(position);
@@ -49,12 +49,12 @@ namespace Game {
 	}
 
 	Vector3 Rigidbody::GetVelocity() {
-		std::lock_guard lock(engineMutex);
+		std::shared_lock lock(engineMutex);
 		return velocity;
 	}
 
 	Vector3 Rigidbody::GetPosition() {
-		std::lock_guard lock(engineMutex);
+		std::shared_lock lock(engineMutex);
 		return position;
 	}
 	dbl Rigidbody::sdFunc(Vector3 p) {
