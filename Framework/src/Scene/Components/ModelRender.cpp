@@ -20,7 +20,7 @@ namespace Game {
 	void ModelRender::OnDisable() {
 		auto& ren = GetSceneObject().GetScene().GetRender();
 		if (!model.IsNull()) {
- 			ren.RemoveModel(model.Get());
+			ren.RemoveModel(model);
 		}
 		enabled = false;
 	}
@@ -37,11 +37,7 @@ namespace Game {
 		auto n = _model->GetSubMeshesCount();
 		materials.resize(n);
 		if (enabled) {
-			if (model.Get()) {
-				ren.ChangeModel(this, &transform, model.Get());
-			} else {
-				ren.AddModel(this, &transform);
-			}
+			ren.ChangeModel(this, &transform, model);
 		}
 		model = _model;
 	}

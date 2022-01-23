@@ -142,6 +142,7 @@ public:
 	Vector3i playerChunk;
 
 	void LodLoaderThread(const size_t lodIdx, int thIdx, int radius) {
+		SetThreadPriority(GetCurrentThread(), -10);
 		int nSkips = 0;
 		auto& sRen = GetScene().GetRender();
 		auto poolSize = chunksPool.size();
@@ -188,6 +189,7 @@ public:
 
 
 	void ChunkLoaderThread() {
+		SetThreadPriority(GetCurrentThread(), -10);
 		int nSkips = 0;
 		int thIdx = nLodThreads + 10;
 		auto& sRen = GetScene().GetRender();

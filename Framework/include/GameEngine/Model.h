@@ -56,6 +56,8 @@ namespace Game {
 			return true;
 		}
 
+		bool show = true;
+
 		~Model();
 	private:
 		std::vector<SmartPtr<Mesh>> subMeshes = {};

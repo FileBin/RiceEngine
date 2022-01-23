@@ -63,7 +63,7 @@ namespace Game {
 		sceneRender->device->LoadBufferSubresource(lightBuffer.Get(), cb);
 	}
 
-	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, RenderingMeshCollection& meshes) {
+	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, std::unordered_map<SmartPtr<Material>, RenderingMeshCollection>& meshes) {
 		auto context = sceneRender->device->GetContext();
 		ID3D11RenderTargetView* pNullView = nullptr;
 		context->OMSetRenderTargets(1, &pNullView, DSV.Get());
@@ -90,8 +90,13 @@ namespace Game {
 			vp.MaxDepth = 1.f;
 			sceneRender->device->SetVP(vp);
 
-			for (auto& m : meshes) {
-				m.second->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
+			for (auto& c : meshes) {
+				sceneRender->setActiveMaterial(c.first);
+				auto context = sceneRender->device->GetContext();
+				context->PSSetShader(0, 0, 0);
+				for (auto& m : c.second) {
+					m.second->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
+				}
 			}
 		}
 		context->OMSetRenderTargets(0, 0, 0);
@@ -109,16 +114,9 @@ namespace Game {
 		device->SetPrimitiveTopology();
 		device->LoadBufferSubresource(constantBuffer, cb);
 		device->SetActiveVSConstantBuffer(constantBuffer);
-		device->SetActiveVSConstantBuffer(pMat->GetBuffer(), 1);
 
 		device->SetActiveVertexBuffer<Vertex>(pVertexBuffer.Get());
 		device->SetActiveIndexBuffer(pIndexBuffer.Get());
-
-		auto context = device->GetContext();
-		const auto& shader = pMat->GetShader();
-		context->VSSetShader(shader.vertexShader, 0, 0);
-		context->IASetInputLayout(shader.layout);
-		context->PSSetShader(0, 0, 0);
 
 		device->Draw();
 	}

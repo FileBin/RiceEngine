@@ -28,7 +28,7 @@ namespace Game::Physics {
 		using namespace std::chrono;
 		alive = true;
 		updateThread = Core::RunThread<void(void)>([this]() {
-			SetThreadPriority(GetCurrentThread(), 3);
+			SetThreadPriority(GetCurrentThread(), 1);
 			dbl fixedDeltaTime = 1 / m_tps;
 			dbl deltaTime = fixedDeltaTime;
 			long interval = fixedDeltaTime*1000. * 1000. - 10;

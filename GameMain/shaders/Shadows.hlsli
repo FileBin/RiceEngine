@@ -47,13 +47,13 @@ float3 GetLight(float4 lPos)
     
     #if SOFT_SHADOWS
     
-    int nSamples = 4;
+    #define nSamples 4
     float e = .5f;
     
-    [unroll(9)]
+    [unroll(nSamples*2+1)]
     for (int i = -nSamples; i <= nSamples; i++)
     {
-        [unroll(9)]
+        [unroll(nSamples*2+1)]
         for (int j = -nSamples; j <= nSamples; j++)
         {
             #if INTERPOLATE_SHADOWS
