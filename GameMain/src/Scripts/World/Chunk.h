@@ -10,7 +10,7 @@
 #include "WorldGenerator.h"
 #include <GameEngine/Vectors/Hasher.h>
 #include "HeightMap.h"
-#include <GameEngine\SceneRender.h>
+#include <GameEngine\Scene\SceneRender.h>
 #include <GameEngine\Components\MeshCollider.h>
 #include <GameEngine\Components\ModelRender.h>
 

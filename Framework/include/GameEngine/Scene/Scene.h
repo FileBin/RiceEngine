@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "SceneObject.h"
-#include "../SceneRender.h"
+#include "SceneRender.h"
 #include <vector>
 #include "../ScriptBase.h"
 #include "../SoundManager.h"

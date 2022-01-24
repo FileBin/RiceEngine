@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Util.h"
 #include "Material.h"
+#include "Util/SmartPointer.h"
 
 namespace Game {
 

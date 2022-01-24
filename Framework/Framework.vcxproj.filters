@@ -87,7 +87,7 @@
     <ClInclude Include="include\GameEngine\Scene\SceneObject.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\SceneRender.h">
+    <ClInclude Include="include\GameEngine\Scene\SceneRender.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\GameEngine\Scene\SceneScript.h">
@@ -256,6 +256,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="include\GameEngine\Components\UI\UIBase.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\Scene\IRenderable.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GameEngine\DX\RenderingMesh.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

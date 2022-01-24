@@ -1,11 +1,12 @@
 ﻿#include "pch.h"
-#include <GameEngine\SceneRender.h>
+#include <GameEngine\Scene\SceneRender.h>
 #include <GameEngine\Material.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Camera.h>
 #include <GameEngine\Util\exceptions.h>
 #include <queue>
 #include <GameEngine\Components\UI\IDrawable.h>
+#include <GameEngine\Scene\IRenderable.h>
 #include <GameEngine\Log.h>
 
 namespace Game {
@@ -15,29 +16,35 @@ namespace Game {
 		lightManager.PreInit(this, { 150 });
 
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
-
-		postProcessingQuad = new RenderingMesh();
-		postProcessingQuad->pIndexBuffer = device->CreateBuffer<UINT>({ 2,1,0,0,3,2 }, D3D11_BIND_INDEX_BUFFER);
-		postProcessingQuad->pVertexBuffer = device->CreateBuffer<Vertex>({
+		auto mesh = new RenderingMesh();
+		mesh->pIndexBuffer = device->CreateBuffer<UINT>({ 2,1,0,0,3,2 }, D3D11_BIND_INDEX_BUFFER);
+		mesh->pVertexBuffer = device->CreateBuffer<Vertex>({
 				{ {-1.f, -1.f, 0 } },
 				{ {1.f, -1.f, 0 } },
 				{ {1.f, 1.f, 0 } },
 				{ {-1.f, 1.f, 0 } },
 			}, D3D11_BIND_VERTEX_BUFFER);
 
+		mesh->pConstBuffer = constantBuffer;
+		mesh->device = device;
+		postProcessingQuad = mesh;
+
 		return true;
 	}
 
 	void Game::SceneRender::SetupSkybox(SmartPtr<Material> skyboxMat) {
-		skyBox = new RenderingMesh();
+		auto rmesh = new RenderingMesh();
 
 		auto mesh = CreateSkyBoxMesh();
 
-		skyBox->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
-		skyBox->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
-		skyBox->orig = mesh;
-		skyboxMaterial = skyboxMat;
-		skyBox->transform = new Transform();
+		rmesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
+		rmesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
+		rmesh->orig = mesh;
+		rmesh->mat = skyboxMaterial = skyboxMat;
+		rmesh->transform = new Transform();
+		rmesh->pConstBuffer = constantBuffer;
+		rmesh->device = device;
+		skyBox = rmesh;
 	}
 
 	void SceneRender::BeginFrame() {
@@ -46,31 +53,9 @@ namespace Game {
 		lightManager.UpdateBuffer();
 		if (!skyBox.IsNull()) {
 			auto cam = cameras[activeCameraIdx];
-			setActiveMaterial(skyboxMaterial);
-			skyBox->Draw(this, Matrix4x4::Rotation(cam->rotation.Opposite()), cam->GetProjectionMatrix(), Matrix4x4::identity, false);
+			skyBox->Render(Matrix4x4::Rotation(cam->rotation.Opposite()), cam->GetProjectionMatrix(), Matrix4x4::identity);
 			device->ClearZBuffer();
 		}
-	}
-
-	void SceneRender::RenderingMesh::Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, Matrix4x4 LVP, bool check) {
-		auto device = ren->device;
-		auto constantBuffer = ren->constantBuffer.Get();
-		ConstantBufferData cb = {};
-		auto World = transform->GetTransformationMatrix();
-		cb.World = World;
-		cb.WorldView = cb.World * View;
-		cb.Projection = Projection;
-		cb.LightWVP = World * LVP;
-		if (check)
-			if (orig.IsNull() || !orig->CheckVisiblity(cb)) return;
-
-		device->LoadBufferSubresource(constantBuffer, cb);
-		device->SetActiveVSConstantBuffer(constantBuffer);
-
-		device->SetActiveVertexBuffer<Vertex>(pVertexBuffer.Get());
-		device->SetActiveIndexBuffer(pIndexBuffer.Get());
-
-		device->Draw();
 	}
 
 	bool SceneRender::Draw() {
@@ -78,16 +63,13 @@ namespace Game {
 		device->SetPrimitiveTopology();
 		device->SetBlendState(false);
 		device->UseDepthBuffer(true);
-		Matrix4x4f mV = cam.GetTransformationMatrix();
-		Matrix4x4f mP = cam.GetProjectionMatrix();
+		Matrix4x4 mV = cam.GetTransformationMatrix();
+		Matrix4x4 mP = cam.GetProjectionMatrix();
 		using namespace std::chrono;
-
-		m_mutex.lock();
-		updateMeshes();
-		m_mutex.unlock();
 
 		device->SetRSState(false);
 
+		m_mutex.lock();
 		lightManager.RenderShadowMap(cam.position, renderingMeshes);
 
 		auto LVP = lightManager.GetMatrixLVP();
@@ -100,21 +82,17 @@ namespace Game {
 		device->SetActiveVSConstantBuffer(lightManager.GetBuffer(), 13);
 		device->SetActivePSConstantBuffer(lightManager.GetBuffer(), 13);
 
-		for (auto& c : renderingMeshes) {
-			setActiveMaterial(c.first);
-			for (auto& m : c.second) {
-				m.second->Draw(this, mV, mP, LVP);
-			}
+		for (auto& m : renderingMeshes) {
+			m->Render(mV, mP, LVP);
 		}
 		device->SetBlendState(true);
 		device->CopyBuffers();
 		device->SetRenderTargetsDefault();
-		for (auto& c : transparentMeshes) {
-			setActiveMaterial(c.first);
-			for (auto& m : c.second) {
-				m.second->Draw(this, mV, mP, LVP);
-			}
+
+		for (auto& m : transparentMeshes) {
+			m->Render(mV, mP, LVP);
 		}
+		m_mutex.unlock();
 
 		for (auto pps : ppscripts) {
 			pps->PostProcess();
@@ -166,100 +144,19 @@ namespace Game {
 		}
 	}
 
-	void SceneRender::setActiveMaterial(SmartPtr<Material> pMat){
-		device->SetActiveVSConstantBuffer(pMat->GetBuffer(), 1);
-		device->SetActivePSConstantBuffer(pMat->GetBuffer());
-		device->SetPSTextures(pMat->GetTextures());
-		device->SetActiveShader(pMat->GetShader());
-	}
-
-	void SceneRender::updateMeshes() {
-		//removeModels
-		while (!removeQ.empty()) {
-			auto mod = removeQ.front();
-			removeQ.pop();
-			if (mod.IsNull()) continue;
-			auto n = mod->GetSubMeshesCount();
-			for (size_t i = 0; i < n; i++) {
-				for (auto& col : renderingMeshes) {
-					if (mod.IsNull()) continue;
-					auto m = mod->GetSubMesh(i);
-					auto rm = col.second[m];
-					if (!rm.IsNull())
-						rm.Release();
-					col.second.erase(m);
-				}
-
-				for (auto& col : transparentMeshes) {
-					if (mod.IsNull()) continue;
-					auto m = mod->GetSubMesh(i);
-					auto rm = col.second[m];
-					if (!rm.IsNull())
-						rm.Release();
-					col.second.erase(m);
-				}
-			}
-		}
-
-		//add Models
-		while (!addQ.empty()) {
-			auto ren = addQ.front().first;
-			auto tr = addQ.front().second;
-			addQ.pop();
-			auto n = ren->GetModel()->GetSubMeshesCount();
-			for (size_t i = 0; i < n; i++) {
-
-				auto pMat = ren->GetMaterial(i);
-				if (pMat.IsNull()) continue;
-
-				auto mesh = ren->GetModel()->GetSubMesh(i);
-				if (mesh->vertexBuffer.empty()) continue;
-				auto rMesh = new RenderingMesh();
-				rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
-				rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
-				rMesh->orig = mesh;
-
-				rMesh->transform = tr;
-				if (pMat->renderType == RenderType::Solid) {
-					renderingMeshes[pMat].insert({ mesh, rMesh });
-				} else if (pMat->renderType == RenderType::Transparent) {
-					transparentMeshes[pMat].insert({ mesh, rMesh });
-				}
-			}
+	void SceneRender::AddModel(SmartPtr<IRenderable> ren) {
+		std::lock_guard lock(m_mutex);
+		if (ren->IsTransparent()) {
+			transparentMeshes.insert(ren);
+		} else {
+			renderingMeshes.insert(ren);
 		}
 	}
 
-	void SceneRender::AddModel(ModelRender* ren, Transform* tr) {
+	void SceneRender::RemoveModel(SmartPtr<IRenderable> ren) {
 		std::lock_guard lock(m_mutex);
-		addQ.push({ ren,tr });
-	}
-
-	void SceneRender::RemoveModel(SmartPtr<Model> mod) {
-		std::lock_guard lock(m_mutex);
-		removeQ.push(mod);
-	}
-
-	void SceneRender::ChangeModel(ModelRender* ren, Transform* tr, SmartPtr<Model> mod) {
-		std::lock_guard lock(m_mutex);
-		removeQ.push(mod);
-		addQ.push({ ren,tr });
-	}
-
-	bool SceneRender::UpdateBuffers(Mesh* mesh) {
-		/*std::lock_guard lock(m_mutex);
-		auto it = renderingMeshes.find(mesh);
-		if (it == renderingMeshes.end()) {
-			it = transparentMeshes.find(mesh);
-			if (it == transparentMeshes.end())
-				return false;
-		}
-		auto rMesh = it->second;
-		rMesh->pIndexBuffer->Release();
-		rMesh->pVertexBuffer->Release();
-		rMesh->pIndexBuffer = device->CreateBuffer(mesh->indexBuffer, D3D11_BIND_INDEX_BUFFER);
-		rMesh->pVertexBuffer = device->CreateBuffer(mesh->vertexBuffer, D3D11_BIND_VERTEX_BUFFER);
-		return true;*/
-		THROW_EXCEPTION("NOTIMPL");
+		transparentMeshes.erase(ren);
+		renderingMeshes.erase(ren);
 	}
 
 	void SceneRender::AddCamera(SmartPtr<Camera> cam) { cameras.push_back(cam); }

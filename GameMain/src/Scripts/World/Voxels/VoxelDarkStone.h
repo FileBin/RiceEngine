@@ -2,7 +2,7 @@
 
 #include "Voxel.h"
 #include <GameEngine\Engine.h>
-#include <GameEngine\SceneRender.h>
+#include <GameEngine\Scene\SceneRender.h>
 
 struct VoxelDarkStone : public Voxel {
     VoxelDarkStone(Vector3i pos) {

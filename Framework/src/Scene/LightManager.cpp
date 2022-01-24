@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include <GameEngine\SceneRender.h>
+#include <GameEngine\Scene\SceneRender.h>
 #include <GameEngine\DX\Texture2D.h>
 #include <GameEngine\Model.h>
 
@@ -63,7 +63,7 @@ namespace Game {
 		sceneRender->device->LoadBufferSubresource(lightBuffer.Get(), cb);
 	}
 
-	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, std::unordered_map<SmartPtr<Material>, RenderingMeshCollection>& meshes) {
+	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, std::unordered_set<SmartPtr<IRenderable>>& meshes) {
 		auto context = sceneRender->device->GetContext();
 		ID3D11RenderTargetView* pNullView = nullptr;
 		context->OMSetRenderTargets(1, &pNullView, DSV.Get());
@@ -90,34 +90,10 @@ namespace Game {
 			vp.MaxDepth = 1.f;
 			sceneRender->device->SetVP(vp);
 
-			for (auto& c : meshes) {
-				sceneRender->setActiveMaterial(c.first);
-				auto context = sceneRender->device->GetContext();
-				context->PSSetShader(0, 0, 0);
-				for (auto& m : c.second) {
-					m.second->DrawShadow(sceneRender, ViewMatrix, ProjMatrix);
-				}
+			for (auto& m : meshes) {
+				m->Render(ViewMatrix, ProjMatrix, Matrix4x4::identity);
 			}
 		}
 		context->OMSetRenderTargets(0, 0, 0);
-	}
-
-	void SceneRender::RenderingMesh::DrawShadow(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection) {
-		if (orig.IsNull()) return;
-		auto device = ren->device;
-		auto constantBuffer = ren->constantBuffer.Get();
-		ConstantBufferData cb = {};
-		cb.World = transform->GetTransformationMatrix();
-		cb.WorldView = cb.World * View;
-		cb.Projection = Projection;
-		cb.LightWVP = Matrix4x4f::identity;
-		device->SetPrimitiveTopology();
-		device->LoadBufferSubresource(constantBuffer, cb);
-		device->SetActiveVSConstantBuffer(constantBuffer);
-
-		device->SetActiveVertexBuffer<Vertex>(pVertexBuffer.Get());
-		device->SetActiveIndexBuffer(pIndexBuffer.Get());
-
-		device->Draw();
 	}
 }

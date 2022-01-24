@@ -189,6 +189,8 @@
     <ClInclude Include="include\GameEngine\Components\UI\Canvas.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
+    <ClInclude Include="include\GameEngine\DX\RenderingMesh.h" />
+    <ClInclude Include="include\GameEngine\Scene\IRenderable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\RectTransform.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Text.h" />
     <ClInclude Include="include\GameEngine\Components\UI\UIBase.h" />
@@ -214,7 +216,7 @@
     <ClInclude Include="include\GameEngine\Log.h" />
     <ClInclude Include="include\GameEngine\macros.h" />
     <ClInclude Include="include\GameEngine\Math.h" />
-    <ClInclude Include="include\GameEngine\SceneRender.h" />
+    <ClInclude Include="include\GameEngine\Scene\SceneRender.h" />
     <ClInclude Include="include\GameEngine\Scene\Component.h" />
     <ClInclude Include="include\GameEngine\Scene\Scene.h" />
     <ClInclude Include="include\GameEngine\Scene\SceneObject.h" />

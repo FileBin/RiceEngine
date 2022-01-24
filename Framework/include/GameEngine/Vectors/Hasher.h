@@ -2,14 +2,7 @@
 
 #include "../Util/defines.h"
 #include "../Util/SmartPointer.h"
-
-struct Vector2;
-struct Vector2f;
-struct Vector2i;
-
-struct Vector3;
-struct Vector3f;
-struct Vector3i;
+#include "../Vectors.h"
 
 #pragma region Vector3_all
 #pragma region Vector3

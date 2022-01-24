@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "RenderBase.h"
 #include <vector>
 #include <queue>
 #include <concurrent_unordered_set.h>
@@ -8,12 +7,14 @@
 #include <concurrent_vector.h>
 #include <GameEngine\macros.h>
 #include <GameEngine\Vectors\Hasher.h>
-#include "Util\SmartPointer.h"
-#include "Scene\IPostProcess.h"
+#include "../Util/SmartPointer.h"
+#include "IPostProcess.h"
 #include <unordered_set>
-#include "Components\ModelRender.h"
-#include "Components\Transform.h"
-#include "Components\UI\Canvas.h"
+#include "../Components\ModelRender.h"
+#include "../Components\Transform.h"
+#include "../Components\UI\Canvas.h"
+#include "../DX/RenderingMesh.h"
+#include "../RenderBase.h"
 
 struct Matrix4x4f;
 
@@ -32,24 +33,6 @@ namespace Game {
 	private:
 #pragma region Classes
 		class LightManager;
-
-		class RenderingMesh {
-		public:
-			SmartPtr<Mesh> orig;
-			SmartPtr<Transform> transform;
-			Microsoft::WRL::ComPtr<Buffer> pIndexBuffer = nullptr;
-			Microsoft::WRL::ComPtr<Buffer> pVertexBuffer = nullptr;
-			void Draw(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection, Matrix4x4 LVP = Matrix4x4::identity, bool checkVisiblity = true);
-
-			void DrawShadow(SceneRender* ren, Matrix4x4f View, Matrix4x4f Projection);
-
-			~RenderingMesh() {
-				pIndexBuffer->Release();
-				pVertexBuffer->Release();
-			}
-		};
-
-		typedef std::unordered_map<SmartPtr<Mesh>, SmartPtr<RenderingMesh>> RenderingMeshCollection;
 
 		class LightManager {
 			struct LightBuffer {
@@ -73,7 +56,7 @@ namespace Game {
 		public:
 			void UpdateBuffer();
 			void PreInit(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 600, size_t shadowMapRes = 1024);
-			void RenderShadowMap(Vector3 playerPos, std::unordered_map<SmartPtr<Material>, RenderingMeshCollection>& meshes);
+			void RenderShadowMap(Vector3 playerPos, std::unordered_set<SmartPtr<IRenderable>>& meshes);
 
 			Matrix4x4 GetMatrixLVP() { return LVP; }
 
@@ -97,10 +80,8 @@ namespace Game {
 
 		void SetupSkybox(SmartPtr<Material> skyboxMat);
 
-		void AddModel(ModelRender* mr, Transform* transform);
-		void RemoveModel(SmartPtr<Model> mod);
-		void ChangeModel(ModelRender* ren, Transform* tr, SmartPtr<Model> mod);
-		bool UpdateBuffers(Mesh* mesh);
+		void AddModel(SmartPtr<IRenderable> ren);
+		void RemoveModel(SmartPtr<IRenderable> ren);
 
 		void AddCamera(SmartPtr<Camera> cam);
 		SmartPtr<Camera> GetCamera(size_t idx);
@@ -132,21 +113,15 @@ namespace Game {
 		concurrency::concurrent_vector<SmartPtr<Camera>> cameras;
 		std::unordered_map<String, SmartPtr<Material>> materials;
 		std::unordered_map<String, SmartPtr<Shader>> shaders;
-		std::unordered_map<SmartPtr<Material>, RenderingMeshCollection> renderingMeshes, transparentMeshes;
+		std::unordered_set<SmartPtr<IRenderable>> renderingMeshes, transparentMeshes;
 		std::unordered_set<SmartPtr<IPostProcess>> ppscripts;
 		std::vector<SmartPtr<UI::IDrawable>> drawables;
 		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
-
-		std::queue<SmartPtr<Model>> removeQ;
-		std::queue<std::pair<ModelRender*, Transform*>> addQ;
 
 		//default
 		SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
 		SmartPtr<Material> skyboxMaterial;
 
 		Mesh* CreateSkyBoxMesh();
-
-		void updateMeshes();
-		void setActiveMaterial(SmartPtr<Material> mat);
 	};
 }

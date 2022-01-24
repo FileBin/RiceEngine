@@ -54,7 +54,7 @@ struct PooledChunk {
 class ChunkGenerator : public MonoScript {
 public:
 	//Chunk* chunk;
-	int renderDistance = 12;
+	int renderDistance = 9;
 	World* world;
 	WorldGenerator* generator;
 
@@ -66,7 +66,7 @@ public:
 
 	size_t nLodThreads = 4;
 
-	int lodDistances[4] = { 4, 6, 7, 10 };
+	int lodDistances[4] = { 4, 6, 7, 8 };
 
 	void Start() {
 #ifdef _DEBUG
