@@ -11,6 +11,7 @@
     <FxCompile Include="shaders\PostProcessVS.hlsl" />
     <FxCompile Include="shaders\SamplePostProcess.hlsl" />
     <FxCompile Include="shaders\Underwater.hlsl" />
+    <FxCompile Include="shaders\ImgShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

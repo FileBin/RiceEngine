@@ -1,17 +1,10 @@
 #pragma once
 
-#include "../../Scene/Component.h"
-#include "../../Util/defines.h"
-#include "../../Vectors/Vector2.h"
-#include "IDrawable.h"
+#include "UIBase.h"
 
 namespace Game::UI {
-	class Text : public Component, public IDrawable {
+	class Text : public UIBase {
 	public:
-		void OnInit();
-
-		void OnEnable();
-		void OnDisable();
 
 		void SetFont(String fontName, IDWriteFontCollection* fontCollection = nullptr) { m_fontName = fontName; }
 
@@ -23,7 +16,7 @@ namespace Game::UI {
 
 		void SetText(String newText) { m_text = newText; }
 
-		void Draw(IDWriteFactory* factory, IDWriteTextFormat* defformat, ID2D1RenderTarget* rt);
+		void Draw(Device* device);
 	private:
 		String m_fontName = L"Arial";
 		float m_fontSize = 20.f;
@@ -31,7 +24,6 @@ namespace Game::UI {
 		DWRITE_FONT_STYLE m_style = DWRITE_FONT_STYLE_NORMAL;
 		DWRITE_FONT_STRETCH m_stretch = DWRITE_FONT_STRETCH_NORMAL;
 		String m_text;
-		Vector2 m_position = {0, 0}, m_size = { 100, 100 };
 		D2D1::ColorF m_color = D2D1::ColorF::Black;
 	};
 }

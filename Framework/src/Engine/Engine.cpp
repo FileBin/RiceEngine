@@ -8,7 +8,7 @@
 
 namespace Game {
 
-	Engine::Engine(Device** d, Core* c, Stage* s) {
+	Engine::Engine(Device** d, Core* c) {
 		if (d != nullptr && c != nullptr) {
 			device = d;
 			core = c;
@@ -66,7 +66,11 @@ namespace Game {
 		scene->PreInit(this);
 		Core::RunTask([scene]() {
 			scene->Init();
-			scene->PostInit(); 
+			scene->PostInit();
 			});
+	}
+
+	Device* Engine::GetDevice() {
+		return core->device;
 	}
 }

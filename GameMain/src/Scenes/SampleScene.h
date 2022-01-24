@@ -4,6 +4,7 @@
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Components\UI\Text.h>
+#include <GameEngine\Components\UI\Image.h>
 #include <GameEngine\Components\Rigidbody.h>
 
 #include "../Scripts/CameraMoverScript.h"
@@ -16,8 +17,6 @@ using namespace Game;
 
 class SampleScene : public Scene {
 	void Init() {
-		auto debugText = Instaniate();
-		debugText->SetName(L"DebugText");
 		auto chunk = Instaniate();
 		chunk->SetName(L"Chunk");
 
@@ -116,12 +115,36 @@ class SampleScene : public Scene {
 
 		ren.SetupSkybox(skymat);
 
+		//text
+		auto debugText = Instaniate();
+		debugText->SetName(L"DebugText");
+
 		auto txt = new UI::Text();
 		txt->SetText(L"SUS");
 		txt->SetColor(D2D1::ColorF::White);
+
+		auto rTransform = new UI::RectTransform();
+		rTransform->SetPosition({ 0, 0 });
+		rTransform->SetScale({ 800,600 });
+
+		debugText->AddComponent(rTransform);
 		debugText->AddComponent(txt);
 		debugText->AddComponent(new DebugText());
 
+		//text
+		auto picture = Instaniate();
+		picture->SetName(L"Picture");
+
+		auto pic = new UI::Image();
+		pic->SetImg(&ren.CreateTexture(L"img/amogus.png"));
+		rTransform = new UI::RectTransform();
+		rTransform->anchor = UI::RectTransform::Anchor::BottomRight;
+		rTransform->SetPosition({ 0, 0 });
+		rTransform->SetScale({ 100, 100 });
+		picture->AddComponent(rTransform);
+		picture->AddComponent(pic);
+
+		//postProcess
 		auto postProcessScript = new SamplePostProcess();
 		postProcessScript->generator = chunkGen;
 		AddScript(postProcessScript);

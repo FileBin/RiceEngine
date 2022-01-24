@@ -11,6 +11,7 @@ struct Vector2 {
 	Vector2& operator+=(Vector2 v);
 	Vector2& operator*=(dbl v);
 	Vector2& operator/=(dbl v);
+	Vector2& operator/=(Vector2 v);
 	dbl& operator[](size_t idx);
 	Vector2 operator-();
 
@@ -32,3 +33,5 @@ Vector2 operator+(Vector2 a, Vector2 b);
 Vector2 operator-(Vector2 a, Vector2 b);
 Vector2 operator*(Vector2 a, dbl b);
 Vector2 operator/(Vector2 a, dbl b);
+Vector2 operator*(Vector2 a, Vector2 b);
+Vector2 operator/(Vector2 a, Vector2 b);

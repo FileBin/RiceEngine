@@ -67,6 +67,14 @@ Vector2 operator/(Vector2 A, dbl b) {
     return { A.x / b, A.y / b };
 }
 
+Vector2 operator*(Vector2 a, Vector2 b) {
+    return { a.x * b.x, a.y * b.y };
+}
+
+Vector2 operator/(Vector2 a, Vector2 b) {
+    return { a.x / b.x, a.y / b.y };
+}
+
 Vector2& Vector2::operator+=(Vector2 v) {
     *this = (*this) + v;
     return *this;
@@ -83,6 +91,11 @@ Vector2& Vector2::operator*=(dbl x) {
 }
 
 Vector2& Vector2::operator/=(dbl x) {
+    *this = (*this) / x;
+    return *this;
+}
+
+Vector2& Vector2::operator/=(Vector2 x) {
     *this = (*this) / x;
     return *this;
 }

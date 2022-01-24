@@ -186,8 +186,12 @@
     <ClInclude Include="include\GameEngine\Components\Rigidbody.h" />
     <ClInclude Include="include\GameEngine\Components\SoundSource.h" />
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\Canvas.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\RectTransform.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Text.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\UIBase.h" />
     <ClInclude Include="include\GameEngine\DefaultLoadingScreenRender.h" />
     <ClInclude Include="include\GameEngine\Device.h" />
     <ClInclude Include="include\GameEngine\DX\Texture2D.h" />
@@ -269,6 +273,7 @@
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
     <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp" />
     <ClCompile Include="src\Scene\Components\SoundSource.cpp" />
+    <ClCompile Include="src\Scene\Components\UI\Image.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\LightManager.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />

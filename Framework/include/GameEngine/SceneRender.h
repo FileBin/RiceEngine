@@ -13,6 +13,7 @@
 #include <unordered_set>
 #include "Components\ModelRender.h"
 #include "Components\Transform.h"
+#include "Components\UI\Canvas.h"
 
 struct Matrix4x4f;
 
@@ -80,9 +81,10 @@ namespace Game {
 			Buffer* GetBuffer() { return lightBuffer.Get(); }
 			
 		} lightManager;
-#pragma endregion
 
 		friend class LightManager;
+		UI::Canvas canvas;
+#pragma endregion
 	public:
 
 		bool Init();
@@ -90,6 +92,8 @@ namespace Game {
 		bool Draw();
 		void Close();
 		void Resize();
+
+		Buffer* GetConstBuffer() { return constantBuffer.Get(); }
 
 		void SetupSkybox(SmartPtr<Material> skyboxMat);
 

@@ -15,7 +15,7 @@ namespace Game {
 	class Engine
 	{
 	public:
-		Engine(Device** device, Core* Core, Stage* stage);
+		Engine(Device** device, Core* Core);
 		~Engine();
 
 		size_t GetMsaaLevel() const { return msaaLevel; }
@@ -27,6 +27,8 @@ namespace Game {
 		void SetRender(LoadingScreenRenderBase* render);
 
 		void LoadScene(Scene* scene);
+
+		Device* GetDevice();
 
 		void PostUpdate();
 		

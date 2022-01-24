@@ -11,6 +11,7 @@
 namespace Game {
 
 	bool SceneRender::Init() {
+		canvas.referenceResoluton = { 800,600 };
 		lightManager.PreInit(this, { 150 });
 
 		constantBuffer = device->CreateBuffer<ConstantBufferData>({}, D3D11_BIND_CONSTANT_BUFFER);
@@ -122,7 +123,7 @@ namespace Game {
 		device->Begin2D();
 		m_2dMutex.lock();
 		for (auto& d : drawables) {
-			d->Draw(device->GetWriteFactory(), device->GetDefFormat(), device->Get2DRenderTarget());
+			d->Draw(device);
 		}
 		m_2dMutex.unlock();
 		device->End2D();
@@ -139,7 +140,7 @@ namespace Game {
 
 		device->SetActiveVertexBuffer<Vertex>(postProcessingQuad->pVertexBuffer.Get());
 		device->SetActiveIndexBuffer(postProcessingQuad->pIndexBuffer.Get());
-		device->SetActiveVSConstantBuffer(mat->GetBuffer());
+		device->SetActiveVSConstantBuffer(mat->GetBuffer(), 1);
 		device->SetActivePSConstantBuffer(mat->GetBuffer());
 		device->SetPSTextures(mat->GetTextures());
 
@@ -156,6 +157,8 @@ namespace Game {
 	}
 
 	void SceneRender::Resize() {
+		auto screenSize = Util::GetWindowScreenSize(device->GetHWND());
+		canvas.currentResolution = screenSize;
 		auto n = cameras.size();
 		auto ar = GetAspectRatio();
 		for (size_t i = 0; i < n; i++) {
@@ -291,6 +294,7 @@ namespace Game {
 	}
 	void SceneRender::AddDrawable(UI::IDrawable* txt) {
 		std::lock_guard lock(m_2dMutex);
+		txt->SetCanvas(&canvas);
 		drawables.push_back(txt);
 	}
 	void SceneRender::RemoveDrawable(UI::IDrawable* txt) {

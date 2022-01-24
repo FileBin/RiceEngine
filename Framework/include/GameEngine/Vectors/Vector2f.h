@@ -4,8 +4,9 @@
 
 struct Vector2f {
 	float x = 0, y = 0;
-	Vector2f() {}
+	Vector2f() = default;
 	Vector2f(float x, float y) : x(x), y(y) {}
+	Vector2f(const Vector2& vec) : x(vec.x), y(vec.y) {}
 
 	Vector2f& operator-=(Vector2f v);
 	Vector2f& operator+=(Vector2f v);

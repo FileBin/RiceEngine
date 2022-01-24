@@ -1,8 +1,11 @@
 #pragma once
 #include "../../stdafx.h"
+#include "../../Device.h"
+#include "Canvas.h"
 
 namespace Game::UI {
 	__interface IDrawable {
-		void Draw(IDWriteFactory* factory, IDWriteTextFormat* defformat, ID2D1RenderTarget* rt);
+		void SetCanvas(UI::Canvas* canvas);
+		void Draw(Device* device);
 	};
 }

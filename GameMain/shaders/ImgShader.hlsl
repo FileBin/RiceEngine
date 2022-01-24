@@ -9,8 +9,8 @@ struct PixelShaderInput
     float2 texcoord : TEXCOORD1;
 };
 
-Texture2D tex;
-SamplerState samp;
+Texture2D tex : register(t0);
+SamplerState samp : register(s0);
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {

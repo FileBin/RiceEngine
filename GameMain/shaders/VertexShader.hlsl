@@ -16,9 +16,10 @@ struct PixelShaderInput
     float4 lPos : TEXCOORD0;
     float3 light : POSITION1;
     float3 world_pos : POSITION2;
+    float2 texcoord : TEXCOORD1;
 };
 
-PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
+PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL, float2 texcoord : TEXCOORD)
 {
     PixelShaderInput output = (PixelShaderInput) 0;
 
@@ -37,7 +38,7 @@ PixelShaderInput main(float3 pos : POSITION, float4 norm : NORMAL)
     
     output.light = mul(light, WV);
    
-
+    output.texcoord = texcoord;
 
     return output;
 }
