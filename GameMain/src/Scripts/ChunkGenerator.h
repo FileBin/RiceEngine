@@ -4,6 +4,7 @@
 #include <Scripts\World\Chunk.h>
 #include <GameEngine\Scene\Scene.h>
 #include <GameEngine\Components\ModelRender.h>
+#include <GameEngine\Components\MultiModelRender.h>
 #include <GameEngine\Components\Transform.h>
 #include <GameEngine\Components\MeshCollider.h>
 
@@ -28,14 +29,25 @@ public:
 	}
 };
 
+
+
 struct PooledChunk {
+#ifdef MULTI_RENDER
+	MultiModelRender::UUID uuid;
+#endif // MULTI_RENDER
 	SceneObject* obj = nullptr;
+
+
 	Vector3i pos = {0,0,0};
 	int lod = -1;
 	std::mutex* busy = nullptr;
 
 	void Swap(PooledChunk& other) {
+#ifdef MULTI_RENDER
+		std::swap(uuid, other.uuid);
+#endif // MULTI_RENDER
 		std::swap(obj, other.obj);
+
 		std::swap(pos, other.pos);
 		std::swap(lod, other.lod);
 		auto p = busy;
@@ -58,6 +70,8 @@ public:
 	World* world;
 	WorldGenerator* generator;
 
+	SmartPtr<MultiModelRender> multiRender;
+
 	vector<SmartPtr<thread>> threads;
 	SmartPtr<thread> chunkLoaderThread{nullptr};
 	concurrent_vector<PooledChunk> chunksPool{};
@@ -77,13 +91,28 @@ public:
 
 		playerPos.y = 0;
 
-		//generator = new FlatGenerator(25.);
+		//generator = new FlatGenerator(0.);
 		generator = new StandartGenerator(WorldSeed::Default(), 60, -20, .3);
 		world = new World(generator, &scene.GetRender());
 
 		auto a = renderDistance * 2 + 1;
 
-		size_t n = a * a * a;
+#ifdef MULTI_RENDER
+		multiRender = new MultiModelRender();
+		GetSceneObject().AddComponent(new Transform());
+		GetSceneObject().AddComponent(multiRender.Get());
+		multiRender->Enable();
+		size_t n = Voxel::GetMaterialCount();
+		vector<SmartPtr<Material>> materials{n};
+		for (auto i = 0; i < n; i++) {
+			materials[i] = SmartPtr<Material>(Voxel::GetMaterialAt(i));
+		}
+		multiRender->SetMaterials(materials);
+#else
+		size_t n;
+#endif
+
+		n = a * a * a;
 		chunksPool.reserve(n);
 		size_t poolSize = 0;
 		for (int i = 0; i < n; i++) {
@@ -97,12 +126,16 @@ public:
 			pos.z = idx - ad2;
 			if (!CheckChunkVisible(pos)) continue;
 			auto o = scene.Instaniate();
-			auto render = new ModelRender();
 			o->AddComponent(new Transform());
 			o->AddComponent(new MeshCollider());
-			o->AddComponent(render);
 			o->SetActiveImmediate(false);
+#ifdef MULTI_RENDER
+			chunksPool.push_back({ {}, o, pos, 10000, nullptr });
+#else
+			auto render = new ModelRender();
+			o->AddComponent(render);
 			chunksPool.push_back({ o, pos, 10000, nullptr });
+#endif // MULTI_RENDER
 			chunksPool[poolSize].busy = new std::mutex();
 			poolSize++;
 		}
@@ -165,10 +198,17 @@ public:
 						int lod = lodIdx;
 						if (lod < pooledCh.lod) {
 							auto model = world->GetChunk(pooledCh.pos)->GetModel(lod);
-							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
+
+							auto transform = pooledCh.obj->GetComponents<Transform>()[0];
 							auto collider = pooledCh.obj->GetComponents<MeshCollider>()[0];
 							collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
+
+#ifdef MULTI_RENDER
+							multiRender->SetModel(pooledCh.uuid, model, transform->GetTransformationMatrix());
+#else
+							auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
 							render->SetModel(model);
+#endif // MULTI_RENDER
 							pooledCh.lod = lod;
 						}
 					}
@@ -243,7 +283,9 @@ public:
 				auto poolIdx = i;
 				auto& pooledCh = chunksPool.at(poolIdx);
 				if (!pooledCh.busy->try_lock()) { nSkips++; continue; }
+#ifndef MULTI_RENDER
 				auto render = pooledCh.obj->GetComponents<ModelRender>()[0];
+#endif
 				auto transform = pooledCh.obj->GetComponents<Transform>()[0];
 				auto collider = pooledCh.obj->GetComponents<MeshCollider>()[0];
 				if (!pooledCh.obj->isEnabled()) {
@@ -256,14 +298,20 @@ public:
 					toLoad.pop();
 					auto model = ch->GetModel(lod);
 					ch->collider = collider;
+#ifndef MULTI_RENDER
 					ch->render = render;
+#endif
 					pooledCh.lod = lod;
 					pooledCh.pos = chPos;
 					transform->SetPosition(World::TransformToWorldPos(chPos));
+#ifdef MULTI_RENDER
+					ch->uuid = pooledCh.uuid = multiRender->AddModel(model, Matrix4x4::Translation(World::TransformToWorldPos(chPos)));
+#else
 					render->SetModel(model);
 					for (auto i = 0; i < Voxel::GetMaterialCount(); i++) {
 						render->SetMaterial(SmartPtr<Material>(Voxel::GetMaterialAt(i)), i);
 					}
+#endif
 					collider->SetModel(model.Get(), VoxelTypeIndex::V_WATER);
 					pooledCh.obj->SetActiveImmediate(true);
 					posStates.insert({ pooledCh.pos, true });
@@ -273,6 +321,9 @@ public:
 						auto it = posStates.find(pooledCh.pos);
 						if (it != posStates.end())
 							posStates.erase(it);
+#ifdef MULTI_RENDER
+						multiRender->RemoveModel(pooledCh.uuid);
+#endif
 						pooledCh.obj->SetActive(false);
 					}
 

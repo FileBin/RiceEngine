@@ -183,6 +183,7 @@
     <ClInclude Include="include\GameEngine\Components\MeshCollider.h" />
     <ClInclude Include="include\GameEngine\Components\ModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\MonoScript.h" />
+    <ClInclude Include="include\GameEngine\Components\MultiModelRender.h" />
     <ClInclude Include="include\GameEngine\Components\Rigidbody.h" />
     <ClInclude Include="include\GameEngine\Components\SoundSource.h" />
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
@@ -239,6 +240,8 @@
     <ClInclude Include="include\GameEngine\Util\exceptions\OpenALException.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\RemovedException.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\UnknownFormatException.h" />
+    <ClInclude Include="include\GameEngine\Util\IRegistrable.h" />
+    <ClInclude Include="include\GameEngine\Util\RegisterCollection.h" />
     <ClInclude Include="include\GameEngine\Util\SmartPointer.h" />
     <ClInclude Include="include\GameEngine\Vectors\Hasher.h" />
     <ClInclude Include="include\GameEngine\Vectors\Quaternion.h" />
@@ -273,6 +276,7 @@
     <ClCompile Include="src\Physics\Rigidbody.cpp" />
     <ClCompile Include="src\Scene\Components\Collider.cpp" />
     <ClCompile Include="src\Scene\Components\MonoScript.cpp" />
+    <ClCompile Include="src\Scene\Components\MultiModelRender.cpp" />
     <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp" />
     <ClCompile Include="src\Scene\Components\SoundSource.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Image.cpp" />

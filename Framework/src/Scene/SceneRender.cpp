@@ -70,7 +70,11 @@ namespace Game {
 		device->SetRSState(false);
 
 		m_mutex.lock();
-		lightManager.RenderShadowMap(cam.position, renderingMeshes);
+
+		const auto& meshes = renderingMeshes.GetCollectionWithGaps();
+
+		device->SetActiveVSConstantBuffer(constantBuffer.Get());
+		lightManager.RenderShadowMap(cam.position, meshes);
 
 		auto LVP = lightManager.GetMatrixLVP();
 
@@ -81,16 +85,22 @@ namespace Game {
 		device->SetPSTexture2D(lightManager.GetShadowMap(), 13);
 		device->SetActiveVSConstantBuffer(lightManager.GetBuffer(), 13);
 		device->SetActivePSConstantBuffer(lightManager.GetBuffer(), 13);
+		auto n = meshes.size();
+		auto pArr = meshes.data();
 
-		for (auto& m : renderingMeshes) {
-			m->Render(mV, mP, LVP);
+		for (size_t i = 0; i < n;i++) {
+			auto elem = *(pArr + i);
+			if (elem.IsNull()) continue;
+			elem->Render(mV, mP, LVP);
 		}
 		device->SetBlendState(true);
 		device->CopyBuffers();
 		device->SetRenderTargetsDefault();
 
-		for (auto& m : transparentMeshes) {
-			m->Render(mV, mP, LVP);
+		for (size_t i = 0; i < n; i++) {
+			auto elem = *(pArr + i);
+			if (elem.IsNull()) continue;
+			elem->RenderTransparent(mV, mP, LVP);
 		}
 		m_mutex.unlock();
 
@@ -144,19 +154,14 @@ namespace Game {
 		}
 	}
 
-	void SceneRender::AddModel(SmartPtr<IRenderable> ren) {
+	void SceneRender::RegisterModel(SmartPtr<IRenderable> ren) {
 		std::lock_guard lock(m_mutex);
-		if (ren->IsTransparent()) {
-			transparentMeshes.insert(ren);
-		} else {
-			renderingMeshes.insert(ren);
-		}
+		ren->Register(renderingMeshes.Register(ren));
 	}
 
-	void SceneRender::RemoveModel(SmartPtr<IRenderable> ren) {
+	void SceneRender::UnregisterModel(SmartPtr<IRenderable> rm) {
 		std::lock_guard lock(m_mutex);
-		transparentMeshes.erase(ren);
-		renderingMeshes.erase(ren);
+		renderingMeshes.Unregister(rm->Unregister());
 	}
 
 	void SceneRender::AddCamera(SmartPtr<Camera> cam) { cameras.push_back(cam); }

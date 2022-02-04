@@ -7,3 +7,5 @@
 
 using std::vector, std::map, std::pair,
 std::shared_ptr, std::unique_ptr, std::weak_ptr;
+
+#define MULTI_RENDER

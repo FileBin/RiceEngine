@@ -28,7 +28,18 @@ namespace Game {
 			D3D11_USAGE usage = D3D11_USAGE_DEFAULT) {
 
 			ID3D11Buffer* buf = nullptr;
-			ThrowIfFailed(_createBuffer((void*)data.data(), data.size(), sizeof(T), &buf, usage, bindFlags, CpuAccessFlags));
+			ThrowIfFailed(_createBuffer((void*)data.data(), data.size() * sizeof(T), sizeof(T), &buf, usage, bindFlags, CpuAccessFlags));
+			return buf;
+		}
+
+		template<typename T>
+		ID3D11Buffer* AllocateBuffer(size_t size,
+			UINT bindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE,
+			UINT CpuAccessFlags = 0,
+			D3D11_USAGE usage = D3D11_USAGE_DEFAULT) {
+
+			ID3D11Buffer* buf = nullptr;
+			ThrowIfFailed(_createBuffer(nullptr, size, sizeof(T), &buf, usage, bindFlags, CpuAccessFlags));
 			return buf;
 		}
 
@@ -37,7 +48,7 @@ namespace Game {
 			UINT CpuAccessFlags = 0,
 			D3D11_USAGE usage = D3D11_USAGE_DEFAULT) {
 			ID3D11Buffer* buf = nullptr;
-			ThrowIfFailed(_createBuffer((void*)data.data(), data.size() / stride, stride, &buf, usage, bindFlags, CpuAccessFlags));
+			ThrowIfFailed(_createBuffer((void*)data.data(), data.size(), stride, &buf, usage, bindFlags, CpuAccessFlags));
 			return buf;
 		}
 

@@ -13,6 +13,7 @@
 #include <GameEngine\Scene\SceneRender.h>
 #include <GameEngine\Components\MeshCollider.h>
 #include <GameEngine\Components\ModelRender.h>
+#include <GameEngine\Components\MultiModelRender.h>
 
 using namespace Game;
 using std::map, std::unordered_map;
@@ -34,7 +35,11 @@ private:
     void Generate();
 
 public:
+#ifdef MULTI_RENDER
+    MultiModelRender::UUID uuid;
+#else
     SmartPtr<ModelRender> render;
+#endif
     SmartPtr<MeshCollider> collider;
 
     enum Status { Invalid = -3, Unloaded, NotCreated, NotLoaded = 0, Loading, Operating, Loaded } status = NotLoaded;
@@ -60,9 +65,6 @@ public:
 
     ~Chunk() {
         std::unique_lock l(lock);
-        if (!render.IsNull()) {
-            //render->Disable();
-        }
        // hmap.Release();
         voxels.clear();
         //std::lock_guard guard(lock);
@@ -185,32 +187,7 @@ public:
         return model[lod] = GenerateSmoothModel(idx);
     }
 
-    void UpdateModel(SceneRender& ren,size_t lod = 0) {
-        auto idx = 1 << lod;
-        auto& _model = model[lod];
-        bool alreadyLoaded = !_model.IsNull();
-        auto otherM = GenerateSmoothModel(idx);
-        render->SetModel(otherM);
-        _model.Release();
-        collider->SetModel(otherM, VoxelTypeIndex::V_WATER);
-        /*if (alreadyLoaded) {
-            auto n = otherM->GetSubMeshesCount();
-            _model->SetSubMeshesCount(n);
-            for (auto i = 0; i < n; i++) {
-                auto otherMesh = otherM->GetSubMesh(i);
-                auto mesh = _model->GetSubMesh(i);
-                mesh->indexBuffer = otherMesh->indexBuffer;
-                mesh->vertexBuffer = otherMesh->vertexBuffer;
-                if (alreadyLoaded) {
-
-                   // ren.UpdateBuffers(mesh);
-                }
-            }
-            delete otherM;
-        } else {
-            _model = otherM;
-        }*/
-    }
+    void UpdateModel(SceneRender& ren, size_t lod = 0);
     Model* GenerateModel();
     Model* GenerateSmoothModel(size_t step = 4);
 };

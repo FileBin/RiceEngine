@@ -12,6 +12,20 @@ float GetPoint(float d1, float d2) {
     return 1 + d2 / (d1 - d2);
 }
 
+void Chunk::UpdateModel(SceneRender& ren, size_t lod) {
+    auto idx = 1 << lod;
+    auto& _model = model[lod];
+    bool alreadyLoaded = !_model.IsNull();
+    auto otherM = GenerateSmoothModel(idx);
+#ifdef MULTI_RENDER
+    uuid.GetRender()->SetModel(uuid, otherM, Matrix4x4::Translation(World::TransformToWorldPos(position)));
+#else
+    render->SetModel(otherM);
+#endif
+    _model.Release();
+    collider->SetModel(otherM, VoxelTypeIndex::V_WATER);
+}
+
 Model* Chunk::GenerateModel() {
     auto mod = new Model();
 

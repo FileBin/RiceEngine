@@ -12,6 +12,8 @@ namespace Game {
 	public:
 		std::mutex renderMutex;
 
+		size_t idx = SIZE_T_MAX;
+
 		SmartPtr<Transform> transform;
 		SmartPtr<Mesh> orig;
 		SmartPtr<Material> mat;
@@ -19,6 +21,14 @@ namespace Game {
 		Microsoft::WRL::ComPtr<Buffer> pConstBuffer = nullptr;
 		Microsoft::WRL::ComPtr<Buffer> pIndexBuffer = nullptr;
 		Microsoft::WRL::ComPtr<Buffer> pVertexBuffer = nullptr;
+
+		void Register(size_t i) { idx = i; }
+
+		size_t Unregister() { 
+			auto i = idx;
+		    idx = SIZE_T_MAX;
+			return i;
+		}
 
 		void Render(Matrix4x4 View, Matrix4x4 Projection, Matrix4x4 LVP) {
 			std::lock_guard l(renderMutex);
@@ -39,6 +49,10 @@ namespace Game {
 			device->SetActiveVertexBuffer<Vertex>(pVertexBuffer.Get());
 			device->SetActiveIndexBuffer(pIndexBuffer.Get());
 			device->Draw();
+		}
+
+		void RenderTransparent(Matrix4x4 View, Matrix4x4 Projection, Matrix4x4 LVP) {
+			Render(View, Projection, LVP);
 		}
 
 		bool IsTransparent() {

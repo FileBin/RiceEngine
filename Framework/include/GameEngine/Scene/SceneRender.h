@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <vector>
-#include <queue>
 #include <concurrent_unordered_set.h>
 #include <concurrent_unordered_map.h>
 #include <concurrent_vector.h>
@@ -15,6 +13,7 @@
 #include "../Components\UI\Canvas.h"
 #include "../DX/RenderingMesh.h"
 #include "../RenderBase.h"
+#include "../Util/RegisterCollection.h"
 
 struct Matrix4x4f;
 
@@ -56,7 +55,7 @@ namespace Game {
 		public:
 			void UpdateBuffer();
 			void PreInit(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 600, size_t shadowMapRes = 1024);
-			void RenderShadowMap(Vector3 playerPos, std::unordered_set<SmartPtr<IRenderable>>& meshes);
+			void RenderShadowMap(Vector3 playerPos, const std::vector<SmartPtr<IRenderable>>& meshes);
 
 			Matrix4x4 GetMatrixLVP() { return LVP; }
 
@@ -80,8 +79,8 @@ namespace Game {
 
 		void SetupSkybox(SmartPtr<Material> skyboxMat);
 
-		void AddModel(SmartPtr<IRenderable> ren);
-		void RemoveModel(SmartPtr<IRenderable> ren);
+		void RegisterModel(SmartPtr<IRenderable> ren);
+		void UnregisterModel(SmartPtr<IRenderable> ren);
 
 		void AddCamera(SmartPtr<Camera> cam);
 		SmartPtr<Camera> GetCamera(size_t idx);
@@ -90,7 +89,7 @@ namespace Game {
 		SmartPtr<Shader> CreateShader(String name);
 		SmartPtr<Shader> GetShader(String name);
 
-		SmartPtr<Material> CreateMaterial(String name, SmartPtr<Shader> sh, std::vector<std::pair<String, size_t>> mapping = {});
+		SmartPtr<Material> CreateMaterial(String name, SmartPtr<Shader> sh, const std::vector<std::pair<String, size_t>> mapping = {});
 		SmartPtr<Material> GetMaterial(String name);
 
 		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
@@ -113,7 +112,7 @@ namespace Game {
 		concurrency::concurrent_vector<SmartPtr<Camera>> cameras;
 		std::unordered_map<String, SmartPtr<Material>> materials;
 		std::unordered_map<String, SmartPtr<Shader>> shaders;
-		std::unordered_set<SmartPtr<IRenderable>> renderingMeshes, transparentMeshes;
+		RegisterCollection<SmartPtr<IRenderable>> renderingMeshes;
 		std::unordered_set<SmartPtr<IPostProcess>> ppscripts;
 		std::vector<SmartPtr<UI::IDrawable>> drawables;
 		Microsoft::WRL::ComPtr<Buffer> constantBuffer;

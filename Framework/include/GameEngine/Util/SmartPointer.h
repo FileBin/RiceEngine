@@ -48,8 +48,6 @@ public:
 	}
 
 	T* Get() const {
-		if (!ppObject.get())
-			THROW_REMOVED_EXCEPTION(ppObject.get());
 		return *ppObject.get();
 	}
 
@@ -58,8 +56,6 @@ public:
 	}
 
 	T* operator->() const {
-		if (!ppObject.get())
-			THROW_REMOVED_EXCEPTION(ppObject.get());
 		if (!*ppObject.get())
 			THROW_NULL_PTR_EXCEPTION(*ppObject.get());
 		return *ppObject.get();
@@ -78,4 +74,9 @@ public:
 template<typename T>
 bool operator==(const SmartPtr<T>& a, const SmartPtr<T>& b) {
 	return a.Get() == b.Get();
+}
+
+template<typename T>
+bool operator==(const SmartPtr<T>& a, _STD nullptr_t b) {
+	return a.IsNull();
 }

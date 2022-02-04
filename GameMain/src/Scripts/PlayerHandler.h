@@ -36,6 +36,7 @@ public:
 
 		auto& ren = scene.GetRender();
 		transform = obj.GetComponents<Transform>()[0];
+		transform->SetPosition({ 0,30,0 });
 		playerBody = obj.GetComponents<Rigidbody>()[0];
 	}
 
@@ -62,7 +63,7 @@ public:
 		double dt = en.GetDeltaTime();
 		auto physEn = GetScene().GetPhysEngine();
 		HitInfo hit;
-		grounded = physEn->Raycast(transform->GetPosition(), Vector3::down, hit, 32, .6, 1.);
+		grounded = physEn->Raycast(transform->GetPosition(), Vector3::down, hit, 32, .3, 1.1);
 
 		auto tangent = Vector3::Dot(Vector3::up, hit.norm);
 

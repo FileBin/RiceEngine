@@ -171,7 +171,7 @@ namespace Game {
 		if (pData == nullptr) {
 			bd.ByteWidth = stride;
 		} else {
-			bd.ByteWidth = stride * nData;
+			bd.ByteWidth = nData;
 		}
 		bd.BindFlags = bFlags;
 		bd.CPUAccessFlags = cFlags;

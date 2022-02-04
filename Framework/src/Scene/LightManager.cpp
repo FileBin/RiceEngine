@@ -63,7 +63,7 @@ namespace Game {
 		sceneRender->device->LoadBufferSubresource(lightBuffer.Get(), cb);
 	}
 
-	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, std::unordered_set<SmartPtr<IRenderable>>& meshes) {
+	void SceneRender::LightManager::RenderShadowMap(Vector3 playerPos, const std::vector<SmartPtr<IRenderable>>& meshes) {
 		auto context = sceneRender->device->GetContext();
 		ID3D11RenderTargetView* pNullView = nullptr;
 		context->OMSetRenderTargets(1, &pNullView, DSV.Get());
@@ -90,8 +90,12 @@ namespace Game {
 			vp.MaxDepth = 1.f;
 			sceneRender->device->SetVP(vp);
 
-			for (auto& m : meshes) {
-				m->Render(ViewMatrix, ProjMatrix, Matrix4x4::identity);
+			auto n = meshes.size();
+			auto pArr = meshes.data();
+			for (size_t i = 0; i < n; i++) {
+				auto pElem = *(pArr + i);
+				if (pElem.IsNull()) continue;
+				pElem->Render(ViewMatrix, ProjMatrix, Matrix4x4::identity);
 			}
 		}
 		context->OMSetRenderTargets(0, 0, 0);
