@@ -143,7 +143,7 @@ public:
 						alignedP.y = floor(alignedP.y) + .5;
 						alignedP.z = floor(alignedP.z) + .5;
 
-						constexpr dbl cubesize = .60;
+						constexpr dbl cubesize = .51;
 						return sdBox(p - alignedP, { cubesize, cubesize, cubesize });
 					};
 				}

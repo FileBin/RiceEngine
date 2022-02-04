@@ -144,7 +144,7 @@ public:
 					auto vpos = Vector3i(i, j, k);
 					auto data = GetVoxelData(vpos);
 					auto d = func(vpos);
-					if (d <= data.depth) {
+					if (d <= 1 && data.depth >= 0 || d <= data.depth) {
 						if (d <= 0)
 							data.index = index;
 						data.depth = d;
@@ -166,9 +166,6 @@ public:
 					auto vpos = Vector3i(i, j, k);
 					auto data = GetVoxelData(vpos);
 					auto d = -func(vpos);
-					if (d >= -1||data.depth > 0) {
-						data.depth = -d;
-					}
 					if (d >= data.depth) {
 						if (d > 0)
 							data.index = VoxelTypeIndex::V_VOID;
