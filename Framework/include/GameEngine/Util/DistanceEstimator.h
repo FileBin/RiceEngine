@@ -9,5 +9,6 @@ namespace Game::Util {
 	dbl sdPlane(Vector3 p, Vector3 n);
 	dbl sdLine(Vector3 p, Vector3 a, Vector3 b);
 	dbl sdSphere(Vector3 p, dbl r);
+	dbl sdBox(Vector3 p, Vector3 b);
 	dbl sdTorus(Vector3 pos, dbl radius, dbl thickness);
 }

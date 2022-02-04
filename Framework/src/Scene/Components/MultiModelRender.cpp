@@ -43,16 +43,16 @@ namespace Game {
 
 	void MultiModelRender::RemoveModel(MultiModelRender::UUID idx){
 		auto n = meshes.size();
-		lock_guard l(renderMutex);
-		if (idx.keys == nullptr) return;
+		if (idx.keys.IsNull()) return;
 		for (size_t i = 0; i < n; i++) {
 			auto& coll = meshes[i].meshes;
-			if (idx.keys[i] == SIZE_T_MAX) continue;
-			auto pData = coll.GetElemAt(idx.keys[i]);
-			coll.Unregister(idx.keys[i]);
+			if (idx.keys.Get()[i] == SIZE_T_MAX) continue;
+			auto pData = coll.GetElemAt(idx.keys.Get()[i]);
+			lock_guard l(renderMutex);
+			coll.Unregister(idx.keys.Get()[i]);
 			pData.Release();
 		}
-		_DELETE_ARRAY(idx.keys);
+		idx.keys.Release();
 	}
 
 	MultiModelRender::UUID MultiModelRender::AddModel(SmartPtr<Model> model, Matrix4x4 transformationMatrix) {
@@ -60,8 +60,6 @@ namespace Game {
 		MultiModelRender::UUID uuid;
 
 		uuid.ptr = this;
-
-		lock_guard l(renderMutex);
 
 		auto n = meshes.size();
 		uuid.keys_count = n;
@@ -71,12 +69,14 @@ namespace Game {
 			auto& coll = meshes[i].meshes;
 
 			auto mesh = model->GetSubMesh(i);
-			uuid.keys[i] = SIZE_T_MAX;
+			uuid.keys.Get()[i] = SIZE_T_MAX;
 			if (mesh->indexBuffer.empty()) continue;
 
 			auto pData = new RenderData();
-			uuid.keys[i] = coll.Register(pData);
 
+
+			lock_guard l(renderMutex);
+			uuid.keys.Get()[i] = coll.Register(pData);
 			setupRenderData(pData, mesh, transformationMatrix);
 		}
 
@@ -84,8 +84,6 @@ namespace Game {
 	}
 
 	void MultiModelRender::SetModel(MultiModelRender::UUID uuid, SmartPtr<Model> model, Matrix4x4 transformationMatrix) {
-
-		lock_guard l(renderMutex);
 
 		auto n = uuid.keys_count;
 
@@ -95,24 +93,27 @@ namespace Game {
 
 			auto mesh = model->GetSubMesh(i);
 			if (mesh->indexBuffer.empty()) {
-				if (uuid.keys[i] == SIZE_T_MAX) continue;
-				coll.Unregister(uuid.keys[i]);
-				uuid.keys[i] = SIZE_T_MAX;
+				if (uuid.keys.Get()[i] == SIZE_T_MAX) continue;
+				lock_guard l(renderMutex);
+				coll.Unregister(uuid.keys.Get()[i]);
+				uuid.keys.Get()[i] = SIZE_T_MAX;
 				continue;
 			}
-			if (uuid.keys[i] == SIZE_T_MAX) {
-				uuid.keys[i] = coll.Register(new RenderData());
+			if (uuid.keys.Get()[i] == SIZE_T_MAX) {
+				lock_guard l(renderMutex);
+				uuid.keys.Get()[i] = coll.Register(new RenderData());
 			}
 
-			auto pData = coll.GetElemAt(uuid.keys[i]);
+			auto pData = coll.GetElemAt(uuid.keys.Get()[i]);
 
 			if (!pData.IsNull()) {
+				lock_guard l(renderMutex);
 				_RELEASE(pData->indexBuffer);
 				_RELEASE(pData->vertexBuffer);
 				pData->mesh = nullptr;
 				setupRenderData(pData.Get(), mesh, transformationMatrix);
 			} else {
-				uuid.keys[i] = SIZE_T_MAX;
+				uuid.keys.Get()[i] = SIZE_T_MAX;
 			}
 		}
 	}

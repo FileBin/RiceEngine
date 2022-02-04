@@ -26,6 +26,8 @@ class PlayerHandler : public MonoScript {
 	SmartPtr<Transform> transform;
 
 	bool grounded = false;
+
+	bool binding = false, bindKeyPress = false;
 public:
 	SmartPtr<ChunkGenerator> chunkGen;
 	std::chrono::steady_clock::time_point click_time = std::chrono::steady_clock::now();
@@ -51,6 +53,15 @@ public:
 		if (InputManager::GetKey(KeyCode::A)) { mv.x -= 1; }
 		if (InputManager::GetKey(KeyCode::W)) { mv.z += 1; }
 		if (InputManager::GetKey(KeyCode::S)) { mv.z -= 1; }
+
+		if (InputManager::GetKey(KeyCode::Q)) {
+			if (!bindKeyPress) {
+				bindKeyPress = true;
+				binding = !binding;
+			}
+		} else {
+			bindKeyPress = false;
+		}
 
 		mv.Qnormalize();
 
@@ -112,16 +123,30 @@ public:
 	}
 
 	bool updating = false;
-	long timeout = 100;
+	long timeout = 200;
 
 	void AddVoxels() {
 		auto physEn = GetScene().GetPhysEngine();
 		auto cam = GetRender().GetActiveCamera();
 		if (!updating) {
 			HitInfo info;
-			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .1, 5.)) {
-				info.pos -= info.norm * 1.5;
-				SDFunc func = [info](Vector3 p) {return sdSphere(p - info.pos, 2); };
+			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .01, 5.)) {
+				SDFunc func;
+				if (!binding) {
+					func = [info](Vector3 p) {return sdSphere(p - info.pos + info.norm * 1.5, 2); };
+				} else {
+					func = [info](Vector3 p) {
+						auto alignedP = info.pos;
+
+						
+						alignedP.x = floor(alignedP.x) + .5;
+						alignedP.y = floor(alignedP.y) + .5;
+						alignedP.z = floor(alignedP.z) + .5;
+
+						constexpr dbl cubesize = .60;
+						return sdBox(p - alignedP, { cubesize, cubesize, cubesize });
+					};
+				}
 				Vector3i minPos = info.pos - Vector3::one * 3;
 				Core::RunTask([this, func, minPos]() {
 					updating = true;
@@ -140,8 +165,21 @@ public:
 		if (!updating) {
 			HitInfo info;
 			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .1, 5.)) {
-				info.pos += info.norm * 1.4;
-				SDFunc func = [info](Vector3 p) { return sdSphere(p - info.pos, 2); };
+				SDFunc func;
+				if (binding) {
+					func = [info](Vector3 p) {
+						auto alignedP = info.pos;
+
+						alignedP.x = floor(alignedP.x) + .5;
+						alignedP.y = floor(alignedP.y) + .5;
+						alignedP.z = floor(alignedP.z) + .5;
+
+						constexpr dbl cubesize = .60;
+						return sdBox(p - alignedP, { cubesize, cubesize, cubesize });
+					};
+				} else {
+					func = [info](Vector3 p) { return sdSphere(p - info.pos - info.norm * 1.4, 2); };
+				}
 				Vector3i minPos = info.pos - Vector3::one * 5;
 				Core::RunTask([this, func, minPos]() {
 					updating = true;

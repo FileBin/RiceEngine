@@ -38,12 +38,18 @@ public:
 	}
 
 	void Release() {
-		if (!ppObject.get())
-			THROW_REMOVED_EXCEPTION(ppObject.get());
 		if (!IsNull()) {
 			T* pointer = *ppObject;
 			*ppObject = nullptr;
 			delete pointer;
+		}
+	}
+
+	void ReleaseArray() {
+		if (!IsNull()) {
+			T* pointer = *ppObject;
+			*ppObject = nullptr;
+			delete[] pointer;
 		}
 	}
 

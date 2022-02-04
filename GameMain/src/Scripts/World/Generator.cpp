@@ -9,7 +9,8 @@
 using std::function, std::vector;
 
 float GetPoint(float d1, float d2) {
-    return 1 + d2 / (d1 - d2);
+    auto l = d2 - d1;
+    return std::lerp(1 - d2/l, -d1/l, .5f);
 }
 
 void Chunk::UpdateModel(SceneRender& ren, size_t lod) {
@@ -134,10 +135,12 @@ struct Piece {
 
             auto x = GetPoint(d1, d2);
 
-            if (x < 0.01)
+            x = Math::Clamp01(x);
+
+            /*if (x < 0.01)
                 x = 0;
             else if (x > 0.99)
-                x = 1;
+                x = 1;*/
 
             Vector3 p = Vector3::Lerp(Tables::cubeVertices[edge[0]] * step, Tables::cubeVertices[edge[1]] * step, x);
             return p;

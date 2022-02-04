@@ -39,6 +39,19 @@ namespace Game::Util {
 		return p.Length() - r;
 	}
 
+	dbl sdBox(Vector3 p, Vector3 b) {
+		auto absp = p;
+		absp.x = abs(absp.x);
+		absp.y = abs(absp.y);
+		absp.z = abs(absp.z);
+		auto q = absp - b;
+		auto qg0 = q;
+		qg0.x = max(qg0.x, 0.);
+		qg0.y = max(qg0.y, 0.);
+		qg0.z = max(qg0.z, 0.);
+		return qg0.Length() + min(max(q.x, max(q.y, q.z)), 0.);
+	}
+
 	dbl sdTorus(Vector3 pos, dbl radius, dbl thickness) {
 		Vector2 q = { sqrt(pos.x * pos.x + pos.z * pos.z) - radius, pos.y };
 		return q.Length() - thickness;

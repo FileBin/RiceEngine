@@ -18,7 +18,7 @@ namespace Game {
 		private:
 			friend class MultiModelRender;
 			size_t keys_count;
-			size_t* keys;
+			SmartPtr<size_t> keys;
 			SmartPtr<MultiModelRender> ptr;
 		public:
 			bool IsActive();
