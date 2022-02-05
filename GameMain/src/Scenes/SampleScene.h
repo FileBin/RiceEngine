@@ -4,7 +4,7 @@
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Components\UI\Text.h>
-#include <GameEngine\Components\UI\Image.h>
+#include <GameEngine\Components\UI\Button.h>
 #include <GameEngine\Components\Rigidbody.h>
 
 #include "../Scripts/CameraMoverScript.h"
@@ -135,7 +135,7 @@ class SampleScene : public Scene {
 		auto picture = Instaniate();
 		picture->SetName(L"Picture");
 
-		auto pic = new UI::Image();
+		auto pic = new UI::Button();
 		pic->SetImg(&ren.CreateTexture(L"img/amogus.png"));
 		rTransform = new UI::RectTransform();
 		rTransform->anchor = UI::RectTransform::Anchor::BottomRight;

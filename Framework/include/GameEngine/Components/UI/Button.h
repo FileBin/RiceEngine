@@ -12,7 +12,7 @@ namespace Game::UI {
 	public:
 		ButtonState getState() { return state; };
 		void setOnClickListener(ClickListener listener) { this->listener = listener; };
-		void update();
+		void Update();
 	private:
 		void setState(ButtonState state) { this->state = state; };
 		ButtonState state;
