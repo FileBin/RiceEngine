@@ -13,7 +13,7 @@ class MsaaTestScript : public ScriptBase {
 		auto& engine = GetEngine();
 		if (InputManager::GetKey(KeyCode::Button1)) {
 			
-			//engine.SetMsaaLevel(1);
+			engine.SetMsaaLevel(1);
 			if (!playing) {
 				std::vector<SoundEffect*> effects;
 				effects.push_back(new SoundEffect(Effect::REVERB));
