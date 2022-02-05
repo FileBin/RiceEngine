@@ -19,6 +19,15 @@ const Vector3 Vector3::down = { 0,-1,0 };
 const Vector3 Vector3::forward = { 0,0,1 };
 const Vector3 Vector3::backward = { 0,0,-1 };
 
+const Vector3i Vector3i::zero = { 0,0,0 };
+const Vector3i Vector3i::one = { 1,1,1 };
+const Vector3i Vector3i::left = { -1,0,0 };
+const Vector3i Vector3i::right = { 1,0,0 };
+const Vector3i Vector3i::up = { 0,1,0 };
+const Vector3i Vector3i::down = { 0,-1,0 };
+const Vector3i Vector3i::forward = { 0,0,1 };
+const Vector3i Vector3i::backward = { 0,0,-1 };
+
 const Vector2 Vector2::one = { 1,1 };
 const Vector2 Vector2::zero = { 0,0 };
 const Vector2 Vector2::left = { -1,0 };

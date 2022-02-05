@@ -144,7 +144,29 @@ public:
 					auto vpos = Vector3i(i, j, k);
 					auto data = GetVoxelData(vpos);
 					auto d = func(vpos);
-					if (d <= 1 && data.depth >= 0 || d <= data.depth) {
+
+					VoxelData datas[6];
+					datas[0] = GetVoxelData(vpos + Vector3i::right);
+					datas[1] = GetVoxelData(vpos + Vector3i::left);
+					datas[2] = GetVoxelData(vpos + Vector3i::up);
+					datas[3] = GetVoxelData(vpos + Vector3i::down);
+					datas[4] = GetVoxelData(vpos + Vector3i::forward);
+					datas[5] = GetVoxelData(vpos + Vector3i::backward);
+
+					dbl maxdepth = data.depth;
+
+					dbl mindepth = data.depth;
+
+					for (auto i = 0; i < 6; i++) {
+						maxdepth = max(maxdepth, datas[i].depth);
+						mindepth = min(mindepth, datas[i].depth);
+					}
+
+					if (maxdepth < 0) {
+						d -= 1;
+					}
+
+					if (mindepth > 0 || d <= data.depth) {
 						if (d <= 0)
 							data.index = index;
 						data.depth = d;
@@ -165,8 +187,24 @@ public:
 				for (auto k = minPos.z; k <= p; k++) {
 					auto vpos = Vector3i(i, j, k);
 					auto data = GetVoxelData(vpos);
+
 					auto d = -func(vpos);
-					if (d >= data.depth) {
+
+					VoxelData datas[6];
+					datas[0] = GetVoxelData(vpos + Vector3i::right);
+					datas[1] = GetVoxelData(vpos + Vector3i::left);
+					datas[2] = GetVoxelData(vpos + Vector3i::up);
+					datas[3] = GetVoxelData(vpos + Vector3i::down);
+					datas[4] = GetVoxelData(vpos + Vector3i::forward);
+					datas[5] = GetVoxelData(vpos + Vector3i::backward);
+
+					dbl maxdepth = data.depth;
+
+					for (auto i = 0; i < 6; i++) {
+						maxdepth = max(maxdepth, datas[i].depth);
+					}
+
+					if (d >= data.depth || maxdepth <= 0) {
 						if (d > 0)
 							data.index = VoxelTypeIndex::V_VOID;
 						data.depth = d;

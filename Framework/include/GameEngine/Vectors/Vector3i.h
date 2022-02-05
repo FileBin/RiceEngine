@@ -21,6 +21,15 @@ public:
 	static Vector3i Cross(Vector3i a, Vector3i b);
 	dbl SqrLength();
 	dbl Length();
+
+	static const Vector3i zero;
+	static const Vector3i one;
+	static const Vector3i left;
+	static const Vector3i right;
+	static const Vector3i up;
+	static const Vector3i down;
+	static const Vector3i forward;
+	static const Vector3i backward;
 };
 
 bool operator==(Vector3i a, Vector3i b);

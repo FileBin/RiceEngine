@@ -125,6 +125,8 @@ public:
 	bool updating = false;
 	long timeout = 200;
 
+	#define eps .01;
+
 	void AddVoxels() {
 		auto physEn = GetScene().GetPhysEngine();
 		auto cam = GetRender().GetActiveCamera();
@@ -143,7 +145,7 @@ public:
 						alignedP.y = floor(alignedP.y) + .5;
 						alignedP.z = floor(alignedP.z) + .5;
 
-						constexpr dbl cubesize = .51;
+						constexpr dbl cubesize = .5+eps;
 						return sdBox(p - alignedP, { cubesize, cubesize, cubesize });
 					};
 				}
@@ -174,7 +176,9 @@ public:
 						alignedP.y = floor(alignedP.y) + .5;
 						alignedP.z = floor(alignedP.z) + .5;
 
-						constexpr dbl cubesize = .60;
+						//alignedP += info.norm * .125;
+
+						constexpr dbl cubesize = .50 + eps;
 						return sdBox(p - alignedP, { cubesize, cubesize, cubesize });
 					};
 				} else {
