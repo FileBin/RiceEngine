@@ -130,7 +130,7 @@ namespace Game {
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
 			if (!effects.empty()) {
-				ogg->applyEffectChain(&effects);
+				ogg->applyEffectChain(effects);
 			}
 			playSoundStream(ogg);
 		}
@@ -145,7 +145,7 @@ namespace Game {
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
 			if (!effects.empty()) {
-				ogg->applyEffectChain(&effects);
+				ogg->applyEffectChain(effects);
 			}
 			playSoundStream(ogg);
 		}
