@@ -17,10 +17,15 @@ namespace Game::UI {
 		} else {
 			setState(ButtonState::OVER);
 		}
-
+		Vector2 buttonTopRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
+		Vector2 buttonScale = canvas->TransformScaleToScreen(transform->GetScale2D());
+		Vector2 anchor = transform->GetAnchor();
+		anchor += Vector2::one;
+		anchor *= .5;
+		buttonTopRight += anchor * buttonScale;
 		Vector2 testPosition = InputManager::GetMousePos();
-		Log::log(Log::LogLevel::ERR, std::to_wstring(testPosition.x));
-		Log::log(Log::LogLevel::ERR, std::to_wstring(testPosition.y));
+		Log::log(Log::LogLevel::INFO, L"mousePos: ({:.2f}, {:.2f})", testPosition.x, testPosition.y);
+		Log::log(Log::LogLevel::INFO, L"buttonPos: ({:.2f}, {:.2f})", buttonTopRight.x, buttonTopRight.y);
 
 		switch (state)
 		{

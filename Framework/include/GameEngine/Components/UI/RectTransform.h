@@ -59,17 +59,11 @@ namespace Game::UI {
 			auto& ren = GetSceneObject().GetScene().GetRender();
 			auto pos = GetPosition2D();
 
-			//auto scale = canvas->TransformScaleToScreen(GetScale2D());
-			auto scale = GetScale2D();
-			//scale.x /= ren.GetAspectRatio();
-
 			auto anchor = GetAnchor();
 
 			//transform to normalized coords
 			anchor += Vector2::one;
 			anchor *= .5;
-
-			//pos -= scale * anchor;
 
 			anchor.x *= canvas->referenceResoluton.x;
 			anchor.y *= canvas->referenceResoluton.y;
