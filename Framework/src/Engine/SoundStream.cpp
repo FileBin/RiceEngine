@@ -46,7 +46,7 @@ namespace Game {
         alCall(alGenSources, 1, &source);
     }
 
-    void SoundStream::applyEffectChain(std::vector<SoundEffect*> *effects) {
+    void SoundStream::applyEffectChain(std::vector<SoundEffect*> effects) {
         hasEffects = true;
 
         alCall(alGenFilters, 1, &filter);
@@ -57,12 +57,12 @@ namespace Game {
         alCall(alSourcei, source, AL_DIRECT_FILTER, filter);
         alCall(alSourcei, source, AL_ROOM_ROLLOFF_FACTOR, 1);
 
-        if (effects->size() > 1) {
-            for (size_t i = 1; i < effects->size(); i++) {
-                alCall(alAuxiliaryEffectSloti, effects->at(i - 1)->slotID, AL_EFFECTSLOT_TARGET_SOFT, effects->at(i)->slotID);
+        if (effects.size() > 1) {
+            for (size_t i = 1; i < effects.size(); i++) {
+                alCall(alAuxiliaryEffectSloti, effects.at(i - 1)->slotID, AL_EFFECTSLOT_TARGET_SOFT, effects.at(i)->slotID);
             }
         }
-        alCall(alSource3i, source, AL_AUXILIARY_SEND_FILTER, effects->at(0)->slotID, 0, NULL);
+        alCall(alSource3i, source, AL_AUXILIARY_SEND_FILTER, effects.at(0)->slotID, 0, NULL);
         //for more info visit https://www.gamedeveloper.com/programming/openal-s-efx and https://nrgcore.com/docs/manual/en-us/effects_extension_guide.pdf
     }
 

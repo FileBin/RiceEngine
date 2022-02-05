@@ -187,6 +187,7 @@
     <ClInclude Include="include\GameEngine\Components\Rigidbody.h" />
     <ClInclude Include="include\GameEngine\Components\SoundSource.h" />
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\Button.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Canvas.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
@@ -279,6 +280,7 @@
     <ClCompile Include="src\Scene\Components\MultiModelRender.cpp" />
     <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp" />
     <ClCompile Include="src\Scene\Components\SoundSource.cpp" />
+    <ClCompile Include="src\Scene\Components\UI\Button.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Image.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\LightManager.cpp" />

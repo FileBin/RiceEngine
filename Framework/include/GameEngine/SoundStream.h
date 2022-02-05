@@ -36,7 +36,7 @@ namespace Game {
         void setPitch(float pitch);
         void closeOnNoVolume(bool close);
 
-        void applyEffectChain(std::vector<SoundEffect*>* effects);
+        void applyEffectChain(std::vector<SoundEffect*> effects);
 
     protected:
 
