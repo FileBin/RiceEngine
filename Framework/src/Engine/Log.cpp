@@ -6,7 +6,6 @@
 #include <GameEngine/Util/exceptions.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/error.h>
-#include <iostream>
 
 #define LOGNAME "log.txt"
 
@@ -110,7 +109,6 @@ namespace Game {
 		auto str = std::format(L"{}::{}: [{}] {}\n", timer, cl, levtext, text);
 
 		wprintf(str.c_str());
-		std::wcout << str;
 		file << str;
 		file.flush();
 	}
