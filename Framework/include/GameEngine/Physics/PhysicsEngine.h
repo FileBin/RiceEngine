@@ -50,6 +50,8 @@ namespace Game::Physics {
 		void PreInit();
 		void Update(dbl dt);
 
+		Vector3 GetNormal(Vector3 pos);
+
 		const Frame GetBackFrame();
 		bool Raycast(Vector3 origin, Vector3 direction, OUT HitInfo& info, size_t maxIterations = 128, dbl eps = .1, dbl maxDist = 300.);
 

@@ -13,6 +13,8 @@ public:
 	Vector3(const Vector3i& vec);
 	Vector3(const Vector3f& vec);
 
+	Vector3(const Vector2& vec);
+
 	Vector3& operator=(Vector3f& v);
 	Vector3& operator-=(Vector3 v);
 	Vector3& operator+=(Vector3 v);

@@ -37,22 +37,20 @@ namespace Game::UI {
 
 		Vector2 scale, pos;
 		scale = canvas->TransformScaleToView(transform->GetScale2D());
-		scale.x /= ren.GetAspectRatio();
-		pos = canvas->TransformPositionToView(transform->GetPosition2D());
+		pos = canvas->TransformPositionToView(transform->GetPosition2DWithAnchor(canvas));
 
 		pos *= 2;
+		pos -= Vector2::one;
 		pos.y = -pos.y;
 
-		auto anchor = transform->GetAnchor();
-		auto origin = anchor;
-		pos += anchor - origin * scale;
-
 		scale.y = -scale.y;
+		scale.x /= ren.GetAspectRatio();
 
 		ConstantBufferData data;
 		data.LightWVP = Matrix4x4f::identity;
 		data.Projection = Matrix4x4f::identity;
-	 	data.WorldView = data.World = Matrix4x4::Scale({ scale.x, scale.y }) * Matrix4x4::Translation({ pos.x, pos.y });
+
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale.x, scale.y }) * Matrix4x4::Translation({ pos.x, pos.y });
 
 		device->LoadBufferSubresource(buf, data);
 		device->ClearZBuffer();

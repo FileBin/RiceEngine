@@ -32,9 +32,7 @@ namespace Game::UI {
 				ren.RemoveDrawable(this);
 			}
 		}
-
 	protected:
-
 		Canvas* canvas;
 		RectTransform* transform;
 	};

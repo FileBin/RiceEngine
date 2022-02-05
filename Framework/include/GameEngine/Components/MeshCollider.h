@@ -54,5 +54,6 @@ namespace Game {
 		void SetModel(Model* m);
 		void SetModel(Model* m, int ignoredMat);
 		dbl sdFunc(Vector3 p);
+
 	};
 }

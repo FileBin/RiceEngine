@@ -34,12 +34,8 @@ namespace Game {
 			n *= re;
 			n.Normalize();
 			auto d = Vector3::Dot(velocity, n);
-			//auto l = velocity.Length();
+
 			velocity -= n * d * (1. + bounciness);
-			/*if (abs(d) < l * .11) {
-				velocity.Normalize();
-				velocity *= l;
-			}*/
 			motion += n * delta;
 			newPos = position + motion;
 		}

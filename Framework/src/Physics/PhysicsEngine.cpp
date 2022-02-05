@@ -47,7 +47,7 @@ namespace Game::Physics {
 		std::unique_lock lock(updateMutex);
 		for (const auto& p : bodies) {
 			auto rb = p.second;
-			rb->Move(timeScale * dt, [this, p](Vector3 pos) { return sdFunc(pos); });
+			rb->Move(timeScale * dt, [this](Vector3 pos) { return sdFunc(pos); });
 		}
 		CaptureFrame(dt);
 		SwapFrames();
@@ -72,6 +72,19 @@ namespace Game::Physics {
 		return d;
 	}
 
+	/*Vector3 PhysicsEngine::GetNormal(Vector3 pos) {
+		SmartPtr<ICollider> col;
+		auto d = DBL_MAX;
+		for (const auto& p : colliders) {
+			auto _d = p.second->sdFunc(pos);
+			if (d > _d) {
+				d = _d;
+				col = p.second;
+			}
+		}
+
+		return col->GetNormal(pos);
+	}*/
 	void PhysicsEngine::SwapFrames() {
 		std::unique_lock lock(swapMutex);
 		auto temp = backFrame;

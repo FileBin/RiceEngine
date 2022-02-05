@@ -14,11 +14,11 @@ namespace Game::UI {
 		Vector2 GetAnchor() {
 			switch (anchor) {
 			case Anchor::TopLeft:
-				return Vector2(-1, 1);
+				return Vector2(-1, -1);
 			case Anchor::TopCenter:
-				return Vector2(0, 1);
+				return Vector2(0, -1);
 			case Anchor::TopRight:
-				return Vector2(1, 1);
+				return Vector2(1, -1);
 			case Anchor::MiddleLeft:
 				return Vector2(-1, 0);
 			case Anchor::MiddleCenter:
@@ -26,11 +26,11 @@ namespace Game::UI {
 			case Anchor::MiddleRight:
 				return Vector2(1, 0);
 			case Anchor::BottomLeft:
-				return Vector2(-1, -1);
+				return Vector2(-1, 1);
 			case Anchor::BottomCenter:
-				return Vector2(0, -1);
+				return Vector2(0, 1);
 			case Anchor::BottomRight:
-				return Vector2(1, -1);
+				return Vector2(1, 1);
 			}
 			THROW_INVALID_ARG_EXCEPTION("RectTransform::anchor");
 		}
@@ -50,10 +50,32 @@ namespace Game::UI {
 			return { scale.x, scale.y };
 		}
 
-
 		Vector2 GetPosition2D() {
 			auto pos = GetPosition();
 			return { pos.x, pos.y };
+		}
+
+		Vector2 GetPosition2DWithAnchor(Canvas* canvas) {
+			auto& ren = GetSceneObject().GetScene().GetRender();
+			auto pos = GetPosition2D();
+
+			//auto scale = canvas->TransformScaleToScreen(GetScale2D());
+			auto scale = GetScale2D();
+			//scale.x /= ren.GetAspectRatio();
+
+			auto anchor = GetAnchor();
+
+			//transform to normalized coords
+			anchor += Vector2::one;
+			anchor *= .5;
+
+			//pos -= scale * anchor;
+
+			anchor.x *= canvas->referenceResoluton.x;
+			anchor.y *= canvas->referenceResoluton.y;
+
+			pos += anchor;
+			return pos;
 		}
 	};
 }

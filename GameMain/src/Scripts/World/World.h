@@ -153,17 +153,10 @@ public:
 					datas[4] = GetVoxelData(vpos + Vector3i::forward);
 					datas[5] = GetVoxelData(vpos + Vector3i::backward);
 
-					dbl maxdepth = data.depth;
-
 					dbl mindepth = data.depth;
 
 					for (auto i = 0; i < 6; i++) {
-						maxdepth = max(maxdepth, datas[i].depth);
 						mindepth = min(mindepth, datas[i].depth);
-					}
-
-					if (maxdepth < 0) {
-						d -= 1;
 					}
 
 					if (mindepth > 0 || d <= data.depth) {

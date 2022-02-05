@@ -251,6 +251,12 @@ Vector3::Vector3(const Vector3f& v) {
     z = (dbl)v.z;
 }
 
+Vector3::Vector3(const Vector2& v) {
+    x = (dbl)v.x;
+    y = (dbl)v.y;
+    z = 0;
+}
+
 double& Vector3::operator[](size_t idx) {
     if (idx == 0)
         return x;
