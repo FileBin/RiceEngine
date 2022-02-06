@@ -117,6 +117,7 @@ public:
 			InputManager::UnlockMouse();
 		} else {
 			if (InputManager::GetKey(KeyCode::MouseLeft)) {
+				InputManager::LockMouse();
 				EraseVoxels();
 			} else if (InputManager::GetKey(KeyCode::MouseRight)) {
 				AddVoxels();

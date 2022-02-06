@@ -40,9 +40,7 @@ namespace Game {
 
 		void AddScript(ScriptBase* script, Stage s);
 
-		void LoadScene(Scene* _scene) {
-			activeScene = _scene;
-		}
+		void LoadScene(Scene* _scene);
 		void SetFps(double _fps) { fps = _fps; }
 
 		double GetFixedDeltaTime() { return fixedDeltaTime; }
@@ -60,8 +58,10 @@ namespace Game {
 		bool RunFrame();
 		void RunScripts(std::vector<ScriptBase*>& scripts);
 
+		void LoadSceneImmediate();
+
 		Stage stage = (Stage)0;
-		SmartPtr<Scene> activeScene;
+		SmartPtr<Scene> activeScene, loadScene;
 
 		Window* wnd = nullptr;
 		LoadingScreenRenderBase* render = nullptr;

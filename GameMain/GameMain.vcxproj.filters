@@ -21,6 +21,7 @@
     <ClCompile Include="src\Scripts\World\World.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\Scripts\Util\Util.cpp" />
+    <ClCompile Include="src\Scenes\SampleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scripts.h" />
@@ -58,6 +59,7 @@
     <ClInclude Include="src\Scripts\Util\MeshGenerator.h" />
     <ClInclude Include="src\Scripts\PlayerHandler.h" />
     <ClInclude Include="src\Scripts\SamplePostProcess.h" />
+    <ClInclude Include="src\Scenes\MainMenuScene.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />

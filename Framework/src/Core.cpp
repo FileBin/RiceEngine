@@ -30,6 +30,27 @@ namespace Game {
 	Core::Core() {}
 
 	Core::~Core() {}
+
+	void Core::LoadScene(Scene* _scene) {
+		if (!loadScene.IsNull()) return;
+		loadScene = _scene;
+	}
+
+	void Core::LoadSceneImmediate() {
+		if (loadScene.IsNull()) return;
+		if (!activeScene.IsNull()) {
+			activeScene->Close();
+		}
+		activeScene = loadScene;
+		loadScene = nullptr;
+		activeScene->GetRender().SetDevice(device);
+		activeScene->PreInit(engine);
+		Core::RunTask([this]() {
+		activeScene->Init();
+		activeScene->PostInit();
+			});
+	}
+
 	bool Core::Init() {
 		fps = 600;
 		engine = new Engine(&device, this);
@@ -77,6 +98,7 @@ namespace Game {
 
 			time_point start = steady_clock::now();
 			do {
+				LoadSceneImmediate();
 				stage = Stage::Update;
 				RunScripts(updateScripts);
 				wnd->inputmgr->Update();

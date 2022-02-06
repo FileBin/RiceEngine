@@ -173,12 +173,14 @@
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Scenes\SampleScene.cpp" />
     <ClCompile Include="src\Scripts\Util\Util.cpp" />
     <ClCompile Include="src\Scripts\World\Generator.cpp" />
     <ClCompile Include="src\Scripts\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Scenes\MainMenuScene.h" />
     <ClInclude Include="src\Scenes\PhysicsTest.h" />
     <ClInclude Include="src\Scripts.h" />
     <ClInclude Include="src\Scripts\CameraMoverScript.h" />

@@ -11,12 +11,14 @@ namespace Game {
 	SceneObject::SceneObject(Scene* scene) { this->scene = scene; }
 
 	SceneObject::~SceneObject() {
-		parent->RemoveChild(this);
+		if (parent)
+			parent->RemoveChild(this);
 		ForceDisable();
 		for (auto c : components) {
 			_DELETE(c);
 		}
 		for (auto o : children) {
+			o->parent = nullptr;
 			_DELETE(o);
 		}
 	}

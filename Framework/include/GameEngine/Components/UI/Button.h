@@ -13,7 +13,8 @@ namespace Game::UI {
 		ButtonState prev_state;
 
 	public:
-		typedef void (*Listener)(Game::UI::Button* button);
+		//typedef void (*Listener)(Game::UI::Button* button);
+		typedef std::function<void(Game::UI::Button* button)> Listener;
 
 		ButtonState getState() { return state; };
 		void setOnClickListener(Listener click_listener) { on_click_listener = click_listener; };

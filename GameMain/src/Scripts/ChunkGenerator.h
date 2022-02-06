@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <GameEngine\Core.h>
+
 #include <GameEngine\Components\MonoScript.h>
 #include <Scripts\World\Chunk.h>
 #include <GameEngine\Scene\Scene.h>

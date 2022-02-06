@@ -58,16 +58,7 @@ namespace Game {
 	SoundManager& Engine::getSoundManager() { return core->activeScene->GetSoundManager(); };
 
 	void Engine::LoadScene(Scene* scene) {
-		if (!core->activeScene.IsNull()) {
-			core->activeScene->Close();
-		}
-		core->activeScene = scene;
-		scene->GetRender().SetDevice(core->device);
-		scene->PreInit(this);
-		Core::RunTask([scene]() {
-			scene->Init();
-			scene->PostInit();
-			});
+		core->LoadScene(scene);
 	}
 
 	Device* Engine::GetDevice() {
