@@ -30,7 +30,7 @@ namespace Game::UI {
 
 		Vector2 scale, pos, scale_bg, pos_root;
 
-		Vector2 scale_raw = transform->GetScale2D();
+		Vector2 scale_raw = transform->GetReferenceScale2D();
 
 		scale = canvas->TransformScaleToView({ scale_raw.y, scale_raw.y });
 		scale_bg = canvas->TransformScaleToView(scale_raw);
@@ -76,7 +76,7 @@ namespace Game::UI {
 
 		device->Draw();
 
-		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos.x);
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos);
 		device->LoadBufferSubresource(buf, data);
 
 		device->SetPSTextures({ tex });
@@ -85,12 +85,13 @@ namespace Game::UI {
 	}
 
 	Vector2 Slider::getPosition(dbl progr) {
-		return transform->GetPosition2DWithAnchor(canvas) + direction * progr * transform->GetScale2D();
+		auto& ren = GetSceneObject().GetScene().GetRender();
+		return transform->GetPosition2DWithAnchor(canvas) + direction * (progr - .5) * transform->GetScale2DTransformed(ren.GetAspectRatio());
 	}
 
 	bool Slider::checkHover() {
-		Vector2 topRight = canvas->TransformPositionToScreen(getPosition(0));
-		Vector2 scale = canvas->TransformScaleToScreen(transform->GetScale2D());
+		Vector2 topRight = canvas->TransformPositionToScreen(getPosition(0.5));
+		Vector2 scale = canvas->TransformScaleToScreen(transform->GetReferenceScale2D());
 		Vector2 anchor = transform->GetAnchor();
 		anchor += Vector2::one;
 		anchor *= .5;
@@ -160,8 +161,8 @@ namespace Game::UI {
 		if (state == SliderState::PRESSED) {
 
 			auto screenPos = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
-			auto len = canvas->TransformScaleToScreen(transform->GetScale2D()).x;
-			SetProgress(Vector2::Dot(direction, (InputManager::GetMousePos() - screenPos) ) / len, true);
+			auto len = canvas->TransformScaleToScreen(transform->GetReferenceScale2D()).x;
+			SetProgress(Vector2::Dot(direction, (InputManager::GetMousePos() - screenPos) ) / len + .5, true);
 			if (prev_progress != progress) {
 				Log::log(Log::LogLevel::INFO, L"{}", progress);
 			}

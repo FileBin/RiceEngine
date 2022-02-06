@@ -51,13 +51,13 @@ void MainMenuScene::Init() {
 
 	//slider
 	UI::Slider* slider = new UI::Slider();
-	slider->SetImg(&ren.CreateTexture(L"img/amogus.png"));
+	slider->SetImg(&ren.CreateTexture(resManager.GetString("CrossTexture")));
 	slider->SetBgImg(&ren.CreateTexture(L"img/sky_finger.png"));
 
 	rectTransform = new UI::RectTransform();
 	rectTransform->anchor = UI::RectTransform::Anchor::BottomCenter;
 	rectTransform->SetPosition({ 0,-20 });
-	rectTransform->SetScale({ 55,55 });
+	rectTransform->SetScale({ 200,55 });
 
 	auto Slider = Instaniate();
 	Slider->SetName(L"Slider");

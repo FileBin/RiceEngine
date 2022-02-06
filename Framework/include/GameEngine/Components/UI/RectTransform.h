@@ -45,7 +45,16 @@ namespace Game::UI {
 			return { vec3.x, vec3.y };
 		}
 
-		Vector2 GetScale2D() {
+		Vector2 GetScale2DTransformed(dbl aspectRatio) {
+			auto scale = GetScale();
+			if (aspectRatio > 1)
+				scale.x /= aspectRatio;
+			else
+				scale.y *= aspectRatio;
+			return { scale.x, scale.y };
+		}
+
+		Vector2 GetReferenceScale2D() {
 			auto scale = GetScale();
 			return { scale.x, scale.y };
 		}

@@ -35,7 +35,7 @@ namespace Game::UI {
 		auto buf = ren.GetConstBuffer();
 
 		Vector2 scale, pos;
-		scale = canvas->TransformScaleToView(transform->GetScale2D());
+		scale = canvas->TransformScaleToView(transform->GetReferenceScale2D());
 		pos = canvas->TransformPositionToView(transform->GetPosition2DWithAnchor(canvas));
 
 		pos *= 2;

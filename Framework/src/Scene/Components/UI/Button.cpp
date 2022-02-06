@@ -46,7 +46,7 @@ namespace Game::UI {
 
 	bool Button::checkHover() {
 		Vector2 buttonTopRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
-		Vector2 buttonScale = canvas->TransformScaleToScreen(transform->GetScale2D());
+		Vector2 buttonScale = canvas->TransformScaleToScreen(transform->GetReferenceScale2D());
 		Vector2 anchor = transform->GetAnchor();
 		anchor += Vector2::one;
 		anchor *= .5;
