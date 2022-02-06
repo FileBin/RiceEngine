@@ -38,17 +38,36 @@ class MainMenuScene : public Scene {
 		UI::Button* button = new UI::Button();
 		button->SetImg(&ren.CreateTexture(L"img/sky_finger.png"));
 		button->setOnClickListener([&en](UI::Button* sender) {
-				en.LoadScene(new SampleScene());
+				//en.LoadScene(new SampleScene());
 			});
 
 		auto rectTransform = new UI::RectTransform();
-		rectTransform->anchor = UI::RectTransform::Anchor::TopCenter;
-		rectTransform->SetPosition({0,0});
+		rectTransform->anchor = UI::RectTransform::Anchor::MiddleCenter;
+		rectTransform->SetPosition({0,-100});
 		rectTransform->SetScale({ 200,33 });
 
 		auto StartButton = Instaniate();
 		StartButton->SetName(L"StartButton");
 		StartButton->AddComponent(rectTransform);
 		StartButton->AddComponent(button);
+
+		//slider
+		UI::Slider* slider = new UI::Slider();
+		slider->SetMax(400);
+		slider->SetDirection({ 1,0 });
+		slider->SetImg(&ren.CreateTexture(L"img/pattern.png"));
+		/*slider->setOnClickListener([&en](UI::Button* sender) {
+			en.LoadScene(new SampleScene());
+			});
+			*/
+		rectTransform = new UI::RectTransform();
+		rectTransform->anchor = UI::RectTransform::Anchor::BottomCenter;
+		rectTransform->SetPosition({ 0,-20 });
+		rectTransform->SetScale({ 200,33 });
+
+		auto Slider = Instaniate();
+		Slider->SetName(L"Slider");
+		Slider->AddComponent(rectTransform);
+		Slider->AddComponent(slider);
 	}
 };

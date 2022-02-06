@@ -18,21 +18,19 @@ namespace Game::UI {
 
 	void Button::Update() {
 		
-		if (checkHover()) {
-			if (InputManager::GetKey(KeyCode::MouseLeft) && 
+		bool hover = checkHover();
+		if (hover || state == ButtonState::PRESSED) {
+			if (InputManager::GetKey(KeyCode::MouseLeft) &&
 				(state == ButtonState::HOVER || state == ButtonState::PRESSED)) {
 				setState(ButtonState::PRESSED);
-			}
-			else {
-				setState(ButtonState::HOVER);
+			} else {
+				if (hover)
+					setState(ButtonState::HOVER);
+				else
+					setState(ButtonState::NEUTRAL);
 			}
 		} else {
-			if (state == ButtonState::PRESSED) {
-				setState(ButtonState::HOVER);
-			}
-			else {
-				setState(ButtonState::NEUTRAL);
-			}
+			setState(ButtonState::NEUTRAL);
 		}
 
 		fireListener(on_click_listener, prev_state == ButtonState::HOVER && state == ButtonState::PRESSED);

@@ -48,6 +48,10 @@ dbl Vector2::SqrLength() { return x * x + y * y; };
 
 dbl Vector2::Length() { return sqrt(SqrLength()); }
 
+Vector2 Vector2::Normalized() {
+    return *this / Length();
+}
+
 double& Vector2::operator[](size_t idx) {
     if (idx == 0)
         return x;

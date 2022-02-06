@@ -18,6 +18,7 @@ struct Vector2 {
 	static dbl Dot(Vector2 a, Vector2 b);
 	dbl SqrLength();
 	dbl Length();
+	Vector2 Normalized();
 
 	static const Vector2 zero;
 	static const Vector2 one;

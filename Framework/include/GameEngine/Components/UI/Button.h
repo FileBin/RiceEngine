@@ -24,9 +24,9 @@ namespace Game::UI {
 		void OnInit();
 		void Update();
 
-		void Draw(Device* device);
+		virtual void Draw(Device* device);
 
-	private:
+	protected:
 		bool checkHover();
 		void setState(ButtonState state);
 
