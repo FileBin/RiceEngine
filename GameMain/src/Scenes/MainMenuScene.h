@@ -6,7 +6,7 @@
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Components\UI\Text.h>
-#include <GameEngine\Components\UI\Slider.h>
+#include <GameEngine\Components\UI\TextButton.h>
 #include <GameEngine\Components\Rigidbody.h>
 
 #include "../Scripts/CameraMoverScript.h"
@@ -39,11 +39,11 @@ class MainMenuScene : public Scene {
 		ren.AddCamera(cam);
 
 		//start button
-		UI::Button* button = new UI::Button();
-		button->SetImg(&ren.CreateTexture(resManager.GetString("StartButtonImg")));
-		button->setOnClickListener([&en](UI::Button* sender) {
+		UI::TextButton* button = new UI::TextButton("StartButtonImg", L"test123123");
+		
+		/*button->setOnClickListener([&en](UI::Button* sender) {
 				en.LoadScene(new SampleScene());
-			});
+			});*/
 
 		auto rectTransform = new UI::RectTransform();
 		rectTransform->anchor = UI::RectTransform::Anchor::MiddleCenter;
