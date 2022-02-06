@@ -24,10 +24,8 @@ namespace Game::UI {
 		void OnInit();
 		void Update();
 
-		void Draw(Device* device) {
-			device->SetActivePSConstantBuffer(PSConstBuffer.Get());
-			Image::Draw(device);
-		};
+		void Draw(Device* device);
+
 	private:
 		bool checkHover();
 		void setState(ButtonState state);
@@ -39,7 +37,7 @@ namespace Game::UI {
 		Listener on_release_listener;
 		Listener on_hover_in_listener;
 		Listener on_hover_out_listener;
-	protected:
+	
 		void fireListener(Listener listener, bool fire) {
 			if (listener != NULL && fire) {
 				listener(this);

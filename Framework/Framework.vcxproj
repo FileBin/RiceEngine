@@ -192,6 +192,7 @@
     <ClInclude Include="include\GameEngine\Components\UI\CheckBox.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\Slider.h" />
     <ClInclude Include="include\GameEngine\DX\RenderingMesh.h" />
     <ClInclude Include="include\GameEngine\Scene\IRenderable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\RectTransform.h" />
@@ -284,6 +285,7 @@
     <ClCompile Include="src\Scene\Components\UI\Button.cpp" />
     <ClCompile Include="src\Scene\Components\UI\CheckBox.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Image.cpp" />
+    <ClCompile Include="src\Scene\Components\UI\Slider.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\LightManager.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />

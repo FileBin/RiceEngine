@@ -4,7 +4,7 @@
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Components\UI\Text.h>
-#include <GameEngine\Components\UI\CheckBox.h>
+#include <GameEngine\Components\UI\Slider.h>
 #include <GameEngine\Components\Rigidbody.h>
 
 #include "../Scripts/CameraMoverScript.h"
@@ -136,10 +136,10 @@ class SampleScene : public Scene {
 		cross->SetName(L"Cross");
 		button->SetName(L"Button");
 
-		UI::CheckBox* but = new UI::CheckBox();
-		but->SetCheckedImg(&ren.CreateTexture(L"img/amogus_red.png"));
-		but->SetUncheckedImg(&ren.CreateTexture(L"img/amogus.png"));
-		but->SetChecked(false, false);
+		UI::Slider* but = new UI::Slider();
+		but->SetImg(&ren.CreateTexture(L"img/amogus_red.png"));
+		//but->SetUncheckedImg(&ren.CreateTexture(L"img/amogus.png"));
+		but->SetMax(10);
 		rTransform = new UI::RectTransform();
 		rTransform->anchor = UI::RectTransform::Anchor::TopRight;
 		rTransform->SetPosition({ 0, 0 });
@@ -152,7 +152,7 @@ class SampleScene : public Scene {
 
 		but->setOnReleaseListener([](UI::Button* but) -> void {
 			Log::log(Log::LogLevel::INFO, L"release"); 
-			but->SetImg(&but->GetSceneObject().GetScene().GetRender().CreateTexture(L"img/amogus.png")); 
+			//but->SetImg(&but->GetSceneObject().GetScene().GetRender().CreateTexture(L"img/amogus.png")); 
 		});
 
 		but->setOnHoverInListener([](UI::Button* but) -> void {

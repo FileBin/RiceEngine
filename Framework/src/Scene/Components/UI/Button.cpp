@@ -2,7 +2,6 @@
 
 #include <GameEngine\Components\UI\Button.h>
 #include <GameEngine\InputManager.h>
-#include <GameEngine\Log.h>
 
 namespace Game::UI {
 
@@ -41,6 +40,11 @@ namespace Game::UI {
 		fireListener(on_hover_in_listener, prev_state == ButtonState::NEUTRAL && state == ButtonState::HOVER);
 		fireListener(on_hover_out_listener, prev_state == ButtonState::HOVER && state == ButtonState::NEUTRAL);
 	}
+
+	void Button::Draw(Device* device) {
+		device->SetActivePSConstantBuffer(PSConstBuffer.Get());
+		Image::Draw(device);
+	};
 
 	bool Button::checkHover() {
 		Vector2 buttonTopRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));

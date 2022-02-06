@@ -10,4 +10,15 @@ namespace Game::UI {
 			SetChecked(!isChecked, true);
 		}
 	}
+
+	void CheckBox::SetChecked(bool checked, bool notify_listener) {
+		isChecked = checked;
+		if (checked) {
+			SetImg(tex_checked);
+		}
+		else {
+			SetImg(tex_unchecked);
+		}
+		fireListener(on_checked_change_listener, notify_listener);
+	};
 }
