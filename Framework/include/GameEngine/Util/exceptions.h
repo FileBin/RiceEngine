@@ -8,3 +8,4 @@
 #include "exceptions/JSONHasNotMemberException.h"
 #include "exceptions/IndexOutOfRangeException.h"
 #include "exceptions/InvalidArgException.h"
+#include "exceptions/FileNotFoundException.h"

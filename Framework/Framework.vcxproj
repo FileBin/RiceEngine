@@ -235,6 +235,7 @@
     <ClInclude Include="include\GameEngine\Util\defines.h" />
     <ClInclude Include="include\GameEngine\Util\DistanceEstimator.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions.h" />
+    <ClInclude Include="include\GameEngine\Util\exceptions\FileNotFoundException.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\IndexOutOfRangeException.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\InvalidArgException.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\JSONHasNotMemberException.h" />
