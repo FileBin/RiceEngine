@@ -2,10 +2,11 @@
 
 #include "Image.h"
 
-typedef void (*Listener)();
-
 namespace Game::UI {
+
 	class Button : public Image {
+
+		typedef void (*Listener)(Game::UI::Button* button);
 
 		enum class ButtonState { DISABLED, NEUTRAL, HOVER, PRESSED };
 
@@ -25,7 +26,7 @@ namespace Game::UI {
 		void setState(ButtonState state);
 		void fireListener(Listener listener, bool fire) {
 			if (listener != NULL && fire) {
-				listener();
+				listener(this);
 			}
 		};
 

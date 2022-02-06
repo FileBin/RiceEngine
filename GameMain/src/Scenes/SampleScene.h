@@ -134,18 +134,35 @@ class SampleScene : public Scene {
 		auto button = Instaniate();
 		auto cross = Instaniate();
 		cross->SetName(L"Cross");
-		button->SetName(L"Picture");
+		button->SetName(L"Button");
 
-		UI::Image* pic = new UI::Button();
-		pic->SetImg(&ren.CreateTexture(L"img/amogus.png"));
+		UI::Button* but = new UI::Button();
+		but->SetImg(&ren.CreateTexture(L"img/amogus.png"));
 		rTransform = new UI::RectTransform();
 		rTransform->anchor = UI::RectTransform::Anchor::TopRight;
 		rTransform->SetPosition({ 0, 0 });
 		rTransform->SetScale({ 100, 100 });
-		button->AddComponent(rTransform);
-		button->AddComponent(pic);
 
-		pic = new UI::Image();
+		but->setOnClickListener([](UI::Button* but) -> void {
+			Log::log(Log::LogLevel::INFO, L"click"); 
+			but->SetImg(&but->GetSceneObject().GetScene().GetRender().CreateTexture(L"img/sky_finger.png"));
+		});
+
+		but->setOnReleaseListener([](UI::Button* but) -> void {
+			Log::log(Log::LogLevel::INFO, L"release"); 
+			but->SetImg(&but->GetSceneObject().GetScene().GetRender().CreateTexture(L"img/amogus.png")); 
+		});
+
+		but->setOnHoverInListener([](UI::Button* but) -> void {
+			Log::log(Log::LogLevel::INFO, L"hover in"); });
+
+		but->setOnHoverOutListener([](UI::Button* but) -> void {
+			Log::log(Log::LogLevel::INFO, L"hover out"); });
+
+		button->AddComponent(rTransform);
+		button->AddComponent(but);
+
+		UI::Image* pic = new UI::Image();
 		pic->SetImg(&ren.CreateTexture(L"img/cross.png"));
 		rTransform = new UI::RectTransform();
 		rTransform->anchor = UI::RectTransform::Anchor::MiddleCenter;
