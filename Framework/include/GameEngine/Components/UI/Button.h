@@ -20,7 +20,10 @@ namespace Game::UI {
 		void OnInit();
 		void Update();
 
-		void Draw(Device* device);
+		void Draw(Device* device) {
+			device->SetActivePSConstantBuffer(PSConstBuffer.Get());
+			Image::Draw(device);
+		};
 	private:
 		bool checkHover();
 		void setState(ButtonState state);
@@ -38,7 +41,6 @@ namespace Game::UI {
 		Listener on_release_listener;
 		Listener on_hover_in_listener;
 		Listener on_hover_out_listener;
-
-		static Shader* button_shader;
 	};
+
 }

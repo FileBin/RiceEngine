@@ -103,12 +103,12 @@ public:
 			SpawnSpheres();
 
 		//} 
-		if (InputManager::GetKey(KeyCode::MouseLeft)) {
+		/*if (InputManager::GetKey(KeyCode::MouseLeft)) {
 			InputManager::LockMouse();
-			/*InputManager::SetMousePos(center);
+			InputManager::SetMousePos(center);
 			ShowCursor(false);
-			lock = true;*/
-		}
+			lock = true;
+		}*/
 	}
 
 	bool click = false;

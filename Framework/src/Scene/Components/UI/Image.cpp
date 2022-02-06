@@ -10,7 +10,7 @@ namespace Game::UI {
 		if (tex_shader == nullptr) {
 			tex_shader = &scene.GetEngine().CreateShader();
 			tex_shader->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
-			tex_shader->LoadPixelShader(Util::ReadFile(L"ImgShader.cso"));
+			tex_shader->LoadPixelShader(Util::ReadFile(shader_name));
 		}
 		auto device = scene.GetEngine().GetDevice();
 		indexBuf = device->CreateBuffer<UINT>({ 2,1,0,0,3,2 }, D3D11_BIND_INDEX_BUFFER);
@@ -26,9 +26,7 @@ namespace Game::UI {
 			v.texcoord.y = v.position.y * .5f + .5f;
 		}
 
-
 		vertexBuf = device->CreateBuffer<Vertex>(vertices, D3D11_BIND_VERTEX_BUFFER);
-
 	}
 
 	void Image::Draw(Device* device) {

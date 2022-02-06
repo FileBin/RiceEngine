@@ -145,7 +145,7 @@ class SampleScene : public Scene {
 
 		but->setOnClickListener([](UI::Button* but) -> void {
 			Log::log(Log::LogLevel::INFO, L"click"); 
-			but->SetImg(&but->GetSceneObject().GetScene().GetRender().CreateTexture(L"img/sky_finger.png"));
+			InputManager::LockMouse();
 		});
 
 		but->setOnReleaseListener([](UI::Button* but) -> void {

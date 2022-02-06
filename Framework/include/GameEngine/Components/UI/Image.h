@@ -20,6 +20,13 @@ namespace Game::UI {
 		Microsoft::WRL::ComPtr<Buffer> indexBuf, vertexBuf;
 
 		static Shader* tex_shader;
+		
+		String shader_name = L"ImgShader.cso";
+
+		void SetShaderName(String name) {
+			shader_name = name;
+		};
+
 	};
 
 	inline Shader* Image::tex_shader;
