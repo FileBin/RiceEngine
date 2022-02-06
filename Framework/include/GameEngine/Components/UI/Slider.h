@@ -22,6 +22,8 @@ namespace Game::UI {
 			maxVal = max;
 		}
 
+		void SetBgImg(Texture2D* texture) { bg_tex = texture; }
+
 		void SetDirection(Vector2 dir) { direction = dir.Normalized(); }
 		void SetProgress(dbl progress, bool notify_listener);
 		dbl GetProgress() { return progress; }
@@ -40,7 +42,9 @@ namespace Game::UI {
 		Vector2 direction = Vector2::right;
 		ProgressListener on_progress_changed_listener;
 
-		Vector2 getPosition() { return transform->GetPosition2DWithAnchor(canvas) + direction * progress * maxVal; }
+		Texture2D* bg_tex;
+
+		Vector2 getPosition(dbl progr);
 		bool checkHover();
 		void setState(SliderState state);
 

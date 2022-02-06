@@ -57,9 +57,10 @@ class MainMenuScene : public Scene {
 
 		/*//slider
 		UI::Slider* slider = new UI::Slider();
-		slider->SetMax(400);
+		slider->SetMax(100);
 		slider->SetDirection({ 1,0 });
-		slider->SetImg(&ren.CreateTexture(L"img/pattern.png"));
+		slider->SetImg(&ren.CreateTexture(L"img/amogus.png"));
+		slider->SetBgImg(&ren.CreateTexture(L"img/sky_finger.png"));
 		/*slider->setOnClickListener([&en](UI::Button* sender) {
 			en.LoadScene(new SampleScene());
 			});
@@ -67,7 +68,7 @@ class MainMenuScene : public Scene {
 		rectTransform = new UI::RectTransform();
 		rectTransform->anchor = UI::RectTransform::Anchor::BottomCenter;
 		rectTransform->SetPosition({ 0,-20 });
-		rectTransform->SetScale({ 200,33 });
+		rectTransform->SetScale({ 55,55 });
 
 		auto Slider = Instaniate();
 		Slider->SetName(L"Slider");

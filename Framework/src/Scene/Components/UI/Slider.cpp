@@ -28,23 +28,26 @@ namespace Game::UI {
 		auto& ren = GetSceneObject().GetScene().GetRender();
 		auto buf = ren.GetConstBuffer();
 
-		Vector2 scale, pos;
-		scale = canvas->TransformScaleToView(transform->GetScale2D());
-		pos = canvas->TransformPositionToView(getPosition());
+		Vector2 scale, pos, scale_bg, pos_root;
 
-		pos *= 2;
-		pos -= Vector2::one;
-		pos.y = -pos.y;
+		Vector2 scale_raw = transform->GetScale2D();
+
+		scale = canvas->TransformScaleToView(scale_raw);
+		scale_bg = canvas->TransformScaleToView({ maxVal + scale_raw.x, scale_raw.y });
+		pos = getPosition(progress);
+
+		pos_root = getPosition(0.5);
+		scale_bg = getPosition(0) - getPosition(1);
+		scale_bg.y = scale.y;
+		scale_bg.x /= ren.GetAspectRatio();
 
 		scale.y = -scale.y;
+		scale_bg.y = -scale_bg.y;
 
 		ConstantBufferData data;
 		data.LightWVP = Matrix4x4f::identity;
 		data.Projection = Matrix4x4f::identity;
 
-		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale.x, scale.y }) * Matrix4x4::Translation({ pos.x, pos.y });
-
-		device->LoadBufferSubresource(buf, data);
 		device->ClearZBuffer();
 		device->SetVPDefault();
 		device->SetRenderTargetsDefault();
@@ -56,16 +59,39 @@ namespace Game::UI {
 		device->SetActiveIndexBuffer(indexBuf.Get());
 		device->SetActiveVSConstantBuffer(buf);
 		device->SetActivePSConstantBuffer(PSConstBuffer.Get());
+		
+		device->SetActiveShader(*tex_shader);
+		device->UseDepthBuffer(false);
+
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale_bg.x, scale_bg.y }) * Matrix4x4::Translation({ pos_root.x, pos_root.y });
+		device->LoadBufferSubresource(buf, data);
+
+		device->SetPSTextures({ bg_tex });
+
+		device->Draw();
+
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale.x, scale.y }) * Matrix4x4::Translation({ pos.x, pos.y });
+		device->LoadBufferSubresource(buf, data);
+
 		device->SetPSTextures({ tex });
 
-		device->SetActiveShader(*tex_shader);
-
-		device->UseDepthBuffer(false);
 		device->Draw();
 	}
 
+	Vector2 Slider::getPosition(dbl progr) {
+
+		Vector2 position = canvas->TransformPositionToView(transform->GetPosition2DWithAnchor(canvas) + direction * progr * maxVal);
+
+		position *= 2;
+		position -= Vector2::one;
+		position.y = -position.y;
+
+		return position;
+
+	}
+
 	bool Slider::checkHover() {
-		Vector2 topRight = canvas->TransformPositionToScreen(getPosition());
+		Vector2 topRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas) + direction * progress * maxVal);
 		Vector2 scale = canvas->TransformScaleToScreen(transform->GetScale2D());
 		Vector2 anchor = transform->GetAnchor();
 		anchor += Vector2::one;

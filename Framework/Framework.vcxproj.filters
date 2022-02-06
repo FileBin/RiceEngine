@@ -282,7 +282,7 @@
     <ClInclude Include="include\GameEngine\Components\UI\Slider.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\Scene\ResourceManager.h">
+    <ClInclude Include="include\GameEngine\Util\exceptions\FileNotFoundException.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
