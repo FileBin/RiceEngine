@@ -5,6 +5,7 @@
 #include "../ScriptBase.h"
 #include "../SoundManager.h"
 #include "../Physics/PhysicsEngine.h"
+#include "ResourceManager.h"
 
 namespace Game {
 	class MonoScript;
@@ -58,15 +59,22 @@ namespace Game {
 		SceneObject* Instaniate(SceneObject* orig);
 		SceneObject* Instaniate();
 		Engine& GetEngine() const;
+		ResourceManager& GetResourceManager() { return resManager; }
 		SoundManager& GetSoundManager() const;
 		SceneRender& GetRender() const { return *render; }
 		const SmartPtr<Physics::PhysicsEngine> GetPhysEngine() const;
 
 		bool isLoaded() { return init; }
 
+	protected:
+		void InitResourceManager(String path) {
+			resManager.LoadJson(path);
+		}
+
 	private:
 		bool init = false;
 
+		ResourceManager resManager;
 		SceneObject* root;
 		SceneRender* render;
 		SmartPtr<Physics::PhysicsEngine> physicsEngine;

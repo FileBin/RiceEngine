@@ -4,8 +4,6 @@
 #include <locale.h>
 #include <GameEngine/Util.h>
 #include <GameEngine/Util/exceptions.h>
-#include <rapidjson/document.h>
-#include <rapidjson/error/error.h>
 
 #define LOGNAME "log.txt"
 
@@ -20,8 +18,6 @@ namespace Game {
 		} else
 			log(LogLevel::ERR, locale.log_is_already_created.c_str());
 	}
-
-	void Log::LoadLocalization(Localization locale) { Log::locale = locale; }
 
 	Log::Log() {
 		init();
@@ -111,33 +107,5 @@ namespace Game {
 		wprintf(str.c_str());
 		file << str;
 		file.flush();
-	}
-
-	Log::Localization Log::Localization::LoadFromJSON(String filename) {
-		using namespace rapidjson;
-		Localization loc = {};
-		auto fileData = Util::ReadFile(filename);
-		fileData.push_back('\0');
-
-		Document doc;
-		doc.Parse((const char*)fileData.data());
-		if (doc.HasParseError()) THROW_JSON_PARSING_EXCEPTION(filename.c_str(), doc.GetErrorOffset());
-		const char* values[] = { "log.begin", "log.end", "log.already_created", "log.creation_error" };
-		std::function<void(String)> functions[] = {
-			[&](String v) { loc.log_begin = v; },
-			[&](String v) { loc.log_end = v; },
-			[&](String v) { loc.log_is_already_created = v; },
-			[&](String v) { loc.log_creation_error = v; },
-		};
-
-		auto n = ARRAYSIZE(values);
-		for (size_t i = 0; i < n; i++) {
-			auto v = values[i];
-			if (doc.HasMember(v)) {
-				functions[i](Util::Utf8ToWstring(doc[v].GetString()));
-			} else THROW_JSON_HAS_NOT_MEMBER_EXCEPTION(filename.c_str(), v);
-		}
-
-		return loc;
 	}
 }

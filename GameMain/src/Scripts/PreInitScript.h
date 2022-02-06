@@ -10,7 +10,6 @@ using namespace Game;
 class PreInitScript : public ScriptBase {
 	void Run() {
 		auto& engine = GetEngine();
-		Log::LoadLocalization(Log::Localization::LoadFromJSON(L"language/en-EN/log.json"));
 		engine.SetMsaaLevel(4);
 
 		engine.SetRender(new DefaultLoadingScreenRender());

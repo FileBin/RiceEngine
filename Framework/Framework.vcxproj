@@ -211,6 +211,7 @@
     <ClInclude Include="include\GameEngine\Physics\IRigidBody.h" />
     <ClInclude Include="include\GameEngine\Physics\PhysicsEngine.h" />
     <ClInclude Include="include\GameEngine\Scene\IPostProcess.h" />
+    <ClInclude Include="include\GameEngine\Scene\ResourceManager.h" />
     <ClInclude Include="include\GameEngine\SoundStream.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
     <ClInclude Include="include\GameEngine\Core.h" />
@@ -288,6 +289,7 @@
     <ClCompile Include="src\Scene\Components\UI\Slider.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\LightManager.cpp" />
+    <ClCompile Include="src\Scene\ResourceManager.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />
     <ClCompile Include="src\Scene\Component.cpp" />
     <ClCompile Include="src\3D\Camera.cpp" />

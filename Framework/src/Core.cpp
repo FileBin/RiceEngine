@@ -46,8 +46,8 @@ namespace Game {
 		activeScene->GetRender().SetDevice(device);
 		activeScene->PreInit(engine);
 		Core::RunTask([this]() {
-		activeScene->Init();
-		activeScene->PostInit();
+			activeScene->Init();
+			activeScene->PostInit();
 			});
 	}
 

@@ -21,6 +21,9 @@ void SampleScene::Init() {
 	auto player = Instaniate();
 	player->SetName(L"Player");
 
+	InitResourceManager(L"resources/GameSceneResources.json");
+	auto& resManager = GetResourceManager();
+
 	auto& ren = GetRender();
 	auto& en = GetEngine();
 
@@ -35,13 +38,13 @@ void SampleScene::Init() {
 
 	auto diff = ren.CreateShader(L"Diffuse");
 
-	diff->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
-	diff->LoadPixelShader(Util::ReadFile(L"DiffuseShader.cso"));
+	diff->LoadVertexShader(Util::ReadFile(resManager.GetString("VertexShaderPath")));
+	diff->LoadPixelShader(Util::ReadFile(resManager.GetString("DiffuseShaderPath")));
 
 	auto sh = ren.CreateShader(L"Water");
 	sh->usesDepthBuffer = true;
 
-	sh->LoadVertexShader(Util::ReadFile(L"WaterVS.cso"));
+	sh->LoadVertexShader(Util::ReadFile(resManager.GetString("WaterVSPath")));
 	sh->LoadPixelShader(Util::ReadFile(L"WaterShader.cso"));
 
 	auto postsh = ren.CreateShader(L"PostProcess");

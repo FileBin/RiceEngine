@@ -12,12 +12,12 @@ catch (Exception& e) {
 	Log::log(Log::ERR, L"Stack trace:\n{}", Util::Utf8ToWstring(e.GetStack()));
 	Log::Close();
 	throw e;
-} /*catch (std::exception& e) {
+} catch (std::exception& e) {
 	Log::log(Log::ERR, L"std::exception occured: {}", Util::Utf8ToWstring(typeid(e).name()));
 	Log::log(Log::ERR, L"What: {}", Util::Utf8ToWstring(e.what()));
 	Log::Close();
 	throw e;
-}/* catch (HRESULT hr) {
+} catch (HRESULT hr) {
 	_com_error err(hr);
 	Log::log(Log::ERR, L"HRESULT Error occured: ");
 	//Log::log(Log::ERR, L"Desc: {}", err.Description().GetBSTR());
@@ -25,9 +25,5 @@ catch (Exception& e) {
 	Log::Close();
 	wchar_t* desc = err.Description().GetBSTR();
 	throw hr;
-} catch (...) {
-	Log::log(Log::ERR, L"Unknown runtime error occured: ");
-	Log::Close();
-	throw "err";
-}*/
+}
 #endif

@@ -8,18 +8,16 @@ namespace Game {
 	static String logLevel_str[6] = { L"", L"INFO", L"DEBUG", L"WARNING", L"ERROR", L"CRITICAL_ERROR" };
 
 	class Log {
-	public:
 		struct Localization {
-			String log_begin;
-			String log_end;
-			String log_is_already_created;
-			String log_creation_error;
-
-			static Localization LoadFromJSON(String filename);
+			String log_begin = L"Log Created";
+			String log_end = L"Log End";
+			String log_is_already_created = L"Log is already created!";
+			String log_creation_error = L"Log creation-error!";
 		} static locale;
+
+	public:
 	
 		static void PreInit();
-		static void LoadLocalization(Localization locale);
 
 		enum LogLevel {NONE = 0, INFO = 1, Debug = 2, WARNING = 3, ERR = 4, CRITICAl = 5};
 		

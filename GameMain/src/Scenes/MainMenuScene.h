@@ -25,6 +25,10 @@ class MainMenuScene : public Scene {
 		auto& ren = GetRender();
 		auto& en = GetEngine();
 
+		InitResourceManager(L"resources/MainMenuSceneResources.json");
+
+		auto& resManager = GetResourceManager();
+
 		SmartPtr<Camera> cam = new Camera();
 
 		cam->SetFov(90);
@@ -36,9 +40,9 @@ class MainMenuScene : public Scene {
 
 		//start button
 		UI::Button* button = new UI::Button();
-		button->SetImg(&ren.CreateTexture(L"img/sky_finger.png"));
+		button->SetImg(&ren.CreateTexture(resManager.GetString("StartButtonImg")));
 		button->setOnClickListener([&en](UI::Button* sender) {
-				//en.LoadScene(new SampleScene());
+				en.LoadScene(new SampleScene());
 			});
 
 		auto rectTransform = new UI::RectTransform();
@@ -51,7 +55,7 @@ class MainMenuScene : public Scene {
 		StartButton->AddComponent(rectTransform);
 		StartButton->AddComponent(button);
 
-		//slider
+		/*//slider
 		UI::Slider* slider = new UI::Slider();
 		slider->SetMax(400);
 		slider->SetDirection({ 1,0 });
@@ -59,7 +63,7 @@ class MainMenuScene : public Scene {
 		/*slider->setOnClickListener([&en](UI::Button* sender) {
 			en.LoadScene(new SampleScene());
 			});
-			*/
+			
 		rectTransform = new UI::RectTransform();
 		rectTransform->anchor = UI::RectTransform::Anchor::BottomCenter;
 		rectTransform->SetPosition({ 0,-20 });
@@ -68,6 +72,6 @@ class MainMenuScene : public Scene {
 		auto Slider = Instaniate();
 		Slider->SetName(L"Slider");
 		Slider->AddComponent(rectTransform);
-		Slider->AddComponent(slider);
+		Slider->AddComponent(slider);*/
 	}
 };
