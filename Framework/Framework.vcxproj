@@ -193,7 +193,7 @@
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Slider.h" />
-    <ClInclude Include="include\GameEngine\Components\UI\TextDrawer.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\TextButton.h" />
     <ClInclude Include="include\GameEngine\DX\RenderingMesh.h" />
     <ClInclude Include="include\GameEngine\Scene\IRenderable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\RectTransform.h" />

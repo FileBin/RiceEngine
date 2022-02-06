@@ -288,7 +288,7 @@
     <ClInclude Include="include\GameEngine\Scene\ResourceManager.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="include\GameEngine\Components\UI\TextDrawer.h">
+    <ClInclude Include="include\GameEngine\Components\UI\TextButton.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
