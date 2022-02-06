@@ -35,5 +35,7 @@ namespace Game {
 		Vector3 GetVelocity();
 		Vector3 GetPosition();
 		dbl sdFunc(Vector3 p);
+
+		Vector3 GetNormal(Vector3 p, dbl);
 	};
 }

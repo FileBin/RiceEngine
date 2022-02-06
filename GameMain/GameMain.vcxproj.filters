@@ -12,6 +12,7 @@
     <FxCompile Include="shaders\SamplePostProcess.hlsl" />
     <FxCompile Include="shaders\Underwater.hlsl" />
     <FxCompile Include="shaders\ImgShader.hlsl" />
+    <FxCompile Include="shaders\ButtonShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

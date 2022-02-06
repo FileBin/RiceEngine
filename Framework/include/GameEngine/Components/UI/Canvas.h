@@ -18,22 +18,24 @@ namespace Game::UI {
 		}
 
 		Vector2 TransformScaleToScreen(Vector2 scale) {
-			auto cur = currentResolution;
-			cur.x = max(cur.x, referenceResoluton.x);
-			cur.y = max(cur.y, referenceResoluton.y);
-			scale /= max(referenceResoluton.x, referenceResoluton.y);
-			return scale * min(cur.x, cur.y);
+			scale = TransformScaleToView(scale);
+			return scale * currentResolution;
 		}
 
 		Vector2 TransformScaleToView(Vector2 scale) {
 			scale /= max(referenceResoluton.x, referenceResoluton.y);
+			auto asp = currentResolution.x / currentResolution.y;
+			if (asp >= 1) {
+				scale.x /= asp;
+			} else {
+				scale.y *= asp;
+			}
+						
 			return scale;
 		}
 
 		dbl TransformScaleToScreen(dbl scale) {
 			auto cur = currentResolution;
-			cur.x = max(cur.x, referenceResoluton.x);
-			cur.y = max(cur.y, referenceResoluton.y);
 			scale /= max(referenceResoluton.x, referenceResoluton.y);
 			return scale * min(cur.x, cur.y);
 		}

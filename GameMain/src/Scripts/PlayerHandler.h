@@ -113,12 +113,15 @@ public:
 		cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 		transform->SetRotation(cam->rotation);
 		cam->position = transform->GetPosition() + Vector3::up;
-
-		if (InputManager::GetKey(KeyCode::MouseLeft)) {
-			InputManager::LockMouse();
-			EraseVoxels();
-		} else if (InputManager::GetKey(KeyCode::MouseRight)) {
-			AddVoxels();
+		if (InputManager::GetKey(KeyCode::V)) {
+			InputManager::UnlockMouse();
+		} else {
+			if (InputManager::GetKey(KeyCode::MouseLeft)) {
+				InputManager::LockMouse();
+				EraseVoxels();
+			} else if (InputManager::GetKey(KeyCode::MouseRight)) {
+				AddVoxels();
+			}
 		}
 	}
 

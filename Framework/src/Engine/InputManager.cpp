@@ -47,11 +47,18 @@ namespace Game {
 		instance->mousePos = pos;
 	}
 
-	void InputManager::SetRect(const RECT &winRect) {
+	void InputManager::SetWindowRect(const RECT& winRect) {
 		windowRect.left = winRect.left;
 		windowRect.right = winRect.right;
 		windowRect.top = winRect.top;
 		windowRect.bottom = winRect.bottom;
+	}
+
+	void InputManager::SetClientRect(const RECT& rect) {
+		clientRect.left = rect.left;
+		clientRect.right = rect.right;
+		clientRect.top = rect.top;
+		clientRect.bottom = rect.bottom;
 	}
 
 	void InputManager::UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam) {
@@ -160,11 +167,10 @@ namespace Game {
 	}
 
 	void InputManager::eventCursor() {
-		POINT Position;
+		POINT Position{0};
 		GetCursorPos(&Position);
 
-		Position.x -= windowRect.left;
-		Position.y -= windowRect.top;
+		ScreenToClient(hwnd, &Position);
 
 		mousePos.x = Position.x;
 		mousePos.y = Position.y;

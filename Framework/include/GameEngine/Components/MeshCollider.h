@@ -24,6 +24,7 @@ namespace Game {
 				std::vector<Triangle*> tris;
 				Vector3 norm;
 				Vector3 pos[3];
+				Vector3 center;
 				bool checked = false;
 
 				Triangle() = default;
@@ -39,12 +40,19 @@ namespace Game {
 					norm.Normalize();
 				}
 
+				void calcCenter() {
+					center = pos[0] + pos[1] + pos[2];
+					center /= 3;
+				}
+
 				dbl sD(Vector3 p) const;
 			};
 
 			std::vector<Triangle> triangles;
 
 			void build(Mesh& m);
+
+			Triangle& getNearestTriangle(Vector3 pos);
 
 			PhysMesh(Mesh& m);
 		} *physMesh;
@@ -54,6 +62,8 @@ namespace Game {
 		void SetModel(Model* m);
 		void SetModel(Model* m, int ignoredMat);
 		dbl sdFunc(Vector3 p);
+
+		Vector3 GetNormal(Vector3 pos, dbl eps);
 
 	};
 }

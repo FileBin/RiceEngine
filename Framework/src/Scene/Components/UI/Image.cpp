@@ -27,7 +27,7 @@ namespace Game::UI {
 		}
 
 
-		vertexBuf = device->CreateBuffer<Vertex>(vertices, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE, D3D11_USAGE_DYNAMIC);
+		vertexBuf = device->CreateBuffer<Vertex>(vertices, D3D11_BIND_VERTEX_BUFFER);
 
 	}
 
@@ -44,7 +44,6 @@ namespace Game::UI {
 		pos.y = -pos.y;
 
 		scale.y = -scale.y;
-		scale.x /= ren.GetAspectRatio();
 
 		ConstantBufferData data;
 		data.LightWVP = Matrix4x4f::identity;

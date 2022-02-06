@@ -56,11 +56,11 @@ namespace Game {
 		long ltop = (long)desc.posy;
 
 		m_hwnd = CreateWindowEx(NULL, L"D3D11F", desc.caption.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, lleft, ltop, lwidth, lheight, NULL, NULL, NULL, NULL);
-
 		if (!m_hwnd) {
 			Log::log(Log::ERR, L"CreateWindowEx failed");
 			return false;
 		}
+		inputmgr->SetHWND(m_hwnd);
 
 		ShowWindow(m_hwnd, SW_SHOW);
 		UpdateWindow(m_hwnd);
@@ -113,7 +113,6 @@ namespace Game {
 		case WM_MOVE:
 			desc.posx = LOWORD(lParam);
 			desc.posy = HIWORD(lParam);
-			m_UpdateWindowState();
 			return 0;
 		case WM_SIZE:
 			if (!desc.resizing)
@@ -138,7 +137,6 @@ namespace Game {
 					m_maximized = false;
 				}
 			}
-			m_UpdateWindowState();
 			return 0;
 		case WM_INPUT:
 		case WM_MOUSEMOVE: case WM_LBUTTONUP: case WM_LBUTTONDOWN: case WM_MBUTTONUP: case WM_MBUTTONDOWN: case WM_RBUTTONUP: case WM_RBUTTONDOWN: case WM_MOUSEWHEEL: case WM_KEYDOWN: case WM_KEYUP:
@@ -146,6 +144,8 @@ namespace Game {
 				inputmgr->UpdateWindow(nMsg, wParam, lParam);
 			return 0;
 		}
+
+		m_UpdateWindowState();
 
 		return DefWindowProcW(hwnd, nMsg, wParam, lParam);
 	}
@@ -156,13 +156,24 @@ namespace Game {
 	}
 
 	void Window::m_UpdateWindowState() {
-		RECT ClientRect;
-		ClientRect.left = desc.posx;
-		ClientRect.top = desc.posy;
-		ClientRect.right = desc.width;
-		ClientRect.bottom = desc.height;
-		if (inputmgr)
-			inputmgr->SetRect(ClientRect);
+		RECT ClientRect{0};
+		
+		if (GetWindowRect(m_hwnd, &ClientRect)) {
+			desc.posx = ClientRect.left;
+			desc.posy = ClientRect.top;
+			desc.width = ClientRect.right;
+			desc.height = ClientRect.bottom;
+			if (inputmgr)
+				inputmgr->SetWindowRect(ClientRect);
+		}
+		if (GetClientRect(m_hwnd, &ClientRect)) {
+			desc.posx = ClientRect.left;
+			desc.posy = ClientRect.top;
+			desc.width = ClientRect.right;
+			desc.height = ClientRect.bottom;
+			if (inputmgr)
+				inputmgr->SetClientRect(ClientRect);
+		}
 	}
 
 	LRESULT CALLBACK StaticWndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam) {

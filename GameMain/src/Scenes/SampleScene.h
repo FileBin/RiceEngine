@@ -131,18 +131,28 @@ class SampleScene : public Scene {
 		debugText->AddComponent(txt);
 		debugText->AddComponent(new DebugText());
 
-		//text
-		auto picture = Instaniate();
-		picture->SetName(L"Picture");
+		auto button = Instaniate();
+		auto cross = Instaniate();
+		cross->SetName(L"Cross");
+		button->SetName(L"Picture");
 
-		auto pic = new UI::Button();
+		UI::Image* pic = new UI::Button();
 		pic->SetImg(&ren.CreateTexture(L"img/amogus.png"));
 		rTransform = new UI::RectTransform();
-		rTransform->anchor = UI::RectTransform::Anchor::BottomRight;
+		rTransform->anchor = UI::RectTransform::Anchor::TopRight;
 		rTransform->SetPosition({ 0, 0 });
 		rTransform->SetScale({ 100, 100 });
-		picture->AddComponent(rTransform);
-		picture->AddComponent(pic);
+		button->AddComponent(rTransform);
+		button->AddComponent(pic);
+
+		pic = new UI::Image();
+		pic->SetImg(&ren.CreateTexture(L"img/cross.png"));
+		rTransform = new UI::RectTransform();
+		rTransform->anchor = UI::RectTransform::Anchor::MiddleCenter;
+		rTransform->SetPosition({ 0, 0 });
+		rTransform->SetScale({ 50, 50 });
+		cross->AddComponent(rTransform);
+		cross->AddComponent(pic);
 
 		//postProcess
 		auto postProcessScript = new SamplePostProcess();

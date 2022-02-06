@@ -6,8 +6,13 @@
 namespace Game {
 	using namespace Physics;
 
+	constexpr size_t MaxIterations = 16;
+
 	Vector3 Rigidbody::Move(dbl deltaTime, std::function<dbl(Vector3)> sdFunc) {
+		auto physEn = GetSceneObject().GetScene().GetPhysEngine();
 		std::unique_lock lock(engineMutex);
+		Vector3 dVelo{0,0,0};
+		dbl veloIters = 0;
 		auto motion = velocity * deltaTime;
 
 		dbl d0 = sdFunc(position);
@@ -20,27 +25,33 @@ namespace Game {
 
 		auto newPos = position + motion;
 
-		dbl d = sdFunc(newPos);
+		bool collided = false;
 
-		dbl delta = radius - d;
+		for (size_t i = 0; i < MaxIterations; i++) {
 
-		if (delta > 0) {
-			constexpr dbl ep = 0.1;
-			constexpr dbl re = 10.;
-			Vector3 n = {
-				sdFunc(newPos + Vector3::right * ep) - d,
-				sdFunc(newPos + Vector3::up * ep) - d,
-				sdFunc(newPos + Vector3::forward * ep) - d };
-			n *= re;
-			n.Normalize();
-			auto d = Vector3::Dot(velocity, n);
+			dbl d = sdFunc(newPos);
 
-			velocity -= n * d * (1. + bounciness);
-			motion += n * delta;
-			newPos = position + motion;
+			dbl delta = radius - d;
+
+			//if (delta >= -collisionDistance) {
+			//	collided = true;
+			//}
+
+			if (delta > 0) {
+				collided = true;
+				Vector3 n = physEn->GetNormal(newPos, .005);
+				motion += n * delta * .99;
+				dbl dot = Vector3::Dot(velocity, n);
+				veloIters++;
+				velocity -= n * dot * (1. + bounciness);
+				newPos = position + motion;
+			} else {
+				break;
+			}
 		}
-		velocity += gravity * deltaTime;
 		position = newPos;
+		velocity += gravity * deltaTime;
+		velocity += dVelo / max(1., veloIters);
 		return motion;
 	}
 
@@ -53,7 +64,12 @@ namespace Game {
 		std::shared_lock lock(engineMutex);
 		return position;
 	}
+
 	dbl Rigidbody::sdFunc(Vector3 p) {
 		return (p - position).Length() - radius;
+	}
+
+	Vector3 Rigidbody::GetNormal(Vector3 p, dbl) {
+		return (p - position).Normalized();
 	}
 }

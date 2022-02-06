@@ -61,9 +61,18 @@ namespace Game::Physics {
 	}
 
 	dbl PhysicsEngine::sdFunc(Vector3 pos) {
-		auto d = std::numeric_limits<dbl>().infinity();
-		for (const auto& p : colliders) {
-			d = Math::Min(d, p.second->sdFunc(pos));
+		if (colliders.empty()) return DBL_MAX;
+		auto it = colliders.begin();
+		dbl d;
+		do {
+			d = it->second->sdFunc(pos);
+			it++;
+			if (it == colliders.end()) return DBL_MAX;
+		} while (isnan(d));
+		for (; it != colliders.end(); it++) {
+			auto _d = it->second->sdFunc(pos);
+			if (isnan(_d)) continue;
+			d = _d > 0 ? Math::Min(d, _d) : Math::Max(d, _d);
 		}
 		/*for (const auto& p : bodies) {
 			if (p.first == idx) continue;
@@ -72,7 +81,7 @@ namespace Game::Physics {
 		return d;
 	}
 
-	/*Vector3 PhysicsEngine::GetNormal(Vector3 pos) {
+	Vector3 PhysicsEngine::GetNormal(Vector3 pos, dbl eps) {
 		SmartPtr<ICollider> col;
 		auto d = DBL_MAX;
 		for (const auto& p : colliders) {
@@ -83,8 +92,8 @@ namespace Game::Physics {
 			}
 		}
 
-		return col->GetNormal(pos);
-	}*/
+		return col->GetNormal(pos, eps);
+	}
 	void PhysicsEngine::SwapFrames() {
 		std::unique_lock lock(swapMutex);
 		auto temp = backFrame;

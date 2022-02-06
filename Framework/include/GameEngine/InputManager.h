@@ -15,8 +15,9 @@ namespace Game {
 		static Vector2 GetMouseDelta();
 		static void SetMousePos(Vector2 pos);
 
-
-		void SetRect(const RECT &winRect);
+		void SetClientRect(const RECT& clientRect);
+		void SetWindowRect(const RECT& winRect);
+		void SetHWND(HWND h) { hwnd = h; }
 		void UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam);
 		void Update();
 		static void LockMouse();
@@ -29,7 +30,8 @@ namespace Game {
 		bool* mouseStates;
 		short mouseScrollDelta = 0, mouseWheel = 0;
 		Vector2 mousePos = Vector2(), mouseDelta = Vector2();
-		RECT windowRect;
+		HWND hwnd;
+		RECT windowRect, clientRect;
 		void eventKey(KeyCode key, bool rs_state);
 		void eventCursor();
 		void eventMouse(MouseKey key, bool rs_state);

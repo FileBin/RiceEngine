@@ -29,25 +29,32 @@ namespace Game {
 		delete combined;
 	}
 
-	dbl MeshCollider::sdFunc(Vector3 p) {
-		using namespace std;
-		p -= position;
-		if (physMesh == nullptr || !physMesh->bounds.IsInBounds(p)) return DBL_MAX;
-		auto n = physMesh->triangles.size();
+	MeshCollider::PhysMesh::Triangle& MeshCollider::PhysMesh::getNearestTriangle(Vector3 p) {
+		MeshCollider::PhysMesh::Triangle* triangle = nullptr;
 		dbl dist = DBL_MAX;
-		std::vector<PhysMesh::Triangle*> initTris(1);
-		for (size_t i = 0; i < n; i++) { // search
-			auto& tri = physMesh->triangles[i];
-			auto d = p - tri.pos[0];
+		auto n = triangles.size();
+		for (size_t i = 1; i < n; i++) { // search
+			auto& tri = triangles[i];
+			auto d = p - tri.center;
 			auto l = d.SqrLength();
 			tri.checked = false;
 			if (dist >= l) {
 				dist = l;
-				initTris[0] = &tri;
+				triangle = &tri;
 			}
 		}
+		return *triangle;
+	}
 
-		dbl res_d = DBL_MAX;
+	dbl MeshCollider::sdFunc(Vector3 p) {
+		using namespace std;
+		p -= position;
+		if (physMesh == nullptr || !physMesh->bounds.IsInBounds(p)) return std::numeric_limits<dbl>().quiet_NaN();
+		auto& initTri = physMesh->getNearestTriangle(p);
+		if (&initTri == nullptr) return std::numeric_limits<dbl>().quiet_NaN();
+		std::vector<PhysMesh::Triangle*> initTris(physMesh->getNearestTriangle(p).tris);
+
+		dbl res_d = initTri.sD(p);
 
 		std::vector<PhysMesh::Triangle*> buf;
 
@@ -56,16 +63,22 @@ namespace Game {
 
 		for (size_t i = 0; i < 2; i++) {
 			for (auto tri : initTris) {
-				if (tri == nullptr) return DBL_MAX;
+				if (tri == nullptr) continue;
 				if (tri->checked) continue;
 				tri->checked = true;
 				buf.insert(buf.end(), tri->tris.begin(), tri->tris.end());
-				res_d = Util::opJoin(res_d, tri->sD(p));
+				auto sD =tri->sD(p);
+				res_d = sD > 0 ? Util::opJoin(res_d, sD) : Math::Max(res_d, sD);
 			}
 			initTris = buf;
 		}
-
 		return res_d;
+	}
+
+	Vector3 MeshCollider::GetNormal(Vector3 pos, dbl eps) {
+		//auto norm0 = physMesh->getNearestTriangle(pos - position).norm;
+		//return norm0;
+		return Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos, eps);
 	}
 
 	dbl MeshCollider::PhysMesh::Triangle::sD(Vector3 p) const {
@@ -73,7 +86,7 @@ namespace Game {
 		auto d2 = Vector3::Dot(p - pos[1], Vector3::Cross(pos[2] - pos[1], norm));
 		auto d3 = Vector3::Dot(p - pos[2], Vector3::Cross(pos[0] - pos[2], norm));
 		if (d1 < 0 && d2 < 0 && d3 < 0 || d1 > 0 && d2 > 0 && d3 > 0) {
-			return abs(Util::sdPlane(p - pos[0], norm));
+			return Util::sdPlane(p - pos[0], norm);
 		}
 		d1 = Util::sdLine(p, pos[0], pos[1]);
 		d2 = Util::sdLine(p, pos[1], pos[2]);
@@ -86,7 +99,7 @@ namespace Game {
 			));
 	}
 
-#define FAST_GENERATE 1
+#define FAST_GENERATE
 
 	void MeshCollider::PhysMesh::build(Mesh& m) {
 		//Log::log(Log::Debug, L"GenerationPhysMesh...");
@@ -98,19 +111,20 @@ namespace Game {
 		for (size_t i = 0; i < n; i++) {
 			auto triIdx = i * 3;
 
-			auto& pos0 = m.vertexBuffer[m.indexBuffer[triIdx]].position;
+			auto& triangle = triangles[i];
 
-			triangles[i].pos[0] = pos0;
-			triangles[i].pos[1] = m.vertexBuffer[m.indexBuffer[triIdx + 1]].position;
-			triangles[i].pos[2] = m.vertexBuffer[m.indexBuffer[triIdx + 2]].position;
-			triangles[i].calcNorm();
+			triangle.pos[0] = m.vertexBuffer[m.indexBuffer[triIdx]].position;
+			triangle.pos[1] = m.vertexBuffer[m.indexBuffer[triIdx + 1]].position;
+			triangle.pos[2] = m.vertexBuffer[m.indexBuffer[triIdx + 2]].position;
+			triangle.calcNorm();
+			triangle.calcCenter();
 		}
 		for (size_t i = 0; i < n; i++) {
 			auto& first = triangles[i];
 			for (auto j = i + 1; j < n; j++) {
 				auto& second = triangles[j];
 #ifdef FAST_GENERATE
-				if ((first.pos[0] - second.pos[0]).SqrLength() < 2.5) {
+				if ((first.center - second.center).SqrLength() <= 4.) {
 					first.tris.push_back(&second);
 					second.tris.push_back(&first);
 				}
@@ -121,7 +135,7 @@ namespace Game {
 						if ((first.pos[k] - second.pos[l]).SqrLength() < .1) {
 							first.tris.push_back(&second);
 							second.tris.push_back(&first);
-
+							break;
 						}
 					}
 				}
