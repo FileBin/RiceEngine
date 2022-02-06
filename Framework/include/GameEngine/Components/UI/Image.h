@@ -21,9 +21,9 @@ namespace Game::UI {
 
 		static Shader* tex_shader;
 		
-		String shader_name = L"ImgShader.cso";
+		std::string shader_name = "ImgShaderPath";
 
-		void SetShaderName(String name) {
+		void SetShaderName(std::string name) {
 			shader_name = name;
 		};
 

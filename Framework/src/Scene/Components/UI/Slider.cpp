@@ -11,7 +11,7 @@ namespace Game::UI {
 	};
 
 	void Slider::OnInit() {
-		SetShaderName(L"ButtonShader.cso");
+		SetShaderName("ButtonShaderPath");
 		Image::OnInit();
 		PSConstBuffer = GetSceneObject().GetScene().GetEngine().GetDevice()->
 			CreateBuffer<ConstBufferData>({ { Vector4f(1,1,1,0) } }, D3D11_BIND_CONSTANT_BUFFER);
@@ -30,16 +30,22 @@ namespace Game::UI {
 
 		Vector2 scale, pos, scale_bg, pos_root;
 
-		Vector2 scale_raw = transform->GetScale2D();
+		Vector2 scale_raw = transform->GetReferenceScale2D();
 
-		scale = canvas->TransformScaleToView(scale_raw);
-		scale_bg = canvas->TransformScaleToView({ maxVal + scale_raw.x, scale_raw.y });
-		pos = getPosition(progress);
+		scale = canvas->TransformScaleToView({ scale_raw.y, scale_raw.y });
+		scale_bg = canvas->TransformScaleToView(scale_raw);
+		pos = canvas->TransformPositionToView(getPosition(progress));
+		pos *= 2;
+		pos -= Vector2::one;
+		pos.y = -pos.y;
 
-		pos_root = getPosition(0.5);
-		scale_bg = getPosition(0) - getPosition(1);
-		scale_bg.y = scale.y;
-		scale_bg.x /= ren.GetAspectRatio();
+		pos_root = canvas->TransformPositionToView(getPosition(0.5));
+
+		pos_root *= 2;
+		pos_root -= Vector2::one;
+		pos_root.y = -pos_root.y;
+
+		//scale_bg.x /= ren.GetAspectRatio();
 
 		scale.y = -scale.y;
 		scale_bg.y = -scale_bg.y;
@@ -63,14 +69,14 @@ namespace Game::UI {
 		device->SetActiveShader(*tex_shader);
 		device->UseDepthBuffer(false);
 
-		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale_bg.x, scale_bg.y }) * Matrix4x4::Translation({ pos_root.x, pos_root.y });
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale_bg) * Matrix4x4::Translation(pos_root);
 		device->LoadBufferSubresource(buf, data);
 
 		device->SetPSTextures({ bg_tex });
 
 		device->Draw();
 
-		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale.x, scale.y }) * Matrix4x4::Translation({ pos.x, pos.y });
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos);
 		device->LoadBufferSubresource(buf, data);
 
 		device->SetPSTextures({ tex });
@@ -79,20 +85,13 @@ namespace Game::UI {
 	}
 
 	Vector2 Slider::getPosition(dbl progr) {
-
-		Vector2 position = canvas->TransformPositionToView(transform->GetPosition2DWithAnchor(canvas) + direction * progr * maxVal);
-
-		position *= 2;
-		position -= Vector2::one;
-		position.y = -position.y;
-
-		return position;
-
+		auto& ren = GetSceneObject().GetScene().GetRender();
+		return transform->GetPosition2DWithAnchor(canvas) + direction * (progr - .5) * transform->GetScale2DTransformed(ren.GetAspectRatio());
 	}
 
 	bool Slider::checkHover() {
-		Vector2 topRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas) + direction * progress * maxVal);
-		Vector2 scale = canvas->TransformScaleToScreen(transform->GetScale2D());
+		Vector2 topRight = canvas->TransformPositionToScreen(getPosition(0.5));
+		Vector2 scale = canvas->TransformScaleToScreen(transform->GetReferenceScale2D());
 		Vector2 anchor = transform->GetAnchor();
 		anchor += Vector2::one;
 		anchor *= .5;
@@ -162,9 +161,8 @@ namespace Game::UI {
 		if (state == SliderState::PRESSED) {
 
 			auto screenPos = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
-			auto maxPos = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas) + direction * maxVal);
-			auto len = (maxPos - screenPos).Length();
-			SetProgress(Vector2::Dot(direction, (InputManager::GetMousePos() - screenPos) ) / len, true);
+			auto len = canvas->TransformScaleToScreen(transform->GetReferenceScale2D()).x;
+			SetProgress(Vector2::Dot(direction, (InputManager::GetMousePos() - screenPos) ) / len + .5, true);
 			if (prev_progress != progress) {
 				Log::log(Log::LogLevel::INFO, L"{}", progress);
 			}

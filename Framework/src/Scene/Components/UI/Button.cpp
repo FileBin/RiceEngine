@@ -10,7 +10,7 @@ namespace Game::UI {
 	};
 
 	void Button::OnInit() {
-		SetShaderName(L"ButtonShader.cso");
+		SetShaderName("ButtonShaderPath");
 		Image::OnInit();
 		PSConstBuffer = GetSceneObject().GetScene().GetEngine().GetDevice()->
 			CreateBuffer<ConstBufferData>({ { Vector4f(0,0,0,0) } }, D3D11_BIND_CONSTANT_BUFFER);
@@ -46,7 +46,7 @@ namespace Game::UI {
 
 	bool Button::checkHover() {
 		Vector2 buttonTopRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
-		Vector2 buttonScale = canvas->TransformScaleToScreen(transform->GetScale2D());
+		Vector2 buttonScale = canvas->TransformScaleToScreen(transform->GetReferenceScale2D());
 		Vector2 anchor = transform->GetAnchor();
 		anchor += Vector2::one;
 		anchor *= .5;

@@ -18,13 +18,8 @@ namespace Game::UI {
 		void setOnHoverInListener(Listener hover_in_listener) { on_hover_in_listener = hover_in_listener; };
 		void setOnHoverOutListener(Listener hover_out_listener) { on_hover_out_listener = hover_out_listener; };
 
-		void SetMax(dbl max) {
-			maxVal = max;
-		}
-
 		void SetBgImg(Texture2D* texture) { bg_tex = texture; }
 
-		void SetDirection(Vector2 dir) { direction = dir.Normalized(); }
 		void SetProgress(dbl progress, bool notify_listener);
 		dbl GetProgress() { return progress; }
 
@@ -36,10 +31,9 @@ namespace Game::UI {
 		void setOnProgressChangedListener(ProgressListener progress_changed_listener) { on_progress_changed_listener = progress_changed_listener; };
 
 	private:
-		dbl maxVal = 100;
 		dbl progress;
 		dbl prev_progress;
-		Vector2 direction = Vector2::right;
+		const Vector2 direction = Vector2::right;
 		ProgressListener on_progress_changed_listener;
 
 		Texture2D* bg_tex;

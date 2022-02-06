@@ -16,7 +16,7 @@ namespace Game::UI {
 
 		auto len = m_text.length();
 
-		Vector2f scale = canvas->TransformScaleToScreen(transform->GetScale2D());
+		Vector2f scale = canvas->TransformScaleToScreen(transform->GetReferenceScale2D());
 		Vector2f pos = canvas->TransformPositionToScreen(transform->GetPosition2D());
 
 		ThrowIfFailed(factory->CreateTextLayout(m_text.c_str(), len, defformat, scale.x, scale.y, layout.GetAddressOf()));

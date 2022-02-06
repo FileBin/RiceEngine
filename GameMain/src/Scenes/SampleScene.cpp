@@ -45,13 +45,13 @@ void SampleScene::Init() {
 	sh->usesDepthBuffer = true;
 
 	sh->LoadVertexShader(Util::ReadFile(resManager.GetString("WaterVSPath")));
-	sh->LoadPixelShader(Util::ReadFile(L"WaterShader.cso"));
+	sh->LoadPixelShader(Util::ReadFile(resManager.GetString("WaterShaderPath")));
 
 	auto postsh = ren.CreateShader(L"PostProcess");
 	postsh->usesDepthBuffer = true;
 
-	postsh->LoadVertexShader(Util::ReadFile(L"PostProcessVS.cso"));
-	postsh->LoadPixelShader(Util::ReadFile(L"SamplePostProcess.cso"));
+	postsh->LoadVertexShader(Util::ReadFile(resManager.GetString("PostProcessVSPath")));
+	postsh->LoadPixelShader(Util::ReadFile(resManager.GetString("SamplePostProcessPath")));
 
 	auto postMat = ren.CreateMaterial(L"PostMaterial", postsh, {});
 
@@ -60,8 +60,8 @@ void SampleScene::Init() {
 
 	auto UnderWaterSh = ren.CreateShader(L"Underwater");
 
-	UnderWaterSh->LoadVertexShader(Util::ReadFile(L"PostProcessVS.cso"));
-	UnderWaterSh->LoadPixelShader(Util::ReadFile(L"Underwater.cso"));
+	UnderWaterSh->LoadVertexShader(Util::ReadFile(resManager.GetString("PostProcessVSPath")));
+	UnderWaterSh->LoadPixelShader(Util::ReadFile(resManager.GetString("UnderwaterPostProcessPath")));
 
 	postMat = ren.CreateMaterial(L"Underwater", UnderWaterSh, {});
 
@@ -70,8 +70,8 @@ void SampleScene::Init() {
 
 	auto skyShader = ren.CreateShader(L"SkyShader");
 
-	skyShader->LoadVertexShader(Util::ReadFile(L"SkyBoxVertex.cso"));
-	skyShader->LoadPixelShader(Util::ReadFile(L"SkyBoxPixel.cso"));
+	skyShader->LoadVertexShader(Util::ReadFile(resManager.GetString("SkyBoxVertexPath")));
+	skyShader->LoadPixelShader(Util::ReadFile(resManager.GetString("SkyBoxPixelPath")));
 
 	auto chunkGen = new ChunkGenerator();
 	//auto camMover = new CameraMover();
