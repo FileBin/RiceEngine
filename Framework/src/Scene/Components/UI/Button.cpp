@@ -10,7 +10,7 @@ namespace Game::UI {
 	};
 
 	void Button::OnInit() {
-		SetShaderName(L"ButtonShader.cso");
+		SetShaderName("ButtonShaderPath");
 		Image::OnInit();
 		PSConstBuffer = GetSceneObject().GetScene().GetEngine().GetDevice()->
 			CreateBuffer<ConstBufferData>({ { Vector4f(0,0,0,0) } }, D3D11_BIND_CONSTANT_BUFFER);

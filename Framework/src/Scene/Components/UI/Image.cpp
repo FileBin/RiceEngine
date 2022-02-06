@@ -7,10 +7,11 @@
 namespace Game::UI {
 	void Image::OnInit() {
 		auto& scene = GetSceneObject().GetScene();
+		auto& resManager = scene.GetResourceManager();
 		if (tex_shader == nullptr) {
 			tex_shader = &scene.GetEngine().CreateShader();
-			tex_shader->LoadVertexShader(Util::ReadFile(L"VertexShader.cso"));
-			tex_shader->LoadPixelShader(Util::ReadFile(shader_name));
+			tex_shader->LoadVertexShader(Util::ReadFile(resManager.GetString("VertexShaderPath")));
+			tex_shader->LoadPixelShader(Util::ReadFile(resManager.GetString(shader_name)));
 		}
 		auto device = scene.GetEngine().GetDevice();
 		indexBuf = device->CreateBuffer<UINT>({ 2,1,0,0,3,2 }, D3D11_BIND_INDEX_BUFFER);
@@ -47,7 +48,7 @@ namespace Game::UI {
 		data.LightWVP = Matrix4x4f::identity;
 		data.Projection = Matrix4x4f::identity;
 
-		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale({ scale.x, scale.y }) * Matrix4x4::Translation({ pos.x, pos.y });
+		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos);
 
 		device->LoadBufferSubresource(buf, data);
 		device->ClearZBuffer();

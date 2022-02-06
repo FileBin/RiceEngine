@@ -17,7 +17,7 @@ namespace Game {
 
 		data_t ReadFile(String filename) {
 			std::ifstream infile(filename, std::ios_base::binary);
-			if (!std::filesystem::exists(filename)) THROW_INVALID_ARG_EXCEPTION(Util::ToStdString(filename).c_str());
+			if (!std::filesystem::exists(filename)) THROW_FILE_NOT_FOUND_EXCEPTION(Util::ToStdString(filename).c_str());
 			auto data = data_t(std::istreambuf_iterator<char>(infile),
 				std::istreambuf_iterator<char>());
 			return data;
