@@ -39,33 +39,22 @@ namespace Game::UI {
 	}
 
 	void Button::Update() {
-		checkHover();
-
-		if (InputManager::GetKey(KeyCode::MouseLeft)) {
-			if (state == ButtonState::OVER) {
+		
+		if (checkHover()) {
+			if (InputManager::GetKey(KeyCode::MouseLeft)) {
 				setState(ButtonState::PRESSED);
-				if (listener != NULL) {
-					listener();
-				}
 			}
+			else {
+				setState(ButtonState::HOVER);
+			}
+		} else {
+			setState(ButtonState::NEUTRAL);
 		}
 
-		//Log::log(Log::LogLevel::INFO, L"Hover: {}", state == ButtonState::OVER);
-
-		switch (state) {
-		case ButtonState::DISABLED:
-
-			break;
-		case ButtonState::NEUTRAL:
-
-			break;
-		case ButtonState::OVER:
-
-			break;
-		case ButtonState::PRESSED:
-
-			break;
-		}
+		fireListener(on_click_listener, prev_state == ButtonState::NEUTRAL && state == ButtonState::PRESSED);
+		fireListener(on_release_listener, prev_state == ButtonState::PRESSED && state == ButtonState::NEUTRAL);
+		fireListener(on_hover_in_listener, prev_state == ButtonState::NEUTRAL && state == ButtonState::HOVER);
+		fireListener(on_hover_out_listener, prev_state == ButtonState::HOVER && state == ButtonState::NEUTRAL);
 	}
 
 	void Button::Draw(Device* device) {
@@ -108,7 +97,7 @@ namespace Game::UI {
 		device->Draw();
 	}
 
-	void Button::checkHover() {
+	bool Button::checkHover() {
 		Vector2 buttonTopRight = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
 		Vector2 buttonScale = canvas->TransformScaleToScreen(transform->GetScale2D());
 		Vector2 anchor = transform->GetAnchor();
@@ -116,19 +105,17 @@ namespace Game::UI {
 		anchor *= .5;
 		buttonTopRight -= anchor * buttonScale;
 		Vector2 mousePos = InputManager::GetMousePos();
-		if (mousePos.x < buttonTopRight.x || mousePos.y < buttonTopRight.y) {
-			setState(ButtonState::NEUTRAL);
-			return;
-		}
+		if (mousePos.x < buttonTopRight.x || mousePos.y < buttonTopRight.y)
+			return false;
 		auto delta = mousePos - buttonTopRight;
-		if (delta.x > buttonScale.x || delta.y > buttonScale.y) {
-			setState(ButtonState::NEUTRAL);
-			return;
-		}
-		setState(ButtonState::OVER);
+		if (delta.x > buttonScale.x || delta.y > buttonScale.y)
+			return false;
+		return true;
 	}
 
 	void Button::setState(Button::ButtonState state) {
+		prev_state = this->state;
+		this->state = state;
 		ConstBufferData data{ {1,1,1,0} };
 		switch (state) {
 		case ButtonState::DISABLED:
@@ -140,7 +127,7 @@ namespace Game::UI {
 			data.state.y = neutral_color.g;
 			data.state.z = neutral_color.b;
 			break;
-		case ButtonState::OVER:
+		case ButtonState::HOVER:
 			data.state.w = 0.;
 			data.state.x = hover_color.r;
 			data.state.y = hover_color.g;
@@ -156,7 +143,5 @@ namespace Game::UI {
 		auto device = GetSceneObject().GetScene().GetEngine().GetDevice();
 
 		device->LoadBufferSubresource(PSConstBuffer.Get(), data);
-
-		this->state = state;
 	}
 }
