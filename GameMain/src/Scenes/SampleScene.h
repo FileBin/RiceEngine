@@ -4,7 +4,7 @@
 #include <GameEngine\Components\ModelRender.h>
 #include <GameEngine\Model.h>
 #include <GameEngine\Components\UI\Text.h>
-#include <GameEngine\Components\UI\Button.h>
+#include <GameEngine\Components\UI\CheckBox.h>
 #include <GameEngine\Components\Rigidbody.h>
 
 #include "../Scripts/CameraMoverScript.h"
@@ -136,8 +136,10 @@ class SampleScene : public Scene {
 		cross->SetName(L"Cross");
 		button->SetName(L"Button");
 
-		UI::Button* but = new UI::Button();
-		but->SetImg(&ren.CreateTexture(L"img/amogus.png"));
+		UI::CheckBox* but = new UI::CheckBox();
+		but->SetCheckedImg(&ren.CreateTexture(L"img/amogus_red.png"));
+		but->SetUncheckedImg(&ren.CreateTexture(L"img/amogus.png"));
+		but->SetChecked(false, false);
 		rTransform = new UI::RectTransform();
 		rTransform->anchor = UI::RectTransform::Anchor::TopRight;
 		rTransform->SetPosition({ 0, 0 });
@@ -145,7 +147,7 @@ class SampleScene : public Scene {
 
 		but->setOnClickListener([](UI::Button* but) -> void {
 			Log::log(Log::LogLevel::INFO, L"click"); 
-			InputManager::LockMouse();
+			//InputManager::LockMouse();
 		});
 
 		but->setOnReleaseListener([](UI::Button* but) -> void {

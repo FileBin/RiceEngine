@@ -56,7 +56,6 @@ namespace Game::UI {
 		}
 
 		Vector2 GetPosition2DWithAnchor(Canvas* canvas) {
-			auto& ren = GetSceneObject().GetScene().GetRender();
 			auto pos = GetPosition2D();
 
 			auto anchor = GetAnchor();

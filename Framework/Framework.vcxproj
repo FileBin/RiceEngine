@@ -189,6 +189,7 @@
     <ClInclude Include="include\GameEngine\Components\Transform.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Button.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Canvas.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\CheckBox.h" />
     <ClInclude Include="include\GameEngine\Components\UI\IDrawable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
     <ClInclude Include="include\GameEngine\DX\RenderingMesh.h" />
@@ -281,6 +282,7 @@
     <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp" />
     <ClCompile Include="src\Scene\Components\SoundSource.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Button.cpp" />
+    <ClCompile Include="src\Scene\Components\UI\CheckBox.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Image.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\LightManager.cpp" />
