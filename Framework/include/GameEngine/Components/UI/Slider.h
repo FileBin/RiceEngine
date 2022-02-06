@@ -6,8 +6,7 @@ namespace Game::UI {
 
 	class Slider : public Button {
 	public:
-
-		typedef void (*ProgressListener)(Game::UI::Slider* checkBox, dbl progress);
+		typedef std::function<void(Game::UI::Slider* checkBox, dbl progress)> ProgressListener;
 
 		void SetMax(dbl max) {
 			maxVal = max;

@@ -6,8 +6,7 @@ namespace Game::UI {
 
 	class CheckBox : public Button {
 	public:
-	
-		typedef void (*CheckListener)(Game::UI::CheckBox* checkBox, bool isChecked);
+		typedef std::function<void(Game::UI::CheckBox* checkBox, bool isChecked)> CheckListener;
 
 		bool IsChecked() {
 			return isChecked;
