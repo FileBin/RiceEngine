@@ -1,33 +1,27 @@
 #pragma once
 
-#include <al/al.h>
-#include <al/alc.h>
-#define AL_ALEXT_PROTOTYPES
-#include <al/alext.h>
-#include <al/efx.h>
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 
-#include "AlDevice.h"
+#include <GameEngine\AL\ALHelper.h>
+
 #include "SoundEffect.h"
 
 #include <GameEngine/Vectors/Vector3f.h>
-
-#define BUFFER_SIZE (4096 * 4)
 
 namespace Game {
 
     typedef char (*FrequencyFunc)(double);
 
-    class SoundStream : private AlDevice
+    class SoundStream
     {
     public:
 
-        void playOgg(std::string path);
-        void playRaw(FrequencyFunc f, dbl beginning, dbl end);
+        void LoadOgg(std::string path);
+        void LoadRaw(FrequencyFunc f, dbl beginning, dbl end);
         void release();
-        bool playback();
-        bool playing();
+        bool Play();
+        bool IsPlaying() { return buffer->IsPlaying(); }
         bool update();
 
         void setVolume(float volume, bool instant);
@@ -36,12 +30,13 @@ namespace Game {
         void setPitch(float pitch);
         void closeOnNoVolume(bool close);
 
-        void applyEffectChain(std::vector<SoundEffect*> effects);
+        //void applyEffectChain(std::vector<SoundEffect*> effects);
 
     protected:
 
-        bool stream(ALuint buffer);
-        void empty();
+        bool stream(int channel);
+        bool stream(int channel, FrequencyFunc func);
+        void Clear();
         std::wstring errorString(int code);
         
     private:
@@ -50,9 +45,7 @@ namespace Game {
         OggVorbis_File oggStream;
         vorbis_info* vorbisInfo;
 
-        ALuint buffers[2];
-        ALuint source;
-        ALenum format;
+        SmartPtr<AL::SoundBuffer> buffer;
 
         bool closeOnNoVol = false;
         float targetVolume = 1;

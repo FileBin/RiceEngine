@@ -2,8 +2,10 @@
 #include "stdafx.h"
 #include "Device.h"
 #include "Math.h"
+#include "Engine.h"
 
 namespace Game {
+	class Engine;
 	class RenderBase {
 	public:
 		RenderBase();
@@ -13,6 +15,7 @@ namespace Game {
 		void EndFrame();
 		void Shutdown();
 		void SetDevice(Device* device);
+		void SetEngine(Engine* en);
 
 		Vector2 GetViewportSize();
 
@@ -33,6 +36,7 @@ namespace Game {
 
 	protected:
 		Device* device;
+		Engine* engine;
 	};
 }
 

@@ -2,9 +2,8 @@
 #include <GameEngine/ScriptBase.h>
 
 namespace Game {
-	void ScriptBase::PreInit(Engine** _en, RenderBase** _ren) {
+	void ScriptBase::PreInit(Engine** _en) {
 		engine = _en;
-		render = _ren;
 	}
 	ScriptBase::~ScriptBase() { Finalize(); };
 }

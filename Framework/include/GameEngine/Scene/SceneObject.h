@@ -25,13 +25,13 @@ namespace Game {
 
 		bool isEnabled() { return enabled; }
 
-		std::vector<SceneObject*> GetChildren();
+		_STD vector<SmartPtr<SceneObject>> GetChildren();
 
 		template<typename T>
-		std::vector<T*> GetComponents() {
-			std::vector<T*> vec = {};
+		_STD vector<T*> GetComponents() {
+			_STD vector<T*> vec = {};
 			for (auto c : components) {
-				auto o = dynamic_cast<T*>(c);
+				auto o = dynamic_cast<T*>(c.Get());
 				if (o != nullptr) { 
 					vec.push_back(o);
 				}
@@ -43,12 +43,12 @@ namespace Game {
 		SceneObject& GetParent() { return *parent; }
 		bool TryGetObjectByName(String& name, SceneObject* &object);
 
-		void AddComponent(Component* component);
-		void RemoveComponent(Component* component);
+		void AddComponent(SmartPtr<Component> component);
+		void RemoveComponent(SmartPtr<Component> component);
 
 		SceneObject* Instantiate(SceneObject* orig);
 		SceneObject* Instantiate();
-		void RemoveChild(SceneObject* whatObj);
+		void RemoveChild(SmartPtr<SceneObject> whatObj);
 
 		void Destroy();
 
@@ -92,8 +92,8 @@ namespace Game {
 		Scene* scene = nullptr;
 		SceneObject* parent;
 		String name = L"";
-		std::unordered_set<Component*> components{};
-		std::unordered_set<SceneObject*> children{};
+		_STD vector<SmartPtr<Component>> components{};
+		_STD vector<SmartPtr<SceneObject>> children{};
 	};
 }
 

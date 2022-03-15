@@ -6,20 +6,23 @@
 #include <GameEngine\Components\UI\Text.h>
 #include <GameEngine\Components\UI\Slider.h>
 #include <GameEngine\Components\Rigidbody.h>
+#include <GameEngine\Components\UI\TextButton.h>
 
 #include "../Scripts/CameraMoverScript.h"
 #include "../Scripts/ChunkGenerator.h"
 #include "../Scripts/UI/DebugText.h"
 #include "../Scripts/PlayerHandler.h"
 #include "../Scripts/SamplePostProcess.h"
-
 #include "SampleScene.h"
+
+void MainMenuScene::InitResourceManager() {
+	_initResourceManager(L"resources/MainMenuSceneResources.json");
+}
 
 void MainMenuScene::Init() {
 	auto& ren = GetRender();
 	auto& en = GetEngine();
-
-	InitResourceManager(L"resources/MainMenuSceneResources.json");
+	auto device = en.GetDevice();
 
 	auto& resManager = GetResourceManager();
 
@@ -32,14 +35,31 @@ void MainMenuScene::Init() {
 
 	ren.AddCamera(cam);
 
+	UI::RectTransform* rectTransform;
+
+	//background
+	rectTransform = new UI::RectTransform();
+	rectTransform->anchor = UI::RectTransform::Anchor::MiddleCenter;
+	rectTransform->SetPosition({ 0,0 });
+	rectTransform->SetScale({ 1920, 1080 });
+
+	UI::Image* bg = new UI::Image();
+	bg->SetImg(&ren.CreateTexture(resManager.GetString("BackgroundImg"), D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_TEXTURE_ADDRESS_CLAMP));
+
+	auto BackgroundImg = Instaniate();
+	BackgroundImg->SetName(L"Background");
+	BackgroundImg->AddComponent(rectTransform);
+	BackgroundImg->AddComponent(bg);
+
 	//start button
-	UI::Button* button = new UI::Button();
-	button->SetImg(&ren.CreateTexture(resManager.GetString("StartButtonImg")));
+	UI::TextButton* button = UI::TextButton::CreateNew(L"Button", D2D1::ColorF::Black);
+	button->SetFont(L"BankGothic Md BT");
+	button->SetImg(&ren.CreateTexture(resManager.GetString("StartButtonImg"), D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_TEXTURE_ADDRESS_CLAMP));
 	button->setOnClickListener([&en](UI::Button* sender) {
 		en.LoadScene(new SampleScene());
 		});
 
-	auto rectTransform = new UI::RectTransform();
+	rectTransform = new UI::RectTransform();
 	rectTransform->anchor = UI::RectTransform::Anchor::MiddleCenter;
 	rectTransform->SetPosition({ 0,-100 });
 	rectTransform->SetScale({ 200,33 });
@@ -51,16 +71,28 @@ void MainMenuScene::Init() {
 
 	//slider
 	UI::Slider* slider = new UI::Slider();
-	slider->SetImg(&ren.CreateTexture(resManager.GetString("CrossTexture")));
-	slider->SetBgImg(&ren.CreateTexture(L"img/sky_finger.png"));
+	slider->SetImg(&ren.CreateTexture(resManager.GetString("CrossTexture"), D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_TEXTURE_ADDRESS_CLAMP));
+	slider->SetBgImg(&ren.CreateTexture(resManager.GetString("SliderImg"), D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_TEXTURE_ADDRESS_CLAMP));
+
+	slider->setOnClickListener([this](UI::Slider* sender) {
+		GetSoundManager().play_sound("test", 1, { 0,0,0 });
+		});
 
 	rectTransform = new UI::RectTransform();
 	rectTransform->anchor = UI::RectTransform::Anchor::BottomCenter;
 	rectTransform->SetPosition({ 0,-20 });
-	rectTransform->SetScale({ 200,55 });
+	rectTransform->SetScale({ 200,35 });
 
 	auto Slider = Instaniate();
 	Slider->SetName(L"Slider");
 	Slider->AddComponent(rectTransform);
 	Slider->AddComponent(slider);
+
+	auto debugText = Instaniate();
+
+	rectTransform = new UI::RectTransform();
+	rectTransform->anchor = UI::RectTransform::Anchor::TopLeft;
+	rectTransform->SetPosition({ 0,0 });
+	rectTransform->SetScale({ 800,600 });
+
 }

@@ -108,6 +108,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\Microsoft SDKs\DirectX11\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -125,6 +126,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\Microsoft SDKs\DirectX11\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -145,6 +147,7 @@
       <LanguageStandard_C>Default</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -165,6 +168,7 @@
       <LanguageStandard_C>Default</LanguageStandard_C>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -175,9 +179,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\GameEngine\AlDevice.h" />
+    <ClInclude Include="include\GameEngine\AL\AlDevice.h" />
     <ClInclude Include="include\GameEngine\AssetManager.h" />
     <ClInclude Include="include\GameEngine\Camera.h" />
+    <ClInclude Include="include\GameEngine\AL\ALHelper.h" />
     <ClInclude Include="include\GameEngine\Components\Collider.h" />
     <ClInclude Include="include\GameEngine\Components\CustomCollider.h" />
     <ClInclude Include="include\GameEngine\Components\MeshCollider.h" />
@@ -194,6 +199,7 @@
     <ClInclude Include="include\GameEngine\Components\UI\Image.h" />
     <ClInclude Include="include\GameEngine\Components\UI\Slider.h" />
     <ClInclude Include="include\GameEngine\Components\UI\TextButton.h" />
+    <ClInclude Include="include\GameEngine\Components\UI\TextDrawer.h" />
     <ClInclude Include="include\GameEngine\DX\RenderingMesh.h" />
     <ClInclude Include="include\GameEngine\Scene\IRenderable.h" />
     <ClInclude Include="include\GameEngine\Components\UI\RectTransform.h" />
@@ -212,6 +218,7 @@
     <ClInclude Include="include\GameEngine\Physics\IRigidBody.h" />
     <ClInclude Include="include\GameEngine\Physics\PhysicsEngine.h" />
     <ClInclude Include="include\GameEngine\Scene\IPostProcess.h" />
+    <ClInclude Include="include\GameEngine\Scene\ObjectSerializer.h" />
     <ClInclude Include="include\GameEngine\Scene\ResourceManager.h" />
     <ClInclude Include="include\GameEngine\SoundStream.h" />
     <ClInclude Include="include\GameEngine\RenderBase.h" />
@@ -264,11 +271,15 @@
     <ClInclude Include="include\GameEngine\stdafx.h" />
     <ClInclude Include="include\GameEngine\Vectors.h" />
     <ClInclude Include="include\GameEngine\Window.h" />
+    <ClInclude Include="include\GameEngine\DX\Common.h" />
+    <ClInclude Include="include\GameEngine\DX\FontLoader.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="include\GameEngine\Util\exceptions\exception.h" />
     <ClInclude Include="src\Util\ExeptionManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AL\ALHelper.cpp" />
+    <ClCompile Include="src\DX\FontLoader.cpp" />
     <ClCompile Include="src\Physics\MeshCollider.cpp" />
     <ClCompile Include="src\Physics\PhysicsEngine.cpp" />
     <ClCompile Include="src\DX\Texture2D.cpp" />
@@ -291,6 +302,7 @@
     <ClCompile Include="src\Scene\Components\UI\Slider.cpp" />
     <ClCompile Include="src\Scene\Components\UI\Text.cpp" />
     <ClCompile Include="src\Scene\LightManager.cpp" />
+    <ClCompile Include="src\Scene\ObjectSerailizer.cpp" />
     <ClCompile Include="src\Scene\ResourceManager.cpp" />
     <ClCompile Include="src\Scene\SceneRender.cpp" />
     <ClCompile Include="src\Scene\Component.cpp" />

@@ -62,11 +62,19 @@ namespace Game {
 
 		}
 
-		Matrix4x4 GetTransformationMatrix() { 
+		Matrix4x4 GetTransformationMatrix() {
 			std::shared_lock l(mut);
-			if(parent != nullptr)
+			if (parent != nullptr)
 				return Matrix4x4::TRS(position, rotation, scale) * parent->GetTransformationMatrix();
-			return Matrix4x4::TRS(position, rotation, scale); 
+			return Matrix4x4::TRS(position, rotation, scale);
+		}
+
+		Matrix4x4 GetInvTransformationMatrix() {
+			std::shared_lock l(mut);
+			auto mat = Matrix4x4::Translation(-position) * Matrix4x4::Rotation(rotation.Opposite()) * Matrix4x4::Scale(1 / scale);
+			if (parent != nullptr)
+				return parent->GetInvTransformationMatrix() * mat;
+			return mat;
 		}
 	};
 }

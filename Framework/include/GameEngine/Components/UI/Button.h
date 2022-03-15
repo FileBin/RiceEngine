@@ -7,6 +7,10 @@ namespace Game::UI {
 	class Button : public Image {
 
 	protected:
+		struct ConstBufferData {
+			Vector4f state;
+		};
+
 		enum class ButtonState { DISABLED, NEUTRAL, HOVER, PRESSED };
 
 		ButtonState state;
@@ -21,7 +25,7 @@ namespace Game::UI {
 		void setOnHoverInListener(Listener hover_in_listener) { on_hover_in_listener = hover_in_listener; };
 		void setOnHoverOutListener(Listener hover_out_listener) { on_hover_out_listener = hover_out_listener; };
 
-		void OnInit();
+		virtual void OnInit();
 		void Update();
 
 		virtual void Draw(Device* device);
@@ -30,7 +34,12 @@ namespace Game::UI {
 		bool checkHover();
 		void setState(ButtonState state);
 
-		D2D1::ColorF neutral_color = D2D1::ColorF::White, hover_color = D2D1::ColorF(.7, .7, .7), press_color = D2D1::ColorF(.5, .5, .5);
+		virtual SmartPtr<Shader> getShader() { return tex_shader; }
+		virtual void setShader(Shader* sh) { tex_shader = sh; }
+
+		static Shader* tex_shader;
+
+		D2D1::ColorF neutral_color = {1, 1, 1}, hover_color = D2D1::ColorF(.7, .7, .7), press_color = D2D1::ColorF(.5, .5, .5);
 		Microsoft::WRL::ComPtr<Buffer> PSConstBuffer;
 
 		Listener on_click_listener;

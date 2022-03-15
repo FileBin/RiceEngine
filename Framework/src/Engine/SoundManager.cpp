@@ -4,94 +4,64 @@
 #include <GameEngine/Util/exceptions.h>
 #include <GameEngine/Util.h>
 
-#include <thread>
-#include <ppltasks.h>
+#include <GameEngine\Core.h>
 
 namespace Game {
 
+	//SoundManager* SoundManager::instance = nullptr;
+
 	SoundManager::SoundManager(SmartPtr<Camera> cam) {
-		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
-		openALDevice = alcOpenDevice(nullptr); // default device
-		if (!openALDevice) {
-			THROW_OPENAL_EXCEPTION("Sound device initialization failed!");
-		}
-		if (!alcCall(alcCreateContext, openALContext, openALDevice, openALDevice, nullptr) || !openALContext) {
-			THROW_OPENAL_EXCEPTION("Could not create openAL context!");
-		}
-		contextMadeCurrent = false;
-		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, openALContext)
-			|| contextMadeCurrent != ALC_TRUE) {
-			THROW_OPENAL_EXCEPTION("Could not make openAL context context current!");
-		}
+		if (!AL::IsInitialized())
+			THROW_OPENAL_EXCEPTION("AL is not initialized!");
 
 		camera = cam;
-		concurrency::create_task([this]() {music_thread(); });
-		concurrency::create_task([this]() {update_thread(); });
+
+		init = true;
+
+		musicThread = Core::RunThread<void()>([this] () { music_thread(); });
+		updateThread = Core::RunThread<void()>([this] () { update_thread(); });
 
 		Log::log(Log::INFO, L"OpenAL init success");
 	}
 
 	SoundManager::~SoundManager() {
-		if (!alcCall(alcMakeContextCurrent, contextMadeCurrent, openALDevice, nullptr))
-		{
-			Log::log(Log::WARNING, L"Error while destroying openAL context");
-		}
+		init = false;
 
-		if (!alcCall(alcDestroyContext, openALDevice, openALContext))
-		{
-			Log::log(Log::WARNING, L"Error while destroying openAL context");
-		}
+		musicThread->join();
+		musicThread.Release();
 
-		ALCboolean closed;
-		alcCall(alcCloseDevice, closed, openALDevice, openALDevice);
+		updateThread->join();
+		updateThread.Release();
 	}
 
 	void SoundManager::update_thread() {
 		auto cam = camera;
-		while (true) {
+		while (init) {
+			if (cam.IsNull())
+				break;
 			setListenerPosition(cam->position);
-			setListenerOrientation(cam->rotation * Vector3::forward, cam->rotation * Vector3::down);
+			//setListenerOrientation(cam->rotation * Vector3::forward, cam->rotation * Vector3::down);
+			AL::SetListenerOrientation(cam->rotation);
 			Sleep(30);
 		}
 	}
 
 	void SoundManager::setListenerPosition(Vector3f position) {
-		alCall(alListener3f, AL_VELOCITY, position.x - prevPos.x, position.y - prevPos.y, position.z - prevPos.z);
+		AL::SetListenerPosition(position);
+		AL::SetListenerVelocity(position - prevPos);
 		prevPos.x = position.x;
 		prevPos.y = position.y;
 		prevPos.z = position.z;
-		alCall(alListener3f, AL_POSITION, position.x, position.y, position.z);
-	}
-
-	void SoundManager::setListenerOrientation(Vector3f at, Vector3f up) {
-		ALfloat listenerOri[] = { at.x, at.y, at.z, up.x, up.y, up.z };
-		alCall(alListenerfv, AL_ORIENTATION, listenerOri);
-	}
-
-	void SoundManager::list_audio_devices(const ALCchar* devices)
-	{
-		const ALCchar* device = devices, * next = devices + 1;
-		size_t len = 0;
-
-		Log::log(Log::INFO, L"OpenAL Devices list:");
-		Log::log(Log::INFO, L"----------");
-		while (device && *device != '\0' && next && *next != '\0') {
-			Log::log(Log::INFO, Util::Utf8ToWstring(std::string(device)));
-			len = strlen(device);
-			device += (len + 1);
-			next += (len + 2);
-		}
-		Log::log(Log::INFO, L"----------\n");
 	}
 
 	void SoundManager::playSoundStream(SmartPtr<SoundStream> ogg) {
-		if (!ogg->playback())
+		if (!ogg->Play())
 			throw std::wstring(L"Ogg refused to play");
-		while (ogg->update())
+		while (ogg->update() && init)
 		{
-			if (!ogg->playing())
+			if (!ogg->IsPlaying())
 			{
-				if (!ogg->playback())
+				if (!ogg->Play())
 					throw std::wstring(L"Ogg abruptly stopped");
 				else
 					throw std::wstring(L"Ogg stream was interrupted");
@@ -102,11 +72,11 @@ namespace Game {
 	}
 
 	void SoundManager::music_thread() {
-		while (true) {
+		while (init) {
 			if (nextMusic.size() > 0) {
 				SmartPtr<SoundStream> ogg = new SoundStream();
 				try {
-					ogg->playOgg(nextMusic);
+					ogg->LoadOgg(nextMusic);
 					ogg->setVolume(musicVolume, false);
 					current_music_stream = ogg;
 					nextMusic.clear();
@@ -124,14 +94,14 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f pos, std::vector<SoundEffect*> effects) {
+	void SoundManager::sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f pos/*, std::vector<SoundEffect*> effects*/) {
 		try {
-			ogg->playOgg(path);
+			ogg->LoadOgg(path);
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
-			if (!effects.empty()) {
-				ogg->applyEffectChain(effects);
-			}
+			//if (!effects.Clear()) {
+			//	ogg->applyEffectChain(effects);
+			//}
 			playSoundStream(ogg);
 		}
 		catch (std::wstring e) {
@@ -139,14 +109,14 @@ namespace Game {
 		}
 	}
 
-	void SoundManager::raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos, std::vector<SoundEffect*> effects) {
+	void SoundManager::raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos/*, std::vector<SoundEffect*> effects*/) {
 		try {
-			ogg->playRaw(f, beginning, end);
+			ogg->LoadRaw(f, beginning, end);
 			ogg->setVolume(volume, true);
 			ogg->setPosition(pos);
-			if (!effects.empty()) {
-				ogg->applyEffectChain(effects);
-			}
+			//if (!effects.Clear()) {
+			//	ogg->applyEffectChain(effects);
+			//}
 			playSoundStream(ogg);
 		}
 		catch (std::wstring e) {
@@ -154,15 +124,15 @@ namespace Game {
 		}
 	}
 
-	SmartPtr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos, std::vector<SoundEffect*> effects) {
-		SmartPtr<SoundStream> ogg = new SoundStream();;
-		concurrency::create_task([&, ogg, name, volume, pos, effects]() {sound_thread(ogg, "sfx/" + name + ".ogg", volume, pos, effects); });
+	SmartPtr<SoundStream> SoundManager::play_sound(const std::string name, float volume, Vector3f pos/*, std::vector<SoundEffect*> effects*/) {
+		SmartPtr<SoundStream> ogg = new SoundStream();
+		concurrency::create_task([&, ogg, name, volume, pos/*, effects*/]() {sound_thread(ogg, "./sfx/" + name + ".ogg", volume, pos/*, effects*/); });
 		return ogg;
 	 }
 
-	SmartPtr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos, std::vector<SoundEffect*> effects) {
+	SmartPtr<SoundStream> SoundManager::play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f pos/*, std::vector<SoundEffect*> effects*/) {
 		 SmartPtr<SoundStream> ogg = new SoundStream();
-		 concurrency::create_task([&, ogg, f, beginning, end, volume, pos, effects]() {raw_sound_thread(ogg, f, beginning, end, volume, pos, effects); });
+		 concurrency::create_task([&, ogg, f, beginning, end, volume, pos/*, effects*/]() {raw_sound_thread(ogg, f, beginning, end, volume, pos/*, effects*/); });
 		 return ogg;
 	 }
 

@@ -6,13 +6,14 @@
 namespace Game {
 	using namespace Physics;
 
-	constexpr size_t MaxIterations = 16;
+	constexpr size_t MaxIterations = 2;
 
 	Vector3 Rigidbody::Move(dbl deltaTime, std::function<dbl(Vector3)> sdFunc) {
 		auto physEn = GetSceneObject().GetScene().GetPhysEngine();
 		std::unique_lock lock(engineMutex);
 		Vector3 dVelo{0,0,0};
 		dbl veloIters = 0;
+		velocity += gravity * deltaTime;
 		auto motion = velocity * deltaTime;
 
 		dbl d0 = sdFunc(position);
@@ -49,8 +50,8 @@ namespace Game {
 				break;
 			}
 		}
+		isCollided = collided;
 		position = newPos;
-		velocity += gravity * deltaTime;
 		velocity += dVelo / max(1., veloIters);
 		return motion;
 	}

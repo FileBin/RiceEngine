@@ -1,0 +1,16 @@
+Log Created: 03/07/22 12:57:32.
+---------------------------------------
+
+12:57:32::348: [INFO] Device initialization...
+12:57:32::361: [INFO] 
+Videocard Info:
+ Description: Intel(R) UHD Graphics
+ VideoMemory 128M
+
+12:57:32::687: [INFO] Successfully device init!
+12:57:32::789: [INFO] OpenAL init success
+12:57:32::1024: [INFO] OpenAL init success
+
+
+---------------------------------------
+Log End: 03/07/22 12:58:30

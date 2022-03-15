@@ -5,16 +5,13 @@
 #include <GameEngine\Log.h>
 
 namespace Game::UI {
-
-	struct ConstBufferData {
-		Vector4f state;
-	};
+	Shader* Slider::tex_shader{ nullptr };
 
 	void Slider::OnInit() {
-		SetShaderName("ButtonShaderPath");
+		SetShaderName("SliderShaderPath");
 		Image::OnInit();
 		PSConstBuffer = GetSceneObject().GetScene().GetEngine().GetDevice()->
-			CreateBuffer<ConstBufferData>({ { Vector4f(1,1,1,0) } }, D3D11_BIND_CONSTANT_BUFFER);
+			CreateBuffer<ConstBufferData>({ { Vector4f(1,1,1,0), {0} } }, D3D11_BIND_CONSTANT_BUFFER);
 	}
 
 	void Slider::SetProgress(dbl progress, bool notify_listener) {
@@ -76,12 +73,12 @@ namespace Game::UI {
 
 		device->Draw();
 
-		data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos);
+		/*data.WorldView = data.World = Matrix4x4::Translation(-transform->GetAnchor()) * Matrix4x4::Scale(scale) * Matrix4x4::Translation(pos);
 		device->LoadBufferSubresource(buf, data);
 
 		device->SetPSTextures({ tex });
 
-		device->Draw();
+		device->Draw();*/
 	}
 
 	Vector2 Slider::getPosition(dbl progr) {
@@ -109,6 +106,7 @@ namespace Game::UI {
 		prev_state = this->state;
 		this->state = state;
 		ConstBufferData data{ {1,1,1,0} };
+		data.value.x = progress;
 		switch (state) {
 		case SliderState::DISABLED:
 			data.state.x = data.state.y = data.state.z = data.state.w = 1.;
@@ -163,9 +161,6 @@ namespace Game::UI {
 			auto screenPos = canvas->TransformPositionToScreen(transform->GetPosition2DWithAnchor(canvas));
 			auto len = canvas->TransformScaleToScreen(transform->GetReferenceScale2D()).x;
 			SetProgress(Vector2::Dot(direction, (InputManager::GetMousePos() - screenPos) ) / len + .5, true);
-			if (prev_progress != progress) {
-				Log::log(Log::LogLevel::INFO, L"{}", progress);
-			}
 		}
 	}
 

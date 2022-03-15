@@ -90,7 +90,7 @@ Model* Chunk::GenerateModel() {
             c.Translate({ 0,0, .5 });
             Vector3 p = inChunkPos;
             p += o;
-            //auto q = Quaternion::LookAt((Vector3)full->position, (Vector3)empty->position);
+            //auto q = Quaternion::LookAt((Vector3)full->position, (Vector3)Clear->position);
             auto q = Quaternion::identity;
             if (i == 0) {
                 q = Quaternion::FromAxisAngle(Vector3::up, angle);

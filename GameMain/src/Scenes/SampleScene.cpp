@@ -14,6 +14,10 @@
 #include "../Scripts/PlayerHandler.h"
 #include "../Scripts/SamplePostProcess.h"
 
+void SampleScene::InitResourceManager() {
+	_initResourceManager(L"resources/GameSceneResources.json");
+}
+
 void SampleScene::Init() {
 	auto chunk = Instaniate();
 	chunk->SetName(L"Chunk");
@@ -21,7 +25,6 @@ void SampleScene::Init() {
 	auto player = Instaniate();
 	player->SetName(L"Player");
 
-	InitResourceManager(L"resources/GameSceneResources.json");
 	auto& resManager = GetResourceManager();
 
 	auto& ren = GetRender();

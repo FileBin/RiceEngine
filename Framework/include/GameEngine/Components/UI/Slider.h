@@ -6,6 +6,11 @@ namespace Game::UI {
 
 	class Slider : public Image {
 	protected:
+		struct ConstBufferData {
+			Vector4f state;
+			Vector4f value;
+		};
+
 		enum class SliderState { DISABLED, NEUTRAL, HOVER, PRESSED } state, prev_state;
 
 	public:
@@ -31,6 +36,8 @@ namespace Game::UI {
 		void setOnProgressChangedListener(ProgressListener progress_changed_listener) { on_progress_changed_listener = progress_changed_listener; };
 
 	private:
+		SmartPtr<Shader> getShader() { return tex_shader; }
+		void setShader(Shader* sh) { tex_shader = sh; }
 		dbl progress;
 		dbl prev_progress;
 		const Vector2 direction = Vector2::right;
@@ -49,6 +56,8 @@ namespace Game::UI {
 		Listener on_release_listener;
 		Listener on_hover_in_listener;
 		Listener on_hover_out_listener;
+
+		static Shader* tex_shader;
 
 		void fireListener(Listener listener, bool fire) {
 			if (listener != NULL && fire) {

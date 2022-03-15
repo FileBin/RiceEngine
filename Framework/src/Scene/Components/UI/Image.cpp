@@ -8,10 +8,11 @@ namespace Game::UI {
 	void Image::OnInit() {
 		auto& scene = GetSceneObject().GetScene();
 		auto& resManager = scene.GetResourceManager();
-		if (tex_shader == nullptr) {
-			tex_shader = &scene.GetEngine().CreateShader();
-			tex_shader->LoadVertexShader(Util::ReadFile(resManager.GetString("VertexShaderPath")));
-			tex_shader->LoadPixelShader(Util::ReadFile(resManager.GetString(shader_name)));
+		if (getShader().IsNull()) {
+			auto shader = &scene.GetEngine().CreateShader();
+			shader->LoadVertexShader(Util::ReadFile(resManager.GetString("VertexShaderPath")));
+			shader->LoadPixelShader(Util::ReadFile(resManager.GetString(shader_name)));
+			setShader(shader);
 		}
 		auto device = scene.GetEngine().GetDevice();
 		indexBuf = device->CreateBuffer<UINT>({ 2,1,0,0,3,2 }, D3D11_BIND_INDEX_BUFFER);
@@ -61,11 +62,10 @@ namespace Game::UI {
 		device->SetActiveVertexBuffer<Vertex>(vertexBuf.Get());
 		device->SetActiveIndexBuffer(indexBuf.Get());
 		device->SetActiveVSConstantBuffer(buf);
-		//device->SetActivePSConstantBuffer(mat->GetBuffer());
+		//device->SetActivePSConstantBuffer(nullptr);
 		device->SetPSTextures({ tex });
 
-		device->SetActiveShader(*tex_shader);
-
+		device->SetActiveShader(*getShader());
 		device->UseDepthBuffer(false);
 		device->Draw();
 		//dev->set

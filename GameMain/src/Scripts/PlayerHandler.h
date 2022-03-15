@@ -22,6 +22,7 @@ class PlayerHandler : public MonoScript {
 
 	Vector2 pos = Vector2::zero;
 
+	SmartPtr<Model> sphereModel;
 	SmartPtr<Rigidbody> playerBody;
 	SmartPtr<Transform> transform;
 
@@ -40,6 +41,10 @@ public:
 		transform = obj.GetComponents<Transform>()[0];
 		transform->SetPosition({ 0,30,0 });
 		playerBody = obj.GetComponents<Rigidbody>()[0];
+
+		sphereModel = new Model();
+		sphereModel->SetSubMeshesCount(1);
+		sphereModel->SetSubMesh(MeshGenerator::GenerateMesh([](Vector3 p) {return Util::sdSphere(p, 1.); }), 0);
 	}
 
 	void Update() {
@@ -74,7 +79,8 @@ public:
 		double dt = en.GetDeltaTime();
 		auto physEn = GetScene().GetPhysEngine();
 		HitInfo hit;
-		grounded = physEn->Raycast(transform->GetPosition(), Vector3::down, hit, 32, .3, 1.1);
+		grounded = playerBody->IsCollided() && physEn->Raycast(transform->GetPosition(), Vector3::down, hit, 32, .3, 1.1);
+		//Log::log(Log::INFO, L"grounded: {}", grounded);
 
 		auto tangent = Vector3::Dot(Vector3::up, hit.norm);
 
@@ -98,6 +104,7 @@ public:
 
 		if (InputManager::GetKey(KeyCode::Space)) {
 			if (grounded) vel.y = 10;
+			grounded = false;
 		}
 
 		playerBody->SetVelocity(vel + deltavel);
@@ -122,13 +129,55 @@ public:
 			} else if (InputManager::GetKey(KeyCode::MouseRight)) {
 				AddVoxels();
 			}
+			if (InputManager::GetKey(KeyCode::H)) {
+				if (!h_pressed) SpawnSphere();
+				h_pressed = true;
+			} else {
+				h_pressed = false;
+			}
 		}
 	}
 
 	bool updating = false;
 	long timeout = 200;
+	bool h_pressed = false;
 
 	#define eps .01;
+
+	void SpawnSphere() {
+		auto& scene = GetScene();
+		auto physEn = scene.GetPhysEngine();
+		auto& ren = scene.GetRender();
+		auto cam = ren.GetActiveCamera();
+		auto& obj = GetSceneObject();
+		static size_t counter = 0;
+		HitInfo info;
+		if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .01, 10.)) {
+			auto sphereMat = ren.CreateMaterial(std::format(L"SphereMat({})", counter++), ren.GetShader(L"Diffuse"), { Var(L"time"), Var(L"color"), Var(L"egst") });
+			sphereMat->SetVar<Vector4f>(L"color", { (float)Math::Random(), (float)Math::Random(), (float)Math::Random(), 1.f });
+			sphereMat->SetVar<Vector4f>(L"egst", { .3,1.,1.,0. });
+			sphereMat->UpdateBuffer();
+
+
+			auto transform = new Transform();
+			transform->SetPosition(info.pos + info.norm);
+			transform->SetScale(Vector3::one);
+
+			auto sphere = scene.Instaniate();
+
+			sphere->AddComponent(transform);
+			sphere->AddComponent(new Rigidbody());
+
+			auto mren = new ModelRender();
+
+			sphere->AddComponent(mren);
+
+			mren->SetModel(sphereModel);
+			mren->SetMaterial(sphereMat, 0);
+
+			sphere->SetActive(true);
+		}
+	}
 
 	void AddVoxels() {
 		auto physEn = GetScene().GetPhysEngine();
@@ -169,7 +218,7 @@ public:
 		auto cam = GetRender().GetActiveCamera();
 		if (!updating) {
 			HitInfo info;
-			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .1, 5.)) {
+			if (physEn->Raycast(cam->position, cam->rotation * Vector3::forward, info, 128, .01, 5.)) {
 				SDFunc func;
 				if (binding) {
 					func = [info](Vector3 p) {

@@ -52,4 +52,5 @@ Vector3 operator+(Vector3 a, Vector3 b);
 Vector3 operator-(Vector3 a, Vector3 b);
 Vector3 operator*(Vector3 a, dbl b);
 Vector3 operator/(Vector3 a, dbl b);
+Vector3 operator/(dbl a, Vector3 b);
 Vector3 operator*(Quaternion q, Vector3 v);

@@ -24,9 +24,11 @@ namespace Game {
 
 		void SetMsaaLevel(size_t level);
 
-		void SetRender(LoadingScreenRenderBase* render);
+		void SetLoadingScene(Scene* scene);
 
 		void LoadScene(Scene* scene);
+
+		void SetFps(float fps = 60.f);
 
 		Device* GetDevice();
 

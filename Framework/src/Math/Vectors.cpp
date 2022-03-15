@@ -373,6 +373,10 @@ Vector3 operator/(Vector3 a, dbl b) {
     return { a.x / b , a.y / b, a.z / b };
 }
 
+Vector3 operator/(dbl b, Vector3 a) {
+    return { b / a.x , b / a.y, b / a.z };
+}
+
 bool operator==(Vector3 a, Vector3 b) {
     return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
 }

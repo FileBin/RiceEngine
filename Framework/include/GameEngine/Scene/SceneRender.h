@@ -23,6 +23,7 @@ namespace Game {
 	class Model;
 	class Camera;
 	struct Mesh;
+	class Scene;
 
 	namespace UI {
 		__interface IDrawable;
@@ -68,7 +69,7 @@ namespace Game {
 		UI::Canvas canvas;
 #pragma endregion
 	public:
-
+		SceneRender(Scene* scene);
 		bool Init();
 		void BeginFrame();
 		bool Draw();
@@ -92,7 +93,7 @@ namespace Game {
 		SmartPtr<Material> CreateMaterial(String name, SmartPtr<Shader> sh, const std::vector<std::pair<String, size_t>> mapping = {});
 		SmartPtr<Material> GetMaterial(String name);
 
-		Texture2D& CreateTexture(String filename) { return *device->CreateTexture(filename); }
+		Texture2D& CreateTexture(String filename, D3D11_TEXTURE_ADDRESS_MODE u_mode = D3D11_TEXTURE_ADDRESS_WRAP, D3D11_TEXTURE_ADDRESS_MODE v_mode = D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR) { return *device->CreateTexture(filename, u_mode, v_mode, filter); }
 		Texture2D& GetDepthBufferTex() { return *device->GetDepthBufferTex(); }
 		Texture2D& GetRenderTargetTex() { return *device->GetRenderTargetTex(); }
 
@@ -100,12 +101,13 @@ namespace Game {
 		void RemoveDrawable(UI::IDrawable* txt);
 
 		void PostProcess(Material* mat);
+		void DefaultPostProcess();
 
 		void AddPostProcessScript(IPostProcess* ppscript) { ppscripts.insert(ppscript); }
 		void RemovePostProcessScript(IPostProcess* ppscript) { ppscripts.erase(ppscript); }
 
 	private:
-
+		SmartPtr<Scene> scene;
 
 		size_t activeCameraIdx;
 		std::mutex m_mutex, m_2dMutex, m_removeMutex;
@@ -119,7 +121,7 @@ namespace Game {
 
 		//default
 		SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
-		SmartPtr<Material> skyboxMaterial;
+		SmartPtr<Material> skyboxMaterial, defaultPostProcessMaterial;
 
 		Mesh* CreateSkyBoxMesh();
 	};

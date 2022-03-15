@@ -6,10 +6,8 @@ namespace Game {
 		engine = nullptr;
 		soundManager = nullptr;
 		root = new SceneObject(this);
-		render = new SceneRender();
+		render = new SceneRender(this);
 	}
-
-	Scene::~Scene() { soundManager->~SoundManager(); };
 	
 	void Scene::AddScript(MonoScript* script) {
 		root->AddComponent(script);

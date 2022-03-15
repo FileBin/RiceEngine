@@ -19,11 +19,9 @@ catch (Exception& e) {
 	throw e;
 } catch (HRESULT hr) {
 	_com_error err(hr);
-	Log::log(Log::ERR, L"HRESULT Error occured: ");
-	//Log::log(Log::ERR, L"Desc: {}", err.Description().GetBSTR());
+	Log::log(Log::ERR, L"HRESULT Error occured: {}", hr);
 	Log::log(Log::ERR, L"Message: {}", err.ErrorMessage());
 	Log::Close();
-	wchar_t* desc = err.Description().GetBSTR();
 	throw hr;
 }
 #endif

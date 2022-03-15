@@ -1,7 +1,5 @@
 #pragma once
 
-#include "AlDevice.h"
-
 #include <al/al.h>
 #include <al/alc.h>
 #define AL_ALEXT_PROTOTYPES
@@ -27,7 +25,7 @@ namespace Game {
         EAXREVERB = AL_EFFECT_EAXREVERB
     };
 
-    class SoundEffect : private AlDevice
+    /*class SoundEffect
     {
     public:
         SoundEffect(ALenum effect);
@@ -40,5 +38,5 @@ namespace Game {
         void setReverbPreset(EFXEAXREVERBPROPERTIES preset);
         ALuint effectID;
         ALuint slotID;
-    };
+    };*/
 }

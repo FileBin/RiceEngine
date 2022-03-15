@@ -7,15 +7,10 @@ using namespace Game;
 
 int main(int argc, char** argv[]) {
 
-#ifndef _DEBUG
-	ShowWindow(GetConsoleWindow(), 0);
-#else
+#ifdef _DEBUG
 	ShowWindow(GetConsoleWindow(), 1);
 #endif
-
 	SetProcessDPIAware();
 	Core::RunNew(new PreInitScript());
-	ShowWindow(GetConsoleWindow(), 0);
-
 	return 0;
 }

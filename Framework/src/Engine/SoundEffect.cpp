@@ -2,7 +2,7 @@
 #include <GameEngine/SoundEffect.h>
 
 namespace Game {
-	SoundEffect::SoundEffect(ALenum effect) {
+	/*SoundEffect::SoundEffect(ALenum effect) {
         alCall(alGenEffects, 1, &effectID);
         alCall(alEffecti, effectID, AL_EFFECT_TYPE, effect);
         
@@ -72,5 +72,5 @@ namespace Game {
         alCall(alEffectf, effectID, AL_REVERB_AIR_ABSORPTION_GAINHF, preset.flAirAbsorptionGainHF);
         alCall(alEffectf, effectID, AL_REVERB_ROOM_ROLLOFF_FACTOR, preset.flRoomRolloffFactor);
         alCall(alEffecti, effectID, AL_REVERB_DECAY_HFLIMIT, preset.iDecayHFLimit);
-    }
+    }*/
 }

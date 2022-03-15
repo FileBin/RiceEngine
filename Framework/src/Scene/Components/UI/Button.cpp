@@ -5,15 +5,13 @@
 
 namespace Game::UI {
 
-	struct ConstBufferData {
-		Vector4f state;
-	};
+	Shader* Button::tex_shader{ nullptr };
 
 	void Button::OnInit() {
 		SetShaderName("ButtonShaderPath");
 		Image::OnInit();
 		PSConstBuffer = GetSceneObject().GetScene().GetEngine().GetDevice()->
-			CreateBuffer<ConstBufferData>({ { Vector4f(0,0,0,0) } }, D3D11_BIND_CONSTANT_BUFFER);
+			CreateBuffer<ConstBufferData>({ { Vector4f(1,1,1,0) } }, D3D11_BIND_CONSTANT_BUFFER);
 	}
 
 	void Button::Update() {

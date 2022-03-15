@@ -26,6 +26,9 @@ namespace Game {
 						float_values.insert({ it->name.GetString(), it->value.GetFloat() });
 					else if (it->value.IsBool())
 						bool_values.insert({ it->name.GetString(), it->value.GetBool() });
+					else if (it->value.IsObject()) {
+						objects.insert({ it->name.GetString(), it->value.GetObj() });
+					}
 				}
 			}
 		} else THROW_JSON_HAS_NOT_MEMBER_EXCEPTION(filename.c_str(), res);
@@ -58,6 +61,14 @@ namespace Game {
 	bool ResourceManager::GetBool(std::string resourceName) {
 		try {
 			return bool_values.at(resourceName);
+		} catch (std::out_of_range) {
+			THROW_INVALID_ARG_EXCEPTION(resourceName.c_str());
+		}
+	}
+
+	std::vector<rapidjson::Value>& ResourceManager::GetArray(std::string resourceName) {
+		try {
+			return arrays.at(resourceName);
 		} catch (std::out_of_range) {
 			THROW_INVALID_ARG_EXCEPTION(resourceName.c_str());
 		}

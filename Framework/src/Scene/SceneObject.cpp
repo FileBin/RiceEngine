@@ -15,11 +15,11 @@ namespace Game {
 			parent->RemoveChild(this);
 		ForceDisable();
 		for (auto c : components) {
-			_DELETE(c);
+			c.Release();
 		}
 		for (auto o : children) {
 			o->parent = nullptr;
-			_DELETE(o);
+			o.Release();
 		}
 	}
 
@@ -40,7 +40,9 @@ namespace Game {
 		for (auto c : components) {
 			c->Start();
 		}
-		for (auto o : children) {
+		auto n = children.size();
+		for (size_t i = 0; i < n; i++) {
+			auto o = children[i];
 			if (o->active)
 				o->ForceEnable();
 		}
@@ -92,13 +94,8 @@ namespace Game {
 	}
 
 	Scene& SceneObject::GetScene() { return *scene; }
-	vector<SceneObject*> SceneObject::GetChildren() { 
-		std::vector<SceneObject*> vec;
-		vec.reserve(children.size());
-		for (auto ch : children) {
-			vec.push_back(ch);
-		}
-		return vec; 
+	vector<SmartPtr<SceneObject>> SceneObject::GetChildren() {
+		return children; 
 	}
 
 	SceneObject& SceneObject::GetObjectByName(String name) {
@@ -112,7 +109,7 @@ namespace Game {
 	bool SceneObject::TryGetObjectByName(String& name, SceneObject* &object) {
 		for (auto o : children) {
 			if (o->name == name) {
-				object = o;
+				object = o.Get();
 				return true;
 			}
 		}
@@ -124,20 +121,25 @@ namespace Game {
 		return false;
 	}
 
-	void SceneObject::AddComponent(Component* c) {
+	void SceneObject::AddComponent(SmartPtr<Component> c) {
 		c->PreInit(this);
-		components.insert(c);
+		components.push_back(c);
 	}
 
-	void SceneObject::RemoveComponent(Component* c) {
-		c->Disable();
-		components.erase(c);
+	void SceneObject::RemoveComponent(SmartPtr<Component> c) {
+		for (auto it = components.begin(); it != components.end();it++) {
+			if (*it == c) {
+				c->Disable();
+				components.erase(it);
+				return;
+			}
+		}
 	}
 
 	SceneObject* SceneObject::Instantiate(SceneObject* o) {
 		if (o == nullptr) THROW_NULL_PTR_EXCEPTION(o);
 		o->parent = this;
-		children.insert(o);
+		children.push_back(o);
 		return o;
 	}
 
@@ -145,8 +147,14 @@ namespace Game {
 		return Instantiate(new SceneObject(scene));
 	}
 
-	void SceneObject::RemoveChild(SceneObject* o) {
-		children.erase(o);
+	void SceneObject::RemoveChild(SmartPtr<SceneObject> o) {
+		for (auto it = children.begin(); it != children.end(); it++) {
+			if (*it == o) {
+				o->Disable();
+				children.erase(it);
+				return;
+			}
+		}
 	}
 
 	void SceneObject::Destroy() {

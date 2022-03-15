@@ -7,7 +7,7 @@
 #include "../Vectors/Hasher.h"
 #include "HitInfo.h"
 
-#define PHYS_FIXED_STEP 8
+#define PHYS_FIXED_STEP 8.
 
 namespace Game::Physics {
 	class PhysicsEngine {

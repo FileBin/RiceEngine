@@ -5,6 +5,8 @@
 #include <GameEngine/Log.h>
 #include <GameEngine/Util.h>
 #include <GameEngine/Util/exceptions.h>
+#include <GameEngine/DX/FontLoader.h>
+#include <filesystem>
 
 namespace Game {
 
@@ -44,10 +46,11 @@ namespace Game {
 
 	void Device::_create2d() {
 		auto options = D2D1_FACTORY_OPTIONS();
-		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options, &factory2d);
-
+		D2D1CreateFactory(D2D1_FACTORY_TYPE::D2D1_FACTORY_TYPE_MULTI_THREADED, options, &factory2d);
 
 		DWriteCreateFactory(DWRITE_FACTORY_TYPE::DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&writeFactory));
+
+
 
 		ThrowIfFailed(writeFactory->CreateTextFormat(
 			L"Arial",
@@ -405,8 +408,8 @@ namespace Game {
 		context->RSSetViewports(1, &vp);
 	}
 
-	Texture2D* Device::CreateTexture(String path) {
-		auto tex = new Texture2D(path, device);
+	Texture2D* Device::CreateTexture(String path, D3D11_TEXTURE_ADDRESS_MODE u_mode, D3D11_TEXTURE_ADDRESS_MODE v_mode, D3D11_FILTER filter) {
+		auto tex = new Texture2D(path, device, u_mode, v_mode, filter);
 		return tex;
 	}
 

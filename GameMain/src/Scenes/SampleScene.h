@@ -5,5 +5,6 @@
 using namespace Game;
 
 class SampleScene : public Scene {
+	void InitResourceManager();
 	void Init();
 };

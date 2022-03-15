@@ -9,7 +9,7 @@ namespace Game {
 	class ScriptBase {
 	public:
 		ScriptBase() {}
-		void PreInit(Engine** engine, RenderBase** render);
+		void PreInit(Engine** engine);
 
 		virtual ~ScriptBase() = 0;
 
@@ -18,9 +18,7 @@ namespace Game {
 		virtual void Finalize() {}
 	protected:
 		Engine& GetEngine() { return **engine; }
-		RenderBase& GetRender() { return **render; }
 	private:
 		Engine** engine = nullptr;
-		RenderBase** render = nullptr;
 	};
 }

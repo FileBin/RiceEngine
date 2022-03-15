@@ -43,8 +43,7 @@ namespace Game {
 		}
 		activeScene = loadScene;
 		loadScene = nullptr;
-		activeScene->GetRender().SetDevice(device);
-		activeScene->PreInit(engine);
+		activeScene->PreInit(engine, device);
 		Core::RunTask([this]() {
 			activeScene->Init();
 			activeScene->PostInit();
@@ -52,11 +51,11 @@ namespace Game {
 	}
 
 	bool Core::Init() {
-		fps = 600;
 		engine = new Engine(&device, this);
 		device = new Device();
 		stage = Stage::PreInit;
 		RunScripts(preInitScripts);
+		AL::Init();
 		Log::PreInit();
 		wnd = new Window();
 
@@ -77,11 +76,10 @@ namespace Game {
 		stage = Stage::Init;
 		RunScripts(initScripts);
 
-		render->SetDevice(device);
-		if (!render->Init()) {
-			Log::log(Log::ERR, L"Render could not be initialized");
-			return false;
-		}
+		loadingScreenScene->PreInit(engine, device);
+		loadingScreenScene->Init();
+		loadingScreenScene->PostInit();
+
 		init = true;
 		stage = Stage::PostInit;
 		RunScripts(postInitScripts);
@@ -120,8 +118,8 @@ namespace Game {
 		stage = Stage::Close;
 		RunScripts(closeScripts);
 		init = false;
-		render->Shutdown();
-		//_DELETE(render);
+		loadingScreenScene->Close();
+		loadingScreenScene.Release();
 		_CLOSE(wnd);
 		Log::Close();
 	}
@@ -136,18 +134,17 @@ namespace Game {
 
 		if (wnd->IsResize()) {
 			device->Resize();
-			render->Resize();
+			loadingScreenScene->Resize();
 			if (!activeScene.IsNull()) {
 				activeScene->Resize();
 			}
 		}
 		if (activeScene.IsNull() || !activeScene->isLoaded()) {
-			render->BeginFrame();
-			render->Draw({});
+			loadingScreenScene->Render();
 		} else {
 			activeScene->Render();
 		}
-		render->EndFrame();
+		device->SwapBuffers();
 
 		return true;
 	}
@@ -157,7 +154,7 @@ namespace Game {
 	}
 
 	void Core::AddScript(ScriptBase* script, Stage stage) {
-		script->PreInit(&engine, reinterpret_cast<RenderBase**>(&render));
+		script->PreInit(&engine);
 		script->Init();
 		switch (stage) {
 		case Stage::PreInit:

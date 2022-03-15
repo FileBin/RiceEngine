@@ -23,8 +23,8 @@ namespace Game {
 		void play(FrequencyFunc f, dbl beginning, dbl end, float volume);
 		void setPosition(Vector3f newPos);
 		void setVolume(float volume);
-		void addEffect(SoundEffect *soundEffect);
-		SoundEffect* addEffect(ALenum effect);
+		//void addEffect(SoundEffect *soundEffect);
+		//SoundEffect* addEffect(ALenum effect);
 		void setLastAddedEffectPropertyf(ALenum property, ALfloat value);
 		void setLastAddedEffectPropertyi(ALenum property, ALint value);
 		void setLastAddedEffectPropertyfv(ALenum property, const ALfloat* values);
@@ -38,7 +38,7 @@ namespace Game {
 		Scene* scene;
 		SoundManager* soundManager;
 		SmartPtr<SoundStream> ogg;
-		std::vector<SoundEffect*> effects;
+		//std::vector<SoundEffect*> effects;
 		Transform* transform;
 	};
 }

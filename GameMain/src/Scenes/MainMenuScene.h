@@ -7,4 +7,5 @@ using namespace Game;
 
 class MainMenuScene : public Scene {
 	void Init();
+	void InitResourceManager();
 };

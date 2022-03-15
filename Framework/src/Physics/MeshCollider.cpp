@@ -48,7 +48,7 @@ namespace Game {
 
 	dbl MeshCollider::sdFunc(Vector3 p) {
 		using namespace std;
-		p -= position;
+		p = p * transform->GetInvTransformationMatrix();
 		if (physMesh == nullptr || !physMesh->bounds.IsInBounds(p)) return std::numeric_limits<dbl>().quiet_NaN();
 		auto& initTri = physMesh->getNearestTriangle(p);
 		if (&initTri == nullptr) return std::numeric_limits<dbl>().quiet_NaN();
@@ -58,19 +58,27 @@ namespace Game {
 
 		std::vector<PhysMesh::Triangle*> buf;
 
-		buf.reserve(0xff);
-		initTris.reserve(0xff);
+		buf.reserve(0x2000);
 
 		for (size_t i = 0; i < 2; i++) {
 			for (auto tri : initTris) {
 				if (tri == nullptr) continue;
 				if (tri->checked) continue;
 				tri->checked = true;
+#ifndef _DEBUG
 				buf.insert(buf.end(), tri->tris.begin(), tri->tris.end());
+#endif
 				auto sD =tri->sD(p);
-				res_d = sD > 0 ? Util::opJoin(res_d, sD) : Math::Max(res_d, sD);
+				res_d = Util::opJoin(res_d, sD > 0 ? sD : DBL_MAX);
 			}
+#ifndef _DEBUG
 			initTris = buf;
+			if (initTris.empty())
+				break;
+			buf.clear();
+#else
+			break;
+#endif
 		}
 		return res_d;
 	}

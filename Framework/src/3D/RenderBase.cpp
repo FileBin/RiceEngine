@@ -2,6 +2,7 @@
 #include <GameEngine/RenderBase.h>
 #include <GameEngine/stdafx.h>
 #include <GameEngine/macros.h>
+#include <GameEngine\Engine.h>
 
 namespace Game {
 	RenderBase::RenderBase() : device(nullptr) {}
@@ -26,8 +27,12 @@ namespace Game {
 		//Close();
 	}
 
-	void RenderBase::SetDevice(Device* device) {
-		this->device = device;
+	void RenderBase::SetDevice(Device* dev) {
+		device = dev;
+	}
+
+	void RenderBase::SetEngine(Engine* en) {
+		engine = en;
 	}
 
 	Vector2 RenderBase::GetViewportSize() {

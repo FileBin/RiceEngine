@@ -5,19 +5,19 @@
 namespace Game {
 
 
-	Texture2D::Texture2D(String filename, ID3D11Device* device) {
+	Texture2D::Texture2D(String filename, ID3D11Device* device, D3D11_TEXTURE_ADDRESS_MODE u_mode, D3D11_TEXTURE_ADDRESS_MODE v_mode, D3D11_FILTER filter) {
 		using namespace Util;
 		HRESULT hr = S_OK;
 		ppResource = new ID3D11ShaderResourceView*[1];
-		D3DX11CreateShaderResourceViewFromFileW(device, filename.c_str(), nullptr, nullptr, ppResource, &hr);
+		hr = D3DX11CreateShaderResourceViewFromFileW(device, filename.c_str(), nullptr, nullptr, ppResource, &hr);
 		ThrowIfFailed(hr);
 		D3D11_SAMPLER_DESC sampDesc;
 		ZeroMemory(&sampDesc, sizeof(sampDesc));
-		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.Filter = filter;
+		sampDesc.AddressU = u_mode;
+		sampDesc.AddressV = v_mode;
 		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_NEVER;
 		sampDesc.MinLOD = 0;
 		sampDesc.MaxLOD = 1;
 		//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;

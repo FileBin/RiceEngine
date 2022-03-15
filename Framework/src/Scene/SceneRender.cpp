@@ -8,10 +8,22 @@
 #include <GameEngine\Components\UI\IDrawable.h>
 #include <GameEngine\Scene\IRenderable.h>
 #include <GameEngine\Log.h>
+#include <GameEngine\Scene\Scene.h>
 
 namespace Game {
+	SceneRender::SceneRender(Scene* s) {
+		scene = s;
+	}
 
 	bool SceneRender::Init() {
+		auto defPPShader = CreateShader(L"DefaultPostProcess");
+
+		defPPShader->LoadVertexShader(Util::ReadFile(scene->resManager.GetString("PostProcessVSPath")));
+		defPPShader->LoadPixelShader(Util::ReadFile(scene->resManager.GetString("DefaultPostProcessPath")));
+
+		defaultPostProcessMaterial = CreateMaterial(L"DefaultPostProcessMaterial", defPPShader);
+		defaultPostProcessMaterial->AddTexture(device->GetRenderTargetTex());
+
 		canvas.referenceResoluton = { 800,600 };
 		lightManager.PreInit(this, { 150 });
 
@@ -116,7 +128,13 @@ namespace Game {
 		m_2dMutex.unlock();
 		device->End2D();
 
+		DefaultPostProcess();
+
 		return true;
+	}
+
+	void SceneRender::DefaultPostProcess() {
+		PostProcess(defaultPostProcessMaterial.Get());
 	}
 
 	void SceneRender::PostProcess(Material* mat) {

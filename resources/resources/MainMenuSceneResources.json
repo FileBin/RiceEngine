@@ -1,12 +1,15 @@
 {
     "Resources" : [
         { "VertexShaderPath" : "shaders/VertexShader.cso" },
+        { "DefaultPostProcessPath" : "shaders/DefaultPostProcess.cso" },
         { "PostProcessVSPath" : "shaders/PostProcessVS.cso" },
         { "ImgShaderPath" : "shaders/ImgShader.cso" },
         { "ButtonShaderPath" : "shaders/ButtonShader.cso" },
+        { "SliderShaderPath" : "shaders/SliderShader.cso" },
 
-        { "StartButtonImg" : "img/sky_finger.png" },
-        { "SliderImg" : "img/pattern.png" },
+        { "BackgroundImg" : "img/Background.png"},
+        { "StartButtonImg" : "img/UI/ButtonWhite.png" },
+        { "SliderImg" : "img/UI/SliderMask.png" },
 
         { "AmogusTexture" : "img/amogus.png" },
         { "CrossTexture" : "img/cross.png" }

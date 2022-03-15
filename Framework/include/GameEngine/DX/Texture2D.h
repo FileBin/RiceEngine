@@ -7,7 +7,7 @@
 namespace Game {
 	class Texture2D {
 	public:
-		Texture2D(String filename, ID3D11Device* device);
+		Texture2D(String filename, ID3D11Device* device, D3D11_TEXTURE_ADDRESS_MODE u_mode, D3D11_TEXTURE_ADDRESS_MODE v_mode, D3D11_FILTER filter);
 		Texture2D(ID3D11ShaderResourceView** ppShaderResource, ID3D11Device* device);
 
 		ID3D11SamplerState* GetSampler() { return pSampler; }

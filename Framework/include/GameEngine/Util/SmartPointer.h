@@ -4,23 +4,18 @@
 #include "../stdafx.h"
 #include <mutex>
 
-namespace Game {
-	class g_Vars {
-	public:
-		static std::mutex smartPtrConstructorMutex;
-	};
-}
 
 template<typename T = void>
 class /*Not*/SmartPtr {
 private:
-	//std::mutex m_mutex;
 	std::shared_ptr<T*> ppObject;
 public:
 
 	SmartPtr(const SmartPtr<T>& other) {
-		//std::lock_guard<std::mutex> lock(Game::g_Vars::smartPtrConstructorMutex);
-		ppObject = other.ppObject;
+		if (other.ppObject.get())
+			ppObject = other.ppObject;
+		else
+			THROW_NULL_PTR_EXCEPTION(other.ppObject.get());
 	}
 
 	SmartPtr(T* obj = nullptr) {
@@ -28,13 +23,12 @@ public:
 	}
 
 	~SmartPtr() {
-		//std::lock_guard<std::mutex> lock(Game::g_Vars::smartPtrConstructorMutex);
 	}
 
 	bool IsNull() const {
-		if (!ppObject.get())
-			THROW_REMOVED_EXCEPTION(ppObject.get());
-		return *ppObject.get() == nullptr;
+		if (ppObject.get() == nullptr)
+			THROW_NULL_PTR_EXCEPTION(ppObject.get());
+		return *ppObject == nullptr;
 	}
 
 	void Release() {
@@ -54,7 +48,7 @@ public:
 	}
 
 	T* Get() const {
-		return *ppObject.get();
+		return *ppObject;
 	}
 
 	T** GetAddress() const {
@@ -62,9 +56,9 @@ public:
 	}
 
 	T* operator->() const {
-		if (!*ppObject.get())
-			THROW_NULL_PTR_EXCEPTION(*ppObject.get());
-		return *ppObject.get();
+		if (!*ppObject)
+			THROW_NULL_PTR_EXCEPTION(*ppObject);
+		return *ppObject;
 	}
 
 	const SmartPtr<T>& operator=(const SmartPtr<T>& other) {
@@ -73,7 +67,7 @@ public:
 	}
 
 	T& operator*() {
-		return **ppObject.get();
+		return **ppObject;
 	}
 };
 

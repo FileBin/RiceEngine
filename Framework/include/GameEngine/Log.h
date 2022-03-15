@@ -23,6 +23,7 @@ namespace Game {
 		
 		template<class... _Types> 
 		static void log(LogLevel logLevel, String message, const _Types &...args) {
+			if (instance == nullptr) return;
 			auto str = std::format(message, args...);
 			if (logLevel == LogLevel::Debug) {
 #ifdef _DEBUG

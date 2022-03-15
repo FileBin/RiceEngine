@@ -52,7 +52,7 @@ namespace Game {
 			return buf;
 		}
 
-		Texture2D* CreateTexture(String filename);
+		Texture2D* CreateTexture(String filename, D3D11_TEXTURE_ADDRESS_MODE u_mode, D3D11_TEXTURE_ADDRESS_MODE v_mode, D3D11_FILTER filter);
 
 		template<typename T>
 		void UpdateBufferData(ID3D11Buffer* buf, std::vector<T> data = {}) {
@@ -93,6 +93,10 @@ namespace Game {
 		void SetRenderTargetsDefault() { context->OMSetRenderTargets(1, &renderTarget, depthStencil); }
 		void SetVP(D3D11_VIEWPORT vp) { context->RSSetViewports(1, &vp); }
 		void SetRSState(bool culling = true);
+
+		Microsoft::WRL::ComPtr<IDWriteFontCollection> CreateFontCollection(String fontName, String filePath);
+		Microsoft::WRL::ComPtr<IDWriteFontCollection> GetFontCollection(String fontName);
+
 		void Draw();
 
 		void CopyBuffers();
@@ -137,6 +141,8 @@ namespace Game {
 		ID3D11BlendState* transparentState, *solidState;
 		ID3D11ShaderResourceView* depthBufferRes = nullptr, *renderTargetRes = nullptr;
 		Texture2D* depthTexture = nullptr, *renderTexture = nullptr;
+
+		std::unordered_map<String, Microsoft::WRL::ComPtr<IDWriteFontCollection>> fontMap;
 
 		ID2D1RenderTarget* renderTarget2d = nullptr;
 		ID2D1Factory* factory2d = nullptr;

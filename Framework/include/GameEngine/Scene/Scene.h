@@ -11,15 +11,20 @@ namespace Game {
 	class MonoScript;
 
 	class Scene {
+	private:
+		friend class SceneRender;
 	public:
 		Scene();
+		virtual ~Scene() {}
 
-		virtual ~Scene() = 0;
-
-		void PreInit(Engine* en) {
+		void PreInit(Engine* en, Device* device) {
+			render->SetDevice(device);
+			InitResourceManager(); 
 			engine = en;
 			render->Init();
 		}
+
+		virtual void InitResourceManager() = 0;
 
 		virtual void Init() = 0;
 
@@ -33,6 +38,7 @@ namespace Game {
 		}
 
 		void Close() {
+			_DELETE(soundManager);
 			root->Disable();
 			delete root;
 			render->Close();
@@ -67,7 +73,7 @@ namespace Game {
 		bool isLoaded() { return init; }
 
 	protected:
-		void InitResourceManager(String path) {
+		void _initResourceManager(String path) {
 			resManager.LoadJson(path);
 		}
 

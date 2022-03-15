@@ -37,6 +37,8 @@ namespace Game {
 		msaaLevel = level;
 	}
 
+	void Engine::SetLoadingScene(Scene* scene) { core->loadingScreenScene = scene; }
+
 	double Engine::GetDeltaTime() { return core->GetDeltaTime(); }
 	double Engine::GetTime() {	return core->GetTime(); }
 	double Engine::GetFixedDeltaTime() { return core->GetFixedDeltaTime(); }
@@ -53,7 +55,9 @@ namespace Game {
 		return *sh;
 	}
 
-	void Engine::SetRender(LoadingScreenRenderBase* render) { core->render = render; }
+	//void Engine::SetRender(LoadingScreenRenderBase* render) { core->render = render; }
+
+	void Engine::SetFps(float fps) { core->fps = fps; }
 
 	SoundManager& Engine::getSoundManager() { return core->activeScene->GetSoundManager(); };
 

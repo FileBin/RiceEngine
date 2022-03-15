@@ -41,7 +41,6 @@ namespace Game {
 		void AddScript(ScriptBase* script, Stage s);
 
 		void LoadScene(Scene* _scene);
-		void SetFps(double _fps) { fps = _fps; }
 
 		double GetFixedDeltaTime() { return fixedDeltaTime; }
 		double GetDeltaTime() { return deltaTime; }
@@ -61,10 +60,10 @@ namespace Game {
 		void LoadSceneImmediate();
 
 		Stage stage = (Stage)0;
-		SmartPtr<Scene> activeScene, loadScene;
+		SmartPtr<Scene> activeScene, loadScene, loadingScreenScene;
 
 		Window* wnd = nullptr;
-		LoadingScreenRenderBase* render = nullptr;
+		//LoadingScreenRenderBase* render = nullptr;
 		Device* device = nullptr;
 		Engine* engine = nullptr;
 		bool init = false;

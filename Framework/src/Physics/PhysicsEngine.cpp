@@ -72,7 +72,7 @@ namespace Game::Physics {
 		for (; it != colliders.end(); it++) {
 			auto _d = it->second->sdFunc(pos);
 			if (isnan(_d)) continue;
-			d = _d > 0 ? Math::Min(d, _d) : Math::Max(d, _d);
+			d = Math::Min(d, _d);
 		}
 		/*for (const auto& p : bodies) {
 			if (p.first == idx) continue;
@@ -112,7 +112,7 @@ namespace Game::Physics {
 		}
 	}
 
-	bool PhysicsEngine::Raycast(Vector3 origin, Vector3 dir, OUT HitInfo& info, size_t maxIters, dbl eps, dbl maxD) {
+	bool PhysicsEngine::Raycast(Vector3 origin, Vector3 dir, HitInfo& info, size_t maxIters, dbl eps, dbl maxD) {
 		Vector3 pos = origin;
 		dbl dist = 0;
 		for (size_t i = 0; i < maxIters; i++) {
@@ -120,17 +120,17 @@ namespace Game::Physics {
 			auto d = sdFunc(pos);
 			updateMutex.unlock();
 			if (d >= DBL_MAX) d = PHYS_FIXED_STEP;
-			dist += d;
 			if (d <= eps) {
-				info.pos = pos + dir * d;
+				info.pos = pos;
 				info.dist = d;
 				updateMutex.lock();
-				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos - dir * .1);
+				info.norm = Math::GetNorm([this](Vector3 p) { return sdFunc(p); }, pos - dir * d);
 				updateMutex.unlock();
 				return true;
-			} else if (dist >= maxD) {
+			} else if (dist > maxD) {
 				break;
 			}
+			dist += d;
 			pos += dir * d;
 		}
 		return false;

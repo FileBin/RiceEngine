@@ -8,10 +8,9 @@
 namespace Game {
 	class Collider : public Component, public Physics::ICollider {
 	protected:
-		Transform* transform;
-		Vector3 position;
+		SmartPtr<Transform> transform;
 		SmartPtr<Physics::PhysicsEngine> engine;
-		size_t UUID;
+		size_t UUID = SIZE_T_MAX;
 		//std::function<dbl(Vector3)> sd = [](Vector3 v) { return DBL_MAX; };
 	public:
 		Collider() = default;

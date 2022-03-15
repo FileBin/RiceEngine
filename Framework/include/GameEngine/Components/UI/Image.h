@@ -14,6 +14,9 @@ namespace Game::UI {
 		virtual void Draw(Device* dev);
 
 	protected:
+		virtual SmartPtr<Shader> getShader() { return tex_shader; }
+		virtual void setShader(Shader* sh) { tex_shader = sh; }
+
 		D2D1::ColorF m_color = D2D1::ColorF::White;
 
 		Texture2D* tex;

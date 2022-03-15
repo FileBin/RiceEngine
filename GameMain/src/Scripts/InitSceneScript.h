@@ -15,6 +15,8 @@ using namespace Game;
 class InitSceneScript : public ScriptBase {
 	void Run() {
 		auto& engine = GetEngine();
+		auto device = engine.GetDevice();
+		//device->CreateFontCollection(L"Hyperblox", L"./fonts/Hypeblox-L3YGZ.ttf");
 //#ifdef _DEBUG
 	//	engine.LoadScene(new PhysicsScene());
 //#else
