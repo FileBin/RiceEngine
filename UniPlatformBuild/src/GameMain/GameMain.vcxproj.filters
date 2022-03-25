@@ -51,23 +51,23 @@
   <ItemGroup>
     <FxCompile Include="shaders\DiffuseShader.hlsl" />
     <FxCompile Include="shaders\VertexShader.hlsl" />
-    <FxCompile Include="shaders\UI\ButtonShader.hlsl" />
-    <FxCompile Include="shaders\DiffuseShader.hlsl" />
-    <FxCompile Include="shaders\UI\ImgShader.hlsl" />
-    <FxCompile Include="shaders\PP\PostProcessVS.hlsl" />
-    <FxCompile Include="shaders\PP\SamplePostProcess.hlsl" />
-    <FxCompile Include="shaders\SkyBoxPixel.hlsl" />
-    <FxCompile Include="shaders\SkyBoxVertex.hlsl" />
-    <FxCompile Include="shaders\TexturedShader.hlsl" />
-    <FxCompile Include="shaders\PP\Underwater.hlsl" />
-    <FxCompile Include="shaders\VertexShader.hlsl" />
-    <FxCompile Include="shaders\WaterShader.hlsl" />
-    <FxCompile Include="shaders\WaterVS.hlsl" />
-    <FxCompile Include="shaders\PP\DefaultPostProcess.hlsl" />
-    <FxCompile Include="shaders\UI\SliderShader.hlsl" />
+    <FxCompile Include="shaders\ps\PP\DefaultPostProcess.hlsl" />
+    <FxCompile Include="shaders\ps\PP\SamplePostProcess.hlsl" />
+    <FxCompile Include="shaders\ps\PP\Underwater.hlsl" />
+    <FxCompile Include="shaders\ps\UI\ButtonShader.hlsl" />
+    <FxCompile Include="shaders\ps\UI\ImgShader.hlsl" />
+    <FxCompile Include="shaders\ps\UI\SliderShader.hlsl" />
+    <FxCompile Include="shaders\ps\DiffuseShader.hlsl" />
+    <FxCompile Include="shaders\ps\SkyBoxPixel.hlsl" />
+    <FxCompile Include="shaders\ps\TexturedShader.hlsl" />
+    <FxCompile Include="shaders\ps\WaterShader.hlsl" />
+    <FxCompile Include="shaders\vs\PostProcessVS.hlsl" />
+    <FxCompile Include="shaders\vs\SkyBoxVertex.hlsl" />
+    <FxCompile Include="shaders\vs\VertexShader.hlsl" />
+    <FxCompile Include="shaders\vs\WaterVS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\LightBuffer.hlsli" />
-    <None Include="shaders\Shadows.hlsli" />
+    <None Include="shaders\include\LightBuffer.hlsli" />
+    <None Include="shaders\include\Shadows.hlsli" />
   </ItemGroup>
 </Project>

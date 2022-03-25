@@ -3,7 +3,10 @@
 #include <clocale>
 #include <ctime>
 #include <stdexcept>
+#ifdef __GNUC__
+#else
 #include <format>
+#endif
 #include <fstream>
 #include <shared_mutex>
 

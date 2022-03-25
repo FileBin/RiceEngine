@@ -29,7 +29,7 @@ public:
 				LoadFont(entry);
 			}
 		}
-		SendMessageW(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
+		//SendMessageW(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
 	}
 
 	void LoadFont(String path) {

@@ -45,26 +45,25 @@ target_precompile_headers(GameEngine PUBLIC "${GAME_ENGINE_PATH}/src/pch.h")
 #includes
 include_directories(GameMain ${DXSDK_INCLUDE_PATH})
 include_directories(GameMain ${LIB_INCLUDE_PATH})
-include_directories(GameMain "${GAME_MAIN_PATH}/include")
 include_directories(GameMain "${GAME_MAIN_PATH}/src")
 
 #build
 add_executable (GameMain ${GAME_MAIN_SRC})
-target_precompile_headers(GameEngine PUBLIC "${GAME_MAIN_PATH}/src/pch.h")
+target_precompile_headers(GameMain PUBLIC "${GAME_MAIN_PATH}/src/pch.h")
 
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 target_link_libraries(GameMain
     ${LIBS_x64}
-    "${DXSDK_LIB_PATH}/x64/d3dx11d.lib"
-    "${PROJECT_BINARY_DIR}/GameEngine.lib")
+    "${DXSDK_LIB_PATH}/x64/d3dx11d.lib")
 
 ELSE(CMAKE_BUILD_TYPE)
 
 target_link_libraries(GameMain
     ${LIBS_x64}
-    "${DXSDK_LIB_PATH}/x64/d3dx11.lib"
-    "${PROJECT_BINARY_DIR}/GameEngine.lib")
+    "${DXSDK_LIB_PATH}/x64/d3dx11.lib")
 ENDIF(CMAKE_BUILD_TYPE)
+
+target_link_libraries(GameMain -L ${PROJECT_BINARY_DIR} -l GameEngine.lib)
 
 
 
