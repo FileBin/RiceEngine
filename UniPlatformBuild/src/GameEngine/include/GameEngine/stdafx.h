@@ -40,6 +40,8 @@
 #	pragma comment(lib, "DirectXTK.lib")
 #endif
 
+#pragma comment(lib, "GameEngine.lib")
+
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d2d1.lib")
