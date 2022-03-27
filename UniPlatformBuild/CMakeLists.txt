@@ -46,7 +46,6 @@ target_precompile_headers(GameEngine PUBLIC "${GAME_ENGINE_PATH}/src/pch.h")
 include_directories(GameMain ${DXSDK_INCLUDE_PATH})
 include_directories(GameMain ${LIB_INCLUDE_PATH})
 include_directories(GameMain "${GAME_MAIN_PATH}/src")
-
 #build
 add_executable (GameMain ${GAME_MAIN_SRC})
 target_precompile_headers(GameMain PUBLIC "${GAME_MAIN_PATH}/src/pch.h")
@@ -56,6 +55,8 @@ target_link_directories(GameMain PUBLIC
 ${PROJECT_BINARY_DIR}
 "${DXSDK_LIB_PATH}/x64"
 )
+
+add_dependencies(GameMain GameEngine)
 
 target_link_libraries(GameMain
     ${LIBS_x64}
