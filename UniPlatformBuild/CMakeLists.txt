@@ -4,18 +4,23 @@
 project ("GameEngine")
 project ("GameMain")
 
-cmake_path(SET GAME_ENGINE_PATH "${CMAKE_SOURCE_DIR}/src/GameEngine")
+cmake_path(SET GAME_ENGINE_PATH "${CMAKE_SOURCE_DIR}/src/RiceEngine")
 cmake_path(SET GAME_MAIN_PATH "${CMAKE_SOURCE_DIR}/src/GameMain")
 cmake_path(SET LIB_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/lib/include")
+
+cmake_path(APPEND VULKAN_LIB_PATH $ENV{VK_SDK_PATH} "Lib")
+cmake_path(APPEND VULKAN_INCLUDE_PATH $ENV{VK_SDK_PATH} "Include")
+
 cmake_path(APPEND DXSDK_LIB_PATH $ENV{DXSDK_DIR} "lib")
 cmake_path(APPEND DXSDK_INCLUDE_PATH $ENV{DXSDK_DIR} "include")
+
 cmake_path(SET SHADER_PATH "${GAME_MAIN_PATH}/shaders")
 cmake_path(SET HLSL_INCLUDE_PATH "${SHADER_PATH}/include")
 cmake_path(SET RESOURCES_PATH "${CMAKE_SOURCE_DIR}/res/")
 
 #file search
-file(GLOB_RECURSE GAME_ENGINE_SRC "${GAME_ENGINE_PATH}/*.h" "${GAME_ENGINE_PATH}/*.cpp")
-file(GLOB_RECURSE GAME_MAIN_SRC "${GAME_MAIN_PATH}/*.h" "${GAME_MAIN_PATH}/*.cpp")
+file(GLOB_RECURSE GAME_ENGINE_SRC "${GAME_ENGINE_PATH}/*.h" "${GAME_ENGINE_PATH}/*.c" "${GAME_ENGINE_PATH}/*.hpp" "${GAME_ENGINE_PATH}/*.cpp")
+file(GLOB_RECURSE GAME_MAIN_SRC "${GAME_MAIN_PATH}/*.h" "${GAME_MAIN_PATH}/*.c" "${GAME_MAIN_PATH}/*.hpp" "${GAME_MAIN_PATH}/*.cpp")
 file(GLOB_RECURSE LIBS_x64 "${CMAKE_SOURCE_DIR}/lib/x64/*.lib")
 file(GLOB_RECURSE DLLs_x64 "${CMAKE_SOURCE_DIR}/lib/x64/*.dll")
 
@@ -32,6 +37,7 @@ set(HLSL_ALL_SHADER_FILES ${HLSL_VS_SHADER_FILES} ${HLSL_PS_SHADER_FILES})
 #GameEngine
 
 #includes
+include_directories(GameEngine ${VULKAN_INCLUDE_PATH})
 include_directories(GameEngine ${DXSDK_INCLUDE_PATH})
 include_directories(GameEngine ${LIB_INCLUDE_PATH})
 include_directories(GameEngine "${GAME_ENGINE_PATH}/include")
@@ -43,6 +49,7 @@ target_precompile_headers(GameEngine PUBLIC "${GAME_ENGINE_PATH}/src/pch.h")
 
 #GameMain
 #includes
+include_directories(GameMain ${VULKAN_INCLUDE_PATH})
 include_directories(GameMain ${DXSDK_INCLUDE_PATH})
 include_directories(GameMain ${LIB_INCLUDE_PATH})
 include_directories(GameMain "${GAME_MAIN_PATH}/src")
@@ -54,6 +61,7 @@ target_precompile_headers(GameMain PUBLIC "${GAME_MAIN_PATH}/src/pch.h")
 target_link_directories(GameMain PUBLIC
 ${PROJECT_BINARY_DIR}
 "${DXSDK_LIB_PATH}/x64"
+${VULKAN_LIB_PATH}
 )
 
 add_dependencies(GameMain GameEngine)
