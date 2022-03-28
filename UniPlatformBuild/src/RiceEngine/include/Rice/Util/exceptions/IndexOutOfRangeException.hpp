@@ -1,12 +1,12 @@
 #pragma once
 
-#include "exception.h"
+#include "Exception.hpp"
 
-#define THROW_INDEX_OUT_OF_RANGE_EXCEPTION throw Game::IndexOutOfRangeException(__LINE__, __FILE__)
+#define THROW_INDEX_OUT_OF_RANGE_EXCEPTION throw ::Rice::IndexOutOfRangeException(__LINE__, __FILE__)
 
-namespace Game {
+NSP_ENGINE_BEGIN
 	class IndexOutOfRangeException : public Exception {
 	public:
 		IndexOutOfRangeException(int line_, const char* file_) : Exception("Index was out of range!", line_, file_) {}
 	};
-}
+NSP_ENGINE_END

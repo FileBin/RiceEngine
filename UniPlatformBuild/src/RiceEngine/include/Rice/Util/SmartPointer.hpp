@@ -1,8 +1,7 @@
 #pragma once
 
-#include "exceptions.h"
-#include "../stdafx.h"
-#include <mutex>
+#include "exceptions.hpp"
+#include "../stdafx.hpp"
 
 
 template<typename T = void>

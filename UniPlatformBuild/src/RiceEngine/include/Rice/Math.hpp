@@ -1,7 +1,9 @@
 ﻿#pragma once
-#include "Util/defines.h"
-#include <cmath>
-#include "Vectors.h"
+#include "stdafx.hpp"
+#include "defines.h"
+#include "Math/Quaternion.hpp"
+#include "Math/Vectors.hpp"
+#include "Math/Matrixes.hpp"
 namespace Game
 {
 	class Math

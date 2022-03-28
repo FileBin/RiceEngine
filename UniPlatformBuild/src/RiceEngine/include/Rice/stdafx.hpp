@@ -1,13 +1,14 @@
 ﻿#pragma once
 
-#ifndef _MSC_VER
-#include "mingw_defines.h"
-#endif
-
 #include <clocale>
 #include <ctime>
 #include <stdexcept>
 #include <fstream>
+
+#include <typeinfo>
+#include <typeindex>
+
+#include <mutex>
 #include <shared_mutex>
 
 #include <string>
@@ -16,6 +17,8 @@
 #include <map>
 #include <functional>
 
+#include <fmt/format.h>
+
 #ifdef _WIN32
 
 #define WIN32_LEAN_AND_MEAN
@@ -23,7 +26,16 @@
 
 #endif //_WIN32
 
+#ifdef _MSC_VER
+
+#include "Dbghelp.h"
+#pragma comment(lib, "Dbghelp.lib")
+
+#endif
+
+#include "defines.h"
 #include "namespaces.h"
+#include "Util/SmartPointer.hpp"
 
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>

@@ -1,13 +1,15 @@
 #pragma once
 
-#include "exception.h"
+#include "Exception.hpp" 
 
-#define THROW_OPENAL_EXCEPTION(wtf) throw Game::OpenALException(wtf, __LINE__, __FILE__)
+#define THROW_OPENAL_EXCEPTION(wtf) throw ::Rice::OpenALException(wtf, __LINE__, __FILE__)
 
-namespace Game {
+NSP_ENGINE_BEGIN
+
 	class OpenALException : public Exception {
 	public:
 		OpenALException(const char* what, int line_, const char* file_) : Exception(what, line_, file_) {}
 	};
-}
+
+NSP_ENGINE_END
 

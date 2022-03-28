@@ -1,9 +1,7 @@
 ﻿#pragma once
-#include "Vectors.h"
-#include "Matrixes.h"
-#include "stdafx.h"
-#include "Util.h"
-#include "Vectors/Quaternion.h"
+#include "Math.hpp"
+#include "stdafx.hpp"
+#include "Util.hpp"
 
 namespace Game {
 

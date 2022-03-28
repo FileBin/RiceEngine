@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "../stdafx.h"
+#include "stdafx.hpp"
 
-typedef std::vector<byte> data_t;
-typedef std::wstring String;
-typedef std::vector<D3D11_INPUT_ELEMENT_DESC> VertexLayout;
-typedef ID3D11Buffer Buffer;
+typedef unsigned char byte;
+
+typedef _STD vector<byte> data_t;
+typedef _STD wstring String;
 
 typedef long long num;
 typedef double dbl;
@@ -13,4 +13,4 @@ typedef unsigned int uint;
 
 struct Vector3;
 
-typedef std::function<dbl(Vector3)> SDFunc;
+typedef _STD function<dbl(Vector3)> SDFunc;
