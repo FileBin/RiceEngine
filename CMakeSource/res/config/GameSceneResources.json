@@ -1,0 +1,24 @@
+{
+  "Resources": [
+    { "VertexShaderPath": "shaders/VertexShader.cso" },
+    { "DefaultPostProcessPath": "shaders/DefaultPostProcess.cso" },
+    { "PostProcessVSPath": "shaders/PostProcessVS.cso" },
+    { "ImgShaderPath": "shaders/ImgShader.cso" },
+    { "ButtonShaderPath": "shaders/ButtonShader.cso" },
+
+    { "SkyBoxTexture": "resources/img/sky_finger.png" },
+    { "SkyBoxVertexPath": "shaders/SkyBoxVertex.cso" },
+    { "SkyBoxPixelPath": "shaders/SkyBoxPixel.cso" },
+
+    { "WaterVSPath": "shaders/WaterVS.cso" },
+
+    { "WaterShaderPath": "shaders/WaterShader.cso" },
+    { "DiffuseShaderPath": "shaders/DiffuseShader.cso" },
+
+    { "SamplePostProcessPath": "shaders/SamplePostProcess.cso" },
+    { "UnderwaterPostProcessPath": "shaders/Underwater.cso" },
+
+    { "AmogusTexture": "resources/img/amogus.png" },
+    { "CrossTexture": "resources/img/cross.png" }
+  ]
+}
