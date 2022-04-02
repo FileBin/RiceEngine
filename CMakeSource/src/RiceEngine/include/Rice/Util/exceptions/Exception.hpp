@@ -5,7 +5,7 @@
 #include <exception>
 #include <string>
 
-#define THROW_EXCEPTION(wtf) throw Game::Exception(wtf, __LINE__, __FILE__)
+#define THROW_EXCEPTION(wtf) throw ::Rice::Exception(wtf, __LINE__, __FILE__)
 
 NSP_ENGINE_BEGIN
 

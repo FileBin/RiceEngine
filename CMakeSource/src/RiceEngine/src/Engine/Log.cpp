@@ -1,111 +1,80 @@
 ﻿#include "pch.h"
-#include <GameEngine/Log.h>
+#include <Rice/Engine/Log.hpp>
 #include <ios>
 #include <locale.h>
-#include <GameEngine/Util.h>
-#include <GameEngine/Util/exceptions.h>
+#include <iostream>
 
 #define LOGNAME "log.txt"
 
-namespace Game {
+NSP_ENGINE_BEGIN
 
-	Log* Log::instance = nullptr;
-	Log::Localization Log::locale = {};
+SmartPtr<Log> Log::instance = nullptr;
+Log::Localization Log::llocale = { };
 
-	void Log::PreInit() {
-		if (!instance) {
-			instance = new Log();
-		} else
-			log(LogLevel::ERR, locale.log_is_already_created.c_str());
-	}
+void Log::init() {
+	if (instance.isNull()) {
+		instance = new Log();
+	} else
+		log(LogLevel::Error, llocale.log_is_already_created.c_str());
+}
 
-	Log::Log() {
-		init();
-	}
+Log::Log() {
+	_init();
+}
 
-	Log::~Log() {
-		close();
-		instance = nullptr;
-	}
+Log::~Log() {
+	_close();
+}
 
-	void Log::Close() {
-		delete instance;
-	}
+void Log::close() {
+	instance.release();
+}
 
-	void Log::init() {
-		file.open(LOGNAME, std::wfstream::out | std::wfstream::trunc);
-		std::locale utf8("en_US.UTF-8");
-		file.imbue(utf8);
-		if (file.is_open()) {
-			wchar_t timer[9];
-			_wstrtime_s(timer, 9);
-			wchar_t date[9];
-			_wstrdate_s(date, 9);
-			file << std::format(L"{}: {} {}.\n---------------------------------------\n\n", locale.log_begin, date, timer);
-		} else {
-			wprintf(locale.log_creation_error.c_str());
-		}
-	}
-
-	void Log::close() {
-		if (!file)
-			return;
-
+void Log::_init() {
+	using namespace ::std;
+	file.open(LOGNAME, wfstream::out | wfstream::trunc);
+    auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>);
+	file.imbue(utf8);
+	if (file.is_open()) {
 		wchar_t timer[9];
 		_wstrtime_s(timer, 9);
 		wchar_t date[9];
 		_wstrdate_s(date, 9);
-		file << std::format(L"\n---------------------------------------\n{}: {} {}", locale.log_end, date, timer);
-		file.close();
-	}
-	
-	/*void Print(String message, ...) {
-		auto s = message.c_str();
-		va_list args;
-
-		va_start(args, s);
-		int len = _vcwprintf(s, args) + 1;
-		wchar_t* buffer = static_cast<wchar_t*>(malloc(len * sizeof(wchar_t)));
-		_vswprintf_c(buffer, len, s, args);
-		instance->print(L"", buffer);
-		va_end(args);
-		free(buffer);
-	}
-
-	void Log::Debug(String message, ...) {
-#ifdef _DEBUG
-		auto s = message.c_str();
-		va_list args;
-		va_start(args, s);
-		int len = _vcwprintf(s, args) + 1;
-		wchar_t* buffer = static_cast<wchar_t*>(malloc(len * sizeof(wchar_t)));
-		_vswprintf_c(buffer, len, s, args);
-		instance->print(L"DEBUG: ", buffer);
-		va_end(args);
-		free(buffer);
-#endif
-	}
-	void Log::Err(String message, ...) {
-		auto s = message.c_str();
-		va_list args;
-		va_start(args, s);
-		int len = _vcwprintf(s, args) + 1;
-		wchar_t* buffer = static_cast<wchar_t*>(malloc(len * sizeof(wchar_t)));
-		_vswprintf_c(buffer, len, s, args);
-		instance->print(L"ERROR: ", buffer);
-		va_end(args);
-		free(buffer);
-	}*/
-
-	void Log::print(String levtext, String text) {
-		wchar_t timer[9];
-		_wstrtime_s(timer, 9);
-		clock_t cl = clock();
-
-		auto str = std::format(L"{}::{}: [{}] {}\n", timer, cl, levtext, text);
-
-		wprintf(str.c_str());
-		file << str;
-		file.flush();
+		file << fmt::format(
+						L"{}: {} {}.\n---------------------------------------\n\n",
+						llocale.log_begin, date, timer);
+	} else {
+		wprintf(llocale.log_creation_error.c_str());
 	}
 }
+
+void Log::_close() {
+	if (!file)
+		return;
+
+	wchar_t timer[9];
+	_wstrtime_s(timer, 9);
+	wchar_t date[9];
+	_wstrdate_s(date, 9);
+	file << fmt::format(
+					L"\n---------------------------------------\n{}: {} {}",
+					llocale.log_end, date, timer);
+	file.close();
+}
+
+void Log::print(String levtext, String text) {
+	wchar_t timer[9];
+	_wstrtime_s(timer, 9);
+	clock_t cl = clock();
+
+	String str = fmt::format(L"{}::{}: [{}] {}\n", timer, cl, levtext, text);
+
+	_STD wcout << str.c_str();
+	fflush(stdout);
+	file << str;
+#ifdef _DEBUG
+	file.flush();
+#endif
+}
+
+NSP_ENGINE_END

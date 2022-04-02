@@ -1389,19 +1389,19 @@ template <typename Context> struct arg_mapper {
 
   FMT_DEPRECATED FMT_CONSTEXPR FMT_INLINE auto map(const signed char* val)
       -> cstring_result {
-    return map(reinterpret_cast<const char*>(val));
+    return map(reinterpret_cast<const char*>(val)); // @suppress("Ambiguous problem")
   }
   FMT_DEPRECATED FMT_CONSTEXPR FMT_INLINE auto map(const unsigned char* val)
       -> cstring_result {
-    return map(reinterpret_cast<const char*>(val));
+    return map(reinterpret_cast<const char*>(val)); // @suppress("Ambiguous problem")
   }
   FMT_DEPRECATED FMT_CONSTEXPR FMT_INLINE auto map(signed char* val)
       -> cstring_result {
-    return map(reinterpret_cast<const char*>(val));
+    return map(reinterpret_cast<const char*>(val)); // @suppress("Ambiguous problem")
   }
   FMT_DEPRECATED FMT_CONSTEXPR FMT_INLINE auto map(unsigned char* val)
       -> cstring_result {
-    return map(reinterpret_cast<const char*>(val));
+    return map(reinterpret_cast<const char*>(val)); // @suppress("Ambiguous problem")
   }
 
   FMT_CONSTEXPR FMT_INLINE auto map(void* val) -> const void* { return val; }
@@ -2640,10 +2640,10 @@ FMT_CONSTEXPR FMT_INLINE void parse_format_string(
       for (;;) {
         const Char* p = nullptr;
         if (!find<IS_CONSTEXPR>(pbegin, pend, Char('}'), p))
-          return handler_.on_text(pbegin, pend);
+          return handler_.on_text(pbegin, pend); // @suppress("Unused return value")
         ++p;
         if (p == pend || *p != '}')
-          return handler_.on_error("unmatched '}' in format string");
+          return handler_.on_error("unmatched '}' in format string"); // @suppress("Unused return value")
         handler_.on_text(pbegin, p);
         pbegin = p + 1;
       }
@@ -2903,7 +2903,7 @@ class format_string_checker {
   explicit FMT_CONSTEXPR format_string_checker(
       basic_string_view<Char> format_str, ErrorHandler eh)
       : context_(format_str, num_args, eh),
-        parse_funcs_{&parse_format_specs<Args, parse_context_type>...} {}
+        parse_funcs_{&parse_format_specs<Args, parse_context_type>...} {} // @suppress("Invalid overload")
 
   FMT_CONSTEXPR void on_text(const Char*, const Char*) {}
 

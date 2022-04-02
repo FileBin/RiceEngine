@@ -8,6 +8,28 @@ set(GAME_ENGINE_PATH "${CMAKE_SOURCE_DIR}/src/RiceEngine")
 set(GAME_MAIN_PATH "${CMAKE_SOURCE_DIR}/src/GameMain")
 set(LIB_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/lib/include")
 
+set(ANY_LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/any")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D UNICODE")
+
+  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/clang64")
+  	
+  	
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE")
+  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/gcc64")
+  	
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/i864")
+  	
+  	
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+
+	add_compile_options(/W4 /WX)
+  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/msvc64")
+endif()
+
 set(VULKAN_LIB_PATH "$ENV{VK_SDK_PATH}/Lib")
 set(VULKAN_INCLUDE_PATH "$ENV{VK_SDK_PATH}/Include")
 
@@ -19,21 +41,30 @@ set(HLSL_INCLUDE_PATH "${SHADER_PATH}/include")
 set(RESOURCES_PATH "${CMAKE_SOURCE_DIR}/res/")
 
 #file search
-set(GAME_ENGINE_SRC "${GAME_ENGINE_PATH}/include/Rice/GL/GraphicsManager.hpp" "${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp")
+
+#for test use only needed files
+set(GAME_ENGINE_SRC 
+	"${GAME_ENGINE_PATH}/include/Rice/GL/GraphicsManager.hpp"
+	"${GAME_ENGINE_PATH}/src/Engine/InputManager.cpp"
+	"${GAME_ENGINE_PATH}/src/Engine/Window.cpp"
+	"${GAME_ENGINE_PATH}/src/Engine/Log.cpp"
+	"${GAME_ENGINE_PATH}/src/Math/Vectors.cpp"
+	"${GAME_ENGINE_PATH}/src/Math/Math.cpp"
+	"${GAME_ENGINE_PATH}/src/Math/Matrixes.cpp"
+ 	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp")
+ 
 set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")
+
 #file(GLOB_RECURSE GAME_ENGINE_SRC "${GAME_ENGINE_PATH}/*.h" "${GAME_ENGINE_PATH}/*.c" "${GAME_ENGINE_PATH}/*.hpp" "${GAME_ENGINE_PATH}/*.cpp")
 #file(GLOB_RECURSE GAME_MAIN_SRC "${GAME_MAIN_PATH}/*.h" "${GAME_MAIN_PATH}/*.c" "${GAME_MAIN_PATH}/*.hpp" "${GAME_MAIN_PATH}/*.cpp")
-file(GLOB_RECURSE LIBS_x64 "${CMAKE_SOURCE_DIR}/lib/win64/*.lib")
-file(GLOB_RECURSE DLLs_x64 "${CMAKE_SOURCE_DIR}/lib/win64/*.dll")
 
-file(GLOB_RECURSE HLSL_VS_SHADER_FILES "${SHADER_PATH}/vs/*.hlsl")
-file(GLOB_RECURSE HLSL_PS_SHADER_FILES "${SHADER_PATH}/ps/*.hlsl")
+file(GLOB_RECURSE DLLs_x64 "${CMAKE_SOURCE_DIR}/lib/*.dll")
+
 file(GLOB_RECURSE RESOURCES "${RESOURCES_PATH}/*.*")
 set(HLSL_ALL_SHADER_FILES ${HLSL_VS_SHADER_FILES} ${HLSL_PS_SHADER_FILES})
 
 #global property
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE")
 
 #Source config
 
@@ -62,7 +93,8 @@ target_precompile_headers(GameMain PUBLIC "${GAME_MAIN_PATH}/src/pch.h")
 
 
 target_link_directories(GameMain PUBLIC
-        "${CMAKE_SOURCE_DIR}/lib/win64"
+        ${ANY_LIB_BIN_PATH}
+        ${LIB_BIN_PATH}
         ${PROJECT_BINARY_DIR}
         "${DXSDK_LIB_PATH}/x64"
         ${VULKAN_LIB_PATH}
@@ -70,10 +102,10 @@ target_link_directories(GameMain PUBLIC
 
 target_link_libraries(GameMain
         "GameEngine"
-        "glfw3"
         "vulkan-1"
         "vk-bootstrap"
         #"OpenAL32"
+        "fmt"
         "ogg"
         "vorbis"
         "vorbisfile"

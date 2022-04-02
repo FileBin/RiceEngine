@@ -1,128 +1,125 @@
-﻿#pragma once
+﻿#include "../stdafx.hpp"
 
-#include <concurrent_unordered_set.h>
-#include <concurrent_unordered_map.h>
-#include <concurrent_vector.h>
-#include <GameEngine\macros.h>
-#include <GameEngine\Vectors\Hasher.h>
-#include "../Util/SmartPointer.h"
-#include "IPostProcess.h"
-#include <unordered_set>
-#include "../Components\ModelRender.h"
-#include "../Components\Transform.h"
-#include "../Components\UI\Canvas.h"
-#include "../DX/RenderingMesh.h"
-#include "../RenderBase.h"
-#include "../Util/RegisterCollection.h"
+NSP_SCENING_BEGIN
+class SceneRender;
+typedef SmartPtr<SceneRender> pSceneRender;
+NSP_SCENING_END
 
-struct Matrix4x4f;
+#pragma once
 
-namespace Game {
-	using namespace concurrency;
-	class Material;
-	class Model;
-	class Camera;
-	struct Mesh;
-	class Scene;
+#include "../Math/Hasher.hpp"
+#include "../Math.hpp"
+#include "IPostProcess.hpp"
+#include "../Components/UI/IDrawable.hpp"
+#include "../Components/ModelRender.hpp"
+#include "../Components/Transform.hpp"
+#include "../Components/UI/Canvas.hpp"
+#include "../GL/RenderingMesh.hpp"
+#include "../Engine/RenderBase.hpp"
+#include "../Util/RegisterCollection.hpp"
+#include "../GL/Texture2D.hpp"
+#include "IRenderable.hpp"
+#include "../GL/Material.hpp"
+#include "Camera.hpp"
 
-	namespace UI {
-		__interface IDrawable;
-	}
+NSP_SCENING_BEGIN
 
-	class SceneRender : public RenderBase {
-	private:
+class SceneRender : public ::Rice::RenderBase {
+private:
+	using pIPPScript = Graphics::pIPostProcess;
+	using pIDrawable = UI::pIDrawable;
+	using pTex = Graphics::pTexture2D;
+	using texArr = Graphics::TextureArray;
+	using pMat = Graphics::pMaterial;
+	using pShader = Graphics::pShader;
+	using pGrMgr = Graphics::pGraphicsManager;
 #pragma region Classes
-		class LightManager;
+	class LightManager;
 
-		class LightManager {
-			struct LightBuffer {
-				Vector4f ambient = {};
-				Vector4f diffuse = {};
-				Vector4f lightDir = {};
-			} buf;
-			SmartPtr<Texture2D> shadowAtlas;
-			Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTex;
-			Microsoft::WRL::ComPtr<ID3D11DepthStencilView> DSV;
-			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SRV;
-			Microsoft::WRL::ComPtr<Buffer> lightBuffer, constantBuffer;
-			SceneRender* sceneRender;
+	class LightManager {
+		struct LightBuffer {
+			Vector4f ambient = {};
+			Vector4f diffuse = {};
+			Vector4f lightDir = {};
+		}buf;
+		Graphics::pTexture2D shadowAtlas;
+		pSceneRender sceneRender;
 
-			size_t numCascades = 0;
-			Vector3 lightDirection = {};
-			dbl shadowDistance = 300;
-			size_t shadowMapRes = 0;
-			std::vector<dbl> shadowMapSizes = {};
-			Matrix4x4 LVP = Matrix4x4::identity;
-		public:
-			void UpdateBuffer();
-			void PreInit(SceneRender* ren, std::vector<dbl> mapSizes, dbl shadowDistanse = 600, size_t shadowMapRes = 1024);
-			void RenderShadowMap(Vector3 playerPos, const std::vector<SmartPtr<IRenderable>>& meshes);
-
-			Matrix4x4 GetMatrixLVP() { return LVP; }
-
-			Texture2D* GetShadowMap() { return shadowAtlas.Get(); }
-			Buffer* GetBuffer() { return lightBuffer.Get(); }
-			
-		} lightManager;
-
-		friend class LightManager;
-		UI::Canvas canvas;
-#pragma endregion
+		size_t numCascades = 0;
+		Vector3 lightDirection = {};
+		dbl shadowDistance = 300;
+		size_t shadowMapRes = 0;
+		_STD vector<dbl> shadowMapSizes = {};
+		Matrix4x4 LVP = Matrix4x4::identity;
 	public:
-		SceneRender(Scene* scene);
-		bool Init();
-		void BeginFrame();
-		bool Draw();
-		void Close();
-		void Resize();
+		void updateBuffer();
+		void preInit(pSceneRender ren, vec<dbl> mapSizes, dbl shadowDistanse = 600, size_t shadowMapRes = 1024);
+		void renderShadowMap(Vector3 playerPos, const vec<pIRenderable>& meshes);
 
-		Buffer* GetConstBuffer() { return constantBuffer.Get(); }
+		Matrix4x4 getMatrixLVP() {return LVP;}
 
-		void SetupSkybox(SmartPtr<Material> skyboxMat);
+		Graphics::pTexture2D getShadowMap() {return shadowAtlas.get();}
+		//Buffer* GetBuffer() { return lightBuffer.Get(); }
 
-		void RegisterModel(SmartPtr<IRenderable> ren);
-		void UnregisterModel(SmartPtr<IRenderable> ren);
+	}lightManager;
 
-		void AddCamera(SmartPtr<Camera> cam);
-		SmartPtr<Camera> GetCamera(size_t idx);
-		SmartPtr<Camera> GetActiveCamera() { return GetCamera(activeCameraIdx); }
+	friend class LightManager;
+	UI::Canvas canvas;
+#pragma endregion
+public:
+	SceneRender(Scene* scene);
+	bool init();
+	void beginFrame();
+	bool draw();
+	void close();
+	void resize();
 
-		SmartPtr<Shader> CreateShader(String name);
-		SmartPtr<Shader> GetShader(String name);
+	//Buffer* GetConstBuffer() { return constantBuffer.Get(); }
 
-		SmartPtr<Material> CreateMaterial(String name, SmartPtr<Shader> sh, const std::vector<std::pair<String, size_t>> mapping = {});
-		SmartPtr<Material> GetMaterial(String name);
+	void setupSkybox(Graphics::Material skyboxMat);
 
-		Texture2D& CreateTexture(String filename, D3D11_TEXTURE_ADDRESS_MODE u_mode = D3D11_TEXTURE_ADDRESS_WRAP, D3D11_TEXTURE_ADDRESS_MODE v_mode = D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR) { return *device->CreateTexture(filename, u_mode, v_mode, filter); }
-		Texture2D& GetDepthBufferTex() { return *device->GetDepthBufferTex(); }
-		Texture2D& GetRenderTargetTex() { return *device->GetRenderTargetTex(); }
+	void registerModel(::Rice::pIRenderable ren);
+	void unregisterModel(::Rice::pIRenderable ren);
 
-		void AddDrawable(UI::IDrawable* txt);
-		void RemoveDrawable(UI::IDrawable* txt);
+	void addCamera(pCamera cam);
+	pCamera getCamera(size_t idx);
+	pCamera getActiveCamera() {return getCamera(activeCameraIdx);}
 
-		void PostProcess(Material* mat);
-		void DefaultPostProcess();
+	Graphics::pShader createShader(String name);
+	Graphics::pShader getShader(String name);
 
-		void AddPostProcessScript(IPostProcess* ppscript) { ppscripts.insert(ppscript); }
-		void RemovePostProcessScript(IPostProcess* ppscript) { ppscripts.erase(ppscript); }
+	Graphics::pMaterial createMaterial(String name, Graphics::pShader sh);
+	Graphics::pMaterial getMaterial(String name);
 
-	private:
-		SmartPtr<Scene> scene;
+//	Graphics::pTexture2D GetDepthBufferTex() {return *device->GetDepthBufferTex();}
+//	Graphics::pTexture2D GetRenderTargetTex() {return *device->GetRenderTargetTex();}
 
-		size_t activeCameraIdx = 0;
-		std::mutex m_mutex, m_2dMutex, m_removeMutex;
-		std::vector<SmartPtr<Camera>> cameras;
-		std::unordered_map<String, SmartPtr<Material>> materials;
-		std::unordered_map<String, SmartPtr<Shader>> shaders;
-		RegisterCollection<SmartPtr<IRenderable>> renderingMeshes;
-		std::unordered_set<SmartPtr<IPostProcess>> ppscripts;
-		std::vector<SmartPtr<UI::IDrawable>> drawables;
-		Microsoft::WRL::ComPtr<Buffer> constantBuffer;
+	void addDrawable(pIDrawable txt);
+	void removeDrawable(pIDrawable txt);
 
-		//default
-		SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
-		SmartPtr<Material> skyboxMaterial, defaultPostProcessMaterial;
+	void postProcess(pMat mat);
+	void defaultPostProcess();
 
-		Mesh* CreateSkyBoxMesh();
-	};
-}
+	void addPostProcessScript(pIPPScript ppscript) {ppscripts.insert(ppscript);}
+	void removePostProcessScript(pIPPScript ppscript) {ppscripts.erase(ppscript);}
+
+private:
+	SmartPtr<Scene> scene;
+
+	size_t activeCameraIdx = 0;
+	_STD mutex m_mutex, m_2dMutex, m_removeMutex;
+	vec<pCamera> cameras;
+	umap<String, pMat> materials;
+	umap<String, pShader> shaders;
+	RegisterCollection<pIRenderable> renderingMeshes;
+	uset<pIPPScript> ppscripts;
+	vec<SmartPtr<UI::IDrawable>> drawables;
+	//Microsoft::WRL::ComPtr<Buffer> constantBuffer;
+
+	//default
+	SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
+	pMat skyboxMaterial, defaultPostProcessMaterial;
+
+	Mesh* CreateSkyBoxMesh();
+};
+NSP_SCENING_END

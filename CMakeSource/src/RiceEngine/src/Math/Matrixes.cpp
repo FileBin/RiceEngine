@@ -1,10 +1,6 @@
 ﻿#include "pch.h"
-#include <GameEngine/Matrixes.h>
-#include <GameEngine/Math.h>
 
-#include <GameEngine/Vectors/Vector3.h>
-#include <GameEngine/Vectors/Vector3f.h>
-#include <GameEngine/Vectors/Quaternion.h>
+#include <Rice/Math.hpp>
 
 const Matrix4x4 Matrix4x4::identity = {
     1,0,0,0,
@@ -16,7 +12,7 @@ const Matrix4x4 Matrix4x4::identity = {
 const Matrix4x4f Matrix4x4f::identity = Matrix4x4::identity;
 
 Matrix4x4 Matrix4x4::Perspective(double fov, double aspect, double nearPlane, double farPlane) {
-    double yScale = 1. / Game::Math::Tan(fov / 2);
+    double yScale = 1. / Rice::Math::tan(fov / 2);
     double xScale = yScale / aspect;
     double nearmfar = farPlane - nearPlane;
 

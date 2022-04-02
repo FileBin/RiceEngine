@@ -8,19 +8,19 @@ NSP_ENGINE_BEGIN
 
 class NullPtrException : public Exception {
 private:
-	std::type_index type;
+	_STD type_index type;
 	void* ptr;
 public:
 	template<typename ptrT = void*>
 	NullPtrException(ptrT whatPtr, int line_, const char* file_) : Exception("Pointer is null", line_, file_), type(typeid(whatPtr)) {
 		ptr = (void*)whatPtr;
-		std::string info = fmt::format("TypeInfo: {}\nPointer: {:#x}\n", GetTypeInfo().name(), (num)GetPointer());
+		_STD string info = fmt::format("TypeInfo: {}\nPointer: {:#x}\n", getTypeInfo().name(), (num)getPointer()); // @suppress("Invalid arguments")
 		SetInfo(info);
 	}
 
-	std::type_index GetTypeInfo() { return type; }
+	_STD type_index getTypeInfo() { return type; }
 
-	void* GetPointer() { return ptr; }
+	void* getPointer() { return ptr; }
 };
 
 NSP_ENGINE_END

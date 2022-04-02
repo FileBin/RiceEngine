@@ -1,17 +1,7 @@
 #include "pch.h"
-#include <Rice/GL/GraphicsManager.hpp>
+#include <Rice/Tests/HelloTriangle.hpp>
 
 int main() {
-	glfwInit();
-
-	GLFWwindow* window = glfwCreateWindow(640, 480, "VulkanTest", nullptr, nullptr);
-	Rice::Graphics::GraphicsManager graphicsMgr;
-	graphicsMgr.init();
-	glfwMakeContextCurrent(window);
-	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
-	}
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	Rice::Tests::HelloTriangle::runTest();
 	return 0;
 }

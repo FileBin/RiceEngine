@@ -1,76 +1,80 @@
-﻿#pragma once
+﻿#include "../stdafx.hpp"
 
-#include "stdafx.h"
-#include "LoadingScreenRender.h"
-#include "Log.h"
-#include "Window.h"
-#include "ScriptBase.h"
-#include "Stage.h"
-#include "Scene\Scene.h"
-#include <functional>
-#include <ppltasks.h>
+NSP_ENGINE_BEGIN
 
-namespace Game {
+class Core;
+typedef SmartPtr<Core> pCore;
 
-	class ScriptBase;
-	class Engine;
+NSP_ENGINE_END
 
-	class Core {
-	public:
-		static void RunNew(ScriptBase* preInitScript);
+#pragma once
+#include "../Misc/LoadingScreenRender.hpp"
+#include "../Log.hpp"
+#include "Window.hpp"
+#include "ScriptBase.hpp"
+#include "Stage.hpp"
+#include "Scene/Scene.hpp"
+#include "../GL/GraphicsManager.hpp"
 
-		template <class FnT = void(void), class... ArgsT>
-		static SmartPtr<std::thread> RunThread(std::function<FnT> func, ArgsT... args) {
-			return new std::thread([](std::function<FnT> _Fx, ArgsT... _Ax) {
-				try {
-					_Fx(_Ax...);
-				}
-				#include "../src/Util/ExeptionManager.h"
+NSP_ENGINE_BEGIN
+
+class Core {
+public:
+	static void RunNew(ScriptBase* preInitScript);
+
+	template<class FnT = void(void), class ... ArgsT>
+	static SmartPtr<_STD thread> RunThread(_STD function<FnT> func,
+			ArgsT ... args) {
+		return new _STD thread([](_STD function<FnT> _Fx, ArgsT... _Ax) {
+					try {
+						_Fx(_Ax...);
+					}
+#include "../src/Util/ExeptionManager.h"
 				}, func, args...);
-		}
+	}
 
-		static void RunTask(std::function<void(void)> func) {
-			 concurrency::create_task([func]() {
-				try {
-					func();
-				}
-				#include "../src/Util/ExeptionManager.h"
-				});
-		}
+	/*static void RunTask(std::function<void(void)> func) {
+	 concurrency::create_task([func]() {
+	 try {
+	 func();
+	 }
+	 #include "../src/Util/ExeptionManager.h"
+	 });
+	 }*/
 
-		void AddScript(ScriptBase* script, Stage s);
+	void AddScript(ScriptBase* script, Stage s);
 
-		void LoadScene(Scene* _scene);
+	void LoadScene(Scening::pScene _scene);
 
-		double GetFixedDeltaTime() { return fixedDeltaTime; }
-		double GetDeltaTime() { return deltaTime; }
-		double GetTime() { return time; }
-	private:
-		Core();
-		~Core();
-		friend class Engine;
+	double GetFixedDeltaTime() {return fixedDeltaTime;}
+	double GetDeltaTime() {return deltaTime;}
+	double GetTime() {return time;}
+private:
+	Core();
+	~Core();
+	friend class Engine;
 
-		bool Init();
-		void Run();
-		void Close();
+	bool Init();
+	void Run();
+	void Close();
 
-		bool RunFrame();
-		void RunScripts(std::vector<ScriptBase*>& scripts);
+	bool RunFrame();
+	void RunScripts(std::vector<ScriptBase*>& scripts);
 
-		void LoadSceneImmediate();
+	void LoadSceneImmediate();
 
-		Stage stage = (Stage)0;
-		SmartPtr<Scene> activeScene, loadScene, loadingScreenScene;
+	Stage stage = (Stage)0;
+	Scening::pScene activeScene, loadScene, loadingScreenScene;
 
-		Window* wnd = nullptr;
-		//LoadingScreenRenderBase* render = nullptr;
-		Device* device = nullptr;
-		Engine* engine = nullptr;
-		bool init = false;
-		double fps = 60.;
-		double fixedDeltaTime = 0, deltaTime = 0, time = 0;
-		std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
-			updateScripts, closeScripts;
+	pWindow wnd = nullptr;
+	Graphics::pGraphicsManager manager = nullptr;
+	Engine* engine = nullptr;
+	bool init = false;
+	double fps = 60.;
+	double fixedDeltaTime = 0, deltaTime = 0, time = 0;
+	std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
+	updateScripts, closeScripts;
 
-	};
-}
+};
+
+NSP_ENGINE_END

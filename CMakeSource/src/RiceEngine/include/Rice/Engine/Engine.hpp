@@ -1,53 +1,59 @@
-﻿#pragma once
-#include "Device.h"
-#include "Stage.h"
+﻿#include "../stdafx.hpp"
 
-namespace Game {
+NSP_ENGINE_BEGIN
 
-	class SoundManager;
-	class ScriptBase;
-	class Core;
-	class RenderBase;
-	class Material;
-	class Scene;
-	class LoadingScreenRenderBase;
+class Engine;
+typedef SmartPtr<Engine> pEngine;
 
-	class Engine
-	{
-	public:
-		Engine(Device** device, Core* Core);
-		~Engine();
+NSP_ENGINE_END
 
-		size_t GetMsaaLevel() const { return msaaLevel; }
+#pragma once
+#include "Core.hpp"
+#include "../GL/GraphicsManager.hpp"
+#include "../Misc/Stage.hpp"
 
-		HWND GetHWND() { return (**device).GetHWND(); }
+NSP_ENGINE_BEGIN
 
-		void SetMsaaLevel(size_t level);
+class Engine {
+public:
+	Engine(Graphics::pGraphicsManager gmanager, pCore Core);
+	~Engine();
 
-		void SetLoadingScene(Scene* scene);
+	size_t GetMsaaLevel() const {
+		return msaaLevel;
+	}
 
-		void LoadScene(Scene* scene);
+	HWND GetHWND() {
+		return (**device).GetHWND();
+	}
 
-		void SetFps(float fps = 60.f);
+	void SetMsaaLevel(size_t level);
 
-		Device* GetDevice();
+	void SetLoadingScene(Scene* scene);
 
-		void PostUpdate();
-		
-		double GetFixedDeltaTime();
-		double GetDeltaTime();
-		double GetTime();
+	void LoadScene(Scene* scene);
 
-		void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
+	void SetFps(float fps = 60.f);
 
-		Material& CreateMaterial(Shader& sh);
-		Shader& CreateShader();
+	Device* GetDevice();
 
-		SoundManager& getSoundManager();
+	void PostUpdate();
 
-	private:
-		Device** device = nullptr;
-		Core* core;
-		size_t msaaLevel = 1;
-	};
-}
+	double GetFixedDeltaTime();
+	double GetDeltaTime();
+	double GetTime();
+
+	void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
+
+	Material& CreateMaterial(Shader& sh);
+	Shader& CreateShader();
+
+	SoundManager& getSoundManager();
+
+private:
+	Device** device = nullptr;
+	Core* core;
+	size_t msaaLevel = 1;
+};\
+
+NSP_ENGINE_END

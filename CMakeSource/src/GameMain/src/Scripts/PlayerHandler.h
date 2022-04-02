@@ -72,7 +72,7 @@ public:
 
 		if (InputManager::GetKey(KeyCode::Shift)) { mv *= .5; }
 
-		auto yrot = Quaternion::FromAxisAngle(Vector3::up, pos.x);
+		auto yrot = Quaternion::fromAxisAngle(Vector3::up, pos.x);
 
 		mv *= yrot;
 
@@ -117,7 +117,7 @@ public:
 		pos += delta;
 		pos.y = Math::Clamp(pos.y, -90., 90.);
 		pos.x = fmod(pos.x, 360);
-		cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
+		cam->rotation = Quaternion::fromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 		transform->SetRotation(cam->rotation);
 		cam->position = transform->GetPosition() + Vector3::up;
 		if (InputManager::GetKey(KeyCode::V)) {

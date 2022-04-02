@@ -16,16 +16,12 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+
 #include <functional>
-
-#include <fmt/format.h>
-
-#ifdef _WIN32
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#endif //_WIN32
+#include <thread>
 
 #ifdef _MSC_VER
 
@@ -34,9 +30,8 @@
 
 #endif
 
-#include "defines.h"
-#include "namespaces.h"
-#include "Util/SmartPointer.hpp"
+#include <fmt/format.h>
+#include <fmt/xchar.h>
 
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
@@ -45,5 +40,13 @@
 #include <VkBootstrap.h>
 
 #include <vulkan/vulkan.hpp>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+
+#include "namespaces.h"
+#include "macros.h"
+
+#include "defines.h"
+#include "Util/String.hpp"
+#include "Util/SmartPointer.hpp"
+#include "Util/Exceptions.hpp"
+#include "Util/ICleanable.hpp"
+

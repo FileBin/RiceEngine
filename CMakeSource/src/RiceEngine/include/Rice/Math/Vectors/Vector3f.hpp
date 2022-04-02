@@ -1,6 +1,9 @@
+struct Vector3f;
+
 #pragma once
-#include "../Util/defines.h"
-#include "Quaternion.h"
+
+#include "../../defines.h"
+#include "../Quaternion.hpp"
 
 struct Vector3f {
 public:

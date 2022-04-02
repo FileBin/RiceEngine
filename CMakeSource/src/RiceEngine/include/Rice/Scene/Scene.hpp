@@ -1,90 +1,105 @@
-﻿#pragma once
-#include "SceneObject.h"
-#include "SceneRender.h"
-#include <vector>
-#include "../ScriptBase.h"
-#include "../SoundManager.h"
-#include "../Physics/PhysicsEngine.h"
-#include "ResourceManager.h"
+﻿#include "../stdafx.hpp"
 
-namespace Game {
-	class MonoScript;
+NSP_SCENING_BEGIN
+class Scene;
+typedef SmartPtr<Scene> pScene;
+NSP_SCENING_END
 
-	class Scene {
-	private:
-		friend class SceneRender;
-	public:
-		Scene();
-		virtual ~Scene() {}
+#pragma once
+#include "../Engine/Engine.hpp"
+#include "SceneObject.hpp"
+#include "SceneRender.hpp"
+#include "../ScriptBase.hpp"
+#include "../SoundManager.hpp"
+#include "../Physics/PhysicsEngine.hpp"
+#include "ResourceManager.hpp"
+#include "../GL/GraphicsManager.hpp"
 
-		void PreInit(Engine* en, Device* device) {
-			render->SetDevice(device);
-			InitResourceManager(); 
-			engine = en;
-			render->Init();
-		}
+NSP_SCENING_BEGIN
 
-		virtual void InitResourceManager() = 0;
+class Scene {
+private:
+	friend class SceneRender;
+public:
+	Scene();
+	virtual ~Scene() {
+	}
 
-		virtual void Init() = 0;
+	void PreInit(pEngine en, Graphics::pGraphicsManager g_manager) {
+		render->SetDevice(device);
+		InitResourceManager();
+		engine = en;
+		render->Init();
+	}
 
-		void PostInit() {
-			soundManager = new SoundManager(render->GetActiveCamera());
-			physicsEngine = new Physics::PhysicsEngine();
-			physicsEngine->PreInit();
-			root->Enable();
-			init = true;
-			Resize();
-		}
+	virtual void InitResourceManager() = 0;
 
-		void Close() {
-			_DELETE(soundManager);
-			root->Disable();
-			delete root;
-			render->Close();
-			delete render;
-		}
+	virtual void Init() = 0;
 
-		void Render() {
-			root->PreUpdate();
-			root->Update();
-			render->BeginFrame();
-			render->Draw();
-		}
+	void PostInit() {
+		soundManager = new SoundManager(render->GetActiveCamera());
+		physicsEngine = new Physics::PhysicsEngine();
+		physicsEngine->PreInit();
+		root->Enable();
+		init = true;
+		Resize();
+	}
 
-		void Resize() {
-			if (init)
-				render->Resize();
-		}
+	void Close() {
+		_DELETE(soundManager);
+		root->Disable();
+		delete root;
+		render->Close();
+		delete render;
+	}
 
-		void AddScript(MonoScript* script);
-		void RemoveScript(MonoScript* script);
+	void Render() {
+		root->PreUpdate();
+		root->Update();
+		render->BeginFrame();
+		render->Draw();
+	}
 
-		SceneObject& GetObjectByName(String name);
+	void Resize() {
+		if (init)
+			render->Resize();
+	}
 
-		SceneObject* Instaniate(SceneObject* orig);
-		SceneObject* Instaniate();
-		Engine& GetEngine() const;
-		ResourceManager& GetResourceManager() { return resManager; }
-		SoundManager& GetSoundManager() const;
-		SceneRender& GetRender() const { return *render; }
-		const SmartPtr<Physics::PhysicsEngine> GetPhysEngine() const;
+	void AddScript(MonoScript* script);
+	void RemoveScript(MonoScript* script);
 
-		bool isLoaded() { return init; }
+	SceneObject& GetObjectByName(String name);
 
-	protected:
-		void _initResourceManager(String path) {
-			resManager.LoadJson(path);
-		}
+	SceneObject* Instaniate(SceneObject* orig);
+	SceneObject* Instaniate();
+	Engine& GetEngine() const;
+	ResourceManager& GetResourceManager() {
+		return resManager;
+	}
+	SoundManager& GetSoundManager() const;
+	SceneRender& GetRender() const {
+		return *render;
+	}
+	const SmartPtr<Physics::PhysicsEngine> GetPhysEngine() const;
 
-	private:
-		bool init = false;
+	bool isLoaded() {
+		return init;
+	}
 
-		ResourceManager resManager;
-		SceneObject* root;
-		SceneRender* render;
-		SmartPtr<Physics::PhysicsEngine> physicsEngine;
-		Engine* engine;
-		SoundManager* soundManager;
-	};
-}
+protected:
+	void _initResourceManager(String path) {
+		resManager.LoadJson(path);
+	}
+
+private:
+	bool init = false;
+
+	ResourceManager resManager;
+	SceneObject* root;
+	SceneRender* render;
+	SmartPtr<Physics::PhysicsEngine> physicsEngine;
+	Engine* engine;
+	SoundManager* soundManager;
+};
+
+NSP_SCENING_END

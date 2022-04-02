@@ -1,79 +1,65 @@
-﻿#pragma once
-#include "stdafx.h"
-#include "InputManager.h"
+﻿#include "../stdafx.hpp"
 
-namespace Game {
-	struct DescWindow {
-		DescWindow() :
-			caption(L"Game"),
-			width(640),
-			height(480),
-			posx(200),
-			posy(20),
-			resizing(true) {}
+NSP_ENGINE_BEGIN
 
-		int posx;
-		int posy;
-		std::wstring caption;	///< ��������� ����
-		int width;				///< ������ ���������� ����� ����
-		int height;				///< ������ ���������� ����� ����
-		bool resizing;
-	};
+class Window;
+typedef SmartPtr<Window> pWindow;
 
-	class Window {
-	public:
-		Window();
+NSP_ENGINE_END
 
-		static Window* Get() { return wndthis; }
+#pragma once
+#include "InputManager.hpp"
 
-		// ������� ����
-		bool Create(const DescWindow& desc);
+NSP_ENGINE_BEGIN
 
-		// ��������� ������� ����
-		void RunEvent();
+struct DescWindow {
+	String caption { L"Game" };
+	int width { 640 };
+	int height { 480 };
+	bool resizing { true };
+	int posx { SDL_WINDOWPOS_UNDEFINED };
+	int posy { SDL_WINDOWPOS_UNDEFINED };
+};
 
-		// ������� ����.
-		void Close();
+class Window : public ICleanable {
+public:
+	Window();
+	~Window() {	cleanup(); }
 
-		void SetInputMgr(InputManager* inputmgr);
+	Window(const Window& other) = delete; //no copying
 
-		HWND GetHWND() const { return m_hwnd; }
-		int GetLeft() const { return desc.posx; }
-		int GetTop() const { return desc.posy; }
-		int GetWidth() const { return desc.width; }
-		int GetHeight() const { return desc.height; }
-		// ������� ��������� ����
-		const std::wstring& GetCaption() const { return desc.caption; }
+	static const pWindow getInst() { return instance; }
 
-		// ��������, ���� �� ��������� � ������
-		bool IsExit() const { return m_isexit; }
-		// �������� �� ���������� ����
-		bool IsActive() const { return m_active; }
-		// �������� �� ��������� ����
-		// ��������������: ����� ������ ��������� ���� �� ��������� �������
-		bool IsResize() {
-			bool ret = m_isresize;
-			m_isresize = false;
-			return ret;
-		}
+	bool create(DescWindow desc);
+	bool update();
+	void close() { cleanup(); }
+	void cleanup() override;
+	void setInputMgr(pInputManager inputmgr);
 
-		// ��������� �������
-		LRESULT WndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam);
-		InputManager* inputmgr;
-	private:
-		void m_UpdateWindowState();
+	const WindowHandle getHandle() const { return handle; }
+	int getLeft() const { return desc.posx; }
+	int getTop() const { return desc.posy; }
+	int getWidth() const { return desc.width; }
+	int getHeight() const { return desc.height; }
 
-		static Window* wndthis;
+	String getCaption() const { return desc.caption; }
+	bool isExit() const { return is_exit; }
+	bool isActive() const { return is_active; }
+	bool isResize() const { return is_resizing; }
 
-		DescWindow desc;	// �������� ����
-		HWND m_hwnd;		// ���������� ����	
-		bool m_isexit;		// ���� ���������� � ������� ������	
-		bool m_active;		// ���� �������?
-		bool m_minimized;
-		bool m_maximized;
-		bool m_isresize;	// ���� ���� �������� ������
-	};
+private:
+	void updateWindowState();
+	void handleEvent(SDL_Event& e);
+	void handleWindowEvent(SDL_WindowEvent& e);
 
-	// ��������� �������
-	static LRESULT CALLBACK StaticWndProc(HWND hwnd, UINT nMsg, WPARAM wParam, LPARAM lParam);
-}
+	static pWindow instance;
+
+	DescWindow desc;
+	WindowHandle handle;
+	bool is_exit;
+	bool is_active;
+	bool is_resizing;
+	pInputManager inputmgr;
+};
+
+NSP_ENGINE_END

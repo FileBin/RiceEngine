@@ -1,18 +1,18 @@
-﻿#pragma once
+﻿struct Quaternion;
 
-#include "../Util/defines.h"
-#include "Vector3.h"
+#pragma once
 
-struct Vector3;
+#include "../defines.h"
+#include "Vectors/Vector3.hpp"
 
 struct Quaternion {
 	dbl x, y, z, w;
 
-	static Quaternion FromAxisAngle(Vector3 axis) { return FromAxisAngle(axis.Normalized(), axis.Length()); };
-	static Quaternion FromAxisAngle(Vector3 axis, double angle);
+	static Quaternion FromAxisAngle(Vector3 axis) { return fromAxisAngle(axis.Normalized(), axis.Length()); };
+	static Quaternion fromAxisAngle(Vector3 axis, double angle);
 	static Quaternion LookAt(Vector3 sourcePoint, Vector3 destPoint);
-	static Quaternion FromEulerAngles(Vector3 v) { return FromEulerAngles(v.x, v.y, v.z); }
-	static Quaternion FromEulerAngles(double x, double y, double z);
+	static Quaternion FromEulerAngles(Vector3 v) { return fromEulerAngles(v.x, v.y, v.z); }
+	static Quaternion fromEulerAngles(double x, double y, double z);
 
 	dbl Magnitude();
 

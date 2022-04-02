@@ -65,7 +65,7 @@ public:
 
 		mv.Qnormalize();
 
-		auto yrot = Quaternion::FromAxisAngle(Vector3::up, pos.x);
+		auto yrot = Quaternion::fromAxisAngle(Vector3::up, pos.x);
 
 		mv *= yrot;
 
@@ -99,7 +99,7 @@ public:
 			pos.y = min(max(pos.y, -90), 90);
 			pos.x = fmod(pos.x, 360);
 
-			cam->rotation = Quaternion::FromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
+			cam->rotation = Quaternion::fromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 			SpawnSpheres();
 
 		//} 

@@ -1,5 +1,8 @@
-﻿#pragma once
-#include "../Util/defines.h"
+﻿struct Vector3;
+
+#pragma once
+#include "../../defines.h"
+
 struct Vector3i;
 struct Quaternion;
 struct Vector3f;
@@ -30,7 +33,7 @@ public:
 	void Qnormalize();
 
 	static dbl Dot(Vector3 a, Vector3 b);
-	static Vector3 Cross(Vector3 a, Vector3 b);
+	static Vector3 cross(Vector3 a, Vector3 b);
 	static Vector3 Lerp(Vector3 a, Vector3 b, dbl t);
 	static Vector3 ProjectOnPlane(Vector3 vec, Vector3 planeNormal);
 	dbl SqrLength();

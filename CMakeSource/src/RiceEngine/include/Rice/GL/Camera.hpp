@@ -1,37 +1,42 @@
-﻿#pragma once
+﻿#include "../stdafx.hpp"
+NSP_SCENING_BEGIN
+class Camera;
+typedef SmartPtr<Camera> pCamera;
+NSP_SCENING_END
+#pragma once
 
-#include "Util3D.h"
+#include "../Math.hpp"
 
-struct Matrix4x4;
+NSP_SCENING_BEGIN
 
-namespace Game {
+class Camera {
+public:
+	Camera();
+	~Camera();
 
-	class Camera {
-	public:
-		Camera();
-		~Camera();
+	Matrix4x4 getProjectionMatrix();
+	Matrix4x4 getTransformationMatrix();
 
-		Matrix4x4 GetProjectionMatrix();
-		Matrix4x4 GetTransformationMatrix();
+	void setFov(dbl _fov) {fov = _fov;}
+	dbl getFov() {return fov;}
 
-		void SetFov(double fov) { this->fov = fov; }
-		double GetFov() { return fov; }
+	void setAspectRatio(dbl aspectRatio) {aspect_ratio = aspectRatio;}
+	dbl getAspectRatio() {return aspect_ratio;}
 
-		void SetAspectRatio(double ratio) { aspectRatio = ratio; }
-		double GetAspectRatio() { return aspectRatio; }
-		Vector2 ToScreenPos(Vector3 point);
-		bool IsPointVisible(Vector3 point);
-		void SetClippingPlanes(double nearPlane, double farPlane) {
-			this->nearPlane = nearPlane;
-			this->farPlane = farPlane;
-		}
+	Vector2 toScreenPos(Vector3 point);
+	bool isPointVisible(Vector3 point);
+	void setClippingPlanes(dbl nearPlane, dbl farPlane) {
+		near_plane = nearPlane;
+		far_plane = farPlane;
+	}
 
-		Vector3 position{0,0,0};
-		Quaternion rotation{0,0,0,1};
+	Vector3 position {0,0,0};
+	Quaternion rotation {0,0,0,1};
 
-	private:
-		double fov;
-		double aspectRatio = 1;
-		double nearPlane = 0.01, farPlane = 1000.f;
-	};
-}
+private:
+	dbl fov = 60.;
+	dbl aspect_ratio = 1.;
+	dbl near_plane = 0.01, far_plane = 1000.;
+};
+
+NSP_SCENING_END

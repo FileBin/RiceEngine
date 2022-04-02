@@ -1,49 +1,73 @@
 ﻿#pragma once
-#include "stdafx.h"
+#include "../stdafx.hpp"
 #include <fstream>
-#include "Util.h"
+#include "../Util.hpp"
 
-namespace Game {
+NSP_ENGINE_BEGIN
 
-	static String logLevel_str[6] = { L"", L"INFO", L"DEBUG", L"WARNING", L"ERROR", L"CRITICAL_ERROR" };
+static String logLevel_str[] = { L"", L"INFO", L"DEBUG", L"WARNING", L"ERROR", L"CRITICAL_ERROR" };
 
-	class Log {
-		struct Localization {
-			String log_begin = L"Log Created";
-			String log_end = L"Log End";
-			String log_is_already_created = L"Log is already created!";
-			String log_creation_error = L"Log creation-error!";
-		} static locale;
+class Log {
+	struct Localization {
+		String log_begin = L"Log Created";
+		String log_end = L"Log End";
+		String log_is_already_created = L"Log is already created!";
+		String log_creation_error = L"Log creation-error!";
+	} static llocale;
 
-	public:
-	
-		static void PreInit();
+public:
 
-		enum LogLevel {NONE = 0, INFO = 1, Debug = 2, WARNING = 3, ERR = 4, CRITICAl = 5};
-		
-		template<class... _Types> 
-		static void log(LogLevel logLevel, String message, const _Types &...args) {
-			if (instance == nullptr) return;
-			auto str = std::format(message, args...);
-			if (logLevel == LogLevel::Debug) {
-#ifdef _DEBUG
-				instance->print(logLevel_str[(int)logLevel], str);
-#endif
-			}
-			else {
-				instance->print(logLevel_str[(int)logLevel], str);
-			}
-		}
+	static void init();
 
-		static void Close();
-		~Log();
-	private:
-		static Log* instance;
-		Log();
-		void init();
-		void close();
-		void print(String levtext, String text);
-
-		std::wfstream file;
+	enum LogLevel {
+		None = 0, Info = 1, Debug = 2, Warning = 3, Error = 4, Critical = 5
 	};
-}
+
+	template<class ... _Types>
+	static void log(LogLevel logLevel, String message, const _Types &...args) {
+		if (instance == nullptr)
+			return;
+		auto str = fmt::format(message, args...);
+		if (logLevel == LogLevel::Debug) {
+#ifdef _DEBUG
+			instance->print(logLevel_str[(int)logLevel], str);
+#endif
+		} else {
+			instance->print(logLevel_str[(int) logLevel], str);
+		}
+	}
+
+	static void log(String message, LogLevel logLevel = Info) {
+		if (instance == nullptr)
+			return;
+		if (logLevel == LogLevel::Debug) {
+#ifdef _DEBUG
+			instance->print(logLevel_str[(int)logLevel], message);
+#endif
+		} else {
+			instance->print(logLevel_str[(int) logLevel], message);
+		}
+	}
+
+	template<class ... _Types>
+	static void debug(String message, const _Types &...args) {
+#ifdef _DEBUG
+		if (instance == nullptr)
+					return;
+		log(Debug, message, args...);
+#endif
+	}
+
+	static void close();
+	~Log();
+private:
+	static SmartPtr<Log> instance;
+	Log();
+	void _init();
+	void _close();
+	void print(String levtext, String text);
+
+	std::wfstream file;
+};
+
+NSP_ENGINE_END

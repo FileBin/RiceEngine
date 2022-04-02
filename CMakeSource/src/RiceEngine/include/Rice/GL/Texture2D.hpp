@@ -1,6 +1,13 @@
 #include "../stdafx.hpp"
+
+NSP_GL_BEGIN
+
 class Texture2D;
-using pTexture2D = SmartPtr<Texture2D>;
+typedef SmartPtr<Texture2D> pTexture2D;
+typedef vec<pTexture2D> TextureArray;
+
+NSP_GL_END
+
 #pragma once
 
 NSP_GL_BEGIN

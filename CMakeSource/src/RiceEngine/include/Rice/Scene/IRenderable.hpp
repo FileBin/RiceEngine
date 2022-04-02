@@ -1,11 +1,19 @@
+#include "../stdafx.hpp"
+NSP_ENGINE_BEGIN
+interface IRenderable;
+typedef SmartPtr<IRenderable> pIRenderable;
+NSP_ENGINE_END
 #pragma once
 
-#include "../Matrixes.h"
-#include "../Util/IRegistrable.h"
+#include "../Math.hpp"
+#include "../Util/IRegistrable.hpp"
 
-namespace Game {
-	__interface IRenderable : public IRegistrable {
-		void Render(Matrix4x4 View, Matrix4x4 Project, Matrix4x4 LVP);
-		void RenderTransparent(Matrix4x4 View, Matrix4x4 Project, Matrix4x4 LVP);
-	};
-}
+NSP_ENGINE_BEGIN
+
+interface IRenderable: public IRegistrable {
+	virtual void Render(Matrix4x4 View, Matrix4x4 Project, Matrix4x4 LVP) = 0;
+	virtual void RenderTransparent(Matrix4x4 View, Matrix4x4 Project, Matrix4x4 LVP) = 0;
+	virtual ~IRenderable() {}
+};
+
+NSP_ENGINE_END

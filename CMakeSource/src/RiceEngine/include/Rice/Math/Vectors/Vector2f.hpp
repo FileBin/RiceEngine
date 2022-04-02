@@ -1,6 +1,8 @@
+struct Vector2f;
+
 #pragma once
 
-#include "../Util/defines.h"
+#include "../../defines.h"
 
 struct Vector2f {
 	float x = 0, y = 0;

@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include "stdafx.h"
-#include <xnamath.h>
+#include "../stdafx.hpp"
 
 struct Quaternion;
 struct Vector3;
@@ -84,7 +83,7 @@ public:
 		c44 = mat.c44;
 	}
 
-	Matrix4x4f(const XMMATRIX& mat){
+	/*Matrix4x4f(const XMMATRIX& mat){
 		XMFLOAT4X4 m;
 		XMStoreFloat4x4(&m, mat);
 
@@ -107,7 +106,7 @@ public:
 		c42 = m._42;
 		c43 = m._43;
 		c44 = m._44;
-	}
+	}*/
 
 	const static Matrix4x4f identity;
 

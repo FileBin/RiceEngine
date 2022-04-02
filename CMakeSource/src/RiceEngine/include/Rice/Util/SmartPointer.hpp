@@ -1,7 +1,7 @@
 #pragma once
+#include "../stdafx.hpp"
 
 #include "exceptions.hpp"
-#include "../stdafx.hpp"
 
 
 template<typename T = void>
@@ -21,36 +21,41 @@ public:
 		ppObject = std::make_shared<T*>(obj);
 	}
 
-	~SmartPtr() {
-	}
+	~SmartPtr() {}
 
-	bool IsNull() const {
+	bool isNull() const {
 		if (ppObject.get() == nullptr)
 			THROW_NULL_PTR_EXCEPTION(ppObject.get());
 		return *ppObject == nullptr;
 	}
 
-	void Release() {
-		if (!IsNull()) {
+	bool isNotNull() const {
+		if (ppObject.get() == nullptr)
+			THROW_NULL_PTR_EXCEPTION(ppObject.get());
+		return *ppObject != nullptr;
+	}
+
+	void release() {
+		if (isNotNull()) {
 			T* pointer = *ppObject;
 			*ppObject = nullptr;
 			delete pointer;
 		}
 	}
 
-	void ReleaseArray() {
-		if (!IsNull()) {
+	void releaseArray() {
+		if (isNotNull()) {
 			T* pointer = *ppObject;
 			*ppObject = nullptr;
 			delete[] pointer;
 		}
 	}
 
-	T* Get() const {
+	T* get() const {
 		return *ppObject;
 	}
 
-	T** GetAddress() const {
+	T** getAddress() const {
 		return ppObject.get();
 	}
 
@@ -77,5 +82,5 @@ bool operator==(const SmartPtr<T>& a, const SmartPtr<T>& b) {
 
 template<typename T>
 bool operator==(const SmartPtr<T>& a, _STD nullptr_t b) {
-	return a.IsNull();
+	return a.isNull();
 }

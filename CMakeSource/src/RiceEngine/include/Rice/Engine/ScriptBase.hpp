@@ -1,24 +1,38 @@
-﻿#pragma once
-#include "Engine.h"
-#include "RenderBase.h"
+﻿#include "../stdafx.hpp"
 
-namespace Game {
+NSP_ENGINE_BEGIN
 
-	class Engine;
+class ScriptBase;
+typedef SmartPtr<ScriptBase> pScriptBase;
 
-	class ScriptBase {
-	public:
-		ScriptBase() {}
-		void PreInit(Engine** engine);
+NSP_ENGINE_END
 
-		virtual ~ScriptBase() = 0;
+#pragma once
 
-		virtual void Init() {}
-		virtual void Run() = 0;
-		virtual void Finalize() {}
-	protected:
-		Engine& GetEngine() { return **engine; }
-	private:
-		Engine** engine = nullptr;
-	};
-}
+#include "Engine.hpp"
+#include "RenderBase.hpp"
+
+NSP_ENGINE_BEGIN
+
+class ScriptBase {
+public:
+	ScriptBase() {
+	}
+	void PreInit(Engine*& engine);
+
+	virtual ~ScriptBase() = 0;
+
+	virtual void Init() {
+	}
+	virtual void Run() = 0;
+	virtual void Finalize() {
+	}
+protected:
+	Engine& GetEngine() {
+		return **engine;
+	}
+private:
+	Engine** engine = nullptr;
+};\
+
+NSP_ENGINE_END

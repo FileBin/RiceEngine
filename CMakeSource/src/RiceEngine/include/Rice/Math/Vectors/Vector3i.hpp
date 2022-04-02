@@ -1,5 +1,8 @@
-﻿#pragma once
-#include "../Util/defines.h"
+﻿struct Vector3i;
+
+#pragma once
+
+#include "../../defines.h"
 
 struct Vector3i {
 public:

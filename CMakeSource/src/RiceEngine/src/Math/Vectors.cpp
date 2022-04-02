@@ -1,12 +1,8 @@
 ﻿#include "pch.h"
-#include <GameEngine/Vectors.h>
-#include <GameEngine/Math.h>
-#include <GameEngine/Matrixes.h>
-#include <GameEngine/Vectors/Quaternion.h>
-#include <GameEngine/Vectors/Vector2i.h>
-#include <GameEngine/Util/exceptions.h>
 
-using namespace Game;
+#include <Rice/Math.hpp>
+
+using namespace Rice;
 
 #pragma region Constants
  
@@ -40,6 +36,11 @@ const Quaternion Quaternion::identity = { 0,0,0,1 };
 #pragma endregion
 
 #pragma region Vector2
+Vector2::Vector2(const Vector2i& v){
+	x = v.x;
+	y = v.y;
+}
+
 dbl Vector2::Dot(Vector2 A, Vector2 b) {
     return A.x * b.x + A.y * b.y;
 }
@@ -310,7 +311,7 @@ Vector3 operator*(Quaternion q, Vector3 v) {
     return v * Matrix4x4::Rotation(q);
 }
 
-Vector3 Vector3::Cross(Vector3 left, Vector3 right) {
+Vector3 Vector3::cross(Vector3 left, Vector3 right) {
     return {
         left.y * right.z - left.z * right.y,
         left.z * right.x - left.x * right.z,
@@ -597,12 +598,12 @@ Vector4f::Vector4f(float _x, float _y, float _z, float _w) {
     w = _w;
 }
 
-Vector4f::Vector4f(const D2D1::ColorF& color) {
+/*Vector4f::Vector4f(const D2D1::ColorF& color) {
     x = color.r;
     y = color.g;
     z = color.b;
     w = color.a;
-}
+}*/
 #pragma endregion
 
 
@@ -620,16 +621,16 @@ Quaternion operator*(Quaternion q1, Quaternion q2) {
     };
 }
 
-Quaternion Quaternion::FromAxisAngle(Vector3 axis, double angle) {
+Quaternion Quaternion::fromAxisAngle(Vector3 axis, double angle) {
     auto halfAngle = angle * .5;
-    if (Math::Abs(halfAngle) < .001)
+    if (Math::abs(halfAngle) < .001)
         return identity;
-    auto s = Math::Sin(halfAngle);
+    auto s = Math::sin(halfAngle);
     Quaternion q;
     q.x = axis.x * s;
     q.y = axis.y * s;
     q.z = axis.z * s;
-    q.w = Math::Cos(halfAngle);
+    q.w = Math::cos(halfAngle);
     return q;
 }
 
@@ -638,26 +639,26 @@ Quaternion Quaternion::LookAt(Vector3 sourcePoint, Vector3 destPoint) {
 
     auto dot = Vector3::Dot(Vector3::forward, forwardVector);
 
-    if (Math::Abs(dot + 1.0) < 0.000001) {
+    if (Math::abs(dot + 1.0) < 0.000001) {
         return { 0, 1, 0, 3.1415926535897932 };
     }
-    if (Math::Abs(dot - 1.0) < 0.000001) {
+    if (Math::abs(dot - 1.0) < 0.000001) {
         return { 0,0,0,0 }/*Quaternion::identity*/;
     }
 
-    auto rotAngle = Math::Acos(dot);
-    Vector3 rotAxis = Vector3::Cross(Vector3::forward, forwardVector);
+    auto rotAngle = Math::acos(dot);
+    Vector3 rotAxis = Vector3::cross(Vector3::forward, forwardVector);
     rotAxis = (rotAxis).Normalized();
-    return Quaternion::FromAxisAngle(rotAxis, rotAngle);
+    return Quaternion::fromAxisAngle(rotAxis, rotAngle);
 }
 
-Quaternion Quaternion::FromEulerAngles(double x, double y, double z) {
-    double cy = Math::Cos(y * 0.5);
-    double sy = Math::Sin(z * 0.5);
-    double cp = Math::Cos(y * 0.5);
-    double sp = Math::Sin(y * 0.5);
-    double cr = Math::Cos(x * 0.5);
-    double sr = Math::Sin(x * 0.5);
+Quaternion Quaternion::fromEulerAngles(double x, double y, double z) {
+    double cy = Math::cos(y * 0.5);
+    double sy = Math::sin(z * 0.5);
+    double cp = Math::cos(y * 0.5);
+    double sp = Math::sin(y * 0.5);
+    double cr = Math::cos(x * 0.5);
+    double sr = Math::sin(x * 0.5);
 
     Quaternion q;
     q.w = cr * cp * cy + sr * sp * sy;
@@ -702,25 +703,25 @@ Vector3 Quaternion::ToEulerAngles() {
     // roll (x-axis rotation)
     double sinr_cosp = 2 * (w * x + y * z);
     double cosr_cosp = 1 - 2 * (x * x + y * y);
-    angles.x = Math::Atan2(sinr_cosp, cosr_cosp);
+    angles.x = Math::atan2(sinr_cosp, cosr_cosp);
 
     // yaw (y-axis rotation)
     double sinp = 2 * (w * y - z * x);
     if (std::abs(sinp) >= 1)
         angles.y = std::copysign(Math::PI / 2, sinp); // use 90 degrees if out of range
     else
-        angles.y = Math::Asin(sinp);
+        angles.y = Math::asin(sinp);
 
     // pitch (z-axis rotation)
     double siny_cosp = 2 * (w * z + x * y);
     double cosy_cosp = 1 - 2 * (y * y + z * z);
-    angles.z = Math::Atan2(siny_cosp, cosy_cosp);
+    angles.z = Math::atan2(siny_cosp, cosy_cosp);
 
     return angles;
 }
 
 Vector3 Quaternion::ToAxisAngle() {
-    auto angle = 2 * Math::Acos(w);
+    auto angle = 2 * Math::acos(w);
     auto s = sqrt(1 - w * w);
     if (s > 0) {
         s = 1 / s;

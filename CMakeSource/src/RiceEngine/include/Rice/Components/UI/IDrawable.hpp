@@ -1,11 +1,19 @@
-#pragma once
-#include "../../stdafx.h"
-#include "../../Device.h"
-#include "Canvas.h"
+#include "../../stdafx.hpp"
+NSP_UI_BEGIN
 
-namespace Game::UI {
-	__interface IDrawable {
-		void SetCanvas(UI::Canvas* canvas);
-		void Draw(Device* device);
-	};
-}
+interface IDrawable;
+typedef SmartPtr<IDrawable> pIDrawable;
+
+NSP_UI_END
+#pragma once
+#include "Canvas.hpp"
+
+NSP_UI_BEGIN
+
+interface IDrawable {
+	virtual void SetCanvas(Canvas* canvas) = 0;
+	//void Draw(Device* device);
+	virtual ~IDrawable() {};
+};
+
+NSP_UI_END

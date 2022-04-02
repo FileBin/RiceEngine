@@ -1,42 +1,37 @@
-﻿#pragma once
-#include "stdafx.h"
-#include "Device.h"
+﻿#include "../stdafx.hpp"
+NSP_ENGINE_BEGIN
+class RenderBase;
+typedef SmartPtr<RenderBase> pRenderBase;
+NSP_ENGINE_END
+
+#pragma once
+#include "../GL/GraphicsManager.hpp"
 #include "Math.h"
-#include "Engine.h"
+#include "Engine.hpp"
 
-namespace Game {
-	class Engine;
-	class RenderBase {
-	public:
-		RenderBase();
-		virtual ~RenderBase();
+NSP_ENGINE_BEGIN
+class RenderBase {
+public:
+	RenderBase();
+	virtual ~RenderBase();
 
-		virtual void BeginFrame() = 0;
-		void EndFrame();
-		void Shutdown();
-		void SetDevice(Device* device);
-		void SetEngine(Engine* en);
+	virtual void beginFrame() = 0;
+	void endFrame();
+	void shutdown();
+	void setGraphicsManager(Graphics::pGraphicsManager g_manager);
+	void setEngine(pEngine en);
 
-		Vector2 GetViewportSize();
+	Vector2 GetViewportSize();
 
-		double GetAspectRatio();
+	dbl GetAspectRatio();
 
-		/*/void* operator new(size_t i) {
-			return _aligned_malloc(i, 16);
-		}
+	virtual bool init() = 0;
+	virtual bool draw() = 0;
+	virtual void close() = 0;
+	virtual void resize() = 0;
 
-		void operator delete(void* p) {
-			_aligned_free(p);
-		}*/
-
-		virtual bool Init() = 0;
-		virtual bool Draw() = 0;
-		virtual void Close() = 0;
-		virtual void Resize() = 0;
-
-	protected:
-		Device* device;
-		Engine* engine;
-	};
-}
-
+protected:
+	Graphics::pGraphicsManager graphics_mansger;
+	Engine* engine;
+};
+NSP_ENGINE_END

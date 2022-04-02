@@ -1,40 +1,51 @@
-﻿#pragma once
-#include "stdafx.h"
-#include "InputButtons.h"
-#include "Vectors/Vector2.h"
+﻿#include "../stdafx.hpp"
+#include "../Math/Vectors/Vector2.hpp"
 
-namespace Game {
-	class InputManager {
-	public:
-		static InputManager* PreInit();
-		InputManager();
-		~InputManager();
+NSP_ENGINE_BEGIN
 
-		static bool GetKey(KeyCode key);
-		static const Vector2 GetMousePos();
-		static Vector2 GetMouseDelta();
-		static void SetMousePos(Vector2 pos);
+class InputManager;
+typedef SmartPtr<InputManager> pInputManager;
 
-		void SetClientRect(const RECT& clientRect);
-		void SetWindowRect(const RECT& winRect);
-		void SetHWND(HWND h) { hwnd = h; }
-		void UpdateWindow(const UINT& msg, WPARAM wParam, LPARAM lParam);
-		void Update();
-		static void LockMouse();
-		static void UnlockMouse();
-		static void SetActive(bool active = true);
-	private:
-		bool active = true;
-		bool lockMouse = false;
-		bool* keyStates;
-		bool* mouseStates;
-		short mouseScrollDelta = 0, mouseWheel = 0;
-		Vector2 mousePos = Vector2(), mouseDelta = Vector2();
-		HWND hwnd;
-		RECT windowRect, clientRect;
-		void eventKey(KeyCode key, bool rs_state);
-		void eventCursor();
-		void eventMouse(MouseKey key, bool rs_state);
-		void eventMouseWheel(short value);
-	};
-}
+NSP_ENGINE_END
+
+#pragma once
+#include "InputButtons.hpp"
+#include "Window.hpp"
+
+NSP_ENGINE_BEGIN
+
+class InputManager {
+public:
+	static pInputManager init(WindowHandle handle);
+	InputManager();
+	~InputManager();
+
+	static bool getKey(KeyCode key);
+	static const Vector2 getMousePos();
+	static Vector2 getMouseDelta();
+	static void setMousePos(Vector2 pos);
+
+	void setMouseRect(SDL_Rect rect);
+	void update();
+	static void lockMouse();
+	static void unlockMouse();
+	static void setActive(bool active = true);
+private:
+	static pInputManager instance;
+
+	friend class Window;
+	bool active = true;
+	bool is_mouse_locked = false;
+	bool* keyStates;
+	bool* mouseStates;
+	short mouseScrollDelta = 0, mouseWheel = 0;
+	Vector2 mousePos = {}, mouseDelta = {};
+	WindowHandle handle;
+	SDL_Rect mouseRect;
+	void eventKey(KeyCode key, bool rs_state);
+	void eventCursor();
+	void eventMouse(KeyCode key, bool rs_state);
+	void eventMouseWheel(short value);
+};
+
+NSP_ENGINE_END

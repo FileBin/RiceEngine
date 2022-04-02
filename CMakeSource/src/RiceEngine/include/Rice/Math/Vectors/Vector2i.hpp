@@ -1,6 +1,8 @@
-﻿#pragma once
+﻿struct Vector2i;
 
-#include "../Util/defines.h"
+#pragma once
+
+#include "../../defines.h"
 
 struct Vector2i {
 	num x = 0, y = 0;

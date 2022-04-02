@@ -1,10 +1,15 @@
-﻿#pragma once
+﻿struct Vector2;
 
-#include "../Util/defines.h"
+#pragma once
+
+#include "../../defines.h"
+
+#include "Vector2i.hpp"
 
 struct Vector2 {
 	dbl x = 0, y = 0;
 	Vector2() {}
+	Vector2(const Vector2i&);
 	Vector2(dbl x, dbl y) : x(x), y(y) {}
 
 	Vector2& operator-=(Vector2 v);

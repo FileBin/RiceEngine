@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Util.h"
+#include "../Util.hpp"
 
 #include "Vectors/Vector2.hpp"
 #include "Vectors/Vector2i.hpp"

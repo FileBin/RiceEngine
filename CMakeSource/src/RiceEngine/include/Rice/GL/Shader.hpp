@@ -1,24 +1,30 @@
-﻿#pragma once
-#include "stdafx.h"
-#include "Util3D.h"
+﻿#include "../stdafx.hpp"
+NSP_GL_BEGIN
+class Shader;
+typedef SmartPtr<Shader> pShader;
+NSP_GL_END
 
-namespace Game {
-	class Device;
+#pragma once
 
-	class Shader {
-	public:
-		Shader(Device* device);
-		~Shader();
+#include "GraphicsManager.hpp"
 
-		void LoadVertexShader(data_t shaderData, VertexLayout layout = Vertex::GetLayout());
-		void LoadPixelShader(data_t shaderData);
+NSP_GL_BEGIN
+class Shader {
+public:
+	Shader();
+	~Shader();
 
-		ID3D11VertexShader* vertexShader;
-		ID3D11PixelShader* pixelShader;
-		ID3D11InputLayout* layout;
+	void loadVertexShader(String filename); //, VertexLayout layout = Vertex::GetLayout());
+	//void loadPixelShader(String filename);
 
-		bool usesDepthBuffer = false;
-	private:
-		Device* device;
-	};
-}
+	//TODO make shaders
+	//ID3D11VertexShader* vertexShader;
+	//ID3D11PixelShader* pixelShader;
+	//ID3D11InputLayout* layout;
+
+	bool uses_depth_buffer = false;
+private:
+	pGraphicsManager graphics_manager;
+};
+NSP_GL_END
+
