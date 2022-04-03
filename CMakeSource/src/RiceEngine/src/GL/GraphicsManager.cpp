@@ -2,6 +2,7 @@
 #include <Rice/GL/GraphicsManager.hpp>
 #include <Rice/version.h>
 #include <Rice/Engine/Log.hpp>
+#include <Rice/GL/VulkanHelper.hpp>
 
 using namespace ::Rice::Graphics;
 NSP_GL_BEGIN
@@ -54,9 +55,17 @@ void GraphicsManager::init(pWindow _window) {
 	vk_device = vkbDevice.device;
 	vk_GPU = physicalDevice.physical_device;
 
+	// use vkbootstrap to get a Graphics queue
+	vk_graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+	vk_graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
 	init_swapchain();
+	init_commands();
+
+	is_initialized = true;
 
 	Log::debug("Successfully initialized!");
+
 }
 
 void GraphicsManager::init_swapchain() {
@@ -72,10 +81,8 @@ void GraphicsManager::init_swapchain() {
 		swapchainBuilder.use_default_format_selection();
 	}
 
-	vkb::Swapchain vkbSwapchain =
-	swapchainBuilder
-	//use v-sync present mode
-	.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+	vkb::Swapchain vkbSwapchain = swapchainBuilder
+	.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR) //use v-sync present mode
 	.set_desired_extent(window->getWidth(), window->getHeight())
 	.build()
 	.value();
@@ -89,8 +96,52 @@ void GraphicsManager::init_swapchain() {
 	Log::debug("Swapchain built!");
 }
 
+void GraphicsManager::init_commands() {
+	//create a command pool for commands submitted to the graphics queue.
+	//we also want the pool to allow for resetting of individual command buffers
+	auto commandPoolInfo = VulkanHelper::command_pool_create_info(vk_graphicsQueueFamily, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+
+	vk::Result res = (vk::Result)vkCreateCommandPool(vk_device, (VkCommandPoolCreateInfo*)&commandPoolInfo, nullptr, (VkCommandPool*)&vk_commandPool);
+	//TODO make error handling
+
+	//allocate the default command buffer that we will use for rendering
+	auto cmdAllocInfo = VulkanHelper::command_buffer_allocate_info(vk_commandPool);
+
+	res = (vk::Result)vkAllocateCommandBuffers(vk_device, (VkCommandBufferAllocateInfo*)&cmdAllocInfo, (VkCommandBuffer*)&vk_mainCommandBuffer);
+	//TODO make error handling
+}
+
+
+//FINALIZER
 void GraphicsManager::cleanup() {
-	Log::debug("Graphics manager cleanup...");
+	if(is_initialized) {
+		Log::debug("Graphics manager cleanup...");
+
+		vkDestroyCommandPool(vk_device, vk_commandPool, nullptr);
+
+		vkDestroySwapchainKHR(vk_device, vk_swapchain, nullptr);
+		vk_swapchain = nullptr;
+
+		//destroy swapchain resources
+		for (int i = 0; i < vk_swapchainImageViews.size(); i++) {
+			vkDestroyImageView(vk_device, vk_swapchainImageViews[i], nullptr);
+		}
+		vk_swapchainImageViews.clear();
+		vk_swapchainImages.clear();
+
+		vkDestroyDevice(vk_device, nullptr);
+		vk_device = nullptr;
+
+		vkDestroySurfaceKHR(vk_instance, vk_surface, nullptr);
+		vk_surface = nullptr;
+
+		vkb::destroy_debug_utils_messenger(vk_instance, vk_debug_messenger);
+		vk_debug_messenger = nullptr;
+
+		vkDestroyInstance(vk_instance, nullptr);
+		vk_instance = nullptr;
+	}
+	is_initialized = false;
 }
 
 NSP_GL_END

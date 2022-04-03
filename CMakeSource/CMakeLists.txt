@@ -6,31 +6,40 @@ project ("GameMain")
 
 set(GAME_ENGINE_PATH "${CMAKE_SOURCE_DIR}/src/RiceEngine")
 set(GAME_MAIN_PATH "${CMAKE_SOURCE_DIR}/src/GameMain")
-set(LIB_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/lib/include")
 
-set(ANY_LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/any")
+set(LIB_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/lib/include")
+set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/bin")
+
+if(WIN32)
+    set(LIB_BIN_PATH "${LIB_BIN_PATH}/win64")
+endif(WIN32)
+if(UNIX)
+    set(LIB_BIN_PATH "${LIB_BIN_PATH}/linux64")
+endif(WIN32)
+
+set(ANY_LIB_BIN_PATH "${LIB_BIN_PATH}/any")
+
+
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D UNICODE")
-
-  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/clang64")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/clang64")
   	
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE")
-  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/gcc64")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/gcc64")
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/i864")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/i864")
   	
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
 	add_compile_options(/W4 /WX)
-  	set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/msvc64")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc64")
 endif()
 
-set(VULKAN_LIB_PATH "$ENV{VK_SDK_PATH}/Lib")
+set(VULKAN_LIB_PATH "$ENV{VULKAN_SDK}/lib")
 set(VULKAN_INCLUDE_PATH "$ENV{VK_SDK_PATH}/Include")
 
 set(APPEND DXSDK_LIB_PATH "$ENV{DXSDK_DIR}/Lib")
@@ -45,12 +54,14 @@ set(RESOURCES_PATH "${CMAKE_SOURCE_DIR}/res/")
 #for test use only needed files
 set(GAME_ENGINE_SRC 
 	"${GAME_ENGINE_PATH}/include/Rice/GL/GraphicsManager.hpp"
+	"${GAME_ENGINE_PATH}/include/Rice/GL/VulkanHelper.hpp"
 	"${GAME_ENGINE_PATH}/src/Engine/InputManager.cpp"
 	"${GAME_ENGINE_PATH}/src/Engine/Window.cpp"
 	"${GAME_ENGINE_PATH}/src/Engine/Log.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Vectors.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Math.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Matrixes.cpp"
+	"${GAME_ENGINE_PATH}/src/GL/VulkanHelper.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp")
  
 set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")
@@ -70,7 +81,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 #GameEngine
 
-#includes
+
 include_directories(GameEngine ${VULKAN_INCLUDE_PATH})
 include_directories(GameEngine ${DXSDK_INCLUDE_PATH})
 include_directories(GameEngine ${LIB_INCLUDE_PATH})
@@ -91,7 +102,6 @@ include_directories(GameMain "${GAME_MAIN_PATH}/src")
 add_executable (GameMain ${GAME_MAIN_SRC})
 target_precompile_headers(GameMain PUBLIC "${GAME_MAIN_PATH}/src/pch.h")
 
-
 target_link_directories(GameMain PUBLIC
         ${ANY_LIB_BIN_PATH}
         ${LIB_BIN_PATH}
@@ -100,9 +110,16 @@ target_link_directories(GameMain PUBLIC
         ${VULKAN_LIB_PATH}
         )
 
+set(VLK_NAME "vulkan")
+
+if(WIN32)
+    set(VLK_NAME "vulkan-1")
+endif(WIN32)
+
+
 target_link_libraries(GameMain
         "GameEngine"
-        "vulkan-1"
+        "${VLK_NAME}"
         "vk-bootstrap"
         #"OpenAL32"
         "fmt"

@@ -2,6 +2,7 @@
 
 #include <clocale>
 #include <ctime>
+#include <time.h>
 #include <stdexcept>
 #include <fstream>
 #include <filesystem>

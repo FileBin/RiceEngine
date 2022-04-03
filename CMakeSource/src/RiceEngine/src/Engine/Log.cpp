@@ -6,6 +6,14 @@
 
 #define LOGNAME "log.txt"
 
+String get_date() {
+	return "";
+}
+
+String get_timer() {
+	return "";
+}
+
 NSP_ENGINE_BEGIN
 
 SmartPtr<Log> Log::instance = nullptr;
@@ -33,16 +41,12 @@ void Log::close() {
 void Log::_init() {
 	using namespace ::std;
 	file.open(LOGNAME, wfstream::out | wfstream::trunc);
-    auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>);
+    auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>());
 	file.imbue(utf8);
 	if (file.is_open()) {
-		wchar_t timer[9];
-		_wstrtime_s(timer, 9);
-		wchar_t date[9];
-		_wstrdate_s(date, 9);
-		file << fmt::format(
+		file << fmt::format( // @suppress("Invalid arguments")
 						L"{}: {} {}.\n---------------------------------------\n\n",
-						llocale.log_begin, date, timer);
+						llocale.log_begin, get_date(), get_timer());
 	} else {
 		wprintf(llocale.log_creation_error.c_str());
 	}
@@ -52,22 +56,16 @@ void Log::_close() {
 	if (!file)
 		return;
 
-	wchar_t timer[9];
-	_wstrtime_s(timer, 9);
-	wchar_t date[9];
-	_wstrdate_s(date, 9);
-	file << fmt::format(
+	file << fmt::format( // @suppress("Invalid arguments")
 					L"\n---------------------------------------\n{}: {} {}",
-					llocale.log_end, date, timer);
+					llocale.log_end, get_date(), get_timer());
 	file.close();
 }
 
 void Log::print(String levtext, String text) {
-	wchar_t timer[9];
-	_wstrtime_s(timer, 9);
 	clock_t cl = clock();
 
-	String str = fmt::format(L"{}::{}: [{}] {}\n", timer, cl, levtext, text);
+	String str = fmt::format(L"{}::{}: [{}] {}\n", get_timer(), cl, levtext, text); // @suppress("Invalid arguments")
 
 	_STD wcout << str.c_str();
 	fflush(stdout);
