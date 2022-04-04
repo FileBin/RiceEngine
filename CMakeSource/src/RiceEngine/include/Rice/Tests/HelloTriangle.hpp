@@ -1,7 +1,7 @@
 /*
  * HelloTriangle.hpp
  *
- *  Created on: 1 апр. 2022 г.
+ *  Created on: 1 пїЅпїЅпїЅ. 2022 пїЅ.
  *      Author: FileBinsLapTop
  */
 
@@ -17,7 +17,11 @@ class HelloTriangle : public ICleanable {
 public:
 	static void runTest(){
 		HelloTriangle program;
-		program.entrypoint();
+		try {
+			program.entrypoint();
+		} catch (::Rice::Exception& e) {
+			Log::log(Log::Error, "Error {}, info {}", String(e.what()), String(e.GetInfo()));
+		}
 	}
 private:
 	~HelloTriangle() {

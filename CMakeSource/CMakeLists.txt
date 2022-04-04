@@ -23,20 +23,20 @@ set(ANY_LIB_BIN_PATH "${LIB_BIN_PATH}/any")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D UNICODE")
-  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/clang64")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/clang")
   	
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE")
-  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/gcc64")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/gnu")
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/i864")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/i8")
   	
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/W4 /WX)
-  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc64")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc")
 endif()
 
 set(VULKAN_LIB_PATH "$ENV{VULKAN_SDK}/lib")
@@ -116,6 +116,12 @@ if(WIN32)
     set(VLK_NAME "vulkan-1")
 endif(WIN32)
 
+set(OTHER_LIBS "")
+
+if(UNIX)
+    set(OTHER_LIBS "dl")
+endif(UNIX)
+
 
 target_link_libraries(GameMain
         "GameEngine"
@@ -129,6 +135,7 @@ target_link_libraries(GameMain
         "vorbisenc"
         "SDL2"
 	"SDL2main"
+	${OTHER_LIBS}
 )
 
 add_dependencies(GameMain GameEngine)

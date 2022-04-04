@@ -20,8 +20,19 @@ bool Window::create(DescWindow desc) {
 	Log::debug("Creating window..");
 	this->desc = desc;
 
+	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+		Log::log(Log::Error, "SDL cannot be initialized: {}\n", String(SDL_GetError()));
+		THROW_EXCEPTION("SDL cannot be initialized!");
+	}
+
 	handle = SDL_CreateWindow("VulkanTest", desc.posx, desc.posy, desc.width,
-			desc.height, SDL_WINDOW_VULKAN);
+			desc.height,
+			SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+
+	if(handle.isNull()) {
+		Log::log(Log::Error, "Could not create SDL window: {}\n", String(SDL_GetError()));
+		THROW_NULL_PTR_EXCEPTION(handle.get());
+	}
 
 	updateWindowState();
 
@@ -93,14 +104,16 @@ void Window::setInputMgr(pInputManager inputmgr) {
 }
 
 void Window::updateWindowState() {
-	if (auto rect = SDL_GetWindowMouseRect(handle.get())) {
-		desc.posx = rect->x;
-		desc.posy = rect->y;
-		desc.width = rect->w;
-		desc.height = rect->h;
-		if (inputmgr.isNotNull())
-			inputmgr->setMouseRect(*rect);
-	}
+	SDL_Rect rect;
+	SDL_GetWindowPosition(handle.get(), &rect.x, &rect.y);
+	SDL_GetWindowSize(handle.get(), &rect.w, &rect.h);
+	desc.posx = rect.x;
+	desc.posy = rect.y;
+	desc.width = rect.w;
+	desc.height = rect.h;
+	if (inputmgr.isNotNull())
+		inputmgr->setMouseRect(rect);
+
 }
 
 NSP_ENGINE_END

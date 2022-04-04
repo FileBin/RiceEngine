@@ -44,7 +44,7 @@ private:
         return strstack;
 #else
         //TODO make get stack
-        return 0;
+        return "";
 #endif
     }
 

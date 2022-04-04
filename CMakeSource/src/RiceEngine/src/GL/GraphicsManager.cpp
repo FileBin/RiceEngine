@@ -14,7 +14,7 @@ void GraphicsManager::init(pWindow _window) {
 	vkb::InstanceBuilder builder;
 
 	//make the Vulkan instance
-	auto inst_ret = builder.set_app_name("Game")
+	auto inst_ret = builder.set_app_name("Riced Field")
 #ifdef _DEBUG
 	.request_validation_layers(true)
 #endif
@@ -23,6 +23,9 @@ void GraphicsManager::init(pWindow _window) {
 	.use_default_debug_messenger()
 #endif
 	.build();
+
+	if(!inst_ret.has_value())
+		THROW_VK_EX(inst_ret.vk_result());
 
 	vkb::Instance vkb_inst = inst_ret.value();
 
@@ -36,15 +39,26 @@ void GraphicsManager::init(pWindow _window) {
 
 	SDL_Vulkan_CreateSurface(window->getHandle().get(), vk_instance, (VkSurfaceKHR*)&vk_surface);
 
+	if(!vk_surface) THROW_NULL_PTR_EXCEPTION(nullptr);
+
 	//use vkbootstrap to select a GPU.
 	//We want a GPU that can write to the SDL surface and supports Vulkan 1.1
 	vkb::PhysicalDeviceSelector selector {vkb_inst};
-	vkb::PhysicalDevice physicalDevice = selector
-	.set_minimum_version(1, 1)
-	.set_surface(vk_surface)
-	.prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
-	.select()
-	.value();
+
+	auto dev_result = selector
+			.set_minimum_version(1, 1)
+			.set_surface(vk_surface)
+			.prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
+			.select();
+
+	if(!dev_result.has_value()) {
+		std::string str = fmt::format("Error: {}!", dev_result.error().message()); // @suppress("Invalid arguments")
+		THROW_EXCEPTION(str.c_str());
+	}
+
+	vkb::PhysicalDevice physicalDevice =
+			dev_result.value();
+
 
 	//create the final Vulkan device
 	vkb::DeviceBuilder deviceBuilder {physicalDevice};
@@ -53,7 +67,11 @@ void GraphicsManager::init(pWindow _window) {
 
 	// Get the VkDevice handle used in the rest of a Vulkan application
 	vk_device = vkbDevice.device;
+	if(!vk_device) THROW_NULL_PTR_EXCEPTION(nullptr);
+
 	vk_GPU = physicalDevice.physical_device;
+	Log::log(Log::Info, "GPU INFO: {}", String(vk_GPU.getProperties().deviceName.data()));
+	if(!vk_GPU) THROW_NULL_PTR_EXCEPTION(nullptr);
 
 	// use vkbootstrap to get a Graphics queue
 	vk_graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
@@ -102,13 +120,13 @@ void GraphicsManager::init_commands() {
 	auto commandPoolInfo = VulkanHelper::command_pool_create_info(vk_graphicsQueueFamily, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
 	vk::Result res = (vk::Result)vkCreateCommandPool(vk_device, (VkCommandPoolCreateInfo*)&commandPoolInfo, nullptr, (VkCommandPool*)&vk_commandPool);
-	//TODO make error handling
+	THROW_VK_EX_IF_BAD(res);
 
 	//allocate the default command buffer that we will use for rendering
 	auto cmdAllocInfo = VulkanHelper::command_buffer_allocate_info(vk_commandPool);
 
 	res = (vk::Result)vkAllocateCommandBuffers(vk_device, (VkCommandBufferAllocateInfo*)&cmdAllocInfo, (VkCommandBuffer*)&vk_mainCommandBuffer);
-	//TODO make error handling
+	THROW_VK_EX_IF_BAD(res);
 }
 
 

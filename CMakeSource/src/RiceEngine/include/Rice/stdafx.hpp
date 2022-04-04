@@ -34,7 +34,9 @@
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
+#ifdef WIN32
 #define SDL_MAIN_HANDLED
+#endif
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 

@@ -41,7 +41,7 @@ void Log::close() {
 void Log::_init() {
 	using namespace ::std;
 	file.open(LOGNAME, wfstream::out | wfstream::trunc);
-    auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>());
+    auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>()); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
 	file.imbue(utf8);
 	if (file.is_open()) {
 		file << fmt::format( // @suppress("Invalid arguments")
