@@ -31,14 +31,16 @@ struct String : public std_wstring, public IPrintable {
         at(0) = ch;
         return *this;
     }
+
+    std::string toUTF8String() {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+        return utf8_conv.to_bytes(*this);
+    }
 };
 
 inline String::String(const char* cstr) {
-    size_t size = strlen(cstr);
-    resize(size);
-    for (size_t pos = 0; pos < size; pos++) {
-        at(pos) = cstr[pos];
-    }
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    *this = utf8_conv.from_bytes(cstr);
 }
 
 inline String operator+(const char* cstr, String s) {

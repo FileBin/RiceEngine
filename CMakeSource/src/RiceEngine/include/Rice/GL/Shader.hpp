@@ -7,24 +7,31 @@ NSP_GL_END
 #pragma once
 
 #include "GraphicsManager.hpp"
+#include "GraphicsComponentBase.hpp"
 
 NSP_GL_BEGIN
-class Shader {
+class Shader : public GraphicsComponentBase {
 public:
-	Shader();
-	~Shader();
+	enum Type {
+		Vertex, Geometry, Fragment,
+	};
+	Shader(pGraphicsManager g_mgr);
+	~Shader() override;
 
-	void loadVertexShader(String filename); //, VertexLayout layout = Vertex::GetLayout());
-	//void loadPixelShader(String filename);
+	void cleanup() override;
 
-	//TODO make shaders
-	//ID3D11VertexShader* vertexShader;
-	//ID3D11PixelShader* pixelShader;
-	//ID3D11InputLayout* layout;
+	void loadShader(String path, Type shaderType);
 
-	bool uses_depth_buffer = false;
+	void buildPipeline(Vector2i windowSize);
+
+	void setActive();
 private:
-	pGraphicsManager graphics_manager;
+	vk::ShaderModule vertexShader, fragmentShader;
+	vk::Pipeline pipeline;
+	vk::PipelineLayout layout;
+
+	bool init = false;
+	bool uses_depth_buffer = false;
 };
 NSP_GL_END
 

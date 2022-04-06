@@ -62,6 +62,9 @@ set(GAME_ENGINE_SRC
 	"${GAME_ENGINE_PATH}/src/Math/Math.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Matrixes.cpp"
 	"${GAME_ENGINE_PATH}/src/GL/VulkanHelper.cpp"
+	"${GAME_ENGINE_PATH}/src/GL/Shader.cpp"
+	"${GAME_ENGINE_PATH}/src/GL/GraphicsComponentBase.cpp"
+	"${GAME_ENGINE_PATH}/src/Util/Util.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp")
  
 set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")
@@ -141,7 +144,7 @@ target_link_libraries(GameMain
 add_dependencies(GameMain GameEngine)
 
 
-
+if(WIN32)
 #copy dll
 add_custom_command(TARGET GameMain POST_BUILD   # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND}
@@ -149,14 +152,15 @@ add_custom_command(TARGET GameMain POST_BUILD   # Adds a post-build event to MyT
         ${DLLs_x64}                           # <--this is in-file
         ${CMAKE_BINARY_DIR})                  # <--this is out-file path
 
+endif(WIN32)
 #copy resources
 add_custom_target(Resources ALL DEPENDS ${RESOURCES})
 set(OUT_RES_DIR ${CMAKE_BINARY_DIR}/resources)
 
 file(MAKE_DIRECTORY ${OUT_RES_DIR})
 
-#add_custom_command(TARGET Resources   # Adds a post-build event to MyTest
-#    COMMAND ${CMAKE_COMMAND}
-#        -E copy_directory                    # which executes "cmake - E copy_if_different..."
-#        ${RESOURCES_PATH}                           # <--this is in-file
-#        ${OUT_RES_DIR})          # <--this is out-file path
+add_custom_command(TARGET Resources   # Adds a post-build event to MyTest
+    COMMAND ${CMAKE_COMMAND}
+        -E copy_directory                    # which executes "cmake - E copy_if_different..."
+        ${RESOURCES_PATH}                           # <--this is in-file
+        ${OUT_RES_DIR})          # <--this is out-file path

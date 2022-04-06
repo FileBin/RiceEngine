@@ -16,20 +16,20 @@ public:
 		file = jsonFile;
 		member = member_;
 
-		std::string info{};
-		info.append("JSON File: ");
-		info.append(Util::ToStdString(GetFile()));
-		info.append("\n");
+		String info{};
+		info.append(L"JSON File: ");
+		info.append(GetFile());
+		info.append(L"\n");
 
-		info.append("Member: ");
+		info.append(L"Member: ");
 		info.append(GetMember());
-		info.append("\n");
+		info.append(L"\n");
 
-		SetInfo(info.c_str());
+		SetInfo(info);
 	}
 
-	const char* GetMember() { return member; }
-	const wchar_t* GetFile() { return file; }
+	String GetMember() { return member; }
+	String GetFile() { return file; }
 };
 
 NSP_ENGINE_END

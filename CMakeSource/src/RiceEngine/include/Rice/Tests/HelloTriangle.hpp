@@ -1,13 +1,14 @@
 /*
  * HelloTriangle.hpp
  *
- *  Created on: 1 ���. 2022 �.
- *      Author: FileBinsLapTop
+ *  Created on: 1 Apr 2022
+ *      Author: filebin
  */
 
 #include "../stdafx.hpp"
 #include "../Engine/Window.hpp"
 #include "../GL/GraphicsManager.hpp"
+#include "../GL/Shader.hpp"
 #include "../Engine/Log.hpp"
 
 NSP_TESTS_BEGIN
@@ -20,7 +21,7 @@ public:
 		try {
 			program.entrypoint();
 		} catch (::Rice::Exception& e) {
-			Log::log(Log::Error, "Error {}, info {}", String(e.what()), String(e.GetInfo()));
+			Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}", e.GetMsg(), e.GetFile(), e.GetLine(), e.GetInfo());
 		}
 	}
 private:
@@ -29,16 +30,26 @@ private:
 	}
 
 	void entrypoint() {
+		using namespace Graphics;
 		Log::init();
 		win.create({ "Vulkan" });
 		Log::debug("Window created!");
 		g_mgr.init(&win);
+		test_shader = new Shader(&g_mgr);
+
+		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
+		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
+		test_shader->buildPipeline(win.getSize());
+
 		while(win.update())
 			loop();
 	}
 
 	void loop() {
-
+		g_mgr.beginDraw();
+		test_shader->setActive();
+		g_mgr.draw(3);
+		g_mgr.endDraw();
 	}
 
 	void cleanup() override {
@@ -48,6 +59,7 @@ private:
 	}
 
 	Window win;
+	Graphics::pShader test_shader;
 	Graphics::GraphicsManager g_mgr;
 };
 

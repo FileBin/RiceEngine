@@ -16,20 +16,20 @@ public:
 		offset = offset_;
 		file = jsonFile;
 
-		std::string info{};
-		info.append("JSON File: ");
-		info.append(Util::ToStdString(GetFile()));
-		info.append("\n");
+		String info{};
+		info.append(L"JSON File: ");
+		info.append(GetFile());
+		info.append(L"\n");
 
-		info.append("Offset: ");
-		info.append(std::to_string(GetOffset()));
-		info.append("\n");
+		info.append(L"Offset: ");
+		info.append(std::to_wstring(GetOffset()));
+		info.append(L"\n");
 
 		SetInfo(info.c_str());
 	}
 
 	size_t GetOffset() { return offset; }
-	const wchar_t* GetFile() { return file; }
+	String GetFile() { return file; }
 };
 
 NSP_ENGINE_END

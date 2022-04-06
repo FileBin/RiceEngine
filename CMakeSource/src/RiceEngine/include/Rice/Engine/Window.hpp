@@ -42,6 +42,8 @@ public:
 	int getWidth() const { return desc.width; }
 	int getHeight() const { return desc.height; }
 
+	Vector2i getSize() const { return { getWidth(), getHeight() }; }
+
 	String getCaption() const { return desc.caption; }
 	bool isExit() const { return is_exit; }
 	bool isActive() const { return is_active; }

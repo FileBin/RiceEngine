@@ -2,8 +2,9 @@
 
 #include "../../stdafx.hpp"
 
+#include "../String.hpp"
+
 #include <exception>
-#include <string>
 
 #define THROW_EXCEPTION(wtf) throw ::Rice::Exception(wtf, __LINE__, __FILE__)
 
@@ -12,11 +13,11 @@ NSP_ENGINE_BEGIN
 class Exception : public std::exception {
 private:
     int line;
-    const char* file, msg;
-    char* stack;
-    char* info;
+    String file, msg;
+    String stack;
+    String info;
 
-    std::string getStack() {
+    String getStack() {
 #ifdef _MSC_VER
         HANDLE process = GetCurrentProcess();
         SymInitialize(process, NULL, TRUE);
@@ -49,28 +50,19 @@ private:
     }
 
 public:
-    Exception(const char* _msg, int line_, const char* file_) : _STD exception(), msg(msg), line(line_), file(file_) {
-        auto s = getStack();
-        auto size = s.size() * sizeof(char);
-        stack = (char*)malloc(size + 1);
-        info = (char*)malloc(7);
-        memcpy((void*)stack, s.c_str(), size);
-        stack[size] = '\0';
-        memcpy((void*)info, "[NONE]", 7);
+    Exception(const char* msg_, int line_, const char* file_) : _STD exception(), msg(msg_), line(line_), file(file_) {
+        stack = getStack();
     }
 
     int GetLine() const { return line; }
-    const char* GetFile() const { return file; }
-    const char* GetStack() const { return stack; }
-    const char* GetInfo() { return info; }
+    String GetFile() const { return file; }
+    String GetStack() const { return stack; }
+    String GetInfo() { return info; }
+    String GetMsg() { return msg; }
 
 protected:
-    void SetInfo(std::string info_) {
-        if (info) free(info);
-        auto len = info_.size();
-        info = (char*)malloc(len + 1);
-        memcpy((void*)info, (void*)info_.c_str(), len);
-        info[len] = '\0';
+    void SetInfo(String info_) {
+    	info = info_;
     }
 };
 

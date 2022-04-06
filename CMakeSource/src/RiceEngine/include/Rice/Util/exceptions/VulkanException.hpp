@@ -8,16 +8,17 @@
 
 NSP_ENGINE_BEGIN
 
-class VulkanException : Exception {
+class VulkanException : public Exception {
 public:
 
-	VulkanException(vk::Result res, int line, const char* file) : Exception("VulkanException occurred!", line, file) {
+	VulkanException(vk::Result res, int line, const char* file) : Exception("VulkanException", line, file) {
 		SetInfo(_getInfo(res));
-
 	}
 private:
-	std::string _getInfo(vk::Result res){
+	String _getInfo(vk::Result res){
 		switch (res) {
+			case vk::Result::eSuboptimalKHR:
+				return "SubOptimalKHR";
 			case vk::Result::eErrorDeviceLost:
 				return "ErrorDeviceLost!";
 				//TODO make other vk error cases

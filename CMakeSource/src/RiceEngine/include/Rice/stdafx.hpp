@@ -1,10 +1,15 @@
 ﻿#pragma once
 
+#include <codecvt>
+#include <locale>
+
+#include <iomanip>
 #include <clocale>
 #include <ctime>
 #include <time.h>
 #include <stdexcept>
 #include <fstream>
+
 #include <filesystem>
 
 #include <typeinfo>

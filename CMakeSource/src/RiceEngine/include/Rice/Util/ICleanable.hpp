@@ -13,5 +13,5 @@ interface ICleanable;
 
 interface ICleanable {
     virtual void cleanup() = 0;
-    virtual ~ICleanable() {}
+    virtual ~ICleanable() {};
 };

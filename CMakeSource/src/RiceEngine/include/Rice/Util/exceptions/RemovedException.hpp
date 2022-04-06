@@ -13,7 +13,7 @@ public:
 	template<typename ptrT = void*>
 	RemovedException(ptrT whatPtr, int line_, const char* file_) : Exception("Pointer was removed", line_, file_), type(typeid(whatPtr)) {
 		ptr = (void*)whatPtr;
-		std::string info = fmt::format("TypeInfo: {}\nPointer: {:#x}\n", GetTypeInfo().name(), (long long)GetPointer()); // @suppress("Invalid arguments")
+		String info = fmt::format("TypeInfo: {}\nPointer: {:#x}\n", GetTypeInfo().name(), (long long)GetPointer()).c_str(); // @suppress("Invalid arguments")
 		SetInfo(info);
 	}
 

@@ -14,7 +14,7 @@ public:
 	template<typename ptrT = void*>
 	NullPtrException(ptrT whatPtr, int line_, const char* file_) : Exception("Pointer is null", line_, file_), type(typeid(whatPtr)) {
 		ptr = (void*)whatPtr;
-		_STD string info = fmt::format("TypeInfo: {}\nPointer: {:#x}\n", getTypeInfo().name(), (num)getPointer()); // @suppress("Invalid arguments")
+		String info = fmt::format(L"TypeInfo: {}\nPointer: {:#x}\n", String(getTypeInfo().name()), (num)getPointer()); // @suppress("Invalid arguments")
 		SetInfo(info);
 	}
 
