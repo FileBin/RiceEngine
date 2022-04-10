@@ -6,7 +6,7 @@
 NSP_UTIL_BEGIN
 
 void checkPath(String path) {
-	if (!std::filesystem::exists(path.toUTF8String())) {
+	if (!std::filesystem::exists(path.toUTF8String())) { // @suppress("Function cannot be resolved")
 		THROW_FILE_NOT_FOUND_EXCEPTION(path.toUTF8String().c_str());
 	}
 }
