@@ -85,6 +85,8 @@ void GraphicsManager::init(pWindow _window) {
 	init_framebuffers();
 	init_sync_structures();
 
+	register_events();
+
 	is_initialized = true;
 
 	Log::debug("Successfully initialized!");
@@ -233,6 +235,44 @@ void GraphicsManager::init_sync_structures() {
 	THROW_VK_EX_IF_BAD(res);
 }
 
+void GraphicsManager::register_events() {
+	on_resize_uuid = window->resize_event.subscribe([this](pWindow sender){ onResize(sender); }); // @suppress("Invalid arguments")
+}
+
+void GraphicsManager::onResize(pWindow win) {
+	recreateSwapChain();
+}
+
+void GraphicsManager::recreateSwapChain() {
+	auto res = vkDeviceWaitIdle(vk_device);
+	THROW_VK_EX_IF_BAD(res);
+	cleanupSwapChain();
+
+	init_swapchain();
+	init_def_renderpass();
+	init_framebuffers();
+}
+
+void GraphicsManager::cleanupSwapChain() {
+	for (size_t i = 0; i < vk_framebuffers.size(); i++) {
+		vkDestroyFramebuffer(vk_device, vk_framebuffers[i], nullptr);
+	}
+
+	resizeEvent.invoke(window);
+
+	vkDestroyRenderPass(vk_device, vk_def_renderPass, nullptr);
+
+	for (size_t i = 0; i < vk_swapchainImages.size(); i++) {
+		vkDestroyImageView(vk_device, vk_swapchainImageViews[i], nullptr);
+		//vkDestroyImage(vk_device, vk_swapchainImages[i], nullptr);
+	}
+
+	vk_swapchainImageViews.clear();
+	//vk_swapchainImages.clear();
+
+	vkDestroySwapchainKHR(vk_device, vk_swapchain, nullptr);
+}
+
 void GraphicsManager::beginDraw() {
 	if(isDrawing) return;
 	isDrawing = true;
@@ -266,9 +306,9 @@ void GraphicsManager::beginDraw() {
 	VkClearValue clearValue;
 	Vector3f flash =
 			{
-					abs(sin(frameNumber / 113.f)), // @suppress("Invalid arguments")
-					abs(sin(frameNumber / 29.f)), // @suppress("Invalid arguments")
-					abs(sin(frameNumber / 89.f)), // @suppress("Invalid arguments")
+					abs(sin(frameNumber / 101.f)), // @suppress("Invalid arguments")
+					abs(sin(frameNumber / 79.f)), // @suppress("Invalid arguments")
+					abs(sin(frameNumber / 93.f)), // @suppress("Invalid arguments")
 			};
 	clearValue.color = { { flash.x, flash.y, flash.z, 1.0f } };
 
@@ -363,23 +403,13 @@ void GraphicsManager::endDraw() {
 
 //FINALIZER
 void GraphicsManager::cleanup() {
+	window->resize_event.unsubscribe(on_resize_uuid);
 	if(is_initialized) {
 		Log::debug("Graphics manager cleanup...");
 
 		vkDestroyCommandPool(vk_device, vk_commandPool, nullptr);
 
-		vkDestroySwapchainKHR(vk_device, vk_swapchain, nullptr);
-		vk_swapchain = nullptr;
-
-		vkDestroyRenderPass(vk_device, vk_def_renderPass, nullptr);
-
-		//destroy swapchain resources
-		for (int i = 0; i < vk_swapchainImageViews.size(); i++) {
-			vkDestroyFramebuffer(vk_device, vk_framebuffers[i], nullptr);
-			vkDestroyImageView(vk_device, vk_swapchainImageViews[i], nullptr);
-		}
-		vk_swapchainImageViews.clear();
-		vk_swapchainImages.clear();
+		cleanupSwapChain();
 
 		vkDestroyDevice(vk_device, nullptr);
 		vk_device = nullptr;

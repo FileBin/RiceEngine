@@ -57,4 +57,5 @@
 #include "Util/SmartPointer.hpp"
 #include "Util/Exceptions.hpp"
 #include "Util/ICleanable.hpp"
+#include "Util/Event.hpp"
 

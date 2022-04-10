@@ -26,12 +26,18 @@ public:
 
 	void setActive();
 private:
-	vk::ShaderModule vertexShader, fragmentShader;
+	vk::ShaderModule vertexShader, fragmentShader, geometryShader;
 	vk::Pipeline pipeline;
 	vk::PipelineLayout layout;
 
+	Window::ResizeEvent::UUID on_resize_uuid;
+
 	bool init = false;
 	bool uses_depth_buffer = false;
+
+	void onResize(pWindow sender);
+	void cleanupPipeline();
+	void cleanupShaders();
 };
 NSP_GL_END
 

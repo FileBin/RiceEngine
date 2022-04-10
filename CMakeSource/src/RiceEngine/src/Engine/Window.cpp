@@ -59,7 +59,7 @@ void Window::cleanup() {
 
 void Window::handleEvent(SDL_Event& e) {
 	is_resizing = false;
-
+	updateWindowState();
 	switch (e.type) {
 	case SDL_WINDOWEVENT:
 		handleWindowEvent(e.window);
@@ -73,8 +73,6 @@ void Window::handleEvent(SDL_Event& e) {
 	case SDL_MOUSEWHEEL:
 		inputmgr->eventMouseWheel(e.wheel.y);
 	}
-
-	updateWindowState();
 }
 
 void Window::handleWindowEvent(SDL_WindowEvent& e) {
@@ -92,6 +90,7 @@ void Window::handleWindowEvent(SDL_WindowEvent& e) {
 		break;
 	case SDL_WINDOWEVENT_RESIZED:
 		is_resizing = true;
+		resize_event.invoke(this);
 		break;
 	case SDL_WINDOWEVENT_MOVED:
 		break;

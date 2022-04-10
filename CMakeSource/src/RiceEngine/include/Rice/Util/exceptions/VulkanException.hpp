@@ -3,7 +3,7 @@
 #define THROW_VK_EX(res) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
 
 
-#define THROW_VK_EX_IF_BAD(res) if(((vk::Result)(res))!=vk::Result::eSuccess) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
+#define THROW_VK_EX_IF_BAD(res) if(((uint)(res))<0) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
 
 
 NSP_ENGINE_BEGIN

@@ -4,14 +4,32 @@
 
 NSP_GL_BEGIN
 
-Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {}
+Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {
+	on_resize_uuid = graphics_mgr->resizeEvent.subscribe([this](pWindow win){ onResize(win); }); // @suppress("Invalid arguments")
+}
 Shader::~Shader() { cleanup(); }
-void Shader::cleanup() {}
+
+void Shader::cleanup() {
+	cleanupPipeline();
+	cleanupShaders();
+
+	graphics_mgr->resizeEvent.unsubscribe(on_resize_uuid);
+	init = false;
+}
+
+void Shader::cleanupShaders() {
+	if(vertexShader) 	vkDestroyShaderModule(getDevice(), vertexShader, nullptr);
+	if(fragmentShader) 	vkDestroyShaderModule(getDevice(), fragmentShader, nullptr);
+	if(geometryShader) 	vkDestroyShaderModule(getDevice(), geometryShader, nullptr);
+}
+
+void Shader::cleanupPipeline() {
+	if(pipeline) vkDestroyPipeline(getDevice(), pipeline, nullptr);
+    if(layout)	 vkDestroyPipelineLayout(getDevice(), layout, nullptr);
+}
 
 void Shader::loadShader(String path, Type type) {
 	data_t buffer = Util::readFile(path);
-
-	//buffer.insert(buffer.end(), {0,0,0,0});
 
 	//create a new shader module, using the buffer we loaded
 	vk::ShaderModuleCreateInfo createInfo = {};
@@ -34,6 +52,8 @@ void Shader::loadShader(String path, Type type) {
 	case Type::Fragment:
 		fragmentShader = shaderModule;
 		break;
+	case Type::Geometry:
+		geometryShader = shaderModule;
 	}
 }
 
@@ -48,11 +68,17 @@ void Shader::buildPipeline(Vector2i size) {
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules per stage
 	help::PipelineBuilder pipelineBuilder;
 
-	pipelineBuilder.vk_shaderStages.push_back(
-			help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, vertexShader));
+	if(vertexShader)
+		pipelineBuilder.vk_shaderStages.push_back(
+				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, vertexShader));
 
-	pipelineBuilder.vk_shaderStages.push_back(
-			help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, fragmentShader));
+	if(fragmentShader)
+		pipelineBuilder.vk_shaderStages.push_back(
+				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, fragmentShader));
+
+	if(geometryShader)
+		pipelineBuilder.vk_shaderStages.push_back(
+				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eGeometry, geometryShader));
 
 	//vertex input controls how to read vertices from vertex buffers. We aren't using it yet
 	pipelineBuilder.vk_vertexInputInfo = help::vertex_input_state_create_info();
@@ -86,6 +112,12 @@ void Shader::buildPipeline(Vector2i size) {
 
 	//finally build the pipeline
 	pipeline = pipelineBuilder.build_pipeline(getDevice(), getDefRenderPass());
+	init = true;
+}
+
+void Shader::onResize(pWindow sender) {
+	cleanupPipeline();
+	buildPipeline(sender->getSize());
 }
 
 void Shader::setActive() {

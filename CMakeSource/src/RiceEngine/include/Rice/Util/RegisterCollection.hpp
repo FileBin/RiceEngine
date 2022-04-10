@@ -1,24 +1,25 @@
 #pragma once
 
-#include <vector>
-#include <queue>
+#include "../stdafx.hpp"
 
-template<typename PtrT = void*>
+template<typename ElemT, typename Id_t = size_t>
 class RegisterCollection {
+public:
+	typedef SmartPtr<ElemT> ptr_t;
 private:
-	_STD vector<PtrT> collection{};
-	_STD vector<size_t> emptyPositions{};
+	vec<ptr_t> collection{};
+	vec<Id_t> emptyPositions{};
 public:
 
 	RegisterCollection() {
 		emptyPositions.reserve(0xfff);
 	}
 
-	const _STD vector<PtrT> AsStdVector() const {
-		_STD vector<PtrT> vec{};
+	const vec<ptr_t> asStdVector() const {
+		vec<ptr_t> vec{};
 		auto n = collection.size();
 		vec.reserve(n);
-		for (size_t i = 0; i < n; i++) {
+		for (Id_t i = 0; i < n; i++) {
 			const auto& elem = collection[i];
 			if (elem != nullptr)
 				vec.push_back(elem);
@@ -27,15 +28,15 @@ public:
 	}
 
 
-	const _STD vector<PtrT>& GetCollectionWithGaps() const {
+	const vec<ptr_t>& getCollectionWithGaps() const {
 		return collection;
 	}
 
-	PtrT GetElemAt(size_t idx) {
+	ptr_t getElemAt(Id_t idx) {
 		return collection[idx];
 	}
 
-	size_t Register(PtrT pObject) {
+	Id_t registerPtr(ptr_t pObject) {
 		if (emptyPositions.empty()) {
 			collection.push_back(pObject);
 			return collection.size() - 1;
@@ -47,7 +48,11 @@ public:
 		}
 	}
 
-	void Unregister(size_t index) {
+	Id_t registerObj(ElemT object) {
+		return registerPtr(new ElemT(object));
+	}
+
+	void unregister(Id_t index) {
 		collection[index] = nullptr;
 		emptyPositions.push_back(index);
 	}

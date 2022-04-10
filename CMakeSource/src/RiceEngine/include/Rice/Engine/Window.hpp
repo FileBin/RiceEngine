@@ -23,6 +23,8 @@ struct DescWindow {
 
 class Window : public ICleanable {
 public:
+	typedef Event<void, pWindow> ResizeEvent;
+
 	Window();
 	~Window() {	cleanup(); }
 
@@ -54,14 +56,18 @@ private:
 	void handleEvent(SDL_Event& e);
 	void handleWindowEvent(SDL_WindowEvent& e);
 
-	static pWindow instance;
+public:
+	ResizeEvent resize_event;
 
+private:
 	DescWindow desc;
 	WindowHandle handle;
 	bool is_exit;
 	bool is_active;
 	bool is_resizing;
 	pInputManager inputmgr;
+
+	static pWindow instance;
 };
 
 NSP_ENGINE_END

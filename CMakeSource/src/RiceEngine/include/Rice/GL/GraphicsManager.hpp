@@ -44,8 +44,9 @@ private:
 	uint frameNumber = 0;
 	uint swapchainImageIndex = 0;
 
-
 	pWindow window;
+
+	Window::ResizeEvent::UUID on_resize_uuid;
 
 	bool isDrawing = false;
 
@@ -56,20 +57,33 @@ private:
     		false;
 #endif
 public:
+    Window::ResizeEvent resizeEvent;
+
 	GraphicsManager() = default;
 	~GraphicsManager() override { cleanup(); }
 
+	pWindow getWindow() { return window; }
+
 	void init(pWindow window);
+
+	void beginDraw();
+	void draw(uint count);
+	void endDraw();
+	void cleanup() override;
+
+private:
 	void init_swapchain();
 	void init_commands();
 	void init_def_renderpass();
 	void init_framebuffers();
 	void init_sync_structures();
 
-	void beginDraw();
-	void draw(uint count);
-	void endDraw();
-	void cleanup() override;
+	void register_events();
+
+
+	void onResize(pWindow sender);
+	void cleanupSwapChain();
+	void recreateSwapChain();
 };
 
 NSP_GL_END
