@@ -9,10 +9,7 @@
 
 #ifndef _MSC_VER
 #define _STD ::std::
-#endif
-
-#ifdef __linux__
-constexpr short SHRT_MAX = 0x7fff;
+#define SHRT_MAX 0x7fff
 #endif
 
 #include "stdafx.hpp"

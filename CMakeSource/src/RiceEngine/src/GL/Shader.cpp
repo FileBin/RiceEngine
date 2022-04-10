@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-
 #include <Rice/GL/Shader.hpp>
+#include <Rice/GL/GraphicsComponentBase.hpp>
 
 NSP_GL_BEGIN
 
