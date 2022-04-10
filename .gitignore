@@ -2,6 +2,7 @@
 obj/
 /bin/
 build/
+!build/.empty
 CMakeSource/CMakeCache.txt
 CMakeSource/CMakeFiles
 CMakeSource/Makefile
