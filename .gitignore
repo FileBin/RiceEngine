@@ -1,6 +1,6 @@
 ﻿.vs/
 obj/
-bin/
+/bin/
 build/
 CMakeSource/CMakeCache.txt
 CMakeSource/CMakeFiles
