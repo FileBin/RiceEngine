@@ -3,7 +3,7 @@
 #define THROW_VK_EX(res) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
 
 
-#define THROW_VK_EX_IF_BAD(res) if(((uint)(res))<0) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
+#define THROW_VK_EX_IF_BAD(res) if(((int)(res))<0) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
 
 
 NSP_ENGINE_BEGIN
@@ -21,6 +21,9 @@ private:
 				return "SubOptimalKHR";
 			case vk::Result::eErrorDeviceLost:
 				return "ErrorDeviceLost!";
+
+			case vk::Result::eErrorOutOfDateKHR:
+				return "ErrorOutOfDateKHR!";
 				//TODO make other vk error cases
 			default:
 				return "Unknown exception!";

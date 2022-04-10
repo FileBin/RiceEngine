@@ -46,10 +46,17 @@ private:
 	}
 
 	void loop() {
-		g_mgr.beginDraw();
-		test_shader->setActive();
-		g_mgr.draw(3);
-		g_mgr.endDraw();
+		if(!win.isResize()) {
+			if(g_mgr.beginDraw()) {
+				test_shader->setActive();
+				g_mgr.draw(3);
+				g_mgr.endDraw();
+			} else {
+				Log::debug("Frame skipped!");
+			}
+		} else {
+			Log::debug("Frame skipped! window resize!");
+		}
 	}
 
 	void cleanup() override {

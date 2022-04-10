@@ -49,7 +49,7 @@ public:
 	String getCaption() const { return desc.caption; }
 	bool isExit() const { return is_exit; }
 	bool isActive() const { return is_active; }
-	bool isResize() const { return is_resizing; }
+	bool isResize() const;
 
 private:
 	void updateWindowState();
@@ -64,7 +64,6 @@ private:
 	WindowHandle handle;
 	bool is_exit;
 	bool is_active;
-	bool is_resizing;
 	pInputManager inputmgr;
 
 	static pWindow instance;

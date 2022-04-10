@@ -8,8 +8,7 @@ NSP_ENGINE_BEGIN
 pWindow Window::instance = nullptr;
 
 Window::Window() :
-		inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true), is_resizing(
-				false) {
+		inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true) {
 	if (instance.isNotNull())
 		instance = this;
 	else
@@ -58,7 +57,6 @@ void Window::cleanup() {
 }
 
 void Window::handleEvent(SDL_Event& e) {
-	is_resizing = false;
 	updateWindowState();
 	switch (e.type) {
 	case SDL_WINDOWEVENT:
@@ -89,7 +87,6 @@ void Window::handleWindowEvent(SDL_WindowEvent& e) {
 		is_exit = true;
 		break;
 	case SDL_WINDOWEVENT_RESIZED:
-		is_resizing = true;
 		resize_event.invoke(this);
 		break;
 	case SDL_WINDOWEVENT_MOVED:
@@ -100,6 +97,12 @@ void Window::handleWindowEvent(SDL_WindowEvent& e) {
 void Window::setInputMgr(pInputManager inputmgr) {
 	this->inputmgr = inputmgr;
 	updateWindowState();
+}
+
+bool Window::isResize() const {
+	int w,h;
+	SDL_GetWindowSize(handle.get(), &w, &h);
+	return w != desc.width || h != desc.height;
 }
 
 void Window::updateWindowState() {

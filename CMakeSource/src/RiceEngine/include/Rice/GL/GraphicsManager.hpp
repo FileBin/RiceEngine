@@ -66,7 +66,7 @@ public:
 
 	void init(pWindow window);
 
-	void beginDraw();
+	bool beginDraw();
 	void draw(uint count);
 	void endDraw();
 	void cleanup() override;

@@ -273,20 +273,30 @@ void GraphicsManager::cleanupSwapChain() {
 	vkDestroySwapchainKHR(vk_device, vk_swapchain, nullptr);
 }
 
-void GraphicsManager::beginDraw() {
-	if(isDrawing) return;
+bool GraphicsManager::beginDraw() {
+	if(window->isResize())
+		return false;
+	if(isDrawing) return false;
 	isDrawing = true;
 	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
-	auto res = vkWaitForFences(vk_device, 1, (VkFence*)&vk_renderFence, true, 1000000000);
+	int res = vkWaitForFences(vk_device, 1, (VkFence*)&vk_renderFence, true, 1000000000);
 	THROW_VK_EX_IF_BAD(res);
+	//if(res != 0) return false;
+
 	res = vkResetFences(vk_device, 1, (VkFence*)&vk_renderFence);
 	THROW_VK_EX_IF_BAD(res);
+	//if(res != 0) return false;
+
 
 	//request image from the swapchain, one second timeout
 	res = vkAcquireNextImageKHR(vk_device, vk_swapchain, 1000000000, vk_presentSemaphore, nullptr, &swapchainImageIndex);
 	THROW_VK_EX_IF_BAD(res);
+	//if(res != 0) return false;
+
 	res = vkResetCommandBuffer(vk_mainCommandBuffer, 0);
 	THROW_VK_EX_IF_BAD(res);
+	//if(res != 0) return false;
+
 
 	//naming it cmd for shorter writing
 	vk::CommandBuffer cmd = vk_mainCommandBuffer;
@@ -301,6 +311,7 @@ void GraphicsManager::beginDraw() {
 
 	res = vkBeginCommandBuffer(cmd, (VkCommandBufferBeginInfo*)&cmdBeginInfo);
 	THROW_VK_EX_IF_BAD(res);
+	//if(res != 0) return false;
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
 	VkClearValue clearValue;
@@ -334,6 +345,10 @@ void GraphicsManager::beginDraw() {
 	rpInfo.pClearValues = &clearValue;
 
 	vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	//if(res == 0)
+		return true;
+	//return false;
 }
 
 void GraphicsManager::draw(uint count) {
@@ -375,8 +390,13 @@ void GraphicsManager::endDraw() {
 	//submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
 	res = vkQueueSubmit((VkQueue)vk_graphicsQueue, 1, (VkSubmitInfo*)&submit, (VkFence)vk_renderFence);
-	THROW_VK_EX_IF_BAD(res);
 
+	if (res == VK_ERROR_OUT_OF_DATE_KHR) {
+	    recreateSwapChain();
+	    return;
+	} else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+	    THROW_VK_EX(res);
+	}
 	// this will put the image we just rendered into the visible window.
 	// we want to wait on the _renderSemaphore for that,
 	// as it's necessary that drawing commands have finished before the image is displayed to the user
@@ -393,7 +413,13 @@ void GraphicsManager::endDraw() {
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
 	res = vkQueuePresentKHR((VkQueue)vk_graphicsQueue, (VkPresentInfoKHR*)&presentInfo);
-	THROW_VK_EX_IF_BAD(res);
+
+	if (res == VK_ERROR_OUT_OF_DATE_KHR) {
+	    recreateSwapChain();
+	    return;
+	} else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
+	    THROW_VK_EX(res);
+	}
 
 	//increase the number of frames drawn
 	frameNumber++;
