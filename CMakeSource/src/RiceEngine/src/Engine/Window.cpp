@@ -28,6 +28,8 @@ bool Window::create(DescWindow desc) {
 			desc.height,
 			SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
 
+	SDL_SetWindowMinimumSize(handle.get(), 64, 64);
+
 	if(handle.isNull()) {
 		Log::log(Log::Error, "Could not create SDL window: {}\n", String(SDL_GetError()));
 		THROW_NULL_PTR_EXCEPTION(handle.get());
@@ -103,6 +105,10 @@ bool Window::isResize() const {
 	int w,h;
 	SDL_GetWindowSize(handle.get(), &w, &h);
 	return w != desc.width || h != desc.height;
+}
+
+bool Window::isMinimized() const {
+	return SDL_GetWindowFlags(handle.get()) & SDL_WINDOW_MINIMIZED;
 }
 
 void Window::updateWindowState() {

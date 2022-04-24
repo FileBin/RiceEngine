@@ -5,7 +5,7 @@
 NSP_GL_BEGIN
 
 Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {
-	on_resize_uuid = graphics_mgr->resizeEvent.subscribe([this](pWindow win){ onResize(win); }); // @suppress("Invalid arguments")
+	on_resize_uuid = graphics_mgr->resizeEvent.subscribe([this](vk::Extent2D win){ onResize(win); }); // @suppress("Invalid arguments")
 }
 Shader::~Shader() { cleanup(); }
 
@@ -57,7 +57,7 @@ void Shader::loadShader(String path, Type type) {
 	}
 }
 
-void Shader::buildPipeline(Vector2i size) {
+void Shader::buildPipeline(vk::Extent2D extent) {
 	using help = VulkanHelper;
 
 	//build the pipeline layout that controls the inputs/outputs of the shader
@@ -90,13 +90,13 @@ void Shader::buildPipeline(Vector2i size) {
 	//build viewport and scissor from the swapchain extents
 	pipelineBuilder.vk_viewport.x = 0.0f;
 	pipelineBuilder.vk_viewport.y = 0.0f;
-	pipelineBuilder.vk_viewport.width = (float)size.x;
-	pipelineBuilder.vk_viewport.height = (float)size.y;
+	pipelineBuilder.vk_viewport.width = (float)extent.width;
+	pipelineBuilder.vk_viewport.height = (float)extent.height;
 	pipelineBuilder.vk_viewport.minDepth = 0.0f;
 	pipelineBuilder.vk_viewport.maxDepth = 1.0f;
 
 	pipelineBuilder.vk_scissor.offset = vk::Offset2D(0, 0);
-	pipelineBuilder.vk_scissor.extent = vk::Extent2D(size.x, size.y);
+	pipelineBuilder.vk_scissor.extent = extent;
 
 	//configure the rasterizer to draw filled triangles
 	pipelineBuilder.vk_rasterizer = help::rasterization_state_create_info();
@@ -115,9 +115,9 @@ void Shader::buildPipeline(Vector2i size) {
 	init = true;
 }
 
-void Shader::onResize(pWindow sender) {
+void Shader::onResize(vk::Extent2D extent) {
 	cleanupPipeline();
-	buildPipeline(sender->getSize());
+	buildPipeline(extent);
 }
 
 void Shader::setActive() {

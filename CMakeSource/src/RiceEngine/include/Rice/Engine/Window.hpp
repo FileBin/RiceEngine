@@ -23,7 +23,7 @@ struct DescWindow {
 
 class Window : public ICleanable {
 public:
-	typedef Event<void, pWindow> ResizeEvent;
+	typedef Event<pWindow> ResizeEvent;
 
 	Window();
 	~Window() {	cleanup(); }
@@ -50,9 +50,10 @@ public:
 	bool isExit() const { return is_exit; }
 	bool isActive() const { return is_active; }
 	bool isResize() const;
+	bool isMinimized() const;
+	void updateWindowState();
 
 private:
-	void updateWindowState();
 	void handleEvent(SDL_Event& e);
 	void handleWindowEvent(SDL_WindowEvent& e);
 

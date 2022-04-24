@@ -39,9 +39,10 @@
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
-#ifdef WIN32
+#include <magic_enum/magic_enum.hpp>
+
 #define SDL_MAIN_HANDLED
-#endif
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 

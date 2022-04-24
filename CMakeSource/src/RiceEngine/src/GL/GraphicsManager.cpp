@@ -85,7 +85,7 @@ void GraphicsManager::init(pWindow _window) {
 	init_framebuffers();
 	init_sync_structures();
 
-	register_events();
+	//register_events();
 
 	is_initialized = true;
 
@@ -95,7 +95,7 @@ void GraphicsManager::init(pWindow _window) {
 
 void GraphicsManager::init_swapchain() {
 	Log::debug("Swapchain building...");
-	vkb::SwapchainBuilder swapchainBuilder {vk_GPU,vk_device, vk_surface};
+	vkb::SwapchainBuilder swapchainBuilder {vk_GPU, vk_device, vk_surface};
 
 	if(use_hdr) {
 		swapchainBuilder.set_desired_format(
@@ -106,18 +106,31 @@ void GraphicsManager::init_swapchain() {
 		swapchainBuilder.use_default_format_selection();
 	}
 
-	vkb::Swapchain vkbSwapchain = swapchainBuilder
-	.set_desired_present_mode((VkPresentModeKHR)vk::PresentModeKHR::eFifo) //use v-sync present mode
-	.set_desired_extent(window->getWidth(), window->getHeight())
-	.build()
-	.value();
+	uint w,h;
+	w = window->getWidth();
+	h = window->getHeight();
 
-	//store swapchain and its related images
-	vk_swapchain = vkbSwapchain.swapchain;
-	vk_swapchainImages = (vec<vk::Image>&)vkbSwapchain.get_images().value();
-	vk_swapchainImageViews = (vec<vk::ImageView>&)vkbSwapchain.get_image_views().value();
+	if(w >= 64 && h >= 64) {
+		for (size_t i = 0; i < vk_swapchainImageViews.size(); i++) {
+			vk_device.destroy(vk_swapchainImageViews[i]);
+		}
 
-	vk_swapchainImageFormat = (vk::Format&)vkbSwapchain.image_format;
+		windowExcent.width = w;
+		windowExcent.height = h;
+		vkb::Swapchain vkbSwapchain = swapchainBuilder
+		.set_desired_present_mode((VkPresentModeKHR)vk::PresentModeKHR::eFifo) //use v-sync present mode
+		//.set_desired_extent(windowExcent.width, windowExcent.height)
+		.set_old_swapchain((VkSwapchainKHR) vk_swapchain)
+		.build()
+		.value();
+
+		//store swapchain and its related images
+		vk_swapchain = vkbSwapchain.swapchain;
+		vk_swapchainImages = (vec<vk::Image>&)vkbSwapchain.get_images().value();
+		vk_swapchainImageViews = (vec<vk::ImageView>&)vkbSwapchain.get_image_views().value();
+
+		vk_swapchainImageFormat = (vk::Format&)vkbSwapchain.image_format;
+	}
 	Log::debug("Swapchain built!");
 }
 
@@ -126,14 +139,15 @@ void GraphicsManager::init_commands() {
 	//we also want the pool to allow for resetting of individual command buffers
 	auto commandPoolInfo = VulkanHelper::command_pool_create_info(vk_graphicsQueueFamily, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
-	vk::Result res = (vk::Result)vkCreateCommandPool(vk_device, (VkCommandPoolCreateInfo*)&commandPoolInfo, nullptr, (VkCommandPool*)&vk_commandPool);
-	THROW_VK_EX_IF_BAD(res);
+	vk_commandPool = vk_device.createCommandPool(commandPoolInfo);
 
 	//allocate the default command buffer that we will use for rendering
 	auto cmdAllocInfo = VulkanHelper::command_buffer_allocate_info(vk_commandPool);
 
-	res = (vk::Result)vkAllocateCommandBuffers(vk_device, (VkCommandBufferAllocateInfo*)&cmdAllocInfo, (VkCommandBuffer*)&vk_mainCommandBuffer);
-	THROW_VK_EX_IF_BAD(res);
+
+	vk_mainCommandBuffer = vk_device.allocateCommandBuffers(cmdAllocInfo)[0];
+	//res = (vk::Result)vkAllocateCommandBuffers(vk_device, (VkCommandBufferAllocateInfo*)&cmdAllocInfo, (VkCommandBuffer*)&vk_mainCommandBuffer);
+	//THROW_VK_EX_IF_BAD(res);
 }
 
 void GraphicsManager::init_def_renderpass(){
@@ -156,41 +170,38 @@ void GraphicsManager::init_def_renderpass(){
 	//after the renderpass ends, the image has to be on a layout ready for display
 	color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
-	VkAttachmentReference color_attachment_ref = {};
+	vk::AttachmentReference color_attachment_ref = {};
 	//attachment number will index into the pAttachments array in the parent renderpass itself
 	color_attachment_ref.attachment = 0;
-	color_attachment_ref.layout = (VkImageLayout)vk::ImageLayout::eColorAttachmentOptimal;
+	color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
 
 	//we are going to create 1 subpass, which is the minimum you can do
 	vk::SubpassDescription subpass = {};
 	subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
 	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = (vk::AttachmentReference*)&color_attachment_ref;
+	subpass.pColorAttachments = &color_attachment_ref;
 
-	VkRenderPassCreateInfo render_pass_info = {};
-	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	vk::RenderPassCreateInfo render_pass_info = {};
 
 	//connect the color attachment to the info
 	render_pass_info.attachmentCount = 1;
-	render_pass_info.pAttachments = (VkAttachmentDescription*)&color_attachment;
+	render_pass_info.pAttachments = &color_attachment;
 	//connect the subpass to the info
 	render_pass_info.subpassCount = 1;
-	render_pass_info.pSubpasses = (VkSubpassDescription*)&subpass;
+	render_pass_info.pSubpasses = &subpass;
 
-	auto res = vkCreateRenderPass(vk_device, &render_pass_info, nullptr, (VkRenderPass*)&vk_def_renderPass);
+	auto res = vk_device.createRenderPass(&render_pass_info, nullptr, &vk_def_renderPass);
 	THROW_VK_EX_IF_BAD(res);
 }
 
 void GraphicsManager::init_framebuffers() {
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for rendering
 	vk::FramebufferCreateInfo fb_info = {};
-	fb_info.sType = vk::StructureType::eFramebufferCreateInfo;
-	fb_info.pNext = nullptr;
 
 	fb_info.renderPass = vk_def_renderPass;
 	fb_info.attachmentCount = 1;
-	fb_info.width = window->getWidth();
-	fb_info.height = window->getHeight();
+	fb_info.width = windowExcent.width;
+	fb_info.height = windowExcent.height;
 	fb_info.layers = 1;
 
 	//grab how many images we have in the swapchain
@@ -200,106 +211,84 @@ void GraphicsManager::init_framebuffers() {
 	//create framebuffers for each of the swapchain image views
 	for (int i = 0; i < swapchain_imagecount; i++) {
 		fb_info.pAttachments = &vk_swapchainImageViews[i];
-		auto res = vkCreateFramebuffer((VkDevice)vk_device, (VkFramebufferCreateInfo*)&fb_info,
-				nullptr, (VkFramebuffer*)&vk_framebuffers[i]);
-		THROW_VK_EX_IF_BAD(res);
+		vk_framebuffers[i] = vk_device.createFramebuffer(fb_info);
 	}
 }
 
 void GraphicsManager::init_sync_structures() {
 	//create synchronization structures
 	vk::FenceCreateInfo fenceCreateInfo = {};
-	fenceCreateInfo.sType = vk::StructureType::eFenceCreateInfo;
-	fenceCreateInfo.pNext = nullptr;
 
 	//we want to create the fence with the Create Signaled flag, so we can wait on it before using it on a GPU command (for the first frame)
 	fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
 
-	auto res = vkCreateFence((VkDevice)vk_device, (VkFenceCreateInfo*)&fenceCreateInfo, nullptr, (VkFence*)&vk_renderFence);
-	THROW_VK_EX_IF_BAD(res);
+	vk_renderFence = vk_device.createFence(fenceCreateInfo);
 
 	//for the semaphores we don't need any flags
 	vk::SemaphoreCreateInfo semaphoreCreateInfo = {};
-	semaphoreCreateInfo.sType = vk::StructureType::eSemaphoreCreateInfo;
-	semaphoreCreateInfo.pNext = nullptr;
 	semaphoreCreateInfo.flags = vk::SemaphoreCreateFlags();
 
-	res = vkCreateSemaphore(vk_device,
-			(VkSemaphoreCreateInfo*)&semaphoreCreateInfo, nullptr,
-			(VkSemaphore*)&vk_presentSemaphore);
-	THROW_VK_EX_IF_BAD(res);
-
-	res = vkCreateSemaphore(vk_device,
-			(VkSemaphoreCreateInfo*)&semaphoreCreateInfo, nullptr,
-			(VkSemaphore*)&vk_renderSemaphore);
-	THROW_VK_EX_IF_BAD(res);
-}
-
-void GraphicsManager::register_events() {
-	on_resize_uuid = window->resize_event.subscribe([this](pWindow sender){ onResize(sender); }); // @suppress("Invalid arguments")
-}
-
-void GraphicsManager::onResize(pWindow win) {
-	recreateSwapChain();
+	vk_presentSemaphore = vk_device.createSemaphore(semaphoreCreateInfo);
+	vk_renderSemaphore = vk_device.createSemaphore(semaphoreCreateInfo);
 }
 
 void GraphicsManager::recreateSwapChain() {
-	auto res = vkDeviceWaitIdle(vk_device);
-	THROW_VK_EX_IF_BAD(res);
-	cleanupSwapChain();
+	if(window->isMinimized()) {
+		Log::debug("Window is minimized!");
+		return;
+	}
+	Log::debug("Swapchain recreating...");
+	vk_device.waitIdle();
+	cleanupSwapChain(false);
 
 	init_swapchain();
 	init_def_renderpass();
 	init_framebuffers();
+	resizeEvent.invoke(windowExcent);
 }
 
-void GraphicsManager::cleanupSwapChain() {
+void GraphicsManager::cleanupSwapChain(bool destroy) {
 	for (size_t i = 0; i < vk_framebuffers.size(); i++) {
-		vkDestroyFramebuffer(vk_device, vk_framebuffers[i], nullptr);
+		vk_device.destroy(vk_framebuffers[i]);
 	}
 
-	resizeEvent.invoke(window);
+	vk_device.destroy(vk_def_renderPass);
 
-	vkDestroyRenderPass(vk_device, vk_def_renderPass, nullptr);
+	if(destroy) {
+		for (size_t i = 0; i < vk_swapchainImages.size(); i++) {
+			vk_device.destroy(vk_swapchainImageViews[i]);
+		}
 
-	for (size_t i = 0; i < vk_swapchainImages.size(); i++) {
-		vkDestroyImageView(vk_device, vk_swapchainImageViews[i], nullptr);
-		//vkDestroyImage(vk_device, vk_swapchainImages[i], nullptr);
+		vk_swapchainImageViews.clear();
+
+		vk_device.destroy(vk_swapchain);
 	}
-
-	vk_swapchainImageViews.clear();
-	//vk_swapchainImages.clear();
-
-	vkDestroySwapchainKHR(vk_device, vk_swapchain, nullptr);
 }
 
 bool GraphicsManager::beginDraw() {
-	if(window->isResize())
-		return false;
 	if(isDrawing) return false;
 	isDrawing = true;
-	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
-	int res = vkWaitForFences(vk_device, 1, (VkFence*)&vk_renderFence, true, 1000000000);
+	//wait until the GPU has finished rendering the last frame. Timeout of 0.1 second (fast)
+	auto res = vk_device.waitForFences({ vk_renderFence }, true, 100000000);
+	if(res == vk::Result::eTimeout && !window->isMinimized()) {
+		//wait until the GPU has finished rendering the last frame. Timeout of 1 second (slow)
+		res = vk_device.waitForFences({ vk_renderFence }, true, 1000000000);
+	}
 	THROW_VK_EX_IF_BAD(res);
-	//if(res != 0) return false;
 
-	res = vkResetFences(vk_device, 1, (VkFence*)&vk_renderFence);
+	vk_device.resetFences({ vk_renderFence });
+
+	vk_mainCommandBuffer.reset();
+
+	//request image from the swapchain, 1 second timeout
+	res = vk_device.acquireNextImageKHR(vk_swapchain, 1000000000, vk_presentSemaphore, nullptr, &swapchainImageIndex); // @suppress("Ambiguous problem")
+	if(res == vk::Result::eErrorOutOfDateKHR) {
+		recreateSwapChain();
+		isDrawing = false;
+		return false;
+	}
 	THROW_VK_EX_IF_BAD(res);
-	//if(res != 0) return false;
 
-
-	//request image from the swapchain, one second timeout
-	res = vkAcquireNextImageKHR(vk_device, vk_swapchain, 1000000000, vk_presentSemaphore, nullptr, &swapchainImageIndex);
-	THROW_VK_EX_IF_BAD(res);
-	//if(res != 0) return false;
-
-	res = vkResetCommandBuffer(vk_mainCommandBuffer, 0);
-	THROW_VK_EX_IF_BAD(res);
-	//if(res != 0) return false;
-
-
-	//naming it cmd for shorter writing
-	vk::CommandBuffer cmd = vk_mainCommandBuffer;
 
 	//begin the command buffer recording. We will use this command buffer exactly once, so we want to let Vulkan know that
 	vk::CommandBufferBeginInfo cmdBeginInfo = {};
@@ -309,30 +298,27 @@ bool GraphicsManager::beginDraw() {
 	cmdBeginInfo.pInheritanceInfo = nullptr;
 	cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 
-	res = vkBeginCommandBuffer(cmd, (VkCommandBufferBeginInfo*)&cmdBeginInfo);
-	THROW_VK_EX_IF_BAD(res);
-	//if(res != 0) return false;
+	vk_mainCommandBuffer.begin(cmdBeginInfo);
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
-	VkClearValue clearValue;
+	vk::ClearValue clearValue;
 	Vector3f flash =
 			{
-					abs(sin(frameNumber / 101.f)), // @suppress("Invalid arguments")
-					abs(sin(frameNumber / 79.f)), // @suppress("Invalid arguments")
-					abs(sin(frameNumber / 93.f)), // @suppress("Invalid arguments")
+					abs(sin(frameNumber / 51.f)), // @suppress("Invalid arguments")
+					abs(sin(frameNumber / 43.f)), // @suppress("Invalid arguments")
+					abs(sin(frameNumber / 13.f)), // @suppress("Invalid arguments")
 			};
-	clearValue.color = { { flash.x, flash.y, flash.z, 1.0f } };
+	clearValue.color.float32[0] = flash.x;
+	clearValue.color.float32[1] = flash.y;
+	clearValue.color.float32[2] = flash.z;
+	clearValue.color.float32[3] = 1.f;
 
 	//start the main renderpass.
 	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
-	VkRenderPassBeginInfo rpInfo = {};
-	rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	rpInfo.pNext = nullptr;
+	vk::RenderPassBeginInfo rpInfo = {};
 
-	VkExtent2D windowExcent;
-
-	windowExcent.height = window->getHeight();
-	windowExcent.width = window->getWidth();
+	//windowExcent.width = window->getWidth();
+	//windowExcent.height = window->getHeight();
 
 	rpInfo.renderPass = vk_def_renderPass;
 	rpInfo.renderArea.offset.x = 0;
@@ -344,27 +330,24 @@ bool GraphicsManager::beginDraw() {
 	rpInfo.clearValueCount = 1;
 	rpInfo.pClearValues = &clearValue;
 
-	vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vk_mainCommandBuffer.beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
 
-	//if(res == 0)
-		return true;
-	//return false;
+	return true;
 }
 
 void GraphicsManager::draw(uint count) {
-	vkCmdDraw(vk_mainCommandBuffer, count, 1, 0, 0);
+	vk_mainCommandBuffer.draw(count, 1, 0, 0);
 }
 
 void GraphicsManager::endDraw() {
 	if(!isDrawing) return;
-	isDrawing = false;
-	vk::CommandBuffer cmd = vk_mainCommandBuffer;
-	//finalize the render pass
-	vkCmdEndRenderPass(cmd);
-	//finalize the command buffer (we can no longer add commands, but it can now be executed)
-	auto res = vkEndCommandBuffer(cmd);
-	THROW_VK_EX_IF_BAD(res);
 
+	//finalize the render pass
+	vk_mainCommandBuffer.endRenderPass();
+	//finalize the command buffer (we can no longer add commands, but it can now be executed)
+	vk_mainCommandBuffer.end();
+
+	isDrawing = false;
 
 	//prepare the submission to the queue.
 	//we want to wait on the _presentSemaphore, as that semaphore is signaled when the swapchain is ready
@@ -385,11 +368,11 @@ void GraphicsManager::endDraw() {
 	submit.pSignalSemaphores = &vk_renderSemaphore;
 
 	submit.commandBufferCount = 1;
-	submit.pCommandBuffers = &cmd;
+	submit.pCommandBuffers = &vk_mainCommandBuffer;
 
 	//submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
-	res = vkQueueSubmit((VkQueue)vk_graphicsQueue, 1, (VkSubmitInfo*)&submit, (VkFence)vk_renderFence);
+	auto res = vkQueueSubmit((VkQueue)vk_graphicsQueue, 1, (VkSubmitInfo*)&submit, (VkFence)vk_renderFence);
 
 	if (res == VK_ERROR_OUT_OF_DATE_KHR) {
 	    recreateSwapChain();
@@ -429,13 +412,19 @@ void GraphicsManager::endDraw() {
 
 //FINALIZER
 void GraphicsManager::cleanup() {
-	window->resize_event.unsubscribe(on_resize_uuid);
 	if(is_initialized) {
+		vk_device.waitIdle();
 		Log::debug("Graphics manager cleanup...");
 
-		vkDestroyCommandPool(vk_device, vk_commandPool, nullptr);
-
 		cleanupSwapChain();
+
+		destroyEvent.invoke();
+
+		vk_device.destroy(vk_presentSemaphore);
+		vk_device.destroy(vk_renderSemaphore);
+		vk_device.destroy(vk_renderFence);
+
+		vk_device.destroy(vk_commandPool);
 
 		vkDestroyDevice(vk_device, nullptr);
 		vk_device = nullptr;
@@ -446,7 +435,7 @@ void GraphicsManager::cleanup() {
 		vkb::destroy_debug_utils_messenger(vk_instance, vk_debug_messenger);
 		vk_debug_messenger = nullptr;
 
-		vkDestroyInstance(vk_instance, nullptr);
+		vk_instance.destroy();
 		vk_instance = nullptr;
 	}
 	is_initialized = false;

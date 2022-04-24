@@ -39,7 +39,7 @@ private:
 
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
-		test_shader->buildPipeline(win.getSize());
+		test_shader->buildPipeline(vk::Extent2D(win.getWidth(), win.getHeight()));
 
 		while(win.update())
 			loop();
@@ -51,8 +51,6 @@ private:
 				test_shader->setActive();
 				g_mgr.draw(3);
 				g_mgr.endDraw();
-			} else {
-				Log::debug("Frame skipped!");
 			}
 		} else {
 			Log::debug("Frame skipped! window resize!");

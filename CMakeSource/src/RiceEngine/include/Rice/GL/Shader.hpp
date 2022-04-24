@@ -22,7 +22,7 @@ public:
 
 	void loadShader(String path, Type shaderType);
 
-	void buildPipeline(Vector2i windowSize);
+	void buildPipeline(vk::Extent2D windowSize);
 
 	void setActive();
 private:
@@ -30,12 +30,12 @@ private:
 	vk::Pipeline pipeline;
 	vk::PipelineLayout layout;
 
-	Window::ResizeEvent::UUID on_resize_uuid;
+	GraphicsManager::ResizeEvent::UUID on_resize_uuid;
 
 	bool init = false;
 	bool uses_depth_buffer = false;
 
-	void onResize(pWindow sender);
+	void onResize(vk::Extent2D sender);
 	void cleanupPipeline();
 	void cleanupShaders();
 };

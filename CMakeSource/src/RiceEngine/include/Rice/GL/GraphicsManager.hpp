@@ -7,12 +7,14 @@ NSP_GL_END
 
 #include "VulkanHelper.hpp"
 #include "../Engine/Window.hpp"
-#include "GraphicsComponentBase.hpp"
 
 
 NSP_GL_BEGIN
 
 class GraphicsManager : public ICleanable {
+public:
+	typedef Event<> DestroyEvent;
+	typedef Event<vk::Extent2D> ResizeEvent;
 private:
 	friend class GraphicsComponentBase;
 	bool is_initialized = false;
@@ -44,9 +46,9 @@ private:
 	uint frameNumber = 0;
 	uint swapchainImageIndex = 0;
 
-	pWindow window;
+	vk::Extent2D windowExcent;
 
-	Window::ResizeEvent::UUID on_resize_uuid;
+	pWindow window;
 
 	bool isDrawing = false;
 
@@ -57,7 +59,8 @@ private:
     		false;
 #endif
 public:
-    Window::ResizeEvent resizeEvent;
+    ResizeEvent resizeEvent;
+    DestroyEvent destroyEvent;
 
 	GraphicsManager() = default;
 	~GraphicsManager() override { cleanup(); }
@@ -78,11 +81,7 @@ private:
 	void init_framebuffers();
 	void init_sync_structures();
 
-	void register_events();
-
-
-	void onResize(pWindow sender);
-	void cleanupSwapChain();
+	void cleanupSwapChain(bool destroy = true);
 	void recreateSwapChain();
 };
 
