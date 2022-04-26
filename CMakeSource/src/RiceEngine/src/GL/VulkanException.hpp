@@ -1,5 +1,3 @@
-#include "Exception.hpp"
-
 #define THROW_VK_EX(res) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
 
 

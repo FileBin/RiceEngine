@@ -9,6 +9,9 @@ NSP_GL_END
 #include "GraphicsManager.hpp"
 #include "GraphicsComponentBase.hpp"
 
+struct Shader_API_Data;
+typedef SmartPtr<Shader_API_Data> pShader_API_Data;
+
 NSP_GL_BEGIN
 class Shader : public GraphicsComponentBase {
 public:
@@ -22,20 +25,18 @@ public:
 
 	void loadShader(String path, Type shaderType);
 
-	void buildPipeline(vk::Extent2D windowSize);
+	void buildPipeline(Vector2i windowSize);
 
 	void setActive();
 private:
-	vk::ShaderModule vertexShader, fragmentShader, geometryShader;
-	vk::Pipeline pipeline;
-	vk::PipelineLayout layout;
+	pShader_API_Data api_data;
 
 	GraphicsManager::ResizeEvent::UUID on_resize_uuid;
 
 	bool init = false;
 	bool uses_depth_buffer = false;
 
-	void onResize(vk::Extent2D sender);
+	void onResize(Vector2i windowSize);
 	void cleanupPipeline();
 	void cleanupShaders();
 };

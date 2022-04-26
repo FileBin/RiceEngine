@@ -5,9 +5,14 @@
  *      Author: FileBinsLapTop
  */
 
-#include "../stdafx.hpp"
+#include <Rice/stdafx.hpp>
+
+#include <vulkan/vulkan.hpp>
+#include <VkBootstrap.h>
 
 #pragma once
+#include "VulkanException.hpp"
+#include "VulkanAPI_data.hpp"
 NSP_GL_BEGIN
 
 #define TO_VK_BOOL(b) ((b) ? VK_TRUE : VK_FALSE)

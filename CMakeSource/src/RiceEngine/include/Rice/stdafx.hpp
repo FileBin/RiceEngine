@@ -46,9 +46,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
-#include <VkBootstrap.h>
-
-#include <vulkan/vulkan.hpp>
+//#include <vulkan/vulkan.hpp>
 
 #include "namespaces.h"
 #include "macros.h"

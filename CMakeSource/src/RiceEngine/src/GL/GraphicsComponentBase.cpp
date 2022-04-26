@@ -12,8 +12,6 @@
 
 NSP_GL_BEGIN
 
-vk::Device& GraphicsComponentBase::getDevice() { return graphics_mgr->vk_device; }
-vk::RenderPass& GraphicsComponentBase::getDefRenderPass() { return graphics_mgr->vk_def_renderPass; }
-vk::CommandBuffer& GraphicsComponentBase::getMainCommandBuffer() { return graphics_mgr->vk_mainCommandBuffer; }
+API_Data& GraphicsComponentBase::get_api_data() { return *graphics_mgr->api_data; }
 
 NSP_GL_END

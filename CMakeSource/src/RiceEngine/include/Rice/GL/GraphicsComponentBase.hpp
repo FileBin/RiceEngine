@@ -16,6 +16,7 @@ NSP_GL_END
 
 #pragma once
 #include "GraphicsManager.hpp"
+#include "API_Data.hpp"
 
 NSP_GL_BEGIN
 
@@ -25,9 +26,7 @@ protected:
 
 	GraphicsManager::DestroyEvent::UUID destroy_uuid;
 
-	vk::Device& getDevice();
-	vk::RenderPass& getDefRenderPass();
-	vk::CommandBuffer& getMainCommandBuffer();
+	API_Data& get_api_data();
 public:
 	GraphicsComponentBase(pGraphicsManager g_mgr) :
 		graphics_mgr(g_mgr)

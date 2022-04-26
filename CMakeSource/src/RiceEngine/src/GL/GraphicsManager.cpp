@@ -2,16 +2,20 @@
 #include <Rice/GL/GraphicsManager.hpp>
 
 #include <Rice/Engine/Log.hpp>
-#include <Rice/GL/VulkanHelper.hpp>
 #include <Rice/Math.hpp>
 
 #include <Rice/GL/Shader.hpp>
+
+#include "VulkanHelper.hpp"
+
+#include "VulkanAPI_data.hpp"
 
 NSP_GL_BEGIN
 
 void GraphicsManager::init(pWindow _window) {
 	Log::debug("GraphicsManager initializing...");
 	window = _window;
+	api_data = new API_Data();
 
 	vkb::InstanceBuilder builder;
 
@@ -32,18 +36,18 @@ void GraphicsManager::init(pWindow _window) {
 	vkb::Instance vkb_inst = inst_ret.value();
 
 	//store the instance
-	vk_instance = vkb_inst.instance;
+	api_data->instance = vkb_inst.instance;
 
 	//store the debug messenger
 #ifdef _DEBUG
-	vk_debug_messenger = vkb_inst.debug_messenger;
+	api_data->debug_messenger = vkb_inst.debug_messenger;
 #endif
 
-	if(!SDL_Vulkan_CreateSurface(window->getHandle().get(), vk_instance, (VkSurfaceKHR*)&vk_surface)){
+	if(!SDL_Vulkan_CreateSurface(window->getHandle().get(), api_data->instance, (VkSurfaceKHR*)&api_data->surface)){
 		THROW_EXCEPTION("Failed to create vulkan surface! (Maybe window is not created)");
 	}
 
-	if(!vk_surface) THROW_NULL_PTR_EXCEPTION(nullptr);
+	if(!api_data->surface) THROW_NULL_PTR_EXCEPTION(nullptr);
 
 	//use vkbootstrap to select a GPU.
 	//We want a GPU that can write to the SDL surface and supports Vulkan 1.1
@@ -51,7 +55,7 @@ void GraphicsManager::init(pWindow _window) {
 
 	auto dev_result = selector
 			.set_minimum_version(1, 1)
-			.set_surface(vk_surface)
+			.set_surface(api_data->surface)
 			.prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
 			.select();
 
@@ -70,14 +74,14 @@ void GraphicsManager::init(pWindow _window) {
 	vkb::Device vkbDevice = deviceBuilder.build().value();
 
 	// Get the VkDevice handle used in the rest of a Vulkan application
-	vk_device = vkbDevice.device;
+	api_data->device = vkbDevice.device;
 
-	vk_GPU = physicalDevice.physical_device;
-	Log::log(Log::Info, "GPU INFO: {}", String(vk_GPU.getProperties().deviceName.data()));
+	api_data->GPU = physicalDevice.physical_device;
+	Log::log(Log::Info, "GPU INFO: {}", String(api_data->GPU.getProperties().deviceName.data()));
 
 	// use vkbootstrap to get a Graphics queue
-	vk_graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
-	vk_graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+	api_data->graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+	api_data->graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 
 	init_swapchain();
 	init_commands();
@@ -95,7 +99,7 @@ void GraphicsManager::init(pWindow _window) {
 
 void GraphicsManager::init_swapchain() {
 	Log::debug("Swapchain building...");
-	vkb::SwapchainBuilder swapchainBuilder {vk_GPU, vk_device, vk_surface};
+	vkb::SwapchainBuilder swapchainBuilder {api_data->GPU, api_data->device, api_data->surface};
 
 	if(use_hdr) {
 		swapchainBuilder.set_desired_format(
@@ -111,25 +115,25 @@ void GraphicsManager::init_swapchain() {
 	h = window->getHeight();
 
 	if(w >= 64 && h >= 64) {
-		for (size_t i = 0; i < vk_swapchainImageViews.size(); i++) {
-			vk_device.destroy(vk_swapchainImageViews[i]);
+		for (size_t i = 0; i < api_data->swapchainImageViews.size(); i++) {
+			api_data->device.destroy(api_data->swapchainImageViews[i]);
 		}
 
-		windowExcent.width = w;
-		windowExcent.height = h;
+		api_data->windowExcent.width = w;
+		api_data->windowExcent.height = h;
 		vkb::Swapchain vkbSwapchain = swapchainBuilder
 		.set_desired_present_mode((VkPresentModeKHR)vk::PresentModeKHR::eFifo) //use v-sync present mode
 		//.set_desired_extent(windowExcent.width, windowExcent.height)
-		.set_old_swapchain((VkSwapchainKHR) vk_swapchain)
+		.set_old_swapchain((VkSwapchainKHR) api_data->swapchain)
 		.build()
 		.value();
 
 		//store swapchain and its related images
-		vk_swapchain = vkbSwapchain.swapchain;
-		vk_swapchainImages = (vec<vk::Image>&)vkbSwapchain.get_images().value();
-		vk_swapchainImageViews = (vec<vk::ImageView>&)vkbSwapchain.get_image_views().value();
+		api_data->swapchain = vkbSwapchain.swapchain;
+		api_data->swapchainImages = (vec<vk::Image>&)vkbSwapchain.get_images().value();
+		api_data->swapchainImageViews = (vec<vk::ImageView>&)vkbSwapchain.get_image_views().value();
 
-		vk_swapchainImageFormat = (vk::Format&)vkbSwapchain.image_format;
+		api_data->swapchainImageFormat = (vk::Format&)vkbSwapchain.image_format;
 	}
 	Log::debug("Swapchain built!");
 }
@@ -137,23 +141,23 @@ void GraphicsManager::init_swapchain() {
 void GraphicsManager::init_commands() {
 	//create a command pool for commands submitted to the graphics queue.
 	//we also want the pool to allow for resetting of individual command buffers
-	auto commandPoolInfo = VulkanHelper::command_pool_create_info(vk_graphicsQueueFamily, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+	auto commandPoolInfo = VulkanHelper::command_pool_create_info(api_data->graphicsQueueFamily, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
-	vk_commandPool = vk_device.createCommandPool(commandPoolInfo);
+	api_data->commandPool = api_data->device.createCommandPool(commandPoolInfo);
 
 	//allocate the default command buffer that we will use for rendering
-	auto cmdAllocInfo = VulkanHelper::command_buffer_allocate_info(vk_commandPool);
+	auto cmdAllocInfo = VulkanHelper::command_buffer_allocate_info(api_data->commandPool);
 
 
-	vk_mainCommandBuffer = vk_device.allocateCommandBuffers(cmdAllocInfo)[0];
-	//res = (vk::Result)vkAllocateCommandBuffers(vk_device, (VkCommandBufferAllocateInfo*)&cmdAllocInfo, (VkCommandBuffer*)&vk_mainCommandBuffer);
-	//THROW_VK_EX_IF_BAD(res);
+	api_data->mainCommandBuffer = api_data->device.allocateCommandBuffers(cmdAllocInfo)[0];
+	//res = (vk::Result)vkAllocateCommandBuffers(api_data->device, (VkCommandBufferAllocateInfo*)&cmdAllocInfo, (VkCommandBuffer*)&api_data->mainCommandBuffer);
+	//THROW_api_data->EX_IF_BAD(res);
 }
 
 void GraphicsManager::init_def_renderpass(){
 	vk::AttachmentDescription color_attachment;
 	//the attachment will have the format needed by the swapchain
-	color_attachment.format = vk_swapchainImageFormat;
+	color_attachment.format = api_data->swapchainImageFormat;
 	//1 sample, we won't be doing MSAA
 	color_attachment.samples = vk::SampleCountFlagBits::e1;
 	// we Clear when this attachment is loaded
@@ -190,7 +194,7 @@ void GraphicsManager::init_def_renderpass(){
 	render_pass_info.subpassCount = 1;
 	render_pass_info.pSubpasses = &subpass;
 
-	auto res = vk_device.createRenderPass(&render_pass_info, nullptr, &vk_def_renderPass);
+	auto res = api_data->device.createRenderPass(&render_pass_info, nullptr, &api_data->def_renderPass);
 	THROW_VK_EX_IF_BAD(res);
 }
 
@@ -198,20 +202,20 @@ void GraphicsManager::init_framebuffers() {
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for rendering
 	vk::FramebufferCreateInfo fb_info = {};
 
-	fb_info.renderPass = vk_def_renderPass;
+	fb_info.renderPass = api_data->def_renderPass;
 	fb_info.attachmentCount = 1;
-	fb_info.width = windowExcent.width;
-	fb_info.height = windowExcent.height;
+	fb_info.width = api_data->windowExcent.width;
+	fb_info.height = api_data->windowExcent.height;
 	fb_info.layers = 1;
 
 	//grab how many images we have in the swapchain
-	const uint32_t swapchain_imagecount = vk_swapchainImages.size();
-	vk_framebuffers = vec<vk::Framebuffer>(swapchain_imagecount);
+	const uint32_t swapchain_imagecount = api_data->swapchainImages.size();
+	api_data->framebuffers = vec<vk::Framebuffer>(swapchain_imagecount);
 
 	//create framebuffers for each of the swapchain image views
 	for (int i = 0; i < swapchain_imagecount; i++) {
-		fb_info.pAttachments = &vk_swapchainImageViews[i];
-		vk_framebuffers[i] = vk_device.createFramebuffer(fb_info);
+		fb_info.pAttachments = &api_data->swapchainImageViews[i];
+		api_data->framebuffers[i] = api_data->device.createFramebuffer(fb_info);
 	}
 }
 
@@ -222,14 +226,14 @@ void GraphicsManager::init_sync_structures() {
 	//we want to create the fence with the Create Signaled flag, so we can wait on it before using it on a GPU command (for the first frame)
 	fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
 
-	vk_renderFence = vk_device.createFence(fenceCreateInfo);
+	api_data->renderFence = api_data->device.createFence(fenceCreateInfo);
 
 	//for the semaphores we don't need any flags
 	vk::SemaphoreCreateInfo semaphoreCreateInfo = {};
 	semaphoreCreateInfo.flags = vk::SemaphoreCreateFlags();
 
-	vk_presentSemaphore = vk_device.createSemaphore(semaphoreCreateInfo);
-	vk_renderSemaphore = vk_device.createSemaphore(semaphoreCreateInfo);
+	api_data->presentSemaphore = api_data->device.createSemaphore(semaphoreCreateInfo);
+	api_data->renderSemaphore = api_data->device.createSemaphore(semaphoreCreateInfo);
 }
 
 void GraphicsManager::recreateSwapChain() {
@@ -238,30 +242,30 @@ void GraphicsManager::recreateSwapChain() {
 		return;
 	}
 	Log::debug("Swapchain recreating...");
-	vk_device.waitIdle();
+	api_data->device.waitIdle();
 	cleanupSwapChain(false);
 
 	init_swapchain();
 	init_def_renderpass();
 	init_framebuffers();
-	resizeEvent.invoke(windowExcent);
+	resizeEvent.invoke({ api_data->windowExcent.width, api_data->windowExcent.height });
 }
 
 void GraphicsManager::cleanupSwapChain(bool destroy) {
-	for (size_t i = 0; i < vk_framebuffers.size(); i++) {
-		vk_device.destroy(vk_framebuffers[i]);
+	for (size_t i = 0; i < api_data->framebuffers.size(); i++) {
+		api_data->device.destroy(api_data->framebuffers[i]);
 	}
 
-	vk_device.destroy(vk_def_renderPass);
+	api_data->device.destroy(api_data->def_renderPass);
 
 	if(destroy) {
-		for (size_t i = 0; i < vk_swapchainImages.size(); i++) {
-			vk_device.destroy(vk_swapchainImageViews[i]);
+		for (size_t i = 0; i < api_data->swapchainImages.size(); i++) {
+			api_data->device.destroy(api_data->swapchainImageViews[i]);
 		}
 
-		vk_swapchainImageViews.clear();
+		api_data->swapchainImageViews.clear();
 
-		vk_device.destroy(vk_swapchain);
+		api_data->device.destroy(api_data->swapchain);
 	}
 }
 
@@ -269,19 +273,19 @@ bool GraphicsManager::beginDraw() {
 	if(isDrawing) return false;
 	isDrawing = true;
 	//wait until the GPU has finished rendering the last frame. Timeout of 0.1 second (fast)
-	auto res = vk_device.waitForFences({ vk_renderFence }, true, 100000000);
+	auto res = api_data->device.waitForFences({ api_data->renderFence }, true, 100000000);
 	if(res == vk::Result::eTimeout && !window->isMinimized()) {
 		//wait until the GPU has finished rendering the last frame. Timeout of 1 second (slow)
-		res = vk_device.waitForFences({ vk_renderFence }, true, 1000000000);
+		res = api_data->device.waitForFences({ api_data->renderFence }, true, 1000000000);
 	}
 	THROW_VK_EX_IF_BAD(res);
 
-	vk_device.resetFences({ vk_renderFence });
+	api_data->device.resetFences({ api_data->renderFence });
 
-	vk_mainCommandBuffer.reset();
+	api_data->mainCommandBuffer.reset();
 
 	//request image from the swapchain, 1 second timeout
-	res = vk_device.acquireNextImageKHR(vk_swapchain, 1000000000, vk_presentSemaphore, nullptr, &swapchainImageIndex); // @suppress("Ambiguous problem")
+	res = api_data->device.acquireNextImageKHR(api_data->swapchain, 1000000000, api_data->presentSemaphore, nullptr, &swapchainImageIndex); // @suppress("Ambiguous problem")
 	if(res == vk::Result::eErrorOutOfDateKHR) {
 		recreateSwapChain();
 		isDrawing = false;
@@ -298,7 +302,7 @@ bool GraphicsManager::beginDraw() {
 	cmdBeginInfo.pInheritanceInfo = nullptr;
 	cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 
-	vk_mainCommandBuffer.begin(cmdBeginInfo);
+	api_data->mainCommandBuffer.begin(cmdBeginInfo);
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
 	vk::ClearValue clearValue;
@@ -320,32 +324,32 @@ bool GraphicsManager::beginDraw() {
 	//windowExcent.width = window->getWidth();
 	//windowExcent.height = window->getHeight();
 
-	rpInfo.renderPass = vk_def_renderPass;
+	rpInfo.renderPass = api_data->def_renderPass;
 	rpInfo.renderArea.offset.x = 0;
 	rpInfo.renderArea.offset.y = 0;
-	rpInfo.renderArea.extent = windowExcent;
-	rpInfo.framebuffer = vk_framebuffers[swapchainImageIndex];
+	rpInfo.renderArea.extent = api_data->windowExcent;
+	rpInfo.framebuffer = api_data->framebuffers[swapchainImageIndex];
 
 	//connect clear values
 	rpInfo.clearValueCount = 1;
 	rpInfo.pClearValues = &clearValue;
 
-	vk_mainCommandBuffer.beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
+	api_data->mainCommandBuffer.beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
 
 	return true;
 }
 
 void GraphicsManager::draw(uint count) {
-	vk_mainCommandBuffer.draw(count, 1, 0, 0);
+	api_data->mainCommandBuffer.draw(count, 1, 0, 0);
 }
 
 void GraphicsManager::endDraw() {
 	if(!isDrawing) return;
 
 	//finalize the render pass
-	vk_mainCommandBuffer.endRenderPass();
+	api_data->mainCommandBuffer.endRenderPass();
 	//finalize the command buffer (we can no longer add commands, but it can now be executed)
-	vk_mainCommandBuffer.end();
+	api_data->mainCommandBuffer.end();
 
 	isDrawing = false;
 
@@ -362,17 +366,17 @@ void GraphicsManager::endDraw() {
 	submit.pWaitDstStageMask = &waitStage;
 
 	submit.waitSemaphoreCount = 1;
-	submit.pWaitSemaphores = &vk_presentSemaphore;
+	submit.pWaitSemaphores = &api_data->presentSemaphore;
 
 	submit.signalSemaphoreCount = 1;
-	submit.pSignalSemaphores = &vk_renderSemaphore;
+	submit.pSignalSemaphores = &api_data->renderSemaphore;
 
 	submit.commandBufferCount = 1;
-	submit.pCommandBuffers = &vk_mainCommandBuffer;
+	submit.pCommandBuffers = &api_data->mainCommandBuffer;
 
 	//submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
-	auto res = vkQueueSubmit((VkQueue)vk_graphicsQueue, 1, (VkSubmitInfo*)&submit, (VkFence)vk_renderFence);
+	auto res = vkQueueSubmit((VkQueue)api_data->graphicsQueue, 1, (VkSubmitInfo*)&submit, (VkFence)api_data->renderFence);
 
 	if (res == VK_ERROR_OUT_OF_DATE_KHR) {
 	    recreateSwapChain();
@@ -387,15 +391,15 @@ void GraphicsManager::endDraw() {
 	presentInfo.sType = vk::StructureType::ePresentInfoKHR;
 	presentInfo.pNext = nullptr;
 
-	presentInfo.pSwapchains = &vk_swapchain;
+	presentInfo.pSwapchains = &api_data->swapchain;
 	presentInfo.swapchainCount = 1;
 
-	presentInfo.pWaitSemaphores = &vk_renderSemaphore;
+	presentInfo.pWaitSemaphores = &api_data->renderSemaphore;
 	presentInfo.waitSemaphoreCount = 1;
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
-	res = vkQueuePresentKHR((VkQueue)vk_graphicsQueue, (VkPresentInfoKHR*)&presentInfo);
+	res = vkQueuePresentKHR((VkQueue)api_data->graphicsQueue, (VkPresentInfoKHR*)&presentInfo);
 
 	if (res == VK_ERROR_OUT_OF_DATE_KHR) {
 	    recreateSwapChain();
@@ -413,30 +417,32 @@ void GraphicsManager::endDraw() {
 //FINALIZER
 void GraphicsManager::cleanup() {
 	if(is_initialized) {
-		vk_device.waitIdle();
+		api_data->device.waitIdle();
 		Log::debug("Graphics manager cleanup...");
 
 		cleanupSwapChain();
 
 		destroyEvent.invoke();
 
-		vk_device.destroy(vk_presentSemaphore);
-		vk_device.destroy(vk_renderSemaphore);
-		vk_device.destroy(vk_renderFence);
+		api_data->device.destroy(api_data->presentSemaphore);
+		api_data->device.destroy(api_data->renderSemaphore);
+		api_data->device.destroy(api_data->renderFence);
 
-		vk_device.destroy(vk_commandPool);
+		api_data->device.destroy(api_data->commandPool);
 
-		vkDestroyDevice(vk_device, nullptr);
-		vk_device = nullptr;
+		vkDestroyDevice(api_data->device, nullptr);
+		api_data->device = nullptr;
 
-		vkDestroySurfaceKHR(vk_instance, vk_surface, nullptr);
-		vk_surface = nullptr;
+		vkDestroySurfaceKHR(api_data->instance, api_data->surface, nullptr);
+		api_data->surface = nullptr;
 
-		vkb::destroy_debug_utils_messenger(vk_instance, vk_debug_messenger);
-		vk_debug_messenger = nullptr;
+		vkb::destroy_debug_utils_messenger(api_data->instance, api_data->debug_messenger);
+		api_data->debug_messenger = nullptr;
 
-		vk_instance.destroy();
-		vk_instance = nullptr;
+		api_data->instance.destroy();
+		api_data->instance = nullptr;
+
+		api_data.release();
 	}
 	is_initialized = false;
 }

@@ -39,7 +39,7 @@ private:
 
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
-		test_shader->buildPipeline(vk::Extent2D(win.getWidth(), win.getHeight()));
+		test_shader->buildPipeline({ win.getWidth(), win.getHeight() });
 
 		while(win.update())
 			loop();
