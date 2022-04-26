@@ -38,8 +38,8 @@ public:
 	void release() {
 		if (isNotNull()) {
 			T* pointer = *ppObject;
-			*ppObject = nullptr;
 			delete pointer;
+			*ppObject = nullptr;
 		}
 	}
 

@@ -17,23 +17,16 @@ public:
 	typedef Event<Vector2i> ResizeEvent;
 private:
 	friend class GraphicsComponentBase;
+	friend struct ::API_Data;
 	bool is_initialized = false;
 
 	pAPI_data api_data;
 
 	uint frameNumber = 0;
-	uint swapchainImageIndex = 0;
 
 	pWindow window;
 
 	bool isDrawing = false;
-
-    bool use_hdr =
-#ifdef USE_HDR
-    		true;
-#else
-    		false;
-#endif
 public:
     ResizeEvent resizeEvent;
     DestroyEvent destroyEvent;
@@ -49,16 +42,6 @@ public:
 	void draw(uint count);
 	void endDraw();
 	void cleanup() override;
-
-private:
-	void init_swapchain();
-	void init_commands();
-	void init_def_renderpass();
-	void init_framebuffers();
-	void init_sync_structures();
-
-	void cleanupSwapChain(bool destroy = true);
-	void recreateSwapChain();
 };
 
 NSP_GL_END

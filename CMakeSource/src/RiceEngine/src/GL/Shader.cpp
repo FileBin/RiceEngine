@@ -19,23 +19,30 @@ Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {
 Shader::~Shader() { cleanup(); }
 
 void Shader::cleanup() {
-	cleanupPipeline();
-	cleanupShaders();
+	if(init) {
+		cleanupShaders();
+		cleanupPipeline();
 
-	graphics_mgr->resizeEvent.unsubscribe(on_resize_uuid);
-	api_data.release();
+		graphics_mgr->resizeEvent.unsubscribe(on_resize_uuid);
+		api_data.release();
+	}
 	init = false;
 }
 
 void Shader::cleanupShaders() {
-	if(api_data->vertexShader) get_api_data().device.destroy(api_data->vertexShader);
-	if(api_data->fragmentShader) get_api_data().device.destroy(api_data->fragmentShader);
-	if(api_data->geometryShader) get_api_data().device.destroy(api_data->geometryShader);
+	if(api_data->vertexShader)
+		get_api_data().device.destroy(api_data->vertexShader);
+	if(api_data->fragmentShader)
+		get_api_data().device.destroy(api_data->fragmentShader);
+	if(api_data->geometryShader)
+		get_api_data().device.destroy(api_data->geometryShader);
 }
 
 void Shader::cleanupPipeline() {
-	if(api_data->pipeline) get_api_data().device.destroy(api_data->pipeline);
-    if(api_data->layout) get_api_data().device.destroy(api_data->layout);
+	if(api_data->pipeline)
+		get_api_data().device.destroy(api_data->pipeline);
+    if(api_data->layout)
+    	get_api_data().device.destroy(api_data->layout);
 }
 
 void Shader::loadShader(String path, Type type) {

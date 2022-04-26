@@ -8,8 +8,10 @@
 #pragma once
 
 #include "VulkanHelper.hpp"
+#include <Rice/GL/GraphicsManager.hpp>
 
 struct API_Data {
+public:
 	vk::Instance instance; // Vulkan library handle
 	vk::DebugUtilsMessengerEXT debug_messenger;// Vulkan debug output handle
 	vk::PhysicalDevice GPU;// GPU chosen as the default device
@@ -35,5 +37,34 @@ struct API_Data {
 	vk::Fence renderFence;
 
 	vk::Extent2D windowExcent;
+
+	Rice::Graphics::pGraphicsManager g_mgr;
+
+	uint swapchainImageIndex = 0;
+
+    bool use_hdr =
+#ifdef USE_HDR
+    		true;
+#else
+    		false;
+#endif
+
+	~API_Data();
+private:
+	friend class Rice::Graphics::GraphicsManager;
+
+	API_Data(Rice::Graphics::pGraphicsManager g_mgr);
+	void recreateSwapchain();
+	void init_swapchain();
+	void init_commands();
+	void init_def_renderpass();
+	void init_framebuffers();
+	void init_sync_structures();
+
+	void cleanupSwapchain(bool destroy = true);
+
+	bool beginDraw();
+	void draw(uint count);
+	void endDraw();
 };
 
