@@ -7,10 +7,6 @@
 #include "Vulkan_API_code/api_GraphicsManager_impl.hpp"
 #include "Vulkan_API_code/api_CommandBuffer.hpp"
 
-#include "VulkanHelper.hpp"
-
-#include "VulkanAPI_data_impl.hpp"
-
 NSP_GL_BEGIN
 
 void GraphicsManager::init(pWindow _window) {
