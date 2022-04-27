@@ -13,6 +13,9 @@ NSP_GL_END
 #include "GraphicsComponentBase.hpp"
 #include "../Math.hpp"
 
+struct Shader_API_Data;
+typedef SmartPtr<Shader_API_Data> pShader_API_Data;
+
 NSP_GL_BEGIN
 class Shader : public GraphicsComponentBase {
 public:

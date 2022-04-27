@@ -5,7 +5,10 @@
  *      Author: FileBinsLapTop
  */
 #include "pch.h"
-#include <Rice/GL/VulkanHelper.hpp>
+
+#include <vulkan/vulkan.hpp>
+
+#include "VulkanHelper.hpp"
 
 NSP_GL_BEGIN
 

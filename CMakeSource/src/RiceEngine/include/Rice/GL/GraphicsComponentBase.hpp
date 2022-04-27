@@ -16,6 +16,7 @@ NSP_GL_END
 
 #pragma once
 #include "GraphicsManager.hpp"
+#include "API_Data.hpp"
 
 NSP_GL_BEGIN
 
