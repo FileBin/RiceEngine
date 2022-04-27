@@ -5,7 +5,12 @@
  *      Author: FileBinsLapTop
  */
 
-#include "../stdafx.hpp"
+#include <Rice/stdafx.hpp>
+
+#include <vulkan/vulkan.hpp>
+#include <VkBootstrap.h>
+
+#include "VulkanException.hpp"
 
 #pragma once
 NSP_GL_BEGIN

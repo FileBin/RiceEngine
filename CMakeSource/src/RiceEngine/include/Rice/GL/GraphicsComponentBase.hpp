@@ -23,12 +23,9 @@ class GraphicsComponentBase : public ICleanable {
 protected:
 	pGraphicsManager graphics_mgr;
 
-	vk::Device& getDevice();
-	vk::RenderPass& getDefRenderPass();
-	vk::CommandBuffer& getMainCommandBuffer();
+	GraphicsManager_API_data& get_api_data();
 public:
-	GraphicsComponentBase(pGraphicsManager g_mgr) :
-		graphics_mgr(g_mgr)
-	{}
+	GraphicsComponentBase(pGraphicsManager g_mgr);
 };
+
 NSP_GL_END

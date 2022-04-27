@@ -10,24 +10,27 @@ set(GAME_MAIN_PATH "${CMAKE_SOURCE_DIR}/src/GameMain")
 set(LIB_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/lib/include")
 set(LIB_BIN_PATH "${CMAKE_SOURCE_DIR}/lib/bin")
 
+set(LINKER_FLAGS "")
+
 if(WIN32)
     set(LIB_BIN_PATH "${LIB_BIN_PATH}/win64")
 endif(WIN32)
 if(UNIX)
+    set(LINKER_FLAGS "-no-pie")
     set(LIB_BIN_PATH "${LIB_BIN_PATH}/linux64")
-endif(WIN32)
+endif(UNIX)
 
 set(ANY_LIB_BIN_PATH "${LIB_BIN_PATH}/any")
 
-
+message("lib any path: ${ANY_LIB_BIN_PATH}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D UNICODE -no-pie")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D UNICODE ${LINKER_FLAGS}")
   	set(LIB_BIN_PATH "${LIB_BIN_PATH}/clang")
   	
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE -no-pie")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE ${LINKER_FLAGS}")
   	set(LIB_BIN_PATH "${LIB_BIN_PATH}/gnu")
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
@@ -38,6 +41,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/W4 /WX)
   	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc")
 endif()
+
+message("lib compiler path: ${LIB_BIN_PATH}")
 
 set(VULKAN_LIB_PATH "$ENV{VULKAN_SDK}/lib")
 set(VULKAN_INCLUDE_PATH "$ENV{VK_SDK_PATH}/Include")
@@ -53,19 +58,19 @@ set(RESOURCES_PATH "${CMAKE_SOURCE_DIR}/res/")
 
 #for test use only needed files
 set(GAME_ENGINE_SRC 
-	"${GAME_ENGINE_PATH}/include/Rice/GL/GraphicsManager.hpp"
-	"${GAME_ENGINE_PATH}/include/Rice/GL/VulkanHelper.hpp"
-	"${GAME_ENGINE_PATH}/src/Engine/InputManager.cpp"
+	"${GAME_ENGINE_PATH}/include/Rice/GL/GraphicsManager.hpp"	"${GAME_ENGINE_PATH}/src/Engine/InputManager.cpp"
 	"${GAME_ENGINE_PATH}/src/Engine/Window.cpp"
 	"${GAME_ENGINE_PATH}/src/Engine/Log.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Vectors.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Math.cpp"
 	"${GAME_ENGINE_PATH}/src/Math/Matrixes.cpp"
-	"${GAME_ENGINE_PATH}/src/GL/VulkanHelper.cpp"
+	"${GAME_ENGINE_PATH}/src/GL/API_helper.cpp"
 	"${GAME_ENGINE_PATH}/src/GL/Shader.cpp"
 	"${GAME_ENGINE_PATH}/src/GL/GraphicsComponentBase.cpp"
 	"${GAME_ENGINE_PATH}/src/Util/Util.cpp"
- 	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp")
+ 	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp"
+ 	"${GAME_ENGINE_PATH}/src/GL/Buffer.cpp"
+ 	"${GAME_ENGINE_PATH}/src/GL/CommandBuffer.cpp")
  
 set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")
 

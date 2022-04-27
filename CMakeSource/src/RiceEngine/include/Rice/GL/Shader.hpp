@@ -2,12 +2,16 @@
 NSP_GL_BEGIN
 class Shader;
 typedef SmartPtr<Shader> pShader;
+
+struct Shader_API_Data;
+typedef SmartPtr<Shader_API_Data> pShader_API_Data;
 NSP_GL_END
 
 #pragma once
 
 #include "GraphicsManager.hpp"
 #include "GraphicsComponentBase.hpp"
+#include "../Math.hpp"
 
 NSP_GL_BEGIN
 class Shader : public GraphicsComponentBase {
@@ -23,19 +27,16 @@ public:
 	void loadShader(String path, Type shaderType);
 
 	void buildPipeline(Vector2i windowSize);
-
-	void setActive();
 private:
-	vk::ShaderModule vertexShader, fragmentShader, geometryShader;
-	vk::Pipeline pipeline;
-	vk::PipelineLayout layout;
+	friend class CommandBuffer_API_data;
+	pShader_API_Data api_data;
 
-	Window::ResizeEvent::UUID on_resize_uuid;
+	GraphicsManager::ResizeEvent::UUID on_resize_uuid;
 
 	bool init = false;
 	bool uses_depth_buffer = false;
 
-	void onResize(pWindow sender);
+	void onResize(Vector2i windowSize);
 	void cleanupPipeline();
 	void cleanupShaders();
 };

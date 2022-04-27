@@ -16,6 +16,8 @@
 
 #define interface struct
 
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
+
 typedef unsigned char byte;
 
 template <typename T>

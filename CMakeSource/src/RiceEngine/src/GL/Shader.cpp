@@ -1,31 +1,44 @@
-﻿#include "pch.h"
+﻿
+#include "pch.h"
 #include <Rice/GL/Shader.hpp>
 #include <Rice/GL/GraphicsComponentBase.hpp>
+
+#include "Vulkan_API_code/api_GraphicsManager.hpp"
+#include "Vulkan_API_code/api_Shader.hpp"
 
 NSP_GL_BEGIN
 
 Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {
-	on_resize_uuid = graphics_mgr->resizeEvent.subscribe([this](pWindow win){ onResize(win); }); // @suppress("Invalid arguments")
+	api_data = new Shader_API_Data();
+	on_resize_uuid = graphics_mgr->resizePipelines.subscribe([this](Vector2i win){ onResize(win); }); // @suppress("Invalid arguments")
 }
 Shader::~Shader() { cleanup(); }
 
 void Shader::cleanup() {
-	cleanupPipeline();
-	cleanupShaders();
+	if(init) {
+		cleanupShaders();
+		cleanupPipeline();
 
-	graphics_mgr->resizeEvent.unsubscribe(on_resize_uuid);
+		graphics_mgr->resizePipelines.unsubscribe(on_resize_uuid);
+		api_data.release();
+	}
 	init = false;
 }
 
 void Shader::cleanupShaders() {
-	if(vertexShader) 	vkDestroyShaderModule(getDevice(), vertexShader, nullptr);
-	if(fragmentShader) 	vkDestroyShaderModule(getDevice(), fragmentShader, nullptr);
-	if(geometryShader) 	vkDestroyShaderModule(getDevice(), geometryShader, nullptr);
+	if(api_data->vertexShader)
+		get_api_data().device.destroy(api_data->vertexShader);
+	if(api_data->fragmentShader)
+		get_api_data().device.destroy(api_data->fragmentShader);
+	if(api_data->geometryShader)
+		get_api_data().device.destroy(api_data->geometryShader);
 }
 
 void Shader::cleanupPipeline() {
-	if(pipeline) vkDestroyPipeline(getDevice(), pipeline, nullptr);
-    if(layout)	 vkDestroyPipelineLayout(getDevice(), layout, nullptr);
+	if(api_data->pipeline)
+		get_api_data().device.destroy(api_data->pipeline);
+    if(api_data->layout)
+    	get_api_data().device.destroy(api_data->layout);
 }
 
 void Shader::loadShader(String path, Type type) {
@@ -41,44 +54,42 @@ void Shader::loadShader(String path, Type type) {
 	createInfo.pCode = (uint*)buffer.data();
 
 	//check that the creation goes well.
-	vk::ShaderModule shaderModule;
-	auto res = vkCreateShaderModule(getDevice(), (VkShaderModuleCreateInfo*)&createInfo, nullptr, (VkShaderModule*)&shaderModule);
-	THROW_VK_EX_IF_BAD(res);
+	vk::ShaderModule shaderModule = get_api_data().device.createShaderModule(createInfo);
 
 	switch(type) {
 	case Type::Vertex:
-		vertexShader = shaderModule;
+		api_data->vertexShader = shaderModule;
 		break;
 	case Type::Fragment:
-		fragmentShader = shaderModule;
+		api_data->fragmentShader = shaderModule;
 		break;
 	case Type::Geometry:
-		geometryShader = shaderModule;
+		api_data->geometryShader = shaderModule;
 	}
 }
 
-void Shader::buildPipeline(Vector2i size) {
+void Shader::buildPipeline(Vector2i extent) {
 	using help = VulkanHelper;
 
 	//build the pipeline layout that controls the inputs/outputs of the shader
 	//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
 	vk::PipelineLayoutCreateInfo pipeline_layout_info = help::pipeline_layout_create_info();
-	auto res = vkCreatePipelineLayout(getDevice(), (VkPipelineLayoutCreateInfo*)&pipeline_layout_info, nullptr, (VkPipelineLayout*)&layout);
+	api_data->layout = get_api_data().device.createPipelineLayout(pipeline_layout_info);
 
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules per stage
 	help::PipelineBuilder pipelineBuilder;
 
-	if(vertexShader)
+	if(api_data->vertexShader)
 		pipelineBuilder.vk_shaderStages.push_back(
-				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, vertexShader));
+				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, api_data->vertexShader));
 
-	if(fragmentShader)
+	if(api_data->fragmentShader)
 		pipelineBuilder.vk_shaderStages.push_back(
-				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, fragmentShader));
+				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, api_data->fragmentShader));
 
-	if(geometryShader)
+	if(api_data->geometryShader)
 		pipelineBuilder.vk_shaderStages.push_back(
-				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eGeometry, geometryShader));
+				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eGeometry, api_data->geometryShader));
 
 	//vertex input controls how to read vertices from vertex buffers. We aren't using it yet
 	pipelineBuilder.vk_vertexInputInfo = help::vertex_input_state_create_info();
@@ -90,13 +101,13 @@ void Shader::buildPipeline(Vector2i size) {
 	//build viewport and scissor from the swapchain extents
 	pipelineBuilder.vk_viewport.x = 0.0f;
 	pipelineBuilder.vk_viewport.y = 0.0f;
-	pipelineBuilder.vk_viewport.width = (float)size.x;
-	pipelineBuilder.vk_viewport.height = (float)size.y;
+	pipelineBuilder.vk_viewport.width = (float)extent.x;
+	pipelineBuilder.vk_viewport.height = (float)extent.y;
 	pipelineBuilder.vk_viewport.minDepth = 0.0f;
 	pipelineBuilder.vk_viewport.maxDepth = 1.0f;
 
 	pipelineBuilder.vk_scissor.offset = vk::Offset2D(0, 0);
-	pipelineBuilder.vk_scissor.extent = vk::Extent2D(size.x, size.y);
+	pipelineBuilder.vk_scissor.extent = vk::Extent2D(extent.x,extent.y);
 
 	//configure the rasterizer to draw filled triangles
 	pipelineBuilder.vk_rasterizer = help::rasterization_state_create_info();
@@ -108,19 +119,16 @@ void Shader::buildPipeline(Vector2i size) {
 	pipelineBuilder.vk_colorBlendAttachment = help::color_blend_attachment_state();
 
 	//use the triangle layout we created
-	pipelineBuilder.vk_pipelineLayout = layout;
+	pipelineBuilder.vk_pipelineLayout = api_data->layout;
 
 	//finally build the pipeline
-	pipeline = pipelineBuilder.build_pipeline(getDevice(), getDefRenderPass());
+	api_data->pipeline = pipelineBuilder.build_pipeline(get_api_data().device, get_api_data().def_renderPass);
 	init = true;
 }
 
-void Shader::onResize(pWindow sender) {
+void Shader::onResize(Vector2i extent) {
 	cleanupPipeline();
-	buildPipeline(sender->getSize());
+	buildPipeline(extent);
 }
 
-void Shader::setActive() {
-	vkCmdBindPipeline(getMainCommandBuffer(), (VkPipelineBindPoint)vk::PipelineBindPoint::eGraphics, (VkPipeline)pipeline);
-}
 NSP_GL_END

@@ -8,8 +8,7 @@ NSP_ENGINE_BEGIN
 pWindow Window::instance = nullptr;
 
 Window::Window() :
-		inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true), is_resizing(
-				false) {
+		inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true) {
 	if (instance.isNotNull())
 		instance = this;
 	else
@@ -28,6 +27,8 @@ bool Window::create(DescWindow desc) {
 	handle = SDL_CreateWindow("VulkanTest", desc.posx, desc.posy, desc.width,
 			desc.height,
 			SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+
+	SDL_SetWindowMinimumSize(handle.get(), 64, 64);
 
 	if(handle.isNull()) {
 		Log::log(Log::Error, "Could not create SDL window: {}\n", String(SDL_GetError()));
@@ -58,7 +59,6 @@ void Window::cleanup() {
 }
 
 void Window::handleEvent(SDL_Event& e) {
-	is_resizing = false;
 	updateWindowState();
 	switch (e.type) {
 	case SDL_WINDOWEVENT:
@@ -89,8 +89,8 @@ void Window::handleWindowEvent(SDL_WindowEvent& e) {
 		is_exit = true;
 		break;
 	case SDL_WINDOWEVENT_RESIZED:
-		is_resizing = true;
 		resize_event.invoke(this);
+		updateWindowState();
 		break;
 	case SDL_WINDOWEVENT_MOVED:
 		break;
@@ -100,6 +100,16 @@ void Window::handleWindowEvent(SDL_WindowEvent& e) {
 void Window::setInputMgr(pInputManager inputmgr) {
 	this->inputmgr = inputmgr;
 	updateWindowState();
+}
+
+bool Window::isResize() const {
+	int w,h;
+	SDL_GetWindowSize(handle.get(), &w, &h);
+	return w != desc.width || h != desc.height;
+}
+
+bool Window::isMinimized() const {
+	return SDL_GetWindowFlags(handle.get()) & SDL_WINDOW_MINIMIZED;
 }
 
 void Window::updateWindowState() {

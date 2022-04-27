@@ -12,8 +12,10 @@
 
 NSP_GL_BEGIN
 
-vk::Device& GraphicsComponentBase::getDevice() { return graphics_mgr->vk_device; }
-vk::RenderPass& GraphicsComponentBase::getDefRenderPass() { return graphics_mgr->vk_def_renderPass; }
-vk::CommandBuffer& GraphicsComponentBase::getMainCommandBuffer() { return graphics_mgr->vk_mainCommandBuffer; }
+GraphicsManager_API_data& GraphicsComponentBase::get_api_data() { return *graphics_mgr->api_data; }
+
+GraphicsComponentBase::GraphicsComponentBase(pGraphicsManager g_mgr) : graphics_mgr(g_mgr) {
+	graphics_mgr->destroyEvent.subscribe([this](){ cleanup(); }); // @suppress("Invalid arguments")
+}
 
 NSP_GL_END

@@ -11,10 +11,10 @@
 
 #pragma once
 
-template<typename ret_t = void, typename ...args_t>
+template<typename ...args_t>
 class Event {
 public:
-	typedef ret_t func_t(args_t...);
+	typedef void func_t(args_t...);
 	typedef _STD function<func_t> std_func_t;
 	struct UUID {
 	friend class Event;

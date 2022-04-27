@@ -39,15 +39,14 @@
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
-#ifdef WIN32
+#include <magic_enum/magic_enum.hpp>
+
 #define SDL_MAIN_HANDLED
-#endif
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
-#include <VkBootstrap.h>
-
-#include <vulkan/vulkan.hpp>
+//#include <vulkan/vulkan.hpp>
 
 #include "namespaces.h"
 #include "macros.h"

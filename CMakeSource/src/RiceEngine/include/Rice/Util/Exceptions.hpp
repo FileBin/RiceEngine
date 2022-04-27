@@ -9,4 +9,3 @@
 #include "exceptions/IndexOutOfRangeException.hpp"
 #include "exceptions/InvalidArgException.hpp"
 #include "exceptions/FileNotFoundException.hpp"
-#include "exceptions/VulkanException.hpp"

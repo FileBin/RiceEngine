@@ -23,7 +23,7 @@ struct DescWindow {
 
 class Window : public ICleanable {
 public:
-	typedef Event<void, pWindow> ResizeEvent;
+	typedef Event<pWindow> ResizeEvent;
 
 	Window();
 	~Window() {	cleanup(); }
@@ -41,18 +41,31 @@ public:
 	const WindowHandle getHandle() const { return handle; }
 	int getLeft() const { return desc.posx; }
 	int getTop() const { return desc.posy; }
-	int getWidth() const { return desc.width; }
-	int getHeight() const { return desc.height; }
+	int getWidth() const {
+		int x,y;
+		SDL_GetWindowSize(handle.get(), &x, &y);
+		return x;
+	}
+	int getHeight() const {
+		int x,y;
+		SDL_GetWindowSize(handle.get(), &x, &y);
+		return y;
+	}
 
-	Vector2i getSize() const { return { getWidth(), getHeight() }; }
+	Vector2i getSize() const {
+		Vector2i size;
+		SDL_GetWindowSize(handle.get(), (int*)&size.x, (int*)&size.y);
+		return size;
+	}
 
 	String getCaption() const { return desc.caption; }
 	bool isExit() const { return is_exit; }
 	bool isActive() const { return is_active; }
-	bool isResize() const { return is_resizing; }
+	bool isResize() const;
+	bool isMinimized() const;
+	void updateWindowState();
 
 private:
-	void updateWindowState();
 	void handleEvent(SDL_Event& e);
 	void handleWindowEvent(SDL_WindowEvent& e);
 
@@ -64,7 +77,6 @@ private:
 	WindowHandle handle;
 	bool is_exit;
 	bool is_active;
-	bool is_resizing;
 	pInputManager inputmgr;
 
 	static pWindow instance;
