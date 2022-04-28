@@ -35,6 +35,11 @@ CommandBuffer::CommandBuffer(pGraphicsManager g_mgr) : GraphicsComponentBase(g_m
 }
 
 void CommandBuffer::reset() {
+	uint n = commands.size();
+	for (uint i = 0; i < n; ++i) {
+		commands[i].release();
+	}
+
 	commands.clear();
 	api_data->reset();
 }
@@ -50,12 +55,16 @@ void CommandBuffer::setActiveShader(pShader shader) {
 	//api_data->doCommand({ Command::SetShader, shader->api_data->pipeline });
 }
 
+void CommandBuffer::bindVertexBuffer(pBuffer buffer) {
+	commands.push_back(new Command(Command::BindVertexBuffer, buffer));
+}
+
 void CommandBuffer::build() {
 	_build(api_data.get(), commands, get_api_data(), get_api_data().windowExcent);
-
 }
 
 void CommandBuffer::cleanup() {
+	reset();
 	api_data->cleanup(get_api_data());
 	api_data.release();
 }

@@ -11,6 +11,7 @@
 #include "../GL/CommandBuffer.hpp"
 #include "../GL/Shader.hpp"
 #include "../Engine/Log.hpp"
+#include "../GL/Mesh.hpp"
 
 NSP_TESTS_BEGIN
 
@@ -42,9 +43,18 @@ private:
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
 		test_shader->buildPipeline({ win.getWidth(), win.getHeight() });
 
+		vec<Vertex> vertices = {
+				Vertex({1, 1, 0}, {1, 0, 0}),
+				Vertex({-1,1, 0}, {0, 1, 0}),
+				Vertex({0,-1, 0}, {0, 0, 1}),
+		};
+
+		vertexBuffer = new Buffer(&g_mgr, BufferUsage::Vertex, vertices);
+
 		cmd = new CommandBuffer(&g_mgr);
 
 		cmd->setActiveShader(test_shader);
+		cmd->bindVertexBuffer(vertexBuffer);
 		cmd->drawVertices(3);
 		cmd->build();
 
@@ -55,11 +65,6 @@ private:
 	void loop() {
 		if(!win.isResize()) {
 			g_mgr.drawCmd(cmd);
-			/*if(g_mgr.beginDraw()) {
-				test_shader->setActive();
-				g_mgr.draw(3);
-				g_mgr.endDraw();
-			}*/
 		} else {
 			Log::debug("Frame skipped! window resize!");
 		}
@@ -72,6 +77,7 @@ private:
 	}
 
 	Window win;
+	Graphics::pBuffer vertexBuffer;
 	Graphics::pShader test_shader;
 	Graphics::GraphicsManager g_mgr;
 	Graphics::pCommandBuffer cmd;

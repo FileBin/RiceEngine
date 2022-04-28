@@ -6,6 +6,8 @@
 #include "Vulkan_API_code/api_GraphicsManager.hpp"
 #include "Vulkan_API_code/api_Shader.hpp"
 
+#include <Rice/GL/Mesh.hpp>
+
 NSP_GL_BEGIN
 
 Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {
@@ -70,10 +72,11 @@ void Shader::loadShader(String path, Type type) {
 
 void Shader::buildPipeline(Vector2i extent) {
 	using help = VulkanHelper;
+	using namespace vk;
 
 	//build the pipeline layout that controls the inputs/outputs of the shader
 	//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
-	vk::PipelineLayoutCreateInfo pipeline_layout_info = help::pipeline_layout_create_info();
+	PipelineLayoutCreateInfo pipeline_layout_info = help::pipeline_layout_create_info();
 	api_data->layout = get_api_data().device.createPipelineLayout(pipeline_layout_info);
 
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules per stage
@@ -91,8 +94,48 @@ void Shader::buildPipeline(Vector2i extent) {
 		pipelineBuilder.vk_shaderStages.push_back(
 				help::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eGeometry, api_data->geometryShader));
 
+	VertexInputBindingDescription bindingDesc = VertexInputBindingDescription()
+			.setBinding(0)
+			.setStride(sizeof(Rice::Graphics::Vertex))
+			.setInputRate(VertexInputRate::eVertex);
+
+	VertexLayout layout = Vertex::getVertexLayout();
+
+	uint n = layout.size();
+
+	vec<VertexInputAttributeDescription> attributeDescs(n);
+
+	for (uint i = 0; i < n; ++i) {
+		auto& input = layout[i];
+		auto& desc = attributeDescs[i];
+		desc.setBinding(input.binding)
+		    .setOffset(input.offset)
+		    .setLocation(i);
+
+		switch (input.format) {
+
+		case VertexInput::float1: 	desc.setFormat(Format::eR32Sfloat); 			break;
+		case VertexInput::float2: 	desc.setFormat(Format::eR32G32Sfloat); 			break;
+		case VertexInput::float3: 	desc.setFormat(Format::eR32G32B32Sfloat); 		break;
+		case VertexInput::float4: 	desc.setFormat(Format::eR32G32B32A32Sfloat); 	break;
+
+		case VertexInput::int1: 	desc.setFormat(Format::eR32Sint); 				break;
+		case VertexInput::int2: 	desc.setFormat(Format::eR32G32Sint); 			break;
+		case VertexInput::int3: 	desc.setFormat(Format::eR32G32B32Sint); 		break;
+		case VertexInput::int4: 	desc.setFormat(Format::eR32G32B32A32Sint); 		break;
+
+		default:
+			THROW_EXCEPTION("Unknown vertex format!");
+			break;
+		}
+	}
+
 	//vertex input controls how to read vertices from vertex buffers. We aren't using it yet
-	pipelineBuilder.vk_vertexInputInfo = help::vertex_input_state_create_info();
+	pipelineBuilder.vk_vertexInputInfo = PipelineVertexInputStateCreateInfo()
+	.setVertexBindingDescriptionCount(1)
+	.setPVertexBindingDescriptions(&bindingDesc)
+	.setVertexAttributeDescriptionCount(n)
+	.setPVertexAttributeDescriptions(attributeDescs.data());
 
 	//input assembly is the configuration for drawing triangle lists, strips, or individual points.
 	//we are just going to draw triangle list
@@ -107,7 +150,7 @@ void Shader::buildPipeline(Vector2i extent) {
 	pipelineBuilder.vk_viewport.maxDepth = 1.0f;
 
 	pipelineBuilder.vk_scissor.offset = vk::Offset2D(0, 0);
-	pipelineBuilder.vk_scissor.extent = vk::Extent2D(extent.x,extent.y);
+	pipelineBuilder.vk_scissor.extent = vk::Extent2D(extent.x, extent.y);
 
 	//configure the rasterizer to draw filled triangles
 	pipelineBuilder.vk_rasterizer = help::rasterization_state_create_info();

@@ -1,7 +1,7 @@
 /*
  * Buffer.hpp
  *
- *  Created on: 26 апр. 2022 г.
+ *  Created on: 26 пїЅпїЅпїЅ. 2022 пїЅ.
  *      Author: FileBinsLapTop
  */
 
@@ -12,7 +12,7 @@ NSP_GL_BEGIN
 class Buffer;
 typedef SmartPtr<Buffer> pBuffer;
 
-enum BufferUsage {
+enum class BufferUsage {
 	Vertex, Index
 };
 
@@ -29,18 +29,26 @@ NSP_GL_END
 NSP_GL_BEGIN
 
 class Buffer : GraphicsComponentBase {
+private:
+	friend class CommandBuffer_API_data;
 	pBuffer_API_Data api_data;
 public:
-	Buffer(pGraphicsManager g_mgr,BufferUsage usage, size_t size) : GraphicsComponentBase(g_mgr) {
+	Buffer(pGraphicsManager g_mgr, BufferUsage usage, size_t size) : GraphicsComponentBase(g_mgr) {
 		build_api();
 		allocate(size, usage);
 	}
 
-	template<typename T>
-	Buffer(pGraphicsManager g_mgr, BufferUsage usage, T& objects, size_t objects_count = 1) : GraphicsComponentBase(g_mgr) {
+	Buffer(pGraphicsManager g_mgr, BufferUsage usage, data_t initialData) : GraphicsComponentBase(g_mgr) {
 		build_api();
-		allocate(sizeof(T) * objects_count, usage);
-		copyData(&objects, sizeof(T) * objects_count);
+		allocate(initialData.size(), usage);
+		copyData(initialData.data(), initialData.size());
+	}
+
+	template<typename T>
+	Buffer(pGraphicsManager g_mgr, BufferUsage usage, vec<T>& initialData) : GraphicsComponentBase(g_mgr) {
+		build_api();
+		allocate(sizeof(T) * initialData.size(), usage);
+		copyData(initialData.data(), sizeof(T) * initialData.size());
 	}
 
 	~Buffer();

@@ -22,6 +22,7 @@ NSP_GL_END
 #include "GraphicsManager.hpp"
 #include "GraphicsComponentBase.hpp"
 #include "Shader.hpp"
+#include "Buffer.hpp"
 
 NSP_GL_BEGIN
 class CommandBuffer : GraphicsComponentBase {
@@ -76,6 +77,8 @@ public:
 			}
 		};
 
+	private:
+
         template<typename... ArgsT>
 		struct __convert_args {
         	static Arg* result() { return nullptr; };
@@ -91,6 +94,7 @@ public:
         	};
         };
 
+	public:
 		template<typename... ArgsT>
 		Command(Type cmd, ArgsT... args) : cmd(cmd) {
 			arg_chain = __convert_args<ArgsT...>::result(args...);
@@ -115,6 +119,8 @@ public:
 
 	void drawVertices(uint count);
 	void setActiveShader(pShader shader);
+
+	void bindVertexBuffer(pBuffer buffer);
 
 	void cleanup() override;
 

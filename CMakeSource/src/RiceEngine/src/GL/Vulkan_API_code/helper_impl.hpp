@@ -1,7 +1,7 @@
 /*
  * helper_impl.hpp
  *
- *  Created on: 27 апр. 2022 г.
+ *  Created on: 27 пїЅпїЅпїЅ. 2022 пїЅ.
  *      Author: FileBinsLapTop
  */
 
@@ -48,8 +48,6 @@ vk::PipelineShaderStageCreateInfo VulkanHelper::pipeline_shader_stage_create_inf
 
 vk::PipelineVertexInputStateCreateInfo VulkanHelper::vertex_input_state_create_info(vec<vk::VertexInputBindingDescription>* bindings, vec<vk::VertexInputAttributeDescription>* attributes) {
 	vk::PipelineVertexInputStateCreateInfo info = {};
-	info.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
-	info.pNext = nullptr;
 
 	if(bindings && attributes) {
 		info.vertexBindingDescriptionCount = bindings->size();
@@ -126,8 +124,6 @@ vk::PipelineColorBlendAttachmentState VulkanHelper::color_blend_attachment_state
 //TODO expand pipeline layout
 vk::PipelineLayoutCreateInfo VulkanHelper::pipeline_layout_create_info() {
 	vk::PipelineLayoutCreateInfo info {};
-	info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
-	info.pNext = nullptr;
 
 	//empty defaults
 	info.flags = {};

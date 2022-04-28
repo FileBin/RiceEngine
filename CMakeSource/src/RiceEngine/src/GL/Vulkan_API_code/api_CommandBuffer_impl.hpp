@@ -9,6 +9,7 @@
 
 #include "api_CommandBuffer.hpp"
 #include "api_Shader.hpp"
+#include "api_Buffer.hpp"
 
 NSP_GL_BEGIN
 
@@ -64,26 +65,35 @@ void CommandBuffer_API_data::doCommand(SmartPtr<CommandBuffer::Command> command)
 	using namespace vk;
 
 	uint n = cmd.size();
-	for(uint i=0; i<n; i++) {
-		switch (command->cmd) {
+
+	switch (command->cmd) {
 		case CommandBuffer::Command::Draw: {
 			CommandBuffer::Command::ArgIterator it = command->arg_chain;
 			auto count = *(uint*)(it++).current->getData();
 			auto instCount = *(uint*)(it++).current->getData();
 			auto vert_begin = *(uint*)(it++).current->getData();
 			auto inst_begin = *(uint*)(it++).current->getData();
-
-			cmd[i].draw(count, instCount, vert_begin, inst_begin);
-		} break;
+			for(uint i=0; i<n; i++) {
+				cmd[i].draw(count, instCount, vert_begin, inst_begin);
+			}
+		}break;
 		case CommandBuffer::Command::SetShader: {
-			cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, (*(pShader*)command->arg_chain->getData())
-					->api_data
-					->pipeline);
-		} break;
+			for(uint i=0; i<n; i++) {
+				cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, (*(pShader*)command->arg_chain->getData())->api_data->pipeline);
+			}
+		}break;
+
+		case CommandBuffer::Command::BindVertexBuffer: {
+			auto buf = *(pBuffer*)command->arg_chain->getData();
+			vk::Buffer vk_buf = buf->api_data->buffer;
+			vk::DeviceSize offsets = 0;
+			for(uint i=0; i<n; i++) {
+				cmd[i].bindVertexBuffers(0, 1, &vk_buf, &offsets); // @suppress("Ambiguous problem")
+			}
+		}break;
 		default:
-			THROW_EXCEPTION("Unknown command occured!");
-			break;
-		}
+		THROW_EXCEPTION("Unknown command occured!");
+		break;
 	}
 }
 
