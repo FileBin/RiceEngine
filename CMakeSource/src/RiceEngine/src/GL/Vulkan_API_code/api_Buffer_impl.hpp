@@ -47,20 +47,35 @@ Buffer_API_Data& Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
 	return *this;
 }
 
-Buffer_API_Data& Buffer_API_Data::copyData(void* pData, size_t nData) {
+Buffer_API_Data& Buffer_API_Data::setData(void* pData, size_t nData, size_t offset) {
 	void* mappedData;
-	mappedData = device.mapMemory(memory, 0, nData);
+	mappedData = device.mapMemory(memory, offset, nData);
 	    memcpy(mappedData, pData, nData);
 	device.unmapMemory(memory);
 
 	return *this;
 }
 
-Buffer_API_Data::~Buffer_API_Data() {
+Buffer_API_Data& Buffer_API_Data::getData(void* pData, size_t nData, size_t offset) {
+	void* mappedData;
+	mappedData = device.mapMemory(memory, offset, nData);
+	memcpy(pData, mappedData, nData);
+	device.unmapMemory(memory);
+
+	return *this;
+}
+
+Buffer_API_Data& Buffer_API_Data::free() {
 	if(allocated) {
 		device.destroy(buffer);
 		device.freeMemory(memory);
 	}
+	allocated = false;
+	return *this;
+}
+
+Buffer_API_Data::~Buffer_API_Data() {
+	free();
 }
 
 uint Buffer_API_Data::findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties) {

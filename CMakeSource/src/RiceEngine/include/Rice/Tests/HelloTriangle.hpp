@@ -12,6 +12,8 @@
 #include "../GL/Shader.hpp"
 #include "../Engine/Log.hpp"
 #include "../GL/Mesh.hpp"
+#include "../Math.hpp"
+#include "../GL/VertexBuffer.hpp"
 
 NSP_TESTS_BEGIN
 
@@ -43,13 +45,13 @@ private:
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
 		test_shader->buildPipeline({ win.getWidth(), win.getHeight() });
 
-		vec<Vertex> vertices = {
-				Vertex({1, 1, 0}, {1, 0, 0}),
-				Vertex({-1,1, 0}, {0, 1, 0}),
-				Vertex({0,-1, 0}, {0, 0, 1}),
+		VertexList vertices = {
+			new Vertex,
+			new Vertex,
+			new Vertex,
 		};
 
-		vertexBuffer = new Buffer(&g_mgr, BufferUsage::Vertex, vertices);
+		vertexBuffer = new VertexBuffer(&g_mgr, vertices);
 
 		cmd = new CommandBuffer(&g_mgr);
 
@@ -63,6 +65,33 @@ private:
 	}
 
 	void loop() {
+		using namespace Graphics;
+		Vertex vert[3] = {
+				{{1, 1, 0}, {1, 0, 0}},
+				{{-1,1, 0}, {0, 1, 0}},
+				{{0,-1, 0}, {0, 0, 1}},
+		};
+
+		constexpr float ph[] =  {0, 2*Math::PI/3, 4*Math::PI/3};
+
+		float t = clock() * .0001f;
+
+		float threshold = sin(t * .1f)*.65f - .5f;
+
+		Vector3f color = {
+				Math::clamp01((cos(t + ph[0]) - threshold)/(1-threshold)),
+				Math::clamp01((cos(t + ph[1]) - threshold)/(1-threshold)),
+				Math::clamp01((cos(t + ph[2]) - threshold)/(1-threshold)),
+		};
+
+		vert[0].data.norm = color;
+		vert[1].data.norm = {color.y, color.z, color.x};
+		vert[2].data.norm = {color.z, color.x, color.y};
+
+		vertexBuffer->updateVertice(0, vert[0]);
+		vertexBuffer->updateVertice(1, vert[1]);
+		vertexBuffer->updateVertice(2, vert[2]);
+
 		if(!win.isResize()) {
 			g_mgr.drawCmd(cmd);
 		} else {
@@ -77,7 +106,7 @@ private:
 	}
 
 	Window win;
-	Graphics::pBuffer vertexBuffer;
+	Graphics::pVertexBuffer vertexBuffer;
 	Graphics::pShader test_shader;
 	Graphics::GraphicsManager g_mgr;
 	Graphics::pCommandBuffer cmd;

@@ -59,6 +59,14 @@ void CommandBuffer::bindVertexBuffer(pBuffer buffer) {
 	commands.push_back(new Command(Command::BindVertexBuffer, buffer));
 }
 
+void CommandBuffer::bindVertexBuffer(pVertexBuffer buffer) {
+	commands.push_back(new Command(Command::BindVertexBuffer, (pBuffer&)buffer));
+}
+
+void CommandBuffer::bindIndexBuffer(pBuffer buffer, IndexBufferType type) {
+	commands.push_back(new Command(Command::BindIndexBuffer, buffer, type));
+}
+
 void CommandBuffer::build() {
 	_build(api_data.get(), commands, get_api_data(), get_api_data().windowExcent);
 }

@@ -82,27 +82,27 @@ public:
 	}
 
 	template<typename T>
-	static T Max(T a, T b) {
-		return max(a, b);
+	static T max(T a, T b) {
+		return a > b ? a : b;
 	}
 
 	template<typename T>
-	static T Clamp(T v, T a, T b) {
+	static T min(T a, T b) {
+		return a < b ? a : b;
+	}
+
+	template<typename T>
+	static T clamp(T v, T a, T b) {
 		return min(max(v, a), b);
 	}
 
 	template<typename T>
-	static T Clamp01(T v) {
-		return Clamp<T>(v, 0, 1);
+	static T clamp01(T v) {
+		return clamp<T>(v, 0, 1);
 	}
 
 	template<typename T>
-	static T Min(T a, T b) {
-		return min(a, b);
-	}
-
-	template<typename T>
-	static T Lerp(T a, T b, T t) {
+	static T lerp(T a, T b, T t) {
 		return a * (1 - t) + b * t;
 	}
 

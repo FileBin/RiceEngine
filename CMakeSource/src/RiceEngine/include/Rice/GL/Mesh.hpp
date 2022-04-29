@@ -17,36 +17,50 @@ typedef SmartPtr<Mesh> pMesh;
 
 NSP_GL_END
 
+#pragma once
+
 #include "../Math.hpp"
 #include "VertexLayout.hpp"
 
 NSP_GL_BEGIN
 
-struct Vertex {
+struct Vertex : public IVertex {
+	struct Data {
+		Vector3f pos;
+		Vector3f norm;
+		Vector2f tex_coord0;
+	} data;
+
+	Vertex()
+	: data({}) {}
 
 	Vertex(Vector3f pos)
-	: pos(pos) {}
+	: data({pos}) {}
 
 	Vertex(Vector3f pos, Vector3f norm)
-	: pos(pos),
-	  norm(norm) {}
+	: data({pos, norm}) {}
 
 	Vertex(Vector3f pos, Vector3f norm, Vector2f texcoord)
-	: pos(pos),
-	  norm(norm),
-	  tex_coord0(texcoord) {}
+	: data({pos, norm, texcoord}) {}
 
-	Vector3f pos;
-	Vector3f norm;
-	Vector2f tex_coord0;
 
 	static VertexLayout getVertexLayout() {
 		return {
-			{ "POSITION", 0, offsetof(Vertex, pos), VertexInput::float3 },
-			{ "NORMAL", 0,  offsetof(Vertex, norm), VertexInput::float3 },
-			{ "TEXCOORD0", 0, offsetof(Vertex, tex_coord0), VertexInput::float2 },
+			{ "POSITION", 0, offsetof(Data, pos), VertexInput::float3 },
+			{ "NORMAL", 0,  offsetof(Data, norm), VertexInput::float3 },
+			{ "TEXCOORD0", 0, offsetof(Data, tex_coord0), VertexInput::float2 },
 		};
 	}
+
+	static uint getVertexStride() {
+		return sizeof(Data);
+	}
+
+	VertexLayout getLayout() const override { return getVertexLayout(); }
+	uint getStride() const override {return getVertexStride(); }
+	void* getData() const override {return (void*)&data; }
+
+
 };
 
 class Mesh {

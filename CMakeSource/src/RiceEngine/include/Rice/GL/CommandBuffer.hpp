@@ -23,6 +23,7 @@ NSP_GL_END
 #include "GraphicsComponentBase.hpp"
 #include "Shader.hpp"
 #include "Buffer.hpp"
+#include "VertexBuffer.hpp"
 
 NSP_GL_BEGIN
 class CommandBuffer : GraphicsComponentBase {
@@ -107,7 +108,7 @@ public:
 		}
 	};
 
-private:
+protected:
 	pCommandBuffer_API_data api_data;
 
 	vec<SmartPtr<Command>> commands;
@@ -121,6 +122,8 @@ public:
 	void setActiveShader(pShader shader);
 
 	void bindVertexBuffer(pBuffer buffer);
+	void bindVertexBuffer(pVertexBuffer vertexBuffer);
+	void bindIndexBuffer(pBuffer indexBuffer, IndexBufferType type);
 
 	void cleanup() override;
 

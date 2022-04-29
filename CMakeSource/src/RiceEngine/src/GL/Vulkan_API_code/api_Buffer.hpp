@@ -26,8 +26,10 @@ public:
 	Buffer_API_Data(vk::Device& dev, vk::PhysicalDevice& gpu);
 
 	Buffer_API_Data& allocate(size_t size, BufferUsage usage);
+	Buffer_API_Data& free();
 
-	Buffer_API_Data& copyData(void* pData, size_t nData);
+	Buffer_API_Data& setData(void* pSrc, size_t nData, size_t offset);
+	Buffer_API_Data& getData(void* pDst, size_t nData, size_t offset);
 
 	~Buffer_API_Data();
 

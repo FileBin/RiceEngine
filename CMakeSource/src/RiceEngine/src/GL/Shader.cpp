@@ -96,7 +96,7 @@ void Shader::buildPipeline(Vector2i extent) {
 
 	VertexInputBindingDescription bindingDesc = VertexInputBindingDescription()
 			.setBinding(0)
-			.setStride(sizeof(Rice::Graphics::Vertex))
+			.setStride(Vertex::getVertexStride())
 			.setInputRate(VertexInputRate::eVertex);
 
 	VertexLayout layout = Vertex::getVertexLayout();

@@ -22,8 +22,12 @@ void Buffer::allocate(size_t size, BufferUsage usage) {
 	api_data->allocate(size, usage);
 }
 
-void Buffer::copyData(void* pData, size_t nData) {
-	api_data->copyData(pData, nData);
+void Buffer::setData(void* pData, size_t nData, size_t offset) {
+	api_data->setData(pData, nData, offset);
+}
+
+void Buffer::getData(void* pData, size_t nData, size_t offset) {
+	api_data->getData(pData, nData, offset);
 }
 
 Buffer::~Buffer() { cleanup(); }
