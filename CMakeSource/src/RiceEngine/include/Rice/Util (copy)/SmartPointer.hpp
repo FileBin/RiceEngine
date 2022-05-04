@@ -3,10 +3,12 @@
 
 #include "Exceptions.hpp"
 
+template<typename T>
+class AutoPtr;
 
 template<typename T = void>
-class /*Not*/SmartPtr {
-private:
+class SmartPtr {
+protected:
 	std::shared_ptr<T*> ppObject;
 public:
 
@@ -21,7 +23,12 @@ public:
 		ppObject = std::make_shared<T*>(obj);
 	}
 
-	~SmartPtr() {}
+	template<typename... Args>
+	static SmartPtr<T> create(Args... args) {
+		return new T(args...);
+	}
+
+	virtual ~SmartPtr() {}
 
 	bool isNull() const {
 		if (ppObject.get() == nullptr)
@@ -84,3 +91,19 @@ template<typename T>
 bool operator==(const SmartPtr<T>& a, _STD nullptr_t b) {
 	return a.isNull();
 }
+
+template<typename T>
+class AutoPtr : public SmartPtr<T> {
+public:
+	AutoPtr(const SmartPtr<T>& other) : SmartPtr<T>(other) {}
+	AutoPtr(const AutoPtr<T>& other) = delete;
+
+	template<typename... Args>
+	AutoPtr(Args... args) {
+		return new T(args...);
+	}
+
+	AutoPtr(T* obj) : SmartPtr<T>(obj) {}
+
+	~AutoPtr() { this->release(); }
+};

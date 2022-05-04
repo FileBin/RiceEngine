@@ -5,15 +5,11 @@
 
 NSP_ENGINE_BEGIN
 
-pWindow Window::instance = nullptr;
-
 Window::Window() :
-		inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true) {
-	if (instance.isNotNull())
-		instance = this;
-	else
-		Log::log(Log::Error, L"Window construction error");
-}
+		inputmgr(nullptr),
+		handle(nullptr),
+		is_exit(false),
+		is_active(true) {}
 
 bool Window::create(DescWindow desc) {
 	Log::debug("Creating window..");
@@ -24,9 +20,16 @@ bool Window::create(DescWindow desc) {
 		THROW_EXCEPTION("SDL cannot be initialized!");
 	}
 
-	handle = SDL_CreateWindow("VulkanTest", desc.posx, desc.posy, desc.width,
-			desc.height,
-			SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+	handle = WindowHandle {
+		SDL_CreateWindow("VulkanTest",
+				desc.posx, desc.posy,
+				desc.width, desc.height,
+			SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN)
+	};
+
+	handle.setDestoyer(SDL_DestroyWindow);
+
+	created = true;
 
 	SDL_SetWindowMinimumSize(handle.get(), 64, 64);
 
@@ -52,10 +55,13 @@ bool Window::update() {
 }
 
 void Window::cleanup() {
-	if (handle.isNotNull())
-		SDL_DestroyWindow(handle.get());
-	handle = nullptr;
-	Log::debug("Window closed!");
+	if(created) {
+		is_exit = true;
+		is_active = false;
+		handle = nullptr;
+		Log::debug("Window closed!");
+	}
+	created = false;
 }
 
 void Window::handleEvent(SDL_Event& e) {
@@ -89,7 +95,7 @@ void Window::handleWindowEvent(SDL_WindowEvent& e) {
 		is_exit = true;
 		break;
 	case SDL_WINDOWEVENT_RESIZED:
-		resize_event.invoke(this);
+		resize_event.invoke(refptr_this());
 		updateWindowState();
 		break;
 	case SDL_WINDOWEVENT_MOVED:

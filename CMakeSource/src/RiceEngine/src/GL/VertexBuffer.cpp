@@ -45,11 +45,22 @@ void VertexBuffer::reset(VertexList& initialData) {
 	}
 }
 
-void VertexBuffer::updateVertice(uint i, const IVertex& vert) {
+void VertexBuffer::updateVertice(const IVertex& vert, uint i) {
 	uint s = vert.getStride();
 	if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
 
 	setData(vert.getData(), s, s*i);
+}
+
+void VertexBuffer::updateVertices(VertexList& vert, uint start) {
+	uint s = vert.front()->getStride();
+	if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
+
+	uint n = vert.size();
+
+	for (uint i = 0; i < n; ++i) {
+		setData(vert[i]->getData(), s, s*i + start);
+	}
 }
 
 NSP_GL_END

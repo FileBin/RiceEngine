@@ -21,44 +21,58 @@ class HelloTriangle : public ICleanable {
 
 public:
 	static void runTest(){
-		HelloTriangle program;
+		AutoPtr<HelloTriangle> program { new HelloTriangle };
 		try {
-			program.entrypoint();
+			program->entrypoint();
+			program.release();
 		} catch (::Rice::Exception& e) {
-			Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}", e.GetMsg(), e.GetFile(), e.GetLine(), e.GetInfo());
+			Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}", e.msg(), e.file(), e.line(), e.info());
 		}
 	}
-private:
+
 	~HelloTriangle() {
 		cleanup();
+	}
+private:
+	bool in_stack = false;
+	HelloTriangle(bool is_in_stack = false) {
+		in_stack = is_in_stack;
 	}
 
 	void entrypoint() {
 		using namespace Graphics;
+		using namespace bettercpp;
 		Log::init();
+		pWindow win_ref = pWindow(&win);
+		//if(in_stack)
+			//win_ref.setDestoyer(PtrDestroyerType::DontDelete);
+
 		win.create({ "Vulkan" });
 		Log::debug("Window created!");
-		g_mgr.init(&win);
-		test_shader = new Shader(&g_mgr);
+		pGraphicsManager g_mgr_ref = pGraphicsManager(&g_mgr);
+		//if(in_stack)
+			//g_mgr_ref.setDestoyer(PtrDestroyerType::DontDelete);
+		g_mgr.init(win_ref);
+		test_shader = new_ref<Shader>(g_mgr_ref);
 
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
-		test_shader->buildPipeline({ win.getWidth(), win.getHeight() });
+		test_shader->buildPipeline(win.getSize());
 
-		VertexList vertices = {
-			new Vertex,
-			new Vertex,
-			new Vertex,
-		};
+		using pVert = RefPtr<IVertex>;
 
-		vertexBuffer = new VertexBuffer(&g_mgr, vertices);
+		VertexList vertices = { pVert{ new Vertex }, pVert{ new Vertex }, pVert{ new Vertex } };
 
-		cmd = new CommandBuffer(&g_mgr);
+		vertexBuffer = new_ref<VertexBuffer>(g_mgr_ref, vertices);
+
+		cmd = new_ref<CommandBuffer>(g_mgr_ref);
 
 		cmd->setActiveShader(test_shader);
 		cmd->bindVertexBuffer(vertexBuffer);
 		cmd->drawVertices(3);
 		cmd->build();
+
+		for(auto& vert : vertices) vert.release();
 
 		while(win.update())
 			loop();
@@ -66,10 +80,10 @@ private:
 
 	void loop() {
 		using namespace Graphics;
-		Vertex vert[3] = {
-				{{1, 1, 0}, {1, 0, 0}},
-				{{-1,1, 0}, {0, 1, 0}},
-				{{0,-1, 0}, {0, 0, 1}},
+		std::array<AutoPtr<Vertex>,3> vert = {
+				pVertex { new Vertex({1, 1, 0}) },
+				pVertex { new Vertex({-1,1, 0}) },
+				pVertex { new Vertex({0,-1, 0}) },
 		};
 
 		constexpr float ph[] =  {0, 2*Math::PI/3, 4*Math::PI/3};
@@ -78,19 +92,15 @@ private:
 
 		float threshold = sin(t * .1f)*.65f - .5f;
 
-		Vector3f color = {
-				Math::clamp01((cos(t + ph[0]) - threshold)/(1-threshold)),
-				Math::clamp01((cos(t + ph[1]) - threshold)/(1-threshold)),
-				Math::clamp01((cos(t + ph[2]) - threshold)/(1-threshold)),
-		};
+		float r = Math::clamp01((cos(t + ph[0]) - threshold)/(1-threshold));
+		float g = Math::clamp01((cos(t + ph[1]) - threshold)/(1-threshold));
+		float b = Math::clamp01((cos(t + ph[2]) - threshold)/(1-threshold));
 
-		vert[0].data.norm = color;
-		vert[1].data.norm = {color.y, color.z, color.x};
-		vert[2].data.norm = {color.z, color.x, color.y};
+		vert[0]->data.norm = {r, g, b};
+		vert[1]->data.norm = {g, b, r};
+		vert[2]->data.norm = {b, r, g};
 
-		vertexBuffer->updateVertice(0, vert[0]);
-		vertexBuffer->updateVertice(1, vert[1]);
-		vertexBuffer->updateVertice(2, vert[2]);
+		vertexBuffer->updateVertices<3>((std::array<RefPtr<IVertex>,3>&)vert, 0);
 
 		if(!win.isResize()) {
 			g_mgr.drawCmd(cmd);

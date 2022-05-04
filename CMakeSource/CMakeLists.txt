@@ -1,5 +1,8 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
+find_path(BETTER_CPP_INCLUDE_PATH REQUIRED)
+find_path(BETTER_CPP_LIB_PATH REQUIRED)
+
 #project config
 project ("GameEngine")
 project ("GameMain")
@@ -88,12 +91,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 #Source config
 
+message("bettercpp: ${BETTER_CPP_INCLUDE_PATH}")
+
 #GameEngine
-
-
 include_directories(GameEngine ${VULKAN_INCLUDE_PATH})
 include_directories(GameEngine ${DXSDK_INCLUDE_PATH})
 include_directories(GameEngine ${LIB_INCLUDE_PATH})
+include_directories(GameEngine ${BETTER_CPP_INCLUDE_PATH})
 include_directories(GameEngine "${GAME_ENGINE_PATH}/include")
 include_directories(GameEngine "${GAME_ENGINE_PATH}/src")
 
@@ -106,6 +110,7 @@ target_precompile_headers(GameEngine PUBLIC "${GAME_ENGINE_PATH}/src/pch.h")
 include_directories(GameMain ${VULKAN_INCLUDE_PATH})
 include_directories(GameMain ${DXSDK_INCLUDE_PATH})
 include_directories(GameMain ${LIB_INCLUDE_PATH})
+include_directories(GameMain ${BETTER_CPP_INCLUDE_PATH})
 include_directories(GameMain "${GAME_MAIN_PATH}/src")
 #build
 add_executable (GameMain ${GAME_MAIN_SRC})
@@ -117,6 +122,7 @@ target_link_directories(GameMain PUBLIC
         ${PROJECT_BINARY_DIR}
         "${DXSDK_LIB_PATH}/x64"
         ${VULKAN_LIB_PATH}
+        ${BETTER_CPP_LIB_PATH}
         )
 
 set(VLK_NAME "vulkan")
@@ -133,17 +139,18 @@ endif(UNIX)
 
 
 target_link_libraries(GameMain
-        "GameEngine"
-        "${VLK_NAME}"
-        "vk-bootstrap"
-        #"OpenAL32"
-        "fmt"
-        "ogg"
-        "vorbis"
-        "vorbisfile"
-        "vorbisenc"
-        "SDL2"
-	"SDL2main"
+    "GameEngine"
+    "BetterCpp"
+    "${VLK_NAME}"
+    "vk-bootstrap"
+    #"OpenAL32"
+    "fmt"
+    "ogg"
+    "vorbis"
+    "vorbisfile"
+    "vorbisenc"
+    "SDL2"
+    "SDL2main"
 	${OTHER_LIBS}
 )
 

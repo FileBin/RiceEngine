@@ -46,15 +46,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
-//#include <vulkan/vulkan.hpp>
+#define USE_BETTERCPP_MACROS
+#include <BetterCpp/BetterCpp.hpp>
 
 #include "namespaces.h"
 #include "macros.h"
 
 #include "defines.h"
-#include "Util/String.hpp"
-#include "Util/SmartPointer.hpp"
-#include "Util/Exceptions.hpp"
-#include "Util/ICleanable.hpp"
-#include "Util/Event.hpp"
+
+NSP_ENGINE_BEGIN
+
+using namespace bettercpp;
+
+NSP_ENGINE_END
 

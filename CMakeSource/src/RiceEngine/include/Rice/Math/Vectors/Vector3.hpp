@@ -6,6 +6,7 @@
 struct Vector3i;
 struct Quaternion;
 struct Vector3f;
+struct Vector2;
 
 struct Vector3 {
 public:

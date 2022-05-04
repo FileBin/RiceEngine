@@ -10,9 +10,8 @@
 
 NSP_GL_BEGIN
 
-Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) {
-	api_data = new Shader_API_Data();
-	on_resize_uuid = graphics_mgr->resizePipelines.subscribe([this](Vector2i win){ onResize(win); }); // @suppress("Invalid arguments")
+Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr), api_data { new Shader_API_Data } {
+	graphics_mgr->resizePipelines.subscribe(resizeReg, [this](Vector2i win){ onResize(win); }); // @suppress("Invalid arguments")
 }
 Shader::~Shader() { cleanup(); }
 
@@ -20,8 +19,6 @@ void Shader::cleanup() {
 	if(init) {
 		cleanupShaders();
 		cleanupPipeline();
-
-		graphics_mgr->resizePipelines.unsubscribe(on_resize_uuid);
 		api_data.release();
 	}
 	init = false;

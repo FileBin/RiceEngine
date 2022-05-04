@@ -10,10 +10,10 @@
 NSP_GL_BEGIN
 
 struct Vertex;
-typedef SmartPtr<Vertex> pVertex;
+typedef RefPtr<Vertex> pVertex;
 
 class Mesh;
-typedef SmartPtr<Mesh> pMesh;
+typedef RefPtr<Mesh> pMesh;
 
 NSP_GL_END
 

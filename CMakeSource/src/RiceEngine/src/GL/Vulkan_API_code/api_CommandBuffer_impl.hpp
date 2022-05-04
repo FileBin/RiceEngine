@@ -61,7 +61,7 @@ void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Exten
 	}
 }
 
-void CommandBuffer_API_data::doCommand(SmartPtr<CommandBuffer::Command> command) {
+void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
 	using namespace vk;
 
 	uint n = cmd.size();

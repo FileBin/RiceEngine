@@ -4,3 +4,5 @@
 
 #include "config.h"
 #include <Rice/stdafx.hpp>
+
+using namespace bettercpp;

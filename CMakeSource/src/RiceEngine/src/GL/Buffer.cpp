@@ -15,7 +15,9 @@
 NSP_GL_BEGIN
 
 void Buffer::build_api() {
-	api_data = new Buffer_API_Data(get_api_data().device, get_api_data().GPU);
+	api_data = RefPtr<Buffer_API_Data> {
+		new Buffer_API_Data(get_api_data().device, get_api_data().GPU)
+	};
 }
 
 void Buffer::allocate(size_t size, BufferUsage usage) {

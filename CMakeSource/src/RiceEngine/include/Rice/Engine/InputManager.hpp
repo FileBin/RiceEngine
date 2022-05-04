@@ -4,7 +4,7 @@
 NSP_ENGINE_BEGIN
 
 class InputManager;
-typedef SmartPtr<InputManager> pInputManager;
+typedef RefPtr<InputManager> pInputManager;
 
 NSP_ENGINE_END
 

@@ -10,7 +10,7 @@
 NSP_GL_BEGIN
 
 class Buffer;
-typedef SmartPtr<Buffer> pBuffer;
+typedef RefPtr<Buffer> pBuffer;
 
 enum class BufferUsage {
 	Vertex, Index
@@ -21,7 +21,7 @@ enum class IndexBufferType {
 };
 
 struct Buffer_API_Data;
-typedef SmartPtr<Buffer_API_Data> pBuffer_API_Data;
+typedef RefPtr<Buffer_API_Data> pBuffer_API_Data;
 
 NSP_GL_END
 

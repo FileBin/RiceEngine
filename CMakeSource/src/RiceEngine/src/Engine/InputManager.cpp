@@ -8,7 +8,7 @@ pInputManager InputManager::instance = nullptr;
 
 pInputManager InputManager::init(WindowHandle _handle) {
 	if (instance == nullptr) {
-		instance = new InputManager();
+		instance = pInputManager { new InputManager() };
 		instance->handle = _handle;
 		return instance;
 	}

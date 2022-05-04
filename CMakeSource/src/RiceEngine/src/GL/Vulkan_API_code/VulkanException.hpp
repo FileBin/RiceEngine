@@ -8,11 +8,11 @@
 
 NSP_ENGINE_BEGIN
 
-class VulkanException : public Exception {
+better_class_extends(VulkanException, Exception) {
 public:
 
 	VulkanException(vk::Result res, int line, const char* file) : Exception("VulkanException", line, file) {
-		SetInfo(_getInfo(res));
+		setInfo(_getInfo(res));
 	}
 private:
 	String _getInfo(vk::Result res){

@@ -60,7 +60,9 @@ GraphicsManager_API_data::GraphicsManager_API_data(pGraphicsManager mgr) {
 	auto dev_result = selector
 			.set_minimum_version(1, 1)
 			.set_surface(surface)
+#ifdef WIN32
 			.prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
+#endif
 			.select();
 
 	if(!dev_result.has_value()) {

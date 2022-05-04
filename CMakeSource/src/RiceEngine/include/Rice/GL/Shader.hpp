@@ -1,10 +1,10 @@
 ﻿#include "../stdafx.hpp"
 NSP_GL_BEGIN
 class Shader;
-typedef SmartPtr<Shader> pShader;
+typedef RefPtr<Shader> pShader;
 
 struct Shader_API_Data;
-typedef SmartPtr<Shader_API_Data> pShader_API_Data;
+typedef RefPtr<Shader_API_Data> pShader_API_Data;
 NSP_GL_END
 
 #pragma once
@@ -12,9 +12,6 @@ NSP_GL_END
 #include "GraphicsManager.hpp"
 #include "GraphicsComponentBase.hpp"
 #include "../Math.hpp"
-
-struct Shader_API_Data;
-typedef SmartPtr<Shader_API_Data> pShader_API_Data;
 
 NSP_GL_BEGIN
 class Shader : public GraphicsComponentBase {
@@ -32,9 +29,9 @@ public:
 	void buildPipeline(Vector2i windowSize);
 private:
 	friend class CommandBuffer_API_data;
-	pShader_API_Data api_data;
+	AutoPtr<Shader_API_Data> api_data;
 
-	GraphicsManager::ResizeEvent::UUID on_resize_uuid;
+	EventRegistration resizeReg;
 
 	bool init = false;
 	bool uses_depth_buffer = false;

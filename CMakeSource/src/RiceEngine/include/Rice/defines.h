@@ -9,16 +9,9 @@
 
 #ifndef _MSC_VER
 #define _STD ::std::
-#define SHRT_MAX 0x7fff
 #endif
 
 #include "stdafx.hpp"
-
-#define interface struct
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
-
-typedef unsigned char byte;
 
 template <typename T>
 using vec = _STD vector<T>;
@@ -39,12 +32,9 @@ typedef vec<byte> data_t;
 
 typedef long long num;
 typedef double dbl;
-typedef unsigned int uint;
 
 struct Vector3;
 
 typedef _STD function<dbl(Vector3)> SDFunc;
 
-#include "Util/SmartPointer.hpp"
-
-typedef SmartPtr<SDL_Window> WindowHandle;
+typedef bettercpp::RefPtr<SDL_Window> WindowHandle;

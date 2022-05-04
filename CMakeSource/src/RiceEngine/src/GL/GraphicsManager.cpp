@@ -10,14 +10,15 @@
 NSP_GL_BEGIN
 
 void GraphicsManager::init(pWindow _window) {
-	Log::debug("GraphicsManager initializing...");
 	window = _window;
-	api_data = new GraphicsManager_API_data(this);
+	api_data = new_ref<GraphicsManager_API_data>(refptr_this());
+	Log::debug("GraphicsManager initializing...");
 
 	is_initialized = true;
 	Log::debug("Successfully initialized!");
 
-	_window->resize_event.subscribe([this](pWindow win) { // @suppress("Invalid arguments")
+	_window->resize_event.subscribe(resizeReg, // @suppress("Invalid arguments")
+	[this](pWindow win) {
 		api_data->recreateSwapchain();
 		api_data->resizing = false;
 	});

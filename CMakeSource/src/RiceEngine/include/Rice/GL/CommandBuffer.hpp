@@ -10,10 +10,10 @@
 NSP_GL_BEGIN
 
 class CommandBuffer;
-typedef SmartPtr<CommandBuffer> pCommandBuffer;
+typedef RefPtr<CommandBuffer> pCommandBuffer;
 
 struct CommandBuffer_API_data;
-typedef SmartPtr<CommandBuffer_API_data> pCommandBuffer_API_data;
+typedef RefPtr<CommandBuffer_API_data> pCommandBuffer_API_data;
 
 NSP_GL_END
 
@@ -30,7 +30,8 @@ class CommandBuffer : GraphicsComponentBase {
 public:
 	friend class GraphicsManager;
 	friend class CommandBuffer_API_data;
-	struct Command {
+	better_class(Command) {
+	public:
 		enum Type {
 			BindVertexBuffer,
 			BindIndexBuffer,
@@ -42,7 +43,7 @@ public:
 			Arg* next;
 			virtual size_t getSize() const = 0;
 			virtual void* getData() const = 0;
-
+			virtual Arg* clone() const = 0;
 			virtual ~Arg() {};
 
 		} *arg_chain;
@@ -72,7 +73,12 @@ public:
 			T data;
 			size_t getSize() const override { return sizeof(T); }
 			void* getData() const override { return (void*)&data; }
-
+			Arg* clone() const override {
+				TypedArg<T>* arg = new TypedArg<T>();
+				arg->data = data;
+				if(next) arg->next = next->clone();
+				return arg;
+			}
 			~TypedArg() {
 				if(next) delete next;
 			}
@@ -101,7 +107,10 @@ public:
 			arg_chain = __convert_args<ArgsT...>::result(args...);
 		}
 
-		Command(const Command& other) = delete;
+		Command(const Command& other) {
+			cmd = other.cmd;
+			arg_chain = other.arg_chain->clone();
+		}
 
 		~Command() {
 			if(arg_chain) delete arg_chain;
@@ -109,9 +118,10 @@ public:
 	};
 
 protected:
-	pCommandBuffer_API_data api_data;
+	EventRegistration resizeReg;
+	AutoPtr<CommandBuffer_API_data> api_data;
 
-	vec<SmartPtr<Command>> commands;
+	List<AutoPtr<Command>> commands;
 public:
 	CommandBuffer(pGraphicsManager g_mgr);
 	~CommandBuffer() { cleanup(); }

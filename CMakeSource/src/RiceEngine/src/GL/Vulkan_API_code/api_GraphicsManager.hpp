@@ -57,10 +57,10 @@ public:
 	vk::Framebuffer getCurrentFrambuffer() {
 		return framebuffers[swapchainImageIndex];
 	}
-private:
 	friend class GraphicsManager;
 
 	GraphicsManager_API_data(pGraphicsManager g_mgr);
+private:
 	void recreateSwapchain();
 	void init_swapchain();
 	void init_commands();

@@ -10,7 +10,7 @@
 NSP_GL_BEGIN
 
 class GraphicsComponentBase;
-typedef SmartPtr<GraphicsComponentBase> pGraphicsComponentBase;
+typedef RefPtr<GraphicsComponentBase> pGraphicsComponentBase;
 
 NSP_GL_END
 
@@ -21,6 +21,7 @@ NSP_GL_BEGIN
 
 class GraphicsComponentBase : public ICleanable {
 protected:
+	EventRegistration deleteReg;
 	pGraphicsManager graphics_mgr;
 
 	GraphicsManager_API_data& get_api_data();

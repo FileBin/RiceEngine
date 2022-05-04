@@ -1,6 +1,5 @@
-#pragma once
 #ifdef __cplusplus
-
+#pragma once
 #define NSP_ENGINE_BEGIN namespace Rice {
 #define NSP_ENGINE_END }
 

@@ -23,7 +23,7 @@ struct CommandBuffer_API_data {
 	void end();
 	void reset();
 
-	void doCommand(SmartPtr<CommandBuffer::Command> command);
+	void doCommand(RefPtr<CommandBuffer::Command> command);
 
 	void cleanup(GraphicsManager_API_data& api_data);
 };

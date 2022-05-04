@@ -9,10 +9,10 @@ static String logLevel_str[] = { L"", L"INFO", L"DEBUG", L"WARNING", L"ERROR", L
 
 class Log {
 	struct Localization {
-		String log_begin = L"Log Created";
-		String log_end = L"Log End";
-		String log_is_already_created = L"Log is already created!";
-		String log_creation_error = L"Log creation-error!";
+		String log_begin = "Log Created";
+		String log_end = "Log End";
+		String log_is_already_created = "Log is already created!";
+		String log_creation_error = "Log creation-error!";
 	} static llocale;
 
 public:
@@ -27,7 +27,7 @@ public:
 	static void log(LogLevel logLevel, String message, const _Types &...args) {
 		if (instance == nullptr)
 			return;
-		auto str = fmt::format(message, args...);
+		auto str = String::format(message, args...);
 		if (logLevel == LogLevel::Debug) {
 #ifdef _DEBUG
 			instance->print(logLevel_str[(int)logLevel], str);
@@ -61,7 +61,7 @@ public:
 	static void close();
 	~Log();
 private:
-	static SmartPtr<Log> instance;
+	static RefPtr<Log> instance;
 	Log();
 	void _init();
 	void _close();

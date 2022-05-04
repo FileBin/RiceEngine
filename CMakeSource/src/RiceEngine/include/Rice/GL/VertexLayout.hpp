@@ -9,15 +9,18 @@
 
 NSP_GL_BEGIN
 
-interface IVertex;
+better_interface_proto(IVertex);
 
-typedef vec<SmartPtr<IVertex>> VertexList;
+typedef RefPtr<IVertex> pIVertex;
+
+typedef vec<pIVertex> VertexList;
+typedef vec<AutoPtr<IVertex>> AutoVertexList;
 
 struct VertexInput;
-typedef SmartPtr<VertexInput> pVertexInput;
+typedef RefPtr<VertexInput> pVertexInput;
 
 typedef vec<VertexInput> VertexLayout;
-typedef SmartPtr<VertexLayout> pVertexLayout;
+typedef RefPtr<VertexLayout> pVertexLayout;
 
 NSP_GL_END
 
@@ -35,7 +38,7 @@ struct VertexInput {
 	} format;
 };
 
-interface IVertex {
+better_interface(IVertex) {
 	virtual VertexLayout getLayout() const = 0;
 	virtual uint getStride() const = 0;
 	virtual void* getData() const = 0;

@@ -3,7 +3,7 @@
 NSP_ENGINE_BEGIN
 
 class Window;
-typedef SmartPtr<Window> pWindow;
+typedef RefPtr<Window> pWindow;
 
 NSP_ENGINE_END
 
@@ -21,16 +21,14 @@ struct DescWindow {
 	int posy { SDL_WINDOWPOS_UNDEFINED };
 };
 
-class Window : public ICleanable {
+better_class(Window) better_implements(public ICleanable) {
 public:
 	typedef Event<pWindow> ResizeEvent;
 
 	Window();
 	~Window() {	cleanup(); }
 
-	Window(const Window& other) = delete; //no copying
-
-	static const pWindow getInst() { return instance; }
+	Window(const Window& other) = default;
 
 	bool create(DescWindow desc);
 	bool update();
@@ -38,7 +36,9 @@ public:
 	void cleanup() override;
 	void setInputMgr(pInputManager inputmgr);
 
-	const WindowHandle getHandle() const { return handle; }
+	const WindowHandle getHandle() {
+		return handle;
+	}
 	int getLeft() const { return desc.posx; }
 	int getTop() const { return desc.posy; }
 	int getWidth() const {
@@ -77,9 +77,8 @@ private:
 	WindowHandle handle;
 	bool is_exit;
 	bool is_active;
+	bool created = false;
 	pInputManager inputmgr;
-
-	static pWindow instance;
 };
 
 NSP_ENGINE_END

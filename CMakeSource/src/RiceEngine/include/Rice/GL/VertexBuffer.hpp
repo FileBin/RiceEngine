@@ -10,7 +10,7 @@
 NSP_GL_BEGIN
 
 class VertexBuffer;
-typedef SmartPtr<VertexBuffer> pVertexBuffer;
+typedef RefPtr<VertexBuffer> pVertexBuffer;
 
 NSP_GL_END
 
@@ -24,8 +24,19 @@ NSP_GL_BEGIN
 class VertexBuffer : public Buffer {
 public:
 	VertexBuffer(pGraphicsManager g_mgr, VertexList& initialData);
-	void reset(vec<SmartPtr<IVertex>>& initialData);
-	void updateVertice(uint index, const IVertex& data);
+	void reset(VertexList& initialData);
+	void updateVertice(const IVertex& data, uint index);
+	void updateVertices(VertexList& data, uint start_index);
+
+	template<uint n>
+	void updateVertices(std::array<RefPtr<IVertex>, n>& data, size_t start_index){
+		uint s = data.front()->getStride();
+		if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
+
+		for (uint i = 0; i < n; ++i) {
+			setData(data[i]->getData(), s, s*i + start_index);
+		}
+	}
 
 	template<typename Vertex = Vertex>
 	Vertex getVertexData(uint index) {

@@ -31,14 +31,14 @@ String get_timer() {
 
 NSP_ENGINE_BEGIN
 
-SmartPtr<Log> Log::instance = nullptr;
+RefPtr<Log> Log::instance = nullptr;
 Log::Localization Log::llocale = { };
 
 void Log::init() {
 	if (instance.isNull()) {
-		instance = new Log();
+		instance = RefPtr<Log>{new Log()};
 	} else
-		log(LogLevel::Error, llocale.log_is_already_created.c_str());
+		log(LogLevel::Error, llocale.log_is_already_created);
 }
 
 Log::Log() {
@@ -60,11 +60,11 @@ void Log::_init() {
     auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>()); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
 	file.imbue(utf8);
 	if (file.is_open()) {
-		file << fmt::format( // @suppress("Invalid arguments")
+		file << String::format( // @suppress("Invalid arguments")
 						L"{}: {}.\n---------------------------------------\n\n",
-						llocale.log_begin, get_date());
+						llocale.log_begin, get_date()).toWide();
 	} else {
-		wprintf(llocale.log_creation_error.c_str());
+		wprintf(llocale.log_creation_error.toWide());
 	}
 }
 
@@ -72,19 +72,22 @@ void Log::_close() {
 	if (!file)
 		return;
 
-	file << fmt::format( // @suppress("Invalid arguments")
+	file << String::format( // @suppress("Invalid arguments")
 					L"\n---------------------------------------\n{}: {}\nTotal execution time: {}",
-					llocale.log_end, get_date(), get_timer());
+					llocale.log_end, get_date(), get_timer()).toWide();
+	file.flush();
 	file.close();
 }
 
 void Log::print(String levtext, String text) {
 
-	String str = fmt::format(L"{}: [{}] {}\n", get_timer(), levtext, text); // @suppress("Invalid arguments")
+	String str = String::format("{}: [{}] {}\n", get_timer(), levtext, text); // @suppress("Invalid arguments")
 
-	_STD wcout << str.c_str();
+	std::wstring wstr = str.toWide();
+
+	std::wcout << wstr;
 	fflush(stdout);
-	file << str;
+	file << wstr;
 #ifdef _DEBUG
 	file.flush();
 #endif

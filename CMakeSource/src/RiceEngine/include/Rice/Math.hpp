@@ -5,7 +5,7 @@
 #include "Math/Vectors.hpp"
 #include "Math/Matrixes.hpp"
 
-#include <math.h>
+/*#include <math.h>
 #include <cmath>
 
 NSP_ENGINE_BEGIN
@@ -28,6 +28,7 @@ public:
 	static double atan(double x) {
 		return toDegrees(atan(x));
 	}
+
 	static double atan2(double y, double x) {
 		return toDegrees(atan2(y, x));
 	}
@@ -109,4 +110,4 @@ public:
 	constexpr static double PI = 3.14159265359;
 };
 
-NSP_ENGINE_END
+NSP_ENGINE_END*/
