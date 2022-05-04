@@ -80,7 +80,8 @@ void CommandBuffer::build() {
 
 void CommandBuffer::cleanup() {
 	reset();
-	api_data->cleanup(get_api_data());
+	GraphicsManager_API_data* data = &get_api_data();
+	api_data->cleanup(*data);
 	api_data.release();
 }
 NSP_GL_END

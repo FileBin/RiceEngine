@@ -2,6 +2,8 @@
 
 NSP_ENGINE_BEGIN
 
+using WindowHandle = RefPtr<SDL_Window>;
+
 class Window;
 typedef RefPtr<Window> pWindow;
 
@@ -36,25 +38,25 @@ public:
 	void cleanup() override;
 	void setInputMgr(pInputManager inputmgr);
 
-	const WindowHandle getHandle() {
+	RefPtr<SDL_Window> getHandle() {
 		return handle;
 	}
 	int getLeft() const { return desc.posx; }
 	int getTop() const { return desc.posy; }
 	int getWidth() const {
 		int x,y;
-		SDL_GetWindowSize(handle.get(), &x, &y);
+		SDL_GetWindowSize(handle.cget(), &x, &y);
 		return x;
 	}
 	int getHeight() const {
 		int x,y;
-		SDL_GetWindowSize(handle.get(), &x, &y);
+		SDL_GetWindowSize(handle.cget(), &x, &y);
 		return y;
 	}
 
 	Vector2i getSize() const {
 		Vector2i size;
-		SDL_GetWindowSize(handle.get(), (int*)&size.x, (int*)&size.y);
+		SDL_GetWindowSize(handle.cget(), (int*)&size.x, (int*)&size.y);
 		return size;
 	}
 

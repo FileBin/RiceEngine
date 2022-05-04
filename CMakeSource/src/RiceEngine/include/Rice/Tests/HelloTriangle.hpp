@@ -110,6 +110,9 @@ private:
 	}
 
 	void cleanup() override {
+		cmd.release();
+		vertexBuffer.release();
+		test_shader.release();
 		g_mgr.cleanup();
 		win.cleanup();
 		Log::close();

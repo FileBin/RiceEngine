@@ -36,5 +36,3 @@ typedef double dbl;
 struct Vector3;
 
 typedef _STD function<dbl(Vector3)> SDFunc;
-
-typedef bettercpp::RefPtr<SDL_Window> WindowHandle;

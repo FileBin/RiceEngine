@@ -110,12 +110,12 @@ void Window::setInputMgr(pInputManager inputmgr) {
 
 bool Window::isResize() const {
 	int w,h;
-	SDL_GetWindowSize(handle.get(), &w, &h);
+	SDL_GetWindowSize(handle.cget(), &w, &h);
 	return w != desc.width || h != desc.height;
 }
 
 bool Window::isMinimized() const {
-	return SDL_GetWindowFlags(handle.get()) & SDL_WINDOW_MINIMIZED;
+	return SDL_GetWindowFlags(handle.cget()) & SDL_WINDOW_MINIMIZED;
 }
 
 void Window::updateWindowState() {
