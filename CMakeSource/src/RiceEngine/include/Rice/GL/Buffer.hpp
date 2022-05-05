@@ -34,7 +34,7 @@ NSP_GL_BEGIN
 
 class Buffer : public GraphicsComponentBase {
 protected:
-	friend class CommandBuffer_API_data;
+	friend struct CommandBuffer_API_data;
 	pBuffer_API_Data api_data;
 	Buffer(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr) { build_api(); }
 public:

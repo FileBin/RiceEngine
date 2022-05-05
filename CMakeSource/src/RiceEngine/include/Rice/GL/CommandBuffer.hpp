@@ -29,7 +29,7 @@ NSP_GL_BEGIN
 class CommandBuffer : GraphicsComponentBase {
 public:
 	friend class GraphicsManager;
-	friend class CommandBuffer_API_data;
+	friend struct CommandBuffer_API_data;
 	better_class(Command) {
 	public:
 		enum Type {

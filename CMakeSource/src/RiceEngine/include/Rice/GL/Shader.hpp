@@ -28,7 +28,7 @@ public:
 
 	void buildPipeline(Vector2i windowSize);
 private:
-	friend class CommandBuffer_API_data;
+	friend struct CommandBuffer_API_data;
 	AutoPtr<Shader_API_Data> api_data;
 
 	EventRegistration resizeReg;

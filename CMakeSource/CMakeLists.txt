@@ -41,7 +41,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   	
   	
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	add_compile_options(/W4 /WX)
+	add_compile_options(/W4 /WX-)
   	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc")
 endif()
 
@@ -148,7 +148,6 @@ target_link_libraries(GameMain
     "ogg"
     "vorbis"
     "vorbisfile"
-    "vorbisenc"
     "SDL2"
     "SDL2main"
 	${OTHER_LIBS}

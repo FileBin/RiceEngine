@@ -88,7 +88,11 @@ private:
 
 		constexpr float ph[] =  {0, 2*Math::PI/3, 4*Math::PI/3};
 
+#ifdef _WIN32
+		auto t = (float)clock() / CLOCKS_PER_SEC;
+#else
 		float t = clock() * .0001f;
+#endif
 
 		float threshold = sin(t * .1f)*.65f - .5f;
 

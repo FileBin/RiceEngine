@@ -28,7 +28,7 @@ void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Exten
 	uint n = cmd.size();
 	for(uint i=0; i<n; i++) {
 		vk::CommandBufferBeginInfo cmdBeginInfo = { };
-		cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+		//cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 
 		cmd[i].begin(cmdBeginInfo);
 

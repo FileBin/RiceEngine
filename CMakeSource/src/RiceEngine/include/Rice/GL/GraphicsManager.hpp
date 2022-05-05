@@ -3,7 +3,7 @@ NSP_GL_BEGIN
 class GraphicsManager;
 typedef RefPtr<GraphicsManager> pGraphicsManager;
 
-class GraphicsManager_API_data;
+struct GraphicsManager_API_data;
 typedef RefPtr<GraphicsManager_API_data> pGraphicsManager_API_data;
 
 class CommandBuffer;

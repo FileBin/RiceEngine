@@ -26,7 +26,8 @@ String get_date() {
 }
 
 String get_timer() {
-	return fmt::format(L"{:.4f}s", (double)duration_cast<microseconds>(steady_clock::now() - start).count() / 1000. / 1000.); // @suppress("Invalid arguments")
+	double time = duration_cast<microseconds>(steady_clock::now() - start).count() / 1000. / 1000.;
+	return fmt::format(L"{:.4f}s", time); // @suppress("Invalid arguments")
 }
 
 NSP_ENGINE_BEGIN
@@ -57,7 +58,12 @@ void Log::close() {
 void Log::_init() {
 	using namespace std;
 	file.open(LOGNAME, wfstream::out | wfstream::trunc);
-    auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>()); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+#ifdef _MSC_VER
+	auto utf8 = std::locale(file.getloc(), new std::codecvt_utf8<wchar_t>);
+#else
+	auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>()); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+#endif // _MSC_VER
+
 	file.imbue(utf8);
 	if (file.is_open()) {
 		file << String::format( // @suppress("Invalid arguments")

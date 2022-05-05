@@ -29,13 +29,6 @@
 #include <functional>
 #include <thread>
 
-#ifdef _MSC_VER
-
-#include "Dbghelp.h"
-#pragma comment(lib, "Dbghelp.lib")
-
-#endif
-
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
