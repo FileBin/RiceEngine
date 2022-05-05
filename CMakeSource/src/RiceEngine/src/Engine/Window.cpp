@@ -41,8 +41,8 @@ bool Window::create(DescWindow desc) {
 	updateWindowState();
 
 	if (handle.isNotNull()) {
-		return true;
 		Log::debug("Window successfully created!");
+		return true;
 	}
 	return false;
 }
