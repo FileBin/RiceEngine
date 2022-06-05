@@ -61,7 +61,7 @@ void Log::_init() {
 #ifdef _MSC_VER
 	auto utf8 = std::locale(file.getloc(), new std::codecvt_utf8<wchar_t>);
 #else
-	auto utf8 = locale(locale(), new codecvt_utf8<wchar_t>()); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
+	auto utf8 = locale(file.getloc(), new codecvt_utf8<wchar_t>()); // @suppress("Type cannot be resolved") // @suppress("Symbol is not resolved")
 #endif // _MSC_VER
 
 	file.imbue(utf8);

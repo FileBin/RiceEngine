@@ -1,7 +1,7 @@
 /*
  * Buffer.hpp
  *
- *  Created on: 26 ���. 2022 �.
+ *  Created on: 26 April 2022
  *      Author: FileBinsLapTop
  */
 

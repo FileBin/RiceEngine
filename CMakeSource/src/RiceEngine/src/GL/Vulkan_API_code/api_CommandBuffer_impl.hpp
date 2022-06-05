@@ -78,6 +78,18 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
 			}
 		}break;
 
+		case CommandBuffer::Command::DrawIndexed: {
+			CommandBuffer::Command::ArgIterator it = command->arg_chain;
+			auto count = *(uint*)(it++).current->getData();
+			auto instCount = *(uint*)(it++).current->getData();
+			auto index_offset = *(uint*)(it++).current->getData();
+			auto vert_begin = *(uint*)(it++).current->getData();
+			auto inst_begin = *(uint*)(it++).current->getData();
+			for(uint i=0; i<n; i++) {
+				cmd[i].drawIndexed(count, instCount, index_offset, vert_begin, inst_begin);
+			}
+		}break;
+
 		case CommandBuffer::Command::SetShader: {
 			for(uint i=0; i<n; i++) {
 				cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, (*(pShader*)command->arg_chain->getData())->api_data->pipeline);
@@ -96,15 +108,11 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
 		case CommandBuffer::Command::BindIndexBuffer: {
 			CommandBuffer::Command::ArgIterator it = command->arg_chain;
 			auto buf = *(pBuffer*)(it++).current->getData();
-			IndexBufferType ind_ty = *(IndexBufferType*)(it++).current->getData();
 			IndexType idx_ty;
 
-			switch (ind_ty) {
-			case IndexBufferType::Uint16: idx_ty = IndexType::eUint16; break;
-			case IndexBufferType::UInt32: idx_ty = IndexType::eUint32; break;
-
-			default: THROW_EXCEPTION("Unknown index buffer type"); break;
-			}
+			if(sizeof(index_t) == sizeof(uint16_t)) idx_ty = IndexType::eUint16;
+			else if(sizeof(index_t) == sizeof(uint)) idx_ty = IndexType::eUint32;
+			else THROW_EXCEPTION("Unknown index buffer type");
 
 			vk::Buffer vk_buf = buf->api_data->buffer;
 			DeviceSize offset = 0;

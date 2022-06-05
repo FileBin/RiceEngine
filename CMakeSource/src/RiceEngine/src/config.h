@@ -9,3 +9,4 @@
 //	  USE_OPENGL (not implemented)
 
 #define USE_VULKAN_API
+#define _DEBUG

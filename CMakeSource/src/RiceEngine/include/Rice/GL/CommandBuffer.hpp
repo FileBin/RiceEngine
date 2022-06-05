@@ -24,6 +24,7 @@ NSP_GL_END
 #include "Shader.hpp"
 #include "Buffer.hpp"
 #include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
 
 NSP_GL_BEGIN
 class CommandBuffer : GraphicsComponentBase {
@@ -37,6 +38,7 @@ public:
 			BindIndexBuffer,
 			SetShader,
 			Draw,
+			DrawIndexed,
 		} cmd;
 
 		struct Arg {
@@ -129,11 +131,12 @@ public:
 	void reset();
 
 	void drawVertices(uint count);
+	void drawIndexed(uint index_count);
 	void setActiveShader(pShader shader);
 
 	void bindVertexBuffer(pBuffer buffer);
 	void bindVertexBuffer(pVertexBuffer vertexBuffer);
-	void bindIndexBuffer(pBuffer indexBuffer, IndexBufferType type);
+	void bindIndexBuffer(pIndexBuffer indexBuffer);
 
 	void cleanup() override;
 

@@ -53,8 +53,7 @@ set(VULKAN_INCLUDE_PATH "$ENV{VK_SDK_PATH}/Include")
 set(APPEND DXSDK_LIB_PATH "$ENV{DXSDK_DIR}/Lib")
 set(APPEND DXSDK_INCLUDE_PATH "$ENV{DXSDK_DIR}/Include")
 
-set(SHADER_PATH "${GAME_MAIN_PATH}/shaders")
-set(HLSL_INCLUDE_PATH "${SHADER_PATH}/include")
+set(SHADER_PATH "${CMAKE_SOURCE_DIR}/shaders")
 set(RESOURCES_PATH "${CMAKE_SOURCE_DIR}/res/")
 
 #file search
@@ -74,6 +73,7 @@ set(GAME_ENGINE_SRC
  	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/Buffer.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/VertexBuffer.cpp"
+ 	"${GAME_ENGINE_PATH}/src/GL/IndexBuffer.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/CommandBuffer.cpp")
  
 set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")
@@ -83,8 +83,17 @@ set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")
 
 file(GLOB_RECURSE DLLs_x64 "${CMAKE_SOURCE_DIR}/lib/*.dll")
 
+file(GLOB_RECURSE FRAG_SHADER_FILES
+    "${SHADER_PATH}/*.frag"
+    )
+file (GLOB_RECURSE VERT_SHADER_FILES
+    "${SHADER_PATH}/*.vert")
+
+    message("vert shaders: ${VERT_SHADER_FILES}")
+    message("frag shaders: ${FRAG_SHADER_FILES}")
+
+
 file(GLOB_RECURSE RESOURCES "${RESOURCES_PATH}/*.*")
-set(HLSL_ALL_SHADER_FILES ${HLSL_VS_SHADER_FILES} ${HLSL_PS_SHADER_FILES})
 
 #global property
 set(CMAKE_CXX_STANDARD 20)
@@ -155,14 +164,36 @@ target_link_libraries(GameMain
 
 add_dependencies(GameMain GameEngine)
 
+find_program(GLSLC glslc)
+
+set(OUT_SHADERS_DIR "${PROJECT_BINARY_DIR}/shaders")
+
+file(MAKE_DIRECTORY ${OUT_SHADERS_DIR})
+
+#shader compilation
+foreach(FILE ${VERT_SHADER_FILES})
+  get_filename_component(FILE_WE ${FILE} NAME_WE)
+  add_custom_command(TARGET GameMain POST_BUILD
+    COMMAND ${GLSLC} ${FILE} -o "${OUT_SHADERS_DIR}/${FILE_WE}.vert.spv" -fshader-stage=vert
+    MAIN_DEPENDENCY ${FILE}
+    COMMENT "VERT ${FILE}")
+endforeach(FILE)
+
+foreach(FILE ${FRAG_SHADER_FILES})
+  get_filename_component(FILE_WE ${FILE} NAME_WE)
+  add_custom_command(TARGET GameMain POST_BUILD
+    COMMAND ${GLSLC} ${FILE} -o "${OUT_SHADERS_DIR}/${FILE_WE}.frag.spv" -fshader-stage=frag
+    MAIN_DEPENDENCY ${FILE}
+    COMMENT "FRAG ${FILE}")
+endforeach(FILE)
 
 if(WIN32)
 #copy dll
 add_custom_command(TARGET GameMain POST_BUILD   # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND}
         -E copy_if_different                    # which executes "cmake - E copy_if_different..."
-        ${DLLs_x64}                           # <--this is in-file
-        ${CMAKE_BINARY_DIR})                  # <--this is out-file path
+        ${DLLs_x64}                             # <--this is in-file
+        ${CMAKE_BINARY_DIR})                    # <--this is out-file path
 
 endif(WIN32)
 #copy resources
@@ -173,6 +204,6 @@ file(MAKE_DIRECTORY ${OUT_RES_DIR})
 
 add_custom_command(TARGET Resources   # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND}
-        -E copy_directory                    # which executes "cmake - E copy_if_different..."
-        ${RESOURCES_PATH}                           # <--this is in-file
-        ${OUT_RES_DIR})          # <--this is out-file path
+        -E copy_directory             # which executes "cmake - E copy_if_different..."
+        ${RESOURCES_PATH}             # <--this is in-file
+        ${OUT_RES_DIR})          	  # <--this is out-file path

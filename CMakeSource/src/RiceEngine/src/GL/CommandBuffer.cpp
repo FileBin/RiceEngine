@@ -57,6 +57,12 @@ void CommandBuffer::drawVertices(uint count) {
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
+void CommandBuffer::drawIndexed(uint count) {
+
+	commands.push(new_ref<Command>(Command::DrawIndexed, count, 1, 0, 0, 0));
+	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
+}
+
 void CommandBuffer::setActiveShader(pShader shader) {
 	commands.push(new_ref<Command>(Command::SetShader, shader));
 	//api_data->doCommand({ Command::SetShader, shader->api_data->pipeline });
@@ -70,8 +76,8 @@ void CommandBuffer::bindVertexBuffer(pVertexBuffer buffer) {
 	commands.push(new_ref<Command>(Command::BindVertexBuffer, (pBuffer)buffer));
 }
 
-void CommandBuffer::bindIndexBuffer(pBuffer buffer, IndexBufferType type) {
-	commands.push(new_ref<Command>(Command::BindIndexBuffer, buffer, type));
+void CommandBuffer::bindIndexBuffer(pIndexBuffer buffer) {
+	commands.push(new_ref<Command>(Command::BindIndexBuffer, (pBuffer)buffer));
 }
 
 void CommandBuffer::build() {
