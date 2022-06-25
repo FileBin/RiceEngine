@@ -15,6 +15,8 @@
 #pragma once
 NSP_GL_BEGIN
 
+#define VK_SEC * 1000000000
+
 #define TO_VK_BOOL(b) ((b) ? VK_TRUE : VK_FALSE)
 
 class VulkanHelper {
@@ -73,8 +75,6 @@ public:
 					vk::ColorComponentFlagBits::eB |
 					vk::ColorComponentFlagBits::eA,
 			bool blendEnable = false);
-
-	static vk::PipelineLayoutCreateInfo pipeline_layout_create_info();
 
 };
 

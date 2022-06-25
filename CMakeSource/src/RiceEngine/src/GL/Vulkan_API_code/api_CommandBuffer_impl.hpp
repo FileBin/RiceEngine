@@ -24,44 +24,44 @@ void CommandBuffer_API_data::build(GraphicsManager_API_data& api_data) {
 	cmd = api_data.device.allocateCommandBuffers(info);
 }
 
-void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Extent2D window) {
+void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Extent2D window, uint i) {
 	uint n = cmd.size();
-	for(uint i=0; i<n; i++) {
-		vk::CommandBufferBeginInfo cmdBeginInfo = { };
-		//cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+	vk::CommandBufferBeginInfo cmdBeginInfo;
 
-		cmd[i].begin(cmdBeginInfo);
+	//cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 
-		//make a clear-color from frame number. This will flash with a 120*pi frame period.
-		vk::ClearValue clearValue;
+	cmd[i].begin(cmdBeginInfo);
 
-		clearValue.color.float32[0] = .1f;
-		clearValue.color.float32[1] = .2f;
-		clearValue.color.float32[2] = .8f;
-		clearValue.color.float32[3] = 1.f;
+	vk::ClearValue clearValue;
 
-		//start the main renderpass.
-		//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
-		vk::RenderPassBeginInfo rpInfo = { };
+	clearValue.color.float32[0] = .1f;
+	clearValue.color.float32[1] = .2f;
+	clearValue.color.float32[2] = .8f;
+	clearValue.color.float32[3] = 1.f;
 
-		//windowExcent.width = window->getWidth();
-		//windowExcent.height = window->getHeight();
+	//start the main renderpass.
+	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
+	vk::RenderPassBeginInfo rpInfo = {};
 
-		rpInfo.renderPass = api_data.def_renderPass;
-		rpInfo.renderArea.offset.x = 0;
-		rpInfo.renderArea.offset.y = 0;
-		rpInfo.renderArea.extent = window;
-		rpInfo.framebuffer = api_data.framebuffers[i];
+	//windowExcent.width = window->getWidth();
+	//windowExcent.height = window->getHeight();
 
-		//connect clear values
-		rpInfo.clearValueCount = 1;
-		rpInfo.pClearValues = &clearValue;
+	rpInfo.renderPass = api_data.def_renderPass;
+	rpInfo.renderArea.offset.x = 0;
+	rpInfo.renderArea.offset.y = 0;
+	rpInfo.renderArea.extent = window;
+	rpInfo.framebuffer = api_data.framebuffers[i];
 
-		cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
-	}
+	//connect clear values
+	rpInfo.clearValueCount = 1;
+	rpInfo.pClearValues = &clearValue;
+
+	cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
 }
 
-void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
+
+
+void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command, uint i) {
 	using namespace vk;
 
 	uint n = cmd.size();
@@ -73,10 +73,8 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
 			auto instCount = *(uint*)(it++).current->getData();
 			auto vert_begin = *(uint*)(it++).current->getData();
 			auto inst_begin = *(uint*)(it++).current->getData();
-			for(uint i=0; i<n; i++) {
-				cmd[i].draw(count, instCount, vert_begin, inst_begin);
-			}
-		}break;
+			cmd[i].draw(count, instCount, vert_begin, inst_begin);
+		} break;
 
 		case CommandBuffer::Command::DrawIndexed: {
 			CommandBuffer::Command::ArgIterator it = command->arg_chain;
@@ -85,24 +83,18 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
 			auto index_offset = *(uint*)(it++).current->getData();
 			auto vert_begin = *(uint*)(it++).current->getData();
 			auto inst_begin = *(uint*)(it++).current->getData();
-			for(uint i=0; i<n; i++) {
-				cmd[i].drawIndexed(count, instCount, index_offset, vert_begin, inst_begin);
-			}
-		}break;
+			cmd[i].drawIndexed(count, instCount, index_offset, vert_begin, inst_begin);
+		} break;
 
 		case CommandBuffer::Command::SetShader: {
-			for(uint i=0; i<n; i++) {
-				cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, (*(pShader*)command->arg_chain->getData())->api_data->pipeline);
-			}
+			cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, (*(pShader*)command->arg_chain->getData())->api_data->pipeline);
 		}break;
 
 		case CommandBuffer::Command::BindVertexBuffer: {
 			auto buf = *(pBuffer*)command->arg_chain->getData();
 			vk::Buffer vk_buf = buf->api_data->buffer;
 			DeviceSize offset = 0;
-			for(uint i=0; i<n; i++) {
-				cmd[i].bindVertexBuffers(0, 1, &vk_buf, &offset); // @suppress("Ambiguous problem")
-			}
+			cmd[i].bindVertexBuffers(0, 1, &vk_buf, &offset); // @suppress("Ambiguous problem")
 		}break;
 
 		case CommandBuffer::Command::BindIndexBuffer: {
@@ -117,29 +109,50 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command) {
 			vk::Buffer vk_buf = buf->api_data->buffer;
 			DeviceSize offset = 0;
 
-			for(uint i=0; i<n; i++) {
-				cmd[i].bindIndexBuffer(vk_buf, offset, idx_ty);
-			}
+			cmd[i].bindIndexBuffer(vk_buf, offset, idx_ty);
 		}break;
+
+		case CommandBuffer::Command::PushConstants: {
+			CommandBuffer::Command::ArgIterator it = command->arg_chain;
+			auto shader = *(pShader*)(it++).current->getData();
+
+			auto stage = *(Shader::Type*)(it++).current->getData();
+
+			auto nData = *(uint*)(it++).current->getData();
+			void* pData = 0;
+			pData = (it++).current->getData();
+
+			ShaderStageFlags flags;
+
+			if(stage == Shader::Vertex)
+				flags = vk::ShaderStageFlagBits::eVertex;
+
+			else if(stage == Shader::Fragment)
+				flags = vk::ShaderStageFlagBits::eFragment;
+
+			else if(stage == Shader::Geometry)
+				flags = vk::ShaderStageFlagBits::eGeometry;
+
+			cmd[i].pushConstants(shader->api_data->layout, flags, 0, nData, pData);
+		} break;
+
 		default:
 		THROW_EXCEPTION("Unknown command occured!");
 		break;
 	}
 }
 
-void CommandBuffer_API_data::end() {
-	uint n = cmd.size();
-	for(uint i=0; i<n; i++) {
-		cmd[i].endRenderPass();
-		cmd[i].end();
-	}
+void CommandBuffer_API_data::end(uint i) {
+	cmd[i].endRenderPass();
+	cmd[i].end();
 }
 
-void CommandBuffer_API_data::reset() {
-	uint n = cmd.size();
-	for(uint i=0; i<n; i++) {
-		cmd[i].reset();
-	}
+void CommandBuffer_API_data::reset(uint i) {
+	cmd[i].reset();
+}
+
+uint CommandBuffer_API_data::bufCount() {
+	return cmd.size();
 }
 
 void CommandBuffer_API_data::cleanup(GraphicsManager_API_data& api_data) {

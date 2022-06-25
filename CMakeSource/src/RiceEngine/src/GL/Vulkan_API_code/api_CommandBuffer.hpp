@@ -17,13 +17,15 @@ NSP_GL_BEGIN
 struct CommandBuffer_API_data {
 	vec<vk::CommandBuffer> cmd;
 
+	uint bufCount();
+
 	void build(GraphicsManager_API_data& api_data);
 
-	void begin(GraphicsManager_API_data& api_data, vk::Extent2D window);
-	void end();
-	void reset();
+	void begin(GraphicsManager_API_data& api_data, vk::Extent2D window, uint i);
+	void end(uint i);
+	void reset(uint i);
 
-	void doCommand(RefPtr<CommandBuffer::Command> command);
+	void doCommand(RefPtr<CommandBuffer::Command> command, uint i);
 
 	void cleanup(GraphicsManager_API_data& api_data);
 };

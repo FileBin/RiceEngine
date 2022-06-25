@@ -39,10 +39,11 @@ public:
 			SetShader,
 			Draw,
 			DrawIndexed,
+			PushConstants
 		} cmd;
 
 		struct Arg {
-			Arg* next;
+			Arg* next = 0;
 			virtual size_t getSize() const = 0;
 			virtual void* getData() const = 0;
 			virtual Arg* clone() const = 0;
@@ -75,9 +76,12 @@ public:
 			T data;
 			size_t getSize() const override { return sizeof(T); }
 			void* getData() const override { return (void*)&data; }
+
+			TypedArg() = default;
+			TypedArg(const T& d) : data(d) {};
+
 			Arg* clone() const override {
-				TypedArg<T>* arg = new TypedArg<T>();
-				arg->data = data;
+				TypedArg<T>* arg = new TypedArg<T>(data);
 				if(next) arg->next = next->clone();
 				return arg;
 			}
@@ -96,8 +100,7 @@ public:
         template<typename FirstT, typename... ArgsT>
 		struct __convert_args<FirstT, ArgsT...> {
         	static Arg* result(FirstT first, ArgsT... args) {
-        		TypedArg<FirstT>* t_arg = new TypedArg<FirstT>;
-        		t_arg->data = first;
+        		TypedArg<FirstT>* t_arg = new TypedArg<FirstT>(first);
         		t_arg->next = __convert_args<ArgsT...>::result(args...);
         		return t_arg;
         	};
@@ -123,12 +126,12 @@ protected:
 	EventRegistration resizeReg;
 	AutoPtr<CommandBuffer_API_data> api_data;
 
-	List<AutoPtr<Command>> commands;
+	std::vector<AutoPtr<Command>> commands;
 public:
 	CommandBuffer(pGraphicsManager g_mgr);
 	~CommandBuffer() { cleanup(); }
 
-	void reset();
+	void clear();
 
 	void drawVertices(uint count);
 	void drawIndexed(uint index_count);
@@ -138,8 +141,14 @@ public:
 	void bindVertexBuffer(pVertexBuffer vertexBuffer);
 	void bindIndexBuffer(pIndexBuffer indexBuffer);
 
+	template<typename T>
+	void pushConstants(T data, pShader shader, Shader::Type stage = Shader::Vertex) {
+		commands.push_back(new_ref<Command>(Command::PushConstants, shader, stage, (uint)sizeof(data), data));
+	}
+
 	void cleanup() override;
 
 	void build();
+	void buildAll();
 };
 NSP_GL_END

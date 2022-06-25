@@ -107,7 +107,7 @@ private:
 		vertexBuffer->updateVertices<3>((std::array<RefPtr<IVertex>,3>&)vert, 0);
 
 		if(!win.isResize()) {
-			g_mgr.drawCmd(cmd);
+			g_mgr.executeCmd(cmd);
 		} else {
 			Log::debug("Frame skipped! window resize!");
 		}

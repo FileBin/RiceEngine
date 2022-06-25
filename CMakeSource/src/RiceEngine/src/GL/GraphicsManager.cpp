@@ -25,8 +25,17 @@ void GraphicsManager::init(pWindow _window) {
 
 }
 
-void GraphicsManager::drawCmd(pCommandBuffer cmd) {
-	api_data->drawCmd(cmd->api_data->cmd[api_data->swapchainImageIndex]);
+void GraphicsManager::executeCmd(pCommandBuffer cmd) {
+	api_data->executeCmd({ cmd->api_data->cmd[api_data->swapchainImageIndex] });
+}
+
+void GraphicsManager::executeCmds(vec<pCommandBuffer> cmds) {
+	uint n = cmds.size();
+	vec<vk::CommandBuffer> c(n);
+	for (uint i = 0; i < n; ++i)
+		c[i] = cmds[i]->api_data->cmd[api_data->swapchainImageIndex];
+
+	api_data->executeCmd(c);
 }
 
 

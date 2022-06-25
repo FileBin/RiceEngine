@@ -10,15 +10,22 @@
 
 NSP_GL_BEGIN
 
-Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr), api_data { new Shader_API_Data } {
+Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr), api_data { new_ref<Shader_API_Data>() } {
 	graphics_mgr->resizePipelines.subscribe(resizeReg, [this](Vector2i win){ onResize(win); }); // @suppress("Invalid arguments")
 }
 Shader::~Shader() { cleanup(); }
+
+void Shader::build() {
+	Vector2i s = { get_api_data().windowExcent.width, get_api_data().windowExcent.height };
+	buildDescriptorSet();
+	buildPipeline(s);
+}
 
 void Shader::cleanup() {
 	if(init) {
 		cleanupShaders();
 		cleanupPipeline();
+		cleanupDescriptorSetLayout();
 		api_data.release();
 	}
 	init = false;
@@ -40,13 +47,17 @@ void Shader::cleanupPipeline() {
     	get_api_data().device.destroy(api_data->layout);
 }
 
+
+void Shader::cleanupDescriptorSetLayout() {
+	if(api_data->descriptorSetLayout)
+		get_api_data().device.destroy(api_data->descriptorSetLayout);
+}
+
 void Shader::loadShader(String path, Type type) {
 	data_t buffer = Util::readFile(path);
 
 	//create a new shader module, using the buffer we loaded
 	vk::ShaderModuleCreateInfo createInfo = {};
-	createInfo.sType = vk::StructureType::eShaderModuleCreateInfo;
-	createInfo.pNext = nullptr;
 
 	//codeSize has to be in bytes, so multiply the ints in the buffer by size of int to know the real size of the buffer
 	createInfo.codeSize = buffer.size();
@@ -67,13 +78,52 @@ void Shader::loadShader(String path, Type type) {
 	}
 }
 
+void Shader::addUniformBuffer(uint binding, Type stage) {
+	using namespace vk;
+	DescriptorSetLayoutBinding uboLayoutBinding;
+	uboLayoutBinding.binding = 0;
+	uboLayoutBinding.descriptorType = DescriptorType::eUniformBuffer;
+	uboLayoutBinding.descriptorCount = 1;
+
+	switch(stage) {
+	case Type::Vertex:
+		uboLayoutBinding.stageFlags = ShaderStageFlagBits::eVertex;
+		break;
+	case Type::Fragment:
+		api_data->fragmentShader = ShaderStageFlagBits::eFragment;
+		break;
+	case Type::Geometry:
+		api_data->geometryShader = ShaderStageFlagBits::eGeometry;
+		break;
+	}
+
+	api_data->bindings.push_back(uboLayoutBinding);
+}
+
+void Shader::buildDescriptorSet() {
+	using namespace vk;
+	DescriptorSetLayoutCreateInfo info;
+	info.bindingCount = api_data->bindings.size();
+	info.pBindings = api_data->bindings.data();
+
+	api_data->descriptorSetLayout = get_api_data().device.createDescriptorSetLayout(info);
+}
+
 void Shader::buildPipeline(Vector2i extent) {
 	using help = VulkanHelper;
 	using namespace vk;
 
-	//build the pipeline layout that controls the inputs/outputs of the shader
-	//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
-	PipelineLayoutCreateInfo pipeline_layout_info = help::pipeline_layout_create_info();
+	vk::PipelineLayoutCreateInfo pipeline_layout_info;
+
+	PushConstantRange range;
+	range.setOffset(0).setSize(128).setStageFlags(ShaderStageFlagBits::eVertex);
+
+	pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_layout_info.pPushConstantRanges = &range;
+
+	pipeline_layout_info.setLayoutCount = 1;
+	pipeline_layout_info.pSetLayouts = &api_data->descriptorSetLayout;
+
 	api_data->layout = get_api_data().device.createPipelineLayout(pipeline_layout_info);
 
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules per stage

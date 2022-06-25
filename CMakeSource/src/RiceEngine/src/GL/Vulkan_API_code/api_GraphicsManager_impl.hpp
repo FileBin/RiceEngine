@@ -25,13 +25,9 @@ GraphicsManager_API_data::GraphicsManager_API_data(pGraphicsManager mgr) {
 
 	//make the Vulkan instance
 	auto inst_ret = builder.set_app_name("Riced Field")
-#ifdef _DEBUG
 	.request_validation_layers(true)
-#endif
 	.require_api_version(1, 1, 0)
-#ifdef _DEBUG
 	.use_default_debug_messenger()
-#endif
 	.build();
 
 	if(!inst_ret.has_value())
@@ -267,29 +263,31 @@ void GraphicsManager_API_data::cleanupSwapchain(bool destroy) {
 	}
 }
 
-void GraphicsManager_API_data::drawCmd(vk::CommandBuffer cmd) {
-	if(resizing) return;
+void GraphicsManager_API_data::sync() {
 	//wait until the GPU has finished rendering the last frame. Timeout of 0.1 second (fast)
-	auto res = device.waitForFences( { renderFence }, true, 100000000);
+	auto res = device.waitForFences( {renderFence}, true, 0.1 VK_SEC);
 	if (res == vk::Result::eTimeout && !g_mgr->window->isMinimized()) {
 		//wait until the GPU has finished rendering the last frame. Timeout of 1 second (slow)
-		res = device.waitForFences( { renderFence }, true,
-				1000000000);
+		res = device.waitForFences( {renderFence}, true,
+				1 VK_SEC);
 	}
 	THROW_VK_EX_IF_BAD(res);
+}
 
-	device.resetFences( { renderFence });
+void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
+	if(resizing) return;
+	sync();
+
+	device.resetFences( {renderFence});
 
 	//request image from the swapchain, 1 second timeout
-	res = device.acquireNextImageKHR(swapchain, 1000000000, // @suppress("Ambiguous problem")
-			presentSemaphore, nullptr, &swapchainImageIndex); // @suppress("Ambiguous problem")
+	auto res = device.acquireNextImageKHR(swapchain, 1000000000,// @suppress("Ambiguous problem")
+			presentSemaphore, nullptr, &swapchainImageIndex);// @suppress("Ambiguous problem")
 	if (res == vk::Result::eErrorOutOfDateKHR) {
 		resizing = true;
-		//recreateSwapchain();
 		return;
 	}
 	THROW_VK_EX_IF_BAD(res);
-
 	//prepare the submission to the queue.
 	//we want to wait on the _presentSemaphore, as that semaphore is signaled when the swapchain is ready
 	//we will signal the _renderSemaphore, to signal that rendering has finished
@@ -309,8 +307,8 @@ void GraphicsManager_API_data::drawCmd(vk::CommandBuffer cmd) {
 	submit.signalSemaphoreCount = 1;
 	submit.pSignalSemaphores = &renderSemaphore;
 
-	submit.commandBufferCount = 1;
-	submit.pCommandBuffers = &cmd;
+	submit.commandBufferCount = cmd.size();
+	submit.pCommandBuffers = cmd.data();
 
 	//submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
@@ -319,7 +317,6 @@ void GraphicsManager_API_data::drawCmd(vk::CommandBuffer cmd) {
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		resizing = true;
-		//recreateSwapchain();
 		return;
 	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 		THROW_VK_EX(result);
@@ -338,21 +335,18 @@ void GraphicsManager_API_data::drawCmd(vk::CommandBuffer cmd) {
 	presentInfo.waitSemaphoreCount = 1;
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
-
 	result = vkQueuePresentKHR((VkQueue) graphicsQueue,
 			(VkPresentInfoKHR*) &presentInfo);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		resizing = true;
-		//recreateSwapchain();
 		return;
 	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-		THROW_VK_EX(res);
+		THROW_VK_EX(result);
 	}
 
 	if(result == VK_SUBOPTIMAL_KHR)
 		resizing = true;
-		//recreateSwapchain();
 }
 
 GraphicsManager_API_data::~GraphicsManager_API_data() {

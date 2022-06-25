@@ -60,6 +60,7 @@ public:
 	friend class GraphicsManager;
 
 	GraphicsManager_API_data(pGraphicsManager g_mgr);
+	void sync();
 private:
 	void recreateSwapchain();
 	void init_swapchain();
@@ -70,7 +71,7 @@ private:
 
 	void cleanupSwapchain(bool destroy = true);
 
-	void drawCmd(vk::CommandBuffer cmd);
+	void executeCmd(vec<vk::CommandBuffer> cmd);
 };
 
 NSP_GL_END

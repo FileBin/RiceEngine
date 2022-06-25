@@ -42,7 +42,8 @@ public:
 
 	void init(pWindow window);
 
-	void drawCmd(pCommandBuffer cmd);
+	void executeCmd(pCommandBuffer cmd);
+	void executeCmds(vec<pCommandBuffer> cmds);
 	void cleanup() override;
 };
 

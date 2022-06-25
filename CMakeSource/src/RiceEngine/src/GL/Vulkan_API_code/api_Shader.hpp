@@ -15,6 +15,8 @@ struct Shader_API_Data {
 	vk::ShaderModule vertexShader, fragmentShader, geometryShader;
 	vk::Pipeline pipeline;
 	vk::PipelineLayout layout;
+	vk::DescriptorSetLayout descriptorSetLayout;
+	vec<vk::DescriptorSetLayoutBinding> bindings;
 };
 
 NSP_GL_END

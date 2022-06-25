@@ -15,6 +15,10 @@
 #include "../Math.hpp"
 #include "../GL/VertexBuffer.hpp"
 
+struct VertConstData {
+	Matrix4x4f renderMatrix;
+};
+
 NSP_TESTS_BEGIN
 
 class QuadTest : public ICleanable {
@@ -42,6 +46,8 @@ private:
 		//if(in_stack)
 			//win_ref.setDestoyer(PtrDestroyerType::DontDelete);
 
+		const_data.renderMatrix = Matrix4x4::Scale({.5,.5,.5}) * Matrix4x4::Translation({0,0,-.5});
+
 		win.create({ "Vulkan" });
 		Log::debug("Window created!");
 		pGraphicsManager g_mgr_ref = pGraphicsManager(&g_mgr);
@@ -52,7 +58,7 @@ private:
 
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
-		test_shader->buildPipeline(win.getSize());
+		test_shader->build();
 
 		using pVert = RefPtr<IVertex>;
 
@@ -60,7 +66,7 @@ private:
 				new_ref<Vertex>(Vector3f(-1,-1,0), Vector3f(0,1,0)),
 				new_ref<Vertex>(Vector3f(-1,1,0), Vector3f(1,0,0)),
 				new_ref<Vertex>(Vector3f(1,1,0), Vector3f(0,0,1)),
-				new_ref<Vertex>(Vector3f(1,-1,0), Vector3f(0,1,0)),
+				new_ref<Vertex>(Vector3f(1,-1,0), Vector3f(0,1,1)),
 		};
 
 		List<index_t> indexes({
@@ -76,8 +82,10 @@ private:
 		cmd->setActiveShader(test_shader);
 		cmd->bindVertexBuffer(vertexBuffer);
 		cmd->bindIndexBuffer(indexBuffer);
+
+		cmd->pushConstants<VertConstData>(const_data, test_shader);
 		cmd->drawIndexed(6);
-		cmd->build();
+		cmd->buildAll();
 
 		while(win.update())
 			loop();
@@ -85,11 +93,17 @@ private:
 
 	void loop() {
 		using namespace Graphics;
-		if(!win.isResize()) {
-			g_mgr.drawCmd(cmd);
-		} else {
-			Log::debug("Frame skipped! window resize!");
-		}
+
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		double time = std::chrono::duration<double, std::chrono::seconds::period>(currentTime - startTime).count();
+
+		//VertConstData data = {Matrix4x4f::identity};
+
+		//data.renderMatrix = Matrix4x4::Scale({sin(time),1,1}) * const_data.renderMatrix;
+
+		g_mgr.executeCmd(cmd);
 	}
 
 	void cleanup() override {
@@ -102,6 +116,7 @@ private:
 	}
 
 	Window win;
+	VertConstData const_data = { Matrix4x4f::identity };
 	Graphics::pVertexBuffer vertexBuffer;
 	Graphics::pIndexBuffer indexBuffer;
 	Graphics::pShader test_shader;

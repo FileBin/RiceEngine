@@ -16,76 +16,82 @@
 
 NSP_GL_BEGIN
 
-void _build(CommandBuffer_API_data* api_data, List<AutoPtr<CommandBuffer::Command>>& commands, GraphicsManager_API_data& data, vk::Extent2D window) {
-	api_data->reset();
-	api_data->begin(data, window);
-	for(AutoPtr<IEnumeratorT<AutoPtr<CommandBuffer::Command>>> en = commands.getEnumeratorT();
-			en->next(); ) {
-		api_data->doCommand(
-				en->currentT()
-				);
-	}
-	//for(auto& cmd : commands) {
-	//	api_data->doCommand(cmd);
-	//}
-	api_data->end();
+void _build(uint i, CommandBuffer_API_data* api_data, std::vector<AutoPtr<CommandBuffer::Command>>& commands, GraphicsManager_API_data& data, vk::Extent2D window) {
+	data.sync();
+	api_data->reset(i);
+	api_data->begin(data, window, i);
+	for(RefPtr<CommandBuffer::Command> cmd : commands)
+		api_data->doCommand(cmd, i);
+	api_data->end(i);
 }
 
 CommandBuffer::CommandBuffer(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr), api_data(new CommandBuffer_API_data) {
 	api_data->build(get_api_data());
 
 	g_mgr->resizeCommandBuffers.subscribe(resizeReg, [this](Vector2i size) { // @suppress("Invalid arguments")
-		_build(api_data.get(), commands, get_api_data(), vk::Extent2D(size.x, size.y));
+		uint n = api_data->bufCount();
+		for (uint i = 0; i < n; ++i)
+			_build(i, api_data.get(), commands, get_api_data(), vk::Extent2D(size.x, size.y));
 	});
 }
 
-void CommandBuffer::reset() {
-	uint n = commands.length();
+void CommandBuffer::clear() {
+	uint n = commands.size();
 	for (uint i = 0; i < n; ++i) {
 		commands[i].release();
 	}
 
 	commands.clear();
-	api_data->reset();
+	n = api_data->bufCount();
+	for (uint i = 0; i < n; ++i)
+		api_data->reset(i);
 }
 
 using pCmd = RefPtr<CommandBuffer::Command>;
 
 void CommandBuffer::drawVertices(uint count) {
 
-	commands.push(new_ref<Command>(Command::Draw, count, 1, 0, 0));
+	commands.push_back(new_ref<Command>(Command::Draw, count, 1, 0, 0));
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
 void CommandBuffer::drawIndexed(uint count) {
 
-	commands.push(new_ref<Command>(Command::DrawIndexed, count, 1, 0, 0, 0));
+	commands.push_back(new_ref<Command>(Command::DrawIndexed, count, 1, 0, 0, 0));
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
 void CommandBuffer::setActiveShader(pShader shader) {
-	commands.push(new_ref<Command>(Command::SetShader, shader));
+	commands.push_back(new_ref<Command>(Command::SetShader, shader));
 	//api_data->doCommand({ Command::SetShader, shader->api_data->pipeline });
 }
 
 void CommandBuffer::bindVertexBuffer(pBuffer buffer) {
-	commands.push(new_ref<Command>(Command::BindVertexBuffer, buffer));
+	commands.push_back(new_ref<Command>(Command::BindVertexBuffer, buffer));
 }
 
 void CommandBuffer::bindVertexBuffer(pVertexBuffer buffer) {
-	commands.push(new_ref<Command>(Command::BindVertexBuffer, (pBuffer)buffer));
+	commands.push_back(new_ref<Command>(Command::BindVertexBuffer, (pBuffer)buffer));
 }
 
 void CommandBuffer::bindIndexBuffer(pIndexBuffer buffer) {
-	commands.push(new_ref<Command>(Command::BindIndexBuffer, (pBuffer)buffer));
+	commands.push_back(new_ref<Command>(Command::BindIndexBuffer, (pBuffer)buffer));
 }
 
 void CommandBuffer::build() {
-	_build(api_data.get(), commands, get_api_data(), get_api_data().windowExcent);
+	GraphicsManager_API_data& d = get_api_data();
+	_build(d.swapchainImageIndex, api_data.get(), commands, d, d.windowExcent);
+}
+
+void CommandBuffer::buildAll() {
+	GraphicsManager_API_data& d = get_api_data();
+	uint n = api_data->bufCount();
+	for (uint i = 0; i < n; ++i)
+		_build(i, api_data.get(), commands, d, d.windowExcent);
 }
 
 void CommandBuffer::cleanup() {
-	reset();
+	clear();
 	GraphicsManager_API_data* data = &get_api_data();
 	api_data->cleanup(*data);
 	api_data.release();

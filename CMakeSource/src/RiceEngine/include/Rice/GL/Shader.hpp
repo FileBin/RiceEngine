@@ -26,12 +26,16 @@ public:
 
 	void loadShader(String path, Type shaderType);
 
-	void buildPipeline(Vector2i windowSize);
+	void addUniformBuffer(uint binding, Type shaderStage);
+
+	void build();
 private:
 	friend struct CommandBuffer_API_data;
 	AutoPtr<Shader_API_Data> api_data;
 
 	EventRegistration resizeReg;
+
+	uint numBindings;
 
 	bool init = false;
 	bool uses_depth_buffer = false;
@@ -39,6 +43,10 @@ private:
 	void onResize(Vector2i windowSize);
 	void cleanupPipeline();
 	void cleanupShaders();
+	void cleanupDescriptorSetLayout();
+
+	void buildPipeline(Vector2i extent);
+	void buildDescriptorSet();
 };
 NSP_GL_END
 

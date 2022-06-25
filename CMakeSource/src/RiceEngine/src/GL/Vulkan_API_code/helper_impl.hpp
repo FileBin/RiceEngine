@@ -121,19 +121,6 @@ vk::PipelineColorBlendAttachmentState VulkanHelper::color_blend_attachment_state
 	return colorBlendAttachment;
 }
 
-//TODO expand pipeline layout
-vk::PipelineLayoutCreateInfo VulkanHelper::pipeline_layout_create_info() {
-	vk::PipelineLayoutCreateInfo info {};
-
-	//empty defaults
-	info.flags = {};
-	info.setLayoutCount = 0;
-	info.pSetLayouts = nullptr;
-	info.pushConstantRangeCount = 0;
-	info.pPushConstantRanges = nullptr;
-	return info;
-}
-
 
 vk::Pipeline VulkanHelper::PipelineBuilder::build_pipeline(vk::Device device, vk::RenderPass pass) {
 	//make viewport state from our stored viewport and scissor.
