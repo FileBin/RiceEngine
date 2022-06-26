@@ -12,6 +12,7 @@ NSP_GL_END
 #include "GraphicsManager.hpp"
 #include "GraphicsComponentBase.hpp"
 #include "../Math.hpp"
+#include "VertexLayout.hpp"
 
 NSP_GL_BEGIN
 class Shader : public GraphicsComponentBase {
@@ -28,6 +29,20 @@ public:
 
 	void addUniformBuffer(uint binding, Type shaderStage);
 
+	void setVertexStride(uint stride) {
+		vertexStride = stride;
+	}
+
+	void setVertexLayout(VertexLayout layout) {
+		vertexLayout = layout;
+	}
+
+	template<typename VertT>
+	void setVertexStrideAndLayout() {
+		vertexStride = sizeof(VertT);
+		vertexLayout = VertT::vertexLayout;
+	}
+
 	void build();
 private:
 	friend struct CommandBuffer_API_data;
@@ -36,7 +51,8 @@ private:
 
 	EventRegistration resizeReg;
 
-	uint numBindings;
+	uint vertexStride = 0;
+	VertexLayout vertexLayout;
 
 	bool init = false;
 	bool uses_depth_buffer = false;

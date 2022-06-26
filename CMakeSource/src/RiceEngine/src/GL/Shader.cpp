@@ -110,6 +110,10 @@ void Shader::buildDescriptorSet() {
 }
 
 void Shader::buildPipeline(Vector2i extent) {
+	if(vertexStride == 0) THROW_EXCEPTION("Cannot build pipeline! Vertex stride is not set!");
+	if(vertexLayout.size() == 0) THROW_EXCEPTION("Cannot build pipeline! Vertex layout is not set!");
+
+
 	using help = VulkanHelper;
 	using namespace vk;
 
@@ -143,17 +147,15 @@ void Shader::buildPipeline(Vector2i extent) {
 
 	VertexInputBindingDescription bindingDesc = VertexInputBindingDescription()
 			.setBinding(0)
-			.setStride(Vertex::getVertexStride())
+			.setStride(vertexStride)
 			.setInputRate(VertexInputRate::eVertex);
 
-	VertexLayout layout = Vertex::getVertexLayout();
-
-	uint n = layout.size();
+	uint n = vertexLayout.size();
 
 	vec<VertexInputAttributeDescription> attributeDescs(n);
 
 	for (uint i = 0; i < n; ++i) {
-		auto& input = layout[i];
+		auto& input = vertexLayout[i];
 		auto& desc = attributeDescs[i];
 		desc.setBinding(input.binding)
 		    .setOffset(input.offset)

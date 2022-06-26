@@ -24,44 +24,21 @@ NSP_GL_END
 
 NSP_GL_BEGIN
 
-struct Vertex : public IVertex {
-	struct Data {
-		Vector3f pos;
-		Vector3f norm;
-		Vector2f tex_coord0;
-	} data;
+struct Vertex {
+	Vector3f pos;
+	Vector3f norm;
+	Vector2f tex_coord0;
 
-	Vertex()
-	: data({}) {}
-
-	Vertex(Vector3f pos)
-	: data({pos}) {}
-
-	Vertex(Vector3f pos, Vector3f norm)
-	: data({pos, norm}) {}
-
-	Vertex(Vector3f pos, Vector3f norm, Vector2f texcoord)
-	: data({pos, norm, texcoord}) {}
-
-
-	static VertexLayout getVertexLayout() {
-		return {
-			{ "POSITION", 0, offsetof(Data, pos), VertexInput::float3 },
-			{ "NORMAL", 0,  offsetof(Data, norm), VertexInput::float3 },
-			{ "TEXCOORD0", 0, offsetof(Data, tex_coord0), VertexInput::float2 },
-		};
-	}
-
-	static uint getVertexStride() {
-		return sizeof(Data);
-	}
-
-	VertexLayout getLayout() const override { return getVertexLayout(); }
-	uint getStride() const override {return getVertexStride(); }
-	void* getData() const override {return (void*)&data; }
-
-
+	static const VertexLayout vertexLayout;
 };
+
+inline const VertexLayout Vertex::vertexLayout(
+	{
+		VertexInput("POSITION", 0, offsetof(Vertex, pos), VertexInput::float3),
+		VertexInput("NORMAL", 0,  offsetof(Vertex, norm), VertexInput::float3),
+		VertexInput("TEXCOORD0", 0, offsetof(Vertex, tex_coord0), VertexInput::float2),
+	}
+);
 
 class Mesh {
 	struct Bounds {
@@ -71,10 +48,8 @@ class Mesh {
 		Vector3f getSize();
 	};
 	Bounds bounds;
-	vec<Vertex> vertexBuffer = {};
+	RefPtr<VertexList> vertexBuffer;
 	vec<uint> indexBuffer = {};
-	VertexLayout layout = Vertex::getVertexLayout();
-
 	static const Mesh quad;
 
 	void rotate(Quaternion q);
@@ -85,7 +60,7 @@ class Mesh {
 	void reclaculateBounds();
 
 	bool isEmpty() {
-		return vertexBuffer.empty();
+		return vertexBuffer->count() == 0;
 	}
 
 	//bool CheckVisiblity(ConstantBufferData WVPm);

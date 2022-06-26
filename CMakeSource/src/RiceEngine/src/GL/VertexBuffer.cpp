@@ -30,36 +30,29 @@ void VertexBuffer::cleanup() {
 void VertexBuffer::reset(VertexList& initialData) {
 	cleanup();
 
-	if(!initialData.empty()) {
-		uint s = initialData.front()->getStride();
-		uint n = initialData.size();
+	uint s = initialData.getStride();
+	uint n = initialData.count();
 
+	if(n != 0) {
 		current_count = n;
 		stride = s;
 
 		allocate(s*n, BufferUsage::Vertex);
 
 		for (uint i = 0; i < n; ++i) {
-			setData(initialData[i]->getData(), s, s * i);
+			setData(initialData.getData(i), s, s * i);
 		}
 	}
 }
 
-void VertexBuffer::updateVertice(const IVertex& vert, uint i) {
+void VertexBuffer::updateVertices(VertexList& vert, uint start) {
 	uint s = vert.getStride();
 	if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
 
-	setData(vert.getData(), s, s*i);
-}
-
-void VertexBuffer::updateVertices(VertexList& vert, uint start) {
-	uint s = vert.front()->getStride();
-	if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
-
-	uint n = vert.size();
+	uint n = vert.count();
 
 	for (uint i = 0; i < n; ++i) {
-		setData(vert[i]->getData(), s, s*i + start);
+		setData(vert.getData(i), s, s*i + start);
 	}
 }
 

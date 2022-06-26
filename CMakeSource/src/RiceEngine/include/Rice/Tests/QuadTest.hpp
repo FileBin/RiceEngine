@@ -60,6 +60,7 @@ private:
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
 		test_shader->addUniformBuffer(0, Shader::Vertex);
+		test_shader->setVertexStrideAndLayout<Vertex>();
 		test_shader->build();
 
 		uniformBuffer = new_ref<UniformBuffer>(g_mgr_ref, sizeof(VertConstData));
@@ -67,14 +68,12 @@ private:
 		uniformBuffer->setBinding(0, sizeof(VertConstData));
 		uniformBuffer->updateDataAll<VertConstData>(const_data);
 
-		using pVert = RefPtr<IVertex>;
-
-		VertexList vertices = {
-				new_ref<Vertex>(Vector3f(-1,-1,0), Vector3f(0,1,0)),
-				new_ref<Vertex>(Vector3f(-1,1,0), Vector3f(1,0,0)),
-				new_ref<Vertex>(Vector3f(1,1,0), Vector3f(0,0,1)),
-				new_ref<Vertex>(Vector3f(1,-1,0), Vector3f(0,1,1)),
-		};
+		VertexListT<Vertex> vertices({
+				{Vector3f(-1,-1,0), Vector3f(0,1,0)},
+				{Vector3f(-1,1,0), Vector3f(1,0,0)},
+				{Vector3f(1,1,0), Vector3f(0,0,1)},
+				{Vector3f(1,-1,0), Vector3f(0,1,1)},
+		});
 
 		List<index_t> indexes({
 			0,1,2,

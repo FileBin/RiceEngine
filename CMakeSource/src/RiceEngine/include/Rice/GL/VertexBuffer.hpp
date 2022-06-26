@@ -25,37 +25,45 @@ class VertexBuffer : public Buffer {
 public:
 	VertexBuffer(pGraphicsManager g_mgr, VertexList& initialData);
 	void reset(VertexList& initialData);
-	void updateVertice(const IVertex& data, uint index);
-	void updateVertices(VertexList& data, uint start_index);
 
-	template<uint n>
-	void updateVertices(std::array<RefPtr<IVertex>, n>& data, size_t start_index){
-		uint s = data.front()->getStride();
+	template<typename Vertex>
+	void updateVertice(const Vertex& data, uint index) {
+		constexpr uint s = sizeof(Vertex);
 		if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
 
+		setData((void*)&data, s, s*index);
+	}
+	void updateVertices(VertexList& data, uint start_index);
+
+	void updateVertices(VertexList& data, size_t start_index){
+		uint s = data.getStride();
+		if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
+
+
+		uint n = data.count();
 		for (uint i = 0; i < n; ++i) {
-			setData(data[i]->getData(), s, s*i + start_index);
+			setData(data.getData(i), s, s*i + start_index);
 		}
 	}
 
-	template<typename Vertex = Vertex>
+	template<typename Vertex>
 	Vertex getVertexData(uint index) {
 		Vertex vert;
-		uint s = vert.getStride();
+		constexpr uint s = sizeof(Vertex);
 		if(s != stride) THROW_EXCEPTION("Incorrect vertex type!");
 
-		getData(vert.getData(), s, s * index);
+		getData((void*)&vert, s, s * index);
 		return vert;
 	}
 
-	template<typename Vertex = Vertex, uint count>
-	std::array<Vertex, count> getVertexData(uint index) {
-		std::array<Vertex, count> vertices;
-		uint s = vertices.front().getStride();
+	template<typename Vertex>
+	VertexList getVertexData(uint index, uint count) {
+		VertexListT<Vertex> vertices({count});
+		uint s = vertices.getStride();
 		if(s != stride) THROW_EXCEPTION("Incorrect vertex type!");
 
 		for (uint i = 0; i < count; ++i) {
-			getData(vertices[i].getData(), s , s*index);
+			getData(vertices.getData(i), s , s*index);
 		}
 		return vertices;
 	}

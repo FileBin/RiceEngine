@@ -9,12 +9,7 @@
 
 NSP_GL_BEGIN
 
-better_interface_proto(IVertex);
-
-typedef RefPtr<IVertex> pIVertex;
-
-typedef vec<pIVertex> VertexList;
-typedef vec<AutoPtr<IVertex>> AutoVertexList;
+class VertexList;
 
 struct VertexInput;
 typedef RefPtr<VertexInput> pVertexInput;
@@ -26,6 +21,37 @@ NSP_GL_END
 
 NSP_GL_BEGIN
 
+class VertexList {
+public:
+	virtual uint getStride() const = 0;
+	virtual VertexLayout getLayout() const = 0;
+	virtual void* getData(uint i) const = 0;
+	virtual uint count() const = 0;
+	virtual ~VertexList() {}
+};
+
+template<typename T>
+class VertexListT : public VertexList {
+private:
+	vec<T> vertices;
+public:
+	VertexListT(vec<T> init_data) : vertices(init_data) {}
+
+	uint getStride() const override {
+		return sizeof(T);
+	}
+	VertexLayout getLayout() const override {
+		return T::vertexLayout;
+	}
+	void* getData(uint i) const override {
+		return (void*)&vertices[i];
+	}
+
+	uint count() const override {
+		return vertices.size();
+	}
+};
+
 struct VertexInput {
 	const char* description;
 	uint binding;
@@ -36,13 +62,8 @@ struct VertexInput {
 		float1 = 0, float2, float3, float4,
 		int1, int2, int3, int4,
 	} format;
-};
 
-better_interface(IVertex) {
-	virtual VertexLayout getLayout() const = 0;
-	virtual uint getStride() const = 0;
-	virtual void* getData() const = 0;
-	virtual ~IVertex() {};
+	VertexInput(const char* desc, uint binding, uint offset, Format format) : description(desc), binding(binding), offset(offset), format(format) {}
 };
 
 NSP_GL_END
