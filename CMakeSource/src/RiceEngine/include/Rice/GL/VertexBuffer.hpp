@@ -46,7 +46,7 @@ public:
 	}
 
 	template<typename Vertex>
-	VertexList getVertexData(uint index, uint count) {
+	VertexListT<Vertex> getVertexData(uint index, uint count) {
 		VertexListT<Vertex> vertices({count});
 		uint s = vertices.getStride();
 		if(s != stride) THROW_EXCEPTION("Incorrect vertex type!");
