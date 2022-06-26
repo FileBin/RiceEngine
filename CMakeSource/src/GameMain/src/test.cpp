@@ -1,8 +1,7 @@
 #include "pch.h"
 #include <Rice/Tests/QuadTest.hpp>
-#include <Rice/Tests/HelloTriangle.hpp>
 
 int main() {
-	Rice::Tests::HelloTriangle::runTest();
+	Rice::Tests::QuadTest::runTest();
 	return 0;
 }
