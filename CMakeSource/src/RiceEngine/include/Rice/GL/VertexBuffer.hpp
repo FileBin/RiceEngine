@@ -35,17 +35,6 @@ public:
 	}
 	void updateVertices(VertexList& data, uint start_index);
 
-	void updateVertices(VertexList& data, size_t start_index){
-		uint s = data.getStride();
-		if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
-
-
-		uint n = data.count();
-		for (uint i = 0; i < n; ++i) {
-			setData(data.getData(i), s, s*i + start_index);
-		}
-	}
-
 	template<typename Vertex>
 	Vertex getVertexData(uint index) {
 		Vertex vert;

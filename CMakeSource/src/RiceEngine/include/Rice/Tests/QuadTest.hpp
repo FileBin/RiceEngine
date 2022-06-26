@@ -57,8 +57,8 @@ private:
 		g_mgr.init(win_ref);
 		test_shader = new_ref<Shader>(g_mgr_ref);
 
-		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
-		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
+		test_shader->loadShader("shaders/quad_test.vert.spv", Shader::Vertex);
+		test_shader->loadShader("shaders/quad_test.frag.spv", Shader::Fragment);
 		test_shader->addUniformBuffer(0, Shader::Vertex);
 		test_shader->setVertexStrideAndLayout<Vertex>();
 		test_shader->build();

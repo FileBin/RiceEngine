@@ -47,6 +47,10 @@ public:
 		return (void*)&vertices[i];
 	}
 
+	T& getVertex(uint i) {
+		return vertices[i];
+	}
+
 	uint count() const override {
 		return vertices.size();
 	}

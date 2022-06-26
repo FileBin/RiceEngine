@@ -57,11 +57,10 @@ private:
 
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
-		test_shader->buildPipeline(win.getSize());
+		test_shader->setVertexStrideAndLayout<Vertex>();
+		test_shader->build();
 
-		using pVert = RefPtr<IVertex>;
-
-		VertexList vertices = { pVert{ new Vertex }, pVert{ new Vertex }, pVert{ new Vertex } };
+		VertexListT<Vertex> vertices({ {{1,1,0}}, {{-1,1,0}}, {{0,-1,0}} });
 
 		vertexBuffer = new_ref<VertexBuffer>(g_mgr_ref, vertices);
 
@@ -70,9 +69,7 @@ private:
 		cmd->setActiveShader(test_shader);
 		cmd->bindVertexBuffer(vertexBuffer);
 		cmd->drawVertices(3);
-		cmd->build();
-
-		for(auto& vert : vertices) vert.release();
+		cmd->buildAll();
 
 		while(win.update())
 			loop();
@@ -80,19 +77,19 @@ private:
 
 	void loop() {
 		using namespace Graphics;
-		std::array<AutoPtr<Vertex>,3> vert = {
-				pVertex { new Vertex({1, 1, 0}) },
-				pVertex { new Vertex({-1,1, 0}) },
-				pVertex { new Vertex({0,-1, 0}) },
-		};
+		VertexListT<Vertex> vertices({
+			{{1,1,0}},
+			{{-1,1,0}},
+			{{0,-1,0}},
+		});
 
 		constexpr float ph[] =  {0, 2*Math::PI/3, 4*Math::PI/3};
 
-#ifdef _WIN32
-		auto t = (float)clock() / CLOCKS_PER_SEC;
-#else
-		float t = clock() * .0001f;
-#endif
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		double time = std::chrono::duration<double, std::chrono::seconds::period>(currentTime - startTime).count();
+		float t = time * 4;
 
 		float threshold = sin(t * .1f)*.65f - .5f;
 
@@ -100,11 +97,11 @@ private:
 		float g = Math::clamp01((cos(t + ph[1]) - threshold)/(1-threshold));
 		float b = Math::clamp01((cos(t + ph[2]) - threshold)/(1-threshold));
 
-		vert[0]->data.norm = {r, g, b};
-		vert[1]->data.norm = {g, b, r};
-		vert[2]->data.norm = {b, r, g};
+		vertices.getVertex(0).norm = {r, g, b};
+		vertices.getVertex(1).norm = {g, b, r};
+		vertices.getVertex(2).norm = {b, r, g};
 
-		vertexBuffer->updateVertices<3>((std::array<RefPtr<IVertex>,3>&)vert, 0);
+		vertexBuffer->updateVertices(vertices, 0);
 
 		if(!win.isResize()) {
 			g_mgr.executeCmd(cmd);
