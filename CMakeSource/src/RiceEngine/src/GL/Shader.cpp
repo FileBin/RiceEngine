@@ -90,10 +90,10 @@ void Shader::addUniformBuffer(uint binding, Type stage) {
 		uboLayoutBinding.stageFlags = ShaderStageFlagBits::eVertex;
 		break;
 	case Type::Fragment:
-		api_data->fragmentShader = ShaderStageFlagBits::eFragment;
+		uboLayoutBinding.stageFlags = ShaderStageFlagBits::eFragment;
 		break;
 	case Type::Geometry:
-		api_data->geometryShader = ShaderStageFlagBits::eGeometry;
+		uboLayoutBinding.stageFlags = ShaderStageFlagBits::eGeometry;
 		break;
 	}
 

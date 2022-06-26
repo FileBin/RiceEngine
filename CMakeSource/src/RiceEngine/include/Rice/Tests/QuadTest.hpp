@@ -9,6 +9,7 @@
 #include "../Engine/Window.hpp"
 #include "../GL/GraphicsManager.hpp"
 #include "../GL/CommandBuffer.hpp"
+#include "../GL/UniformBuffer.hpp"
 #include "../GL/Shader.hpp"
 #include "../Engine/Log.hpp"
 #include "../GL/Mesh.hpp"
@@ -58,7 +59,13 @@ private:
 
 		test_shader->loadShader("shaders/triangle.vert.spv", Shader::Vertex);
 		test_shader->loadShader("shaders/triangle.frag.spv", Shader::Fragment);
+		test_shader->addUniformBuffer(0, Shader::Vertex);
 		test_shader->build();
+
+		uniformBuffer = new_ref<UniformBuffer>(g_mgr_ref, sizeof(VertConstData));
+		uniformBuffer->setShader(test_shader);
+		uniformBuffer->setBinding(0, sizeof(VertConstData));
+		uniformBuffer->updateDataAll<VertConstData>(const_data);
 
 		using pVert = RefPtr<IVertex>;
 
@@ -83,7 +90,8 @@ private:
 		cmd->bindVertexBuffer(vertexBuffer);
 		cmd->bindIndexBuffer(indexBuffer);
 
-		cmd->pushConstants<VertConstData>(const_data, test_shader);
+		//cmd->pushConstants<VertConstData>(const_data, test_shader);
+		cmd->bindUniformBuffer(uniformBuffer);
 		cmd->drawIndexed(6);
 		cmd->buildAll();
 
@@ -99,9 +107,11 @@ private:
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		double time = std::chrono::duration<double, std::chrono::seconds::period>(currentTime - startTime).count();
 
-		//VertConstData data = {Matrix4x4f::identity};
+		VertConstData data = {const_data.renderMatrix};
 
-		//data.renderMatrix = Matrix4x4::Scale({sin(time),1,1}) * const_data.renderMatrix;
+		data.renderMatrix = Matrix4x4::Scale({sin(time),cos(time),1}) * data.renderMatrix;
+
+		uniformBuffer->updateData<VertConstData>(data);
 
 		g_mgr.executeCmd(cmd);
 	}
@@ -109,6 +119,9 @@ private:
 	void cleanup() override {
 		cmd.release();
 		vertexBuffer.release();
+		indexBuffer.release();
+		uniformBuffer.release();
+		cmd.release();
 		test_shader.release();
 		g_mgr.cleanup();
 		win.cleanup();
@@ -119,6 +132,7 @@ private:
 	VertConstData const_data = { Matrix4x4f::identity };
 	Graphics::pVertexBuffer vertexBuffer;
 	Graphics::pIndexBuffer indexBuffer;
+	Graphics::pUniformBuffer uniformBuffer;
 	Graphics::pShader test_shader;
 	Graphics::GraphicsManager g_mgr;
 	Graphics::pCommandBuffer cmd;

@@ -26,11 +26,11 @@ private:
 	bool is_allocated = false;
 	uint current_count = 0;
 public:
-	IndexBuffer(pGraphicsManager g_mgr, List<index_t> initial_data);
-	void reset(List<index_t> initial_data);
-	void updateIndices(List<index_t> indices, uint start_pos);
+	IndexBuffer(pGraphicsManager g_mgr, vec<index_t> initial_data);
+	void reset(vec<index_t> initial_data);
+	void updateIndices(vec<index_t> indices, uint start_pos);
 	index_t getIndexData(uint pos);
-	List<index_t> getIndexData(uint pos, uint count);
+	vec<index_t> getIndexData(uint pos, uint count);
 
 	void cleanup() override;
 };

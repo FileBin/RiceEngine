@@ -78,6 +78,10 @@ void CommandBuffer::bindIndexBuffer(pIndexBuffer buffer) {
 	commands.push_back(new_ref<Command>(Command::BindIndexBuffer, (pBuffer)buffer));
 }
 
+void CommandBuffer::bindUniformBuffer(pUniformBuffer buffer) {
+	commands.push_back(new_ref<Command>(Command::BindUniformBuffer, buffer));
+}
+
 void CommandBuffer::build() {
 	GraphicsManager_API_data& d = get_api_data();
 	_build(d.swapchainImageIndex, api_data.get(), commands, d, d.windowExcent);

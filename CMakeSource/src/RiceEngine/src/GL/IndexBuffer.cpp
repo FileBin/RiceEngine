@@ -14,7 +14,7 @@ constexpr auto stride = sizeof(index_t);
 
 NSP_GL_BEGIN
 
-IndexBuffer::IndexBuffer(pGraphicsManager g_mgr, List<index_t> data) : Buffer(g_mgr) {
+IndexBuffer::IndexBuffer(pGraphicsManager g_mgr, vec<index_t> data) : Buffer(g_mgr) {
 	reset(data);
 }
 
@@ -24,17 +24,17 @@ void IndexBuffer::cleanup() {
 	}
 }
 
-void IndexBuffer::reset(List<uint> data) {
+void IndexBuffer::reset(vec<uint> data) {
 	cleanup();
 	if(!data.empty()) {
-		uint n = data.length();
+		uint n = data.size();
 
 		current_count = n;
 
 		allocate(n * stride, BufferUsage::Index);
 		is_allocated = true;
 
-		setData(data.data_ptr(), n * stride, 0);
+		setData(data.data(), n * stride, 0);
 	}
 }
 
@@ -44,14 +44,14 @@ index_t IndexBuffer::getIndexData(uint pos) {
 	return ret;
 }
 
-List<index_t> IndexBuffer::getIndexData(uint pos, uint count) {
-	auto list = List<index_t>(count);
-	getData(list.data_ptr(), count * stride, pos * stride);
+vec<index_t> IndexBuffer::getIndexData(uint pos, uint count) {
+	auto list = vec<index_t>(count);
+	getData(list.data(), count * stride, pos * stride);
 	return list;
 }
 
-void IndexBuffer::updateIndices(List<index_t> indices, uint pos) {
-	setData(indices.data_ptr(), indices.length() * stride, pos * stride);
+void IndexBuffer::updateIndices(vec<index_t> indices, uint pos) {
+	setData(indices.data(), indices.size() * stride, pos * stride);
 }
 
 NSP_GL_END

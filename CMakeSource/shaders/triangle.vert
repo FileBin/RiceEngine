@@ -5,7 +5,7 @@ layout (location = 1) in vec3 inColor;
 
 layout (location = 0) out vec3 outColor;
 
-layout(push_constant) uniform Constants {
+layout(binding = 0) uniform Constants {
     mat4 render_matrix;
 } constants;
 

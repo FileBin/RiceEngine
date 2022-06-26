@@ -10,6 +10,7 @@
 #include "api_CommandBuffer.hpp"
 #include "api_Shader.hpp"
 #include "api_Buffer.hpp"
+#include "api_UniformBuffer.hpp"
 
 NSP_GL_BEGIN
 
@@ -134,6 +135,13 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command, u
 				flags = vk::ShaderStageFlagBits::eGeometry;
 
 			cmd[i].pushConstants(shader->api_data->layout, flags, 0, nData, pData);
+		} break;
+
+		case CommandBuffer::Command::BindUniformBuffer: {
+			CommandBuffer::Command::ArgIterator it = command->arg_chain;
+			pUniformBuffer buffer = *(pUniformBuffer*)(it++).current->getData();
+			vk::DescriptorSet& set = buffer->api_data->sets[i];
+			cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, buffer->api_data->pip_layout, 0, 1, &buffer->api_data->sets[i], 0, nullptr);
 		} break;
 
 		default:

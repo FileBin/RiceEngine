@@ -74,6 +74,7 @@ set(GAME_ENGINE_SRC
  	"${GAME_ENGINE_PATH}/src/GL/Buffer.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/VertexBuffer.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/IndexBuffer.cpp"
+ 	 "${GAME_ENGINE_PATH}/src/GL/UniformBuffer.cpp"
  	"${GAME_ENGINE_PATH}/src/GL/CommandBuffer.cpp")
  
 set(GAME_MAIN_SRC "${GAME_MAIN_PATH}/src/test.cpp")

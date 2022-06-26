@@ -13,7 +13,7 @@ class Buffer;
 typedef RefPtr<Buffer> pBuffer;
 
 enum class BufferUsage {
-	Vertex, Index
+	Vertex, Index, Uniform
 };
 
 enum class IndexBufferType {

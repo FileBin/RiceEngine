@@ -31,6 +31,7 @@ public:
 	void build();
 private:
 	friend struct CommandBuffer_API_data;
+	friend class UniformBuffer;
 	AutoPtr<Shader_API_Data> api_data;
 
 	EventRegistration resizeReg;

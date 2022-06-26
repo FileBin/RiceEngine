@@ -25,6 +25,7 @@ NSP_GL_END
 #include "Buffer.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "UniformBuffer.hpp"
 
 NSP_GL_BEGIN
 class CommandBuffer : GraphicsComponentBase {
@@ -39,7 +40,8 @@ public:
 			SetShader,
 			Draw,
 			DrawIndexed,
-			PushConstants
+			PushConstants,
+			BindUniformBuffer,
 		} cmd;
 
 		struct Arg {
@@ -140,6 +142,7 @@ public:
 	void bindVertexBuffer(pBuffer buffer);
 	void bindVertexBuffer(pVertexBuffer vertexBuffer);
 	void bindIndexBuffer(pIndexBuffer indexBuffer);
+	void bindUniformBuffer(pUniformBuffer uniformBuffer);
 
 	template<typename T>
 	void pushConstants(T data, pShader shader, Shader::Type stage = Shader::Vertex) {

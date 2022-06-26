@@ -21,11 +21,15 @@ Buffer_API_Data& Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
 		BufferCreateInfo bufferInfo {};
 		bufferInfo.size = size;
 		switch (usage) {
-			case BufferUsage::Index:
+		case BufferUsage::Index:
 			bufferInfo.usage = BufferUsageFlagBits::eIndexBuffer;
 			break;
-			case BufferUsage::Vertex:
+		case BufferUsage::Vertex:
 			bufferInfo.usage = BufferUsageFlagBits::eVertexBuffer;
+			break;
+		case BufferUsage::Uniform:
+			bufferInfo.usage = BufferUsageFlagBits::eUniformBuffer;
+			break;
 		}
 
 		bufferInfo.sharingMode = SharingMode::eExclusive;
