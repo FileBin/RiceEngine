@@ -5,16 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
-            "type": "cppvsdbg",
+            "name": "Debug-Linux",
+            "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\bin\\x64\\Debug\\GameMain.exe",
+            "program": "${workspaceFolder}/build/GameMain",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}\\bin\\x64\\Debug\\",
+            "cwd": "${workspaceFolder}/build/",
             "environment": [],
-            "console": "externalTerminal",
-            "preLaunchTask": "Build Debug"
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
