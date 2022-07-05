@@ -3,6 +3,8 @@
 
 #include <Rice/Util.hpp>
 
+#include <filesystem>
+
 NSP_UTIL_BEGIN
 
 void checkPath(String path) {

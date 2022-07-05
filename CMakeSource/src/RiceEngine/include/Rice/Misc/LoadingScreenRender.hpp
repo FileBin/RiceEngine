@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderBase.h"
+#include "../Engine/RenderBase.hpp"
 
 namespace Game {
 	class LoadingScreenRenderBase : public RenderBase {

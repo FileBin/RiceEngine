@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../Util/defines.h"
-#include "../Util/SmartPointer.h"
-#include "../Vectors.h"
+#include "../stdafx.hpp"
 
 #pragma region Vector3_all
 #pragma region Vector3
@@ -101,8 +99,8 @@ template <> struct std::equal_to<Vector2i> {
 #pragma endregion
 
 #pragma region SmartPtr
-template <typename T> struct std::hash<SmartPtr<T>> {
-	size_t operator()(const SmartPtr<T>& a) const {
+template <typename T> struct std::hash<RefPtr<T>> {
+	size_t operator()(const RefPtr<T>& a) const {
 		return (size_t)std::hash<T*>()(a.Get());
 	}
 };

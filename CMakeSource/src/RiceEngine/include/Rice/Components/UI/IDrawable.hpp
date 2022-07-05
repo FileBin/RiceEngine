@@ -1,8 +1,8 @@
 #include "../../stdafx.hpp"
 NSP_UI_BEGIN
 
-interface IDrawable;
-typedef SmartPtr<IDrawable> pIDrawable;
+struct IDrawable;
+typedef RefPtr<IDrawable> pIDrawable;
 
 NSP_UI_END
 #pragma once
@@ -10,8 +10,8 @@ NSP_UI_END
 
 NSP_UI_BEGIN
 
-interface IDrawable {
-	virtual void SetCanvas(Canvas* canvas) = 0;
+struct IDrawable {
+    virtual void setCanvas(pCanvas canvas) = 0;
 	//void Draw(Device* device);
 	virtual ~IDrawable() {};
 };

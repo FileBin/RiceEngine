@@ -1,29 +1,34 @@
 ﻿#pragma once
 
-namespace Game {
-	class SceneObject;
+NSP_SCENING_BEGIN
 
-	class Component {
-	public:
-		void PreInit(SceneObject* parent);
+class SceneObject;
+typedef RefPtr<SceneObject> pSceneObject;
 
-		virtual ~Component() = 0;
+class Component {
+public:
+    void preInit(pSceneObject parent);
 
-		virtual void OnInit() {};
+    virtual ~Component() = 0;
 
-		void Enable() { OnEnable(); enabled = true; };
-		virtual void OnEnable() {};
-		virtual void Start() {};
-		virtual void PreUpdate() {};
-		virtual void Update() {};
-		void Disable() { OnDisable(); enabled = false; };
-		virtual void OnDisable() {};
+    virtual void onInit() {};
 
-		bool isEnabled() { return enabled; }
-		SceneObject& GetSceneObject();
-	protected:
-		bool enabled = false;
-	private:
-		SceneObject* obj = nullptr;
-	};
-}
+    void enable() { onEnable(); enabled = true; };
+    void disable() { onDisable(); enabled = false; };
+    virtual void onEnable() {};
+    virtual void start() {};
+    virtual void preUpdate() {};
+    virtual void update() {};
+    virtual void onDisable() {};
+
+    bool isEnabled() { return enabled; }
+    pSceneObject getSceneObject();
+protected:
+    bool enabled = false;
+private:
+    pSceneObject obj = nullptr;
+};
+
+NSP_SCENING_END
+
+#include "SceneObject.hpp"

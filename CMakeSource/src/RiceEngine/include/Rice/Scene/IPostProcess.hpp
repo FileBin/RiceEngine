@@ -1,8 +1,8 @@
 #include "../stdafx.hpp"
 NSP_GL_BEGIN
 
-interface IPostProcess;
-typedef SmartPtr<IPostProcess> pIPostProcess;
+struct IPostProcess;
+typedef RefPtr<IPostProcess> pIPostProcess;
 
 NSP_GL_END
 
@@ -10,8 +10,8 @@ NSP_GL_END
 
 NSP_GL_BEGIN
 
-interface IPostProcess {
-	virtual void PostProcess() = 0;
+struct IPostProcess {
+    virtual void postProcess() = 0;
 	virtual ~IPostProcess() {}
 };
 

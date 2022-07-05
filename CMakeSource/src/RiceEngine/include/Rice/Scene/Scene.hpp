@@ -2,22 +2,24 @@
 
 NSP_SCENING_BEGIN
 class Scene;
-typedef SmartPtr<Scene> pScene;
+typedef RefPtr<Scene> pScene;
 NSP_SCENING_END
 
 #pragma once
 #include "../Engine/Engine.hpp"
 #include "SceneObject.hpp"
+
+
 #include "SceneRender.hpp"
-#include "../ScriptBase.hpp"
-#include "../SoundManager.hpp"
-#include "../Physics/PhysicsEngine.hpp"
+#include "../Engine/ScriptBase.hpp"
+//TODO #include "../AL/SoundManager.hpp"
+//TODO #include "../Physics/PhysicsEngine.hpp"
 #include "ResourceManager.hpp"
 #include "../GL/GraphicsManager.hpp"
 
 NSP_SCENING_BEGIN
 
-class Scene {
+class Scene : public ICleanable {
 private:
 	friend class SceneRender;
 public:

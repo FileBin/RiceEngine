@@ -1,11 +1,13 @@
 #include "../../stdafx.hpp"
 
+NSP_UI_BEGIN
+
 class Canvas;
-typedef SmartPtr<Canvas> pCnavas;
+typedef RefPtr<Canvas> pCanvas;
+
+NSP_UI_END
 
 #pragma once
-
-#include "../../Math.hpp"
 
 NSP_UI_BEGIN
 
@@ -31,7 +33,7 @@ public:
 	}
 
 	Vector2 TransformScaleToView(Vector2 scale) {
-		scale /= _STD max(referenceResoluton.x, referenceResoluton.y);
+        scale /= std::max(referenceResoluton.x, referenceResoluton.y);
 		auto asp = currentResolution.x / currentResolution.y;
 		if (asp >= 1) {
 			scale.x /= asp;
@@ -44,8 +46,8 @@ public:
 
 	dbl TransformScaleToScreen(dbl scale) {
 		auto cur = currentResolution;
-		scale /= _STD max(referenceResoluton.x, referenceResoluton.y);
-		return scale * _STD min(cur.x, cur.y);
+        scale /= std::max(referenceResoluton.x, referenceResoluton.y);
+        return scale * std::min(cur.x, cur.y);
 	}
 };
 

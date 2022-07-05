@@ -2,29 +2,24 @@
 
 NSP_SCENING_BEGIN
 class SceneRender;
-typedef SmartPtr<SceneRender> pSceneRender;
+typedef RefPtr<SceneRender> pSceneRender;
 NSP_SCENING_END
 
 #pragma once
 
 #include "../Math/Hasher.hpp"
-#include "../Math.hpp"
 #include "IPostProcess.hpp"
+#include "../Components/Camera.hpp"
 #include "../Components/UI/IDrawable.hpp"
-#include "../Components/ModelRender.hpp"
-#include "../Components/Transform.hpp"
 #include "../Components/UI/Canvas.hpp"
 #include "../GL/RenderingMesh.hpp"
 #include "../Engine/RenderBase.hpp"
-#include "../Util/RegisterCollection.hpp"
 #include "../GL/Texture2D.hpp"
-#include "IRenderable.hpp"
 #include "../GL/Material.hpp"
-#include "Camera.hpp"
 
 NSP_SCENING_BEGIN
 
-class SceneRender : public ::Rice::RenderBase {
+class SceneRender : public RenderBase {
 private:
 	using pIPPScript = Graphics::pIPostProcess;
 	using pIDrawable = UI::pIDrawable;
@@ -67,7 +62,7 @@ private:
 	UI::Canvas canvas;
 #pragma endregion
 public:
-	SceneRender(Scene* scene);
+	SceneRender(pScene scene);
 	bool init();
 	void beginFrame();
 	bool draw();
@@ -77,9 +72,6 @@ public:
 	//Buffer* GetConstBuffer() { return constantBuffer.Get(); }
 
 	void setupSkybox(Graphics::Material skyboxMat);
-
-	void registerModel(::Rice::pIRenderable ren);
-	void unregisterModel(::Rice::pIRenderable ren);
 
 	void addCamera(pCamera cam);
 	pCamera getCamera(size_t idx);
@@ -94,8 +86,8 @@ public:
 //	Graphics::pTexture2D GetDepthBufferTex() {return *device->GetDepthBufferTex();}
 //	Graphics::pTexture2D GetRenderTargetTex() {return *device->GetRenderTargetTex();}
 
-	void addDrawable(pIDrawable txt);
-	void removeDrawable(pIDrawable txt);
+	void addDrawable(pIDrawable drawable);
+	void removeDrawable(pIDrawable drawable);
 
 	void postProcess(pMat mat);
 	void defaultPostProcess();
@@ -113,13 +105,13 @@ private:
 	umap<String, pShader> shaders;
 	RegisterCollection<pIRenderable> renderingMeshes;
 	uset<pIPPScript> ppscripts;
-	vec<SmartPtr<UI::IDrawable>> drawables;
+	vec<pIDrawable> drawables;
 	//Microsoft::WRL::ComPtr<Buffer> constantBuffer;
 
 	//default
-	SmartPtr<RenderingMesh> skyBox, postProcessingQuad;
+	pRenderingMesh skyBox, postProcessingQuad;
 	pMat skyboxMaterial, defaultPostProcessMaterial;
 
-	Mesh* CreateSkyBoxMesh();
+	pMesh createSkyBoxMesh();
 };
 NSP_SCENING_END

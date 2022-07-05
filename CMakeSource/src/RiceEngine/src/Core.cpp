@@ -1,29 +1,20 @@
 ﻿#include "pch.h"
-#include <GameEngine/Core.h>
-#include <GameEngine/macros.h>
-#include <GameEngine/Device.h>
-#include <GameEngine/ScriptBase.h>
-#include <GameEngine/Engine.h>
-#include <GameEngine/Util/exceptions.h>
-#include <GameEngine/Util.h>
-#include <chrono>
-#include <thread>
+#include <Rice/Engine/Core.hpp>
 
 using namespace std::chrono;
 using namespace std::this_thread;
 
-namespace Game {
+NSP_ENGINE_BEGIN
 
-	void Core::RunNew(ScriptBase* script) {
+	void Core::runNew(ScriptBase* script) {
 		SetThreadPriority(GetCurrentThread(), 15);
 		Core engine;
-		try {
+		 {
 			engine.AddScript(script, Stage::PreInit);
 			engine.Init();
 			engine.Run();
 			engine.Close();
 		}
-		#include "Util\ExeptionManager.h"
 	}
 
 

@@ -3,7 +3,7 @@
 NSP_ENGINE_BEGIN
 
 class ScriptBase;
-typedef SmartPtr<ScriptBase> pScriptBase;
+typedef RefPtr<ScriptBase> pScriptBase;
 
 NSP_ENGINE_END
 
@@ -14,25 +14,20 @@ NSP_ENGINE_END
 
 NSP_ENGINE_BEGIN
 
-class ScriptBase {
+class ScriptBase : public ICleanable {
 public:
-	ScriptBase() {
-	}
-	void PreInit(Engine*& engine);
+    ScriptBase();
 
 	virtual ~ScriptBase() = 0;
 
-	virtual void Init() {
-	}
-	virtual void Run() = 0;
-	virtual void Finalize() {
-	}
+	virtual void init() {}
+	virtual void run() = 0;
 protected:
-	Engine& GetEngine() {
-		return **engine;
+	pEngine getEngine() {
+		return engine;
 	}
 private:
-	Engine** engine = nullptr;
+    pEngine& engine;
 };\
 
 NSP_ENGINE_END

@@ -1,13 +1,13 @@
 #pragma once
 
+#include "../stdafx.hpp"
+
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 
-#include <GameEngine\AL\ALHelper.h>
 
-#include "SoundEffect.h"
+#include "SoundEffect.hpp"
 
-#include <GameEngine/Vectors/Vector3f.h>
 
 namespace Game {
 
@@ -17,8 +17,8 @@ namespace Game {
     {
     public:
 
-        void LoadOgg(std::string path);
-        void LoadRaw(FrequencyFunc f, dbl beginning, dbl end);
+        void loadOgg(std::string path);
+        void loadRaw(FrequencyFunc f, dbl beginning, dbl end);
         void release();
         bool Play();
         bool IsPlaying() { return buffer->IsPlaying(); }

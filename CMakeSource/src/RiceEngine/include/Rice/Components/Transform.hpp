@@ -1,80 +1,80 @@
+#include "../stdafx.hpp"
+
+NSP_SCENING_BEGIN
+
+class Transform;
+typedef RefPtr<Transform> pTransform;
+
+NSP_SCENING_END
+
+
 #pragma once
 
-#include "../Scene/Component.h"
-#include "../Scene/SceneObject.h"
-#include "../Util3D.h"
+#include "../Scene/Component.hpp"
+#include "../Scene/SceneObject.hpp"
 
-namespace Game {
-	class Transform : public Component {
-	private:
-		std::shared_mutex mut;
-		Transform* parent = nullptr;
-		Vector3 position = Vector3::zero;
-		Quaternion rotation = Quaternion::identity;
-		Vector3 scale = Vector3::one;
-	public:
+NSP_SCENING_BEGIN
 
-		void OnEnable() {
-			auto parentO = &GetSceneObject().GetParent();
-			if (parentO != nullptr) {
-				auto transforms = parentO->GetComponents<Transform>();
-				if (!transforms.empty())
-					parent = transforms.front();
-			}
+class Transform : public Component {
+private:
+    std::shared_mutex mut;
+    pTransform parent = nullptr;
+    Vector3 position = Vector3::zero;
+    Quaternion rotation = Quaternion::identity;
+    Vector3 scale = Vector3::one;
+public:
 
-		}
+    void onEnable() override;
 
-		Vector3 GetPosition() {
-			std::shared_lock l(mut);
-			return position;
-		}
+    Vector3 getPosition();
 
-		Quaternion GetRotation() {
-			std::shared_lock l(mut);
-			return rotation;
-		}
+    Quaternion getRotation() {
+        std::shared_lock l(mut);
+        return rotation;
+    }
 
-		Vector3 GetScale() {
-			std::shared_lock l(mut);
-			return scale;
-		}
+    Vector3 getScale() {
+        std::shared_lock l(mut);
+        return scale;
+    }
 
-		void SetPosition(Vector3 pos) {
-			std::unique_lock l(mut);
-			position = pos;
-		}
+    void setPosition(Vector3 pos) {
+        std::unique_lock l(mut);
+        position = pos;
+    }
 
-		void SetRotation(Quaternion q) {
-			std::unique_lock l(mut);
-			rotation = q;
-		}
+    void SetRotation(Quaternion q) {
+        std::unique_lock l(mut);
+        rotation = q;
+    }
 
-		void SetScale(Vector3 s) {
-			std::unique_lock l(mut);
-			scale = s;
-		}
+    void SetScale(Vector3 s) {
+        std::unique_lock l(mut);
+        scale = s;
+    }
 
-		void SetPRS(Vector3 pos = Vector3::zero, Quaternion rot = Quaternion::identity, Vector3 s = Vector3::one){
-			std::unique_lock l(mut);
-			position = pos;
-			rotation = rot;
-			scale = s;
+    void SetPRS(Vector3 pos = Vector3::zero, Quaternion rot = Quaternion::identity, Vector3 s = Vector3::one){
+        std::unique_lock l(mut);
+        position = pos;
+        rotation = rot;
+        scale = s;
 
-		}
+    }
 
-		Matrix4x4 GetTransformationMatrix() {
-			std::shared_lock l(mut);
-			if (parent != nullptr)
-				return Matrix4x4::TRS(position, rotation, scale) * parent->GetTransformationMatrix();
-			return Matrix4x4::TRS(position, rotation, scale);
-		}
+    Matrix4x4 GetTransformationMatrix() {
+        std::shared_lock l(mut);
+        if (parent != nullptr)
+            return Matrix4x4::TRS(position, rotation, scale) * parent->GetTransformationMatrix();
+        return Matrix4x4::TRS(position, rotation, scale);
+    }
 
-		Matrix4x4 GetInvTransformationMatrix() {
-			std::shared_lock l(mut);
-			auto mat = Matrix4x4::Translation(-position) * Matrix4x4::Rotation(rotation.Opposite()) * Matrix4x4::Scale(1 / scale);
-			if (parent != nullptr)
-				return parent->GetInvTransformationMatrix() * mat;
-			return mat;
-		}
-	};
-}
+    Matrix4x4 GetInvTransformationMatrix() {
+        std::shared_lock l(mut);
+        auto mat = Matrix4x4::Translation(-position) * Matrix4x4::Rotation(rotation.Opposite()) * Matrix4x4::Scale(1 / scale);
+        if (parent != nullptr)
+            return parent->GetInvTransformationMatrix() * mat;
+        return mat;
+    }
+};
+
+NSP_SCENING_END

@@ -1,12 +1,11 @@
 ﻿#include "../stdafx.hpp"
 NSP_ENGINE_BEGIN
 class RenderBase;
-typedef SmartPtr<RenderBase> pRenderBase;
+typedef RefPtr<RenderBase> pRenderBase;
 NSP_ENGINE_END
 
 #pragma once
 #include "../GL/GraphicsManager.hpp"
-#include "Math.h"
 #include "Engine.hpp"
 
 NSP_ENGINE_BEGIN

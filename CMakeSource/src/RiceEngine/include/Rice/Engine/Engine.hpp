@@ -3,57 +3,53 @@
 NSP_ENGINE_BEGIN
 
 class Engine;
-typedef SmartPtr<Engine> pEngine;
+typedef RefPtr<Engine> pEngine;
 
 NSP_ENGINE_END
 
 #pragma once
 #include "Core.hpp"
 #include "../GL/GraphicsManager.hpp"
-#include "../Misc/Stage.hpp"
+//#include "../AL/SoundManager.hpp" //TODO
+
+#include "../Scene/Scene.hpp"
 
 NSP_ENGINE_BEGIN
 
 class Engine {
 public:
-	Engine(Graphics::pGraphicsManager gmanager, pCore Core);
+	Engine(pCore Core);
 	~Engine();
 
-	size_t GetMsaaLevel() const {
+	uint getMsaaLevel() const {
 		return msaaLevel;
 	}
 
-	HWND GetHWND() {
-		return (**device).GetHWND();
-	}
+	void setMsaaLevel(uint level);
 
-	void SetMsaaLevel(size_t level);
+	void setLoadingScene(Scening::pScene scene);
 
-	void SetLoadingScene(Scene* scene);
+	void loadScene(Scening::pScene scene);
 
-	void LoadScene(Scene* scene);
+	void setFps(float fps = 60.f);
 
-	void SetFps(float fps = 60.f);
+	void postUpdate();
 
-	Device* GetDevice();
+	double getFixedDeltaTime();
+	double getDeltaTime();
+	double getTime();
 
-	void PostUpdate();
+	void registerScript(pScriptBase script, Stage stage = Stage::Update);
 
-	double GetFixedDeltaTime();
-	double GetDeltaTime();
-	double GetTime();
+	pMaterial createMaterial(pShader shader);
+	pShader createShader();
 
-	void RegisterScript(ScriptBase* script, Stage stage = Stage::Update);
-
-	Material& CreateMaterial(Shader& sh);
-	Shader& CreateShader();
-
-	SoundManager& getSoundManager();
+	Graphics::pGraphicsManager getGraphicsManager();
+    //TODO Audio::pSoundManader getSoundManager();
 
 private:
-	Device** device = nullptr;
-	Core* core;
-	size_t msaaLevel = 1;
-};\
+	pCore core;
+	uint msaaLevel = 1;
+};
 
 NSP_ENGINE_END

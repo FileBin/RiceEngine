@@ -1,43 +1,46 @@
 #pragma once
-#include "AL\ALHelper.h"
+//#include "ALHelper.hpp"
+#include "../stdafx.hpp"
+
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 
-#include <GameEngine/SoundStream.h>
-//#include <GameEngine/AlDevice.h>
-#include <GameEngine/Vectors/Vector3f.h>
-#include <GameEngine/Camera.h>
+#include "SoundStream.hpp"
+//#include <GameEngine/Camera.h>
 
-namespace Game {
-	class SoundManager {// : private AlDevice{
-	public:
-		SoundManager(SmartPtr<Camera> cam);
-		~SoundManager();
+NSP_AL_BEGIN
 
-		void play_music(const std::string name, bool force);
-		SmartPtr<SoundStream> play_raw(FrequencyFunc f, double beginning, double end, float volume, Vector3f position/*, std::vector<SoundEffect*> effects = {}*/);
-		SmartPtr<SoundStream> play_sound(const std::string name, float volume, Vector3f position/*, std::vector<SoundEffect*> effects*/);
-		void setMusicVolume(float volume);
+class SoundManager
+{ // : private AlDevice{
+public:
+	SoundManager(RefPtr<Camera> cam);
+	~SoundManager();
 
-		void update_thread();
+	void playMusic(const std::string name, bool force);
+	RefPtr<SoundStream> playRaw(FrequencyFunc f, double beginning, double end, float volume, Vector3f position /*, std::vector<SoundEffect*> effects = {}*/);
+	RefPtr<SoundStream> playSound(const std::string name, float volume, Vector3f position /*, std::vector<SoundEffect*> effects*/);
+	void setMusicVolume(float volume);
 
-	private:
-		void playSoundStream(SmartPtr<SoundStream> ogg);
-		void music_thread();
-		void sound_thread(SmartPtr<SoundStream> ogg, std::string path, float volume, Vector3f position/*, std::vector<SoundEffect*> effects*/);
-		void raw_sound_thread(SmartPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos/*, std::vector<SoundEffect*> effects = {}*/);
+	void updateThread();
 
-		void setListenerPosition(Vector3f position);
+private:
+	void play_sound_stream(RefPtr<SoundStream> ogg);
+	void music_thread();
+	void sound_thread(RefPtr<SoundStream> ogg, std::string path, float volume, Vector3f position /*, std::vector<SoundEffect*> effects*/);
+	void raw_sound_thread(RefPtr<SoundStream> ogg, FrequencyFunc f, dbl beginning, dbl end, float volume, Vector3f pos /*, std::vector<SoundEffect*> effects = {}*/);
 
-		Vector3f prevPos = {};
+	void set_listener_position(Vector3f position);
 
-		//static SoundManager* instance;
-		bool init = false;
-		SmartPtr<std::thread> updateThread, musicThread;
-		SmartPtr<Camera> camera;
+	Vector3f prevPos = {};
 
-		SmartPtr<SoundStream> current_music_stream;
-		float musicVolume = 1;
-		std::string nextMusic;
-	};
-}
+	// static SoundManager* instance;
+	bool init = false;
+	RefPtr<std::thread> updateThread, musicThread;
+	RefPtr<Camera> camera;
+
+	RefPtr<SoundStream> current_music_stream;
+	float musicVolume = 1;
+	std::string nextMusic;
+};
+
+NSP_AL_END

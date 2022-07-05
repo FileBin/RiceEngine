@@ -1,99 +1,104 @@
 ﻿#pragma once
+#include "../stdafx.hpp"
 
-#include "../Util.h"
-#include <vector>
-#include <concurrent_vector.h>
-#include <unordered_set>
-#include "Component.h"
+NSP_SCENING_BEGIN
 
-namespace Game {
-	using namespace concurrency;
+class Scene;
+typedef RefPtr<Scene> pScene;
 
-	class Scene;
+class SceneObject;
+typedef RefPtr<SceneObject> pSceneObject;
 
-	class SceneObject  {
-	public:
-		enum class Flags {
-			NONE = 0x0,
-			NEED_ENABLE = 0x1,
-			NEED_DISABLE = 0x2,
-			NEED_DESTROY = 0x40000000,
-		};
+class Component;
+typedef RefPtr<Component> pComponent;
 
-		SceneObject (Scene* scene);
-		~SceneObject();
+class SceneObject  {
+public:
+    enum class Flags {
+        NONE = 0x0,
+        NEED_ENABLE = 0x1,
+        NEED_DISABLE = 0x2,
+        NEED_DESTROY = 0x40000000,
+    };
 
-		bool isEnabled() { return enabled; }
+    SceneObject (pScene scene);
+    ~SceneObject();
 
-		_STD vector<SmartPtr<SceneObject>> GetChildren();
+    bool isEnabled() { return is_enabled; }
 
-		template<typename T>
-		_STD vector<T*> GetComponents() {
-			_STD vector<T*> vec = {};
-			for (auto c : components) {
-				auto o = dynamic_cast<T*>(c.Get());
-				if (o != nullptr) { 
-					vec.push_back(o);
-				}
-			}
-			return vec;
-		}
+    vec<pSceneObject> getChildren();
 
-		SceneObject& GetObjectByName(String name);
-		SceneObject& GetParent() { return *parent; }
-		bool TryGetObjectByName(String& name, SceneObject* &object);
+    template<typename T>
+    vec<RefPtr<T>> getComponents() {
+        vec<RefPtr<T>> vec = {};
+        for (auto& c : components) {
+            auto o = dynamic_cast<T*>(c.cget());
+            if (o != nullptr) {
+                vec.push_back(o);
+            }
+        }
+        return vec;
+    }
 
-		void AddComponent(SmartPtr<Component> component);
-		void RemoveComponent(SmartPtr<Component> component);
+    pSceneObject getObjectByName(String name);
+    pSceneObject getParent() { return parent; }
+    bool tryGetObjectByName(String name, pSceneObject& out_object);
 
-		SceneObject* Instantiate(SceneObject* orig);
-		SceneObject* Instantiate();
-		void RemoveChild(SmartPtr<SceneObject> whatObj);
+    void addComponent(pComponent component);
+    void removeComponent(pComponent component);
 
-		void Destroy();
+    pSceneObject instantiate(pSceneObject orig);
+    pSceneObject instantiate();
+    void removeChild(pSceneObject whatObj);
 
-		void SetName(String name) { this->name = name; }
-		Scene& GetScene();
+    void destroy();
 
-		void SetActive(bool _active) {
-			active = _active; 
-			if (active) {
-				Enable();
-			} else {
-				Disable();
-			}
-		}
+    void setName(String name) { this->name = name; }
+    pScene getScene();
 
-		void SetActiveImmediate(bool _active) {
-			active = _active;
-			if (active) {
-				ForceEnable();
-			} else {
-				ForceDisable();
-			}
-		}
-		bool GetActive() { return active; }
+    void setActive(bool active) {
+        is_active = active;
+        if (active) {
+            enable();
+        } else {
+            disable();
+        }
+    }
 
-	private:
+    void setActiveImmediate(bool active) {
+        is_active = active;
+        if (active) {
+            forceEnable();
+        } else {
+            forceDisable();
+        }
+    }
+    bool isActive() { return is_active; }
 
-		friend class Scene;
+private:
 
-		void Enable();
-		void ForceEnable();
-		void PreUpdate();
-		void Update();
-		void Disable();
-		void ForceDisable();
+    friend class Scene;
 
-		UINT flags = 0;
+    void enable();
+    void forceEnable();
+    void preUpdate();
+    void update();
+    void disable();
+    void forceDisable();
 
-		bool active = true;
-		bool enabled = false;
-		Scene* scene = nullptr;
-		SceneObject* parent = nullptr;
-		String name = L"";
-		_STD vector<SmartPtr<Component>> components{};
-		_STD vector<SmartPtr<SceneObject>> children{};
-	};
-}
+    uint flags = 0;
 
+    bool is_active = true;
+    bool is_enabled = false;
+    pScene scene = nullptr;
+    pSceneObject parent = nullptr;
+    String name = "";
+    vec<pComponent> components{};
+    vec<pSceneObject> children{};
+};
+
+NSP_SCENING_END
+
+#include "Scene.hpp"
+#include "SceneObject.hpp"
+#include "Component.hpp"

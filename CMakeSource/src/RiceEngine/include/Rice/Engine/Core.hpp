@@ -3,34 +3,51 @@
 NSP_ENGINE_BEGIN
 
 class Core;
-typedef SmartPtr<Core> pCore;
+typedef RefPtr<Core> pCore;
 
 NSP_ENGINE_END
 
 #pragma once
-#include "../Misc/LoadingScreenRender.hpp"
-#include "../Log.hpp"
+//#include "../Misc/LoadingScreenRender.hpp"
+#include "Log.hpp"
 #include "Window.hpp"
 #include "ScriptBase.hpp"
-#include "Stage.hpp"
-#include "Scene/Scene.hpp"
+#include "../Misc/Stage.hpp"
+#include "../Scene/Scene.hpp"
 #include "../GL/GraphicsManager.hpp"
 
 NSP_ENGINE_BEGIN
 
 class Core {
+private:
+    template<typename RetT, typename... ArgsT>
+	static RetT executeFuncAndHandleExceptions(std::function<RetT(ArgsT...)>& fn, ArgsT... args) {
+		try {
+			return fn(args...);
+		} catch (Exception& e) {
+            Log::log(Log::Error, "Not handled exception occured: {}", String(typeid(e).name()));
+			Log::log(Log::Error, "Line {}", std::to_wstring(e.line()));
+            Log::log(Log::Error, "File: {}", e.file());
+            Log::log(Log::Error, "Message: {}", e.msg());
+            Log::log(Log::Error, "AdditionalInfo: {}\n", e.info());
+            Log::log(Log::Error, "Stack trace:\n{}", e.stack());
+			Log::close();
+			throw e;
+		} catch (std::exception& e) {
+            Log::log(Log::Error, "std::exception occured: {}", String(typeid(e).name()));
+            Log::log(Log::Error, "What: {}", String(e.what()));
+			Log::close();
+			throw e;
+		}
+	}
 public:
-	static void RunNew(ScriptBase* preInitScript);
+	static void runNew(RefPtr<ScriptBase> preInitScript);
 
-	template<class FnT = void(void), class ... ArgsT>
-	static SmartPtr<_STD thread> RunThread(_STD function<FnT> func,
-			ArgsT ... args) {
-		return new _STD thread([](_STD function<FnT> _Fx, ArgsT... _Ax) {
-					try {
-						_Fx(_Ax...);
-					}
-#include "../src/Util/ExeptionManager.h"
-				}, func, args...);
+	template<class... ArgsT>
+	static RefPtr<std::thread> runThread(std::function<void(ArgsT...)> func, ArgsT ... args) {
+        return new_ref<std::thread>([](std::function<void(ArgsT...)> _Fx, ArgsT... _Ax) {
+            executeFuncAndHandleExceptions<void, ArgsT...>(_Fx, _Ax...);
+		}, func, args...);
 	}
 
 	/*static void RunTask(std::function<void(void)> func) {
@@ -40,39 +57,39 @@ public:
 	 }
 	 #include "../src/Util/ExeptionManager.h"
 	 });
-	 }*/
+	 }*/ //TODO: Make tasks
 
-	void AddScript(ScriptBase* script, Stage s);
+	void addScript(pScriptBase script, Stage s);
 
-	void LoadScene(Scening::pScene _scene);
+	void loadScene(Scening::pScene _scene);
 
-	double GetFixedDeltaTime() {return fixedDeltaTime;}
-	double GetDeltaTime() {return deltaTime;}
-	double GetTime() {return time;}
+	double getFixedDeltaTime() { return fixedDeltaTime; }
+	double getDeltaTime() { return deltaTime; }
+	double getTime() { return time; }
 private:
 	Core();
 	~Core();
 	friend class Engine;
 
-	bool Init();
-	void Run();
-	void Close();
+	bool init();
+	void run();
+	void close();
 
-	bool RunFrame();
-	void RunScripts(std::vector<ScriptBase*>& scripts);
+	bool runFrame();
+	void runScripts(vec<pScriptBase>& scripts);
 
-	void LoadSceneImmediate();
+	void loadSceneImmediate();
 
 	Stage stage = (Stage)0;
-	Scening::pScene activeScene, loadScene, loadingScreenScene;
+    Scening::pScene activeScene, loadingScene, loadingScreenScene;
 
 	pWindow wnd = nullptr;
 	Graphics::pGraphicsManager manager = nullptr;
 	Engine* engine = nullptr;
-	bool init = false;
+    bool is_init = false;
 	double fps = 60.;
 	double fixedDeltaTime = 0, deltaTime = 0, time = 0;
-	std::vector<ScriptBase*> preInitScripts, initScripts, postInitScripts,
+	vec<pScriptBase> preInitScripts, initScripts, postInitScripts,
 	updateScripts, closeScripts;
 
 };

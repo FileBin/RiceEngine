@@ -1,8 +1,6 @@
 #pragma once
-#include "../stdafx.h"
-#include "../Util/defines.h"
+#include "../stdafx.hpp"
 #include <typeindex>
-#include "../Util/SmartPointer.h"
 #include <rapidjson/document.h>
 
 namespace Game {

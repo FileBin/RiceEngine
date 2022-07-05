@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include "../Scene/Component.h"
-#include <GameEngine/macros.h>
-#include "../Model.h"
-#include <concurrent_vector.h>
-#include "../DX/RenderingMesh.h"
+#include "../stdafx.hpp"
+
+#include "../Scene/Component.hpp"
+#include "../GL/RenderingMesh.hpp"
 
 namespace Game {
 
