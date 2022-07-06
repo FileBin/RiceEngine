@@ -75,6 +75,8 @@ public:
 	ResizeEvent resize_event;
 
 private:
+friend class Core;
+
 	DescWindow desc;
 	WindowHandle handle;
 	bool is_exit;

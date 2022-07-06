@@ -1,107 +1,29 @@
-﻿#include "../stdafx.hpp"
+#include "../stdafx.hpp"
 
-NSP_SCENING_BEGIN
+NSP_ENGINE_BEGIN
+
 class Scene;
 typedef RefPtr<Scene> pScene;
-NSP_SCENING_END
+
+NSP_ENGINE_END
 
 #pragma once
-#include "../Engine/Engine.hpp"
-#include "SceneObject.hpp"
 
+#include "Object.hpp"
+#include "Rice/Engine/Engine.hpp"
 
-#include "SceneRender.hpp"
-#include "../Engine/ScriptBase.hpp"
-//TODO #include "../AL/SoundManager.hpp"
-//TODO #include "../Physics/PhysicsEngine.hpp"
-#include "ResourceManager.hpp"
-#include "../GL/GraphicsManager.hpp"
+NSP_ENGINE_BEGIN
 
-NSP_SCENING_BEGIN
-
-class Scene : public ICleanable {
-private:
-	friend class SceneRender;
+class Scene {
 public:
-	Scene();
-	virtual ~Scene() {
-	}
+    void setup(pEngine engine);
+    void init();
 
-	void PreInit(pEngine en, Graphics::pGraphicsManager g_manager) {
-		render->SetDevice(device);
-		InitResourceManager();
-		engine = en;
-		render->Init();
-	}
+    void render();
 
-	virtual void InitResourceManager() = 0;
+    void close();
 
-	virtual void Init() = 0;
-
-	void PostInit() {
-		soundManager = new SoundManager(render->GetActiveCamera());
-		physicsEngine = new Physics::PhysicsEngine();
-		physicsEngine->PreInit();
-		root->Enable();
-		init = true;
-		Resize();
-	}
-
-	void Close() {
-		_DELETE(soundManager);
-		root->Disable();
-		delete root;
-		render->Close();
-		delete render;
-	}
-
-	void Render() {
-		root->PreUpdate();
-		root->Update();
-		render->BeginFrame();
-		render->Draw();
-	}
-
-	void Resize() {
-		if (init)
-			render->Resize();
-	}
-
-	void AddScript(MonoScript* script);
-	void RemoveScript(MonoScript* script);
-
-	SceneObject& GetObjectByName(String name);
-
-	SceneObject* Instaniate(SceneObject* orig);
-	SceneObject* Instaniate();
-	Engine& GetEngine() const;
-	ResourceManager& GetResourceManager() {
-		return resManager;
-	}
-	SoundManager& GetSoundManager() const;
-	SceneRender& GetRender() const {
-		return *render;
-	}
-	const SmartPtr<Physics::PhysicsEngine> GetPhysEngine() const;
-
-	bool isLoaded() {
-		return init;
-	}
-
-protected:
-	void _initResourceManager(String path) {
-		resManager.LoadJson(path);
-	}
-
-private:
-	bool init = false;
-
-	ResourceManager resManager;
-	SceneObject* root;
-	SceneRender* render;
-	SmartPtr<Physics::PhysicsEngine> physicsEngine;
-	Engine* engine;
-	SoundManager* soundManager;
+    bool isLoaded();
 };
 
-NSP_SCENING_END
+NSP_ENGINE_END

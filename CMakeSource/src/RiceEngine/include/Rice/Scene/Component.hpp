@@ -1,34 +1,34 @@
-﻿#pragma once
+#include "../stdafx.hpp"
 
-NSP_SCENING_BEGIN
+NSP_COMPONENTS_BEGIN
 
-class SceneObject;
-typedef RefPtr<SceneObject> pSceneObject;
+class Component;
+typedef RefPtr<Component> pComponent;
+
+NSP_COMPONENTS_END
+
+#pragma once
+
+#include "Object.hpp"
+
+NSP_COMPONENTS_BEGIN
 
 class Component {
-public:
-    void preInit(pSceneObject parent);
-
-    virtual ~Component() = 0;
-
-    virtual void onInit() {};
-
-    void enable() { onEnable(); enabled = true; };
-    void disable() { onDisable(); enabled = false; };
-    virtual void onEnable() {};
-    virtual void start() {};
-    virtual void preUpdate() {};
-    virtual void update() {};
-    virtual void onDisable() {};
-
-    bool isEnabled() { return enabled; }
-    pSceneObject getSceneObject();
 protected:
-    bool enabled = false;
-private:
-    pSceneObject obj = nullptr;
+  pObject object;
+
+  virtual void onEnable() = 0;
+  virtual void Start(){};
+  virtual void PreUpdate(){};
+  virtual void Update(){};
+
+public:
+  pObject getObject();
+
+  void enable();
+  void disable();
+
+  bool isEnabled();
 };
 
-NSP_SCENING_END
-
-#include "SceneObject.hpp"
+NSP_COMPONENTS_END

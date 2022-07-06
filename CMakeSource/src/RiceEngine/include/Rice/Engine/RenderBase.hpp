@@ -11,26 +11,26 @@ NSP_ENGINE_END
 NSP_ENGINE_BEGIN
 class RenderBase {
 public:
-	RenderBase();
-	virtual ~RenderBase();
+  RenderBase();
+  virtual ~RenderBase();
 
-	virtual void beginFrame() = 0;
-	void endFrame();
-	void shutdown();
-	void setGraphicsManager(Graphics::pGraphicsManager g_manager);
-	void setEngine(pEngine en);
+  virtual void beginFrame() = 0;
+  void endFrame();
+  void shutdown();
+  void setGraphicsManager(Graphics::pGraphicsManager g_manager);
+  void setEngine(pEngine en);
 
-	Vector2 GetViewportSize();
+  Vector2 getViewportSize();
 
-	dbl GetAspectRatio();
+  dbl GetAspectRatio();
 
-	virtual bool init() = 0;
-	virtual bool draw() = 0;
-	virtual void close() = 0;
-	virtual void resize() = 0;
+  virtual bool init() = 0;
+  virtual bool draw() = 0;
+  virtual void close() = 0;
+  virtual void resize() = 0;
 
 protected:
-	Graphics::pGraphicsManager graphics_mansger;
-	Engine* engine;
+  Graphics::pGraphicsManager graphics_mansger;
+  pEngine engine;
 };
 NSP_ENGINE_END

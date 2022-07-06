@@ -9,8 +9,8 @@
 #define NSP_AL_BEGIN NSP_ENGINE_BEGIN namespace Audio {
 #define NSP_AL_END NSP_ENGINE_END } 
 
-#define NSP_SCENING_BEGIN NSP_ENGINE_BEGIN namespace Scening {
-#define NSP_SCENING_END NSP_ENGINE_END }
+#define NSP_COMPONENTS_BEGIN NSP_ENGINE_BEGIN namespace Components {
+#define NSP_COMPONENTS_END NSP_ENGINE_END }
 
 #define NSP_UI_BEGIN NSP_SCENING_BEGIN namespace UI {
 #define NSP_UI_END NSP_SCENING_BEGIN }

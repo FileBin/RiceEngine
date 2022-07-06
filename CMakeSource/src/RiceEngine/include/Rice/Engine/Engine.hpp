@@ -10,6 +10,7 @@ NSP_ENGINE_END
 #pragma once
 #include "Core.hpp"
 #include "../GL/GraphicsManager.hpp"
+#include "../GL/Shader.hpp"
 //#include "../AL/SoundManager.hpp" //TODO
 
 #include "../Scene/Scene.hpp"
@@ -18,38 +19,26 @@ NSP_ENGINE_BEGIN
 
 class Engine {
 public:
-	Engine(pCore Core);
+	Engine(pCore& core);
 	~Engine();
 
-	uint getMsaaLevel() const {
-		return msaaLevel;
-	}
+	void setLoadingScene(pScene scene);
 
-	void setMsaaLevel(uint level);
+	void loadScene(pScene scene);
 
-	void setLoadingScene(Scening::pScene scene);
-
-	void loadScene(Scening::pScene scene);
-
-	void setFps(float fps = 60.f);
+	void setFps(dbl fps = 60.);
 
 	void postUpdate();
 
-	double getFixedDeltaTime();
-	double getDeltaTime();
-	double getTime();
+	dbl getFixedDeltaTime();
+	dbl getDeltaTime();
+	dbl getTime();
 
-	void registerScript(pScriptBase script, Stage stage = Stage::Update);
-
-	pMaterial createMaterial(pShader shader);
-	pShader createShader();
-
+	Graphics::pShader createShader();
 	Graphics::pGraphicsManager getGraphicsManager();
-    //TODO Audio::pSoundManader getSoundManager();
 
 private:
-	pCore core;
-	uint msaaLevel = 1;
+	pCore& core;
 };
 
 NSP_ENGINE_END

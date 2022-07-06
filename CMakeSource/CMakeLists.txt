@@ -58,28 +58,8 @@ set(RESOURCES_PATH "${CMAKE_SOURCE_DIR}/res/")
 
 #file search
 
-file(GLOB_RECURSE GAME_ENGINE_SRC "${GAME_ENGINE_PATH}/*.h" "${GAME_ENGINE_PATH}/*.hpp")
+file(GLOB_RECURSE GAME_ENGINE_SRC "${GAME_ENGINE_PATH}/*.h" "${GAME_ENGINE_PATH}/*.hpp" "${GAME_ENGINE_PATH}/*.c" "${GAME_ENGINE_PATH}/*.cpp" )
 file(GLOB_RECURSE GAME_MAIN_SRC "${GAME_MAIN_PATH}/*.h" "${GAME_MAIN_PATH}/*.hpp")
-
-
-#for test use only needed files
-set(GAME_ENGINE_SRC ${GAME_ENGINE_SRC}
-        "${GAME_ENGINE_PATH}/src/Engine/InputManager.cpp"
-	"${GAME_ENGINE_PATH}/src/Engine/Window.cpp"
-	"${GAME_ENGINE_PATH}/src/Engine/Log.cpp"
-	"${GAME_ENGINE_PATH}/src/Math/Vectors.cpp"
-	"${GAME_ENGINE_PATH}/src/Math/Math.cpp"
-	"${GAME_ENGINE_PATH}/src/Math/Matrixes.cpp"
-	"${GAME_ENGINE_PATH}/src/GL/API_helper.cpp"
-	"${GAME_ENGINE_PATH}/src/GL/Shader.cpp"
-	"${GAME_ENGINE_PATH}/src/GL/GraphicsComponentBase.cpp"
-	"${GAME_ENGINE_PATH}/src/Util/Util.cpp"
- 	"${GAME_ENGINE_PATH}/src/GL/GraphicsManager.cpp"
- 	"${GAME_ENGINE_PATH}/src/GL/Buffer.cpp"
- 	"${GAME_ENGINE_PATH}/src/GL/VertexBuffer.cpp"
- 	"${GAME_ENGINE_PATH}/src/GL/IndexBuffer.cpp"
- 	 "${GAME_ENGINE_PATH}/src/GL/UniformBuffer.cpp"
- 	"${GAME_ENGINE_PATH}/src/GL/CommandBuffer.cpp")
  
 set(GAME_MAIN_SRC ${GAME_MAIN_SRC} "${GAME_MAIN_PATH}/src/test.cpp")
 
