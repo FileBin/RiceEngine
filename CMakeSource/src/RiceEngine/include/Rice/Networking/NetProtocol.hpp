@@ -1,0 +1,171 @@
+#include "../stdafx.hpp"
+
+NSP_NET_BEGIN
+
+struct Request;
+struct Response;
+typedef RefPtr<Request> pRequest;
+typedef RefPtr<Request> pResponse;
+
+NSP_NET_END
+
+#pragma once
+
+#include "../Engine/Engine.hpp"
+#include "../Scene/Scene.hpp"
+#include "VirtualServer.hpp"
+
+NSP_NET_BEGIN
+
+#undef GetObject
+
+struct ConnectionKey {
+    uint64_t connection_id = 0;
+    uint64_t hash = 0;
+};
+
+struct ObjectData {
+    Scene::UUID objectUUID;
+    struct TickData {
+        Vector3 position;
+        Quaternion rotation;
+        Vector3 scale;
+    } tick_data, prev_tick_data;
+};
+
+typedef RefPtr<ConnectionKey> pConnectionKey;
+
+class Request {
+  public:
+    enum Type {
+        JOIN,
+        GET_SCENE_STATE,
+        GET_OBJECT,
+        SEND_INPUT,
+    };
+
+    struct ClientInfo {
+        String clientVersion;
+
+        dbl renderDistance;
+    };
+
+    struct GetObject {
+        Scene::UUID uuid;
+    };
+
+  private:
+    Request() {}
+    Request(Type type, ConnectionKey key, ClientInfo info, void *data)
+        : type(type), key(key), data(data), info(info) {}
+    void init(Type ty) {}
+
+  public:
+    ~Request() { free(data); }
+
+    static Request joinRequest(ClientInfo info) {
+        return {JOIN, {}, info, nullptr};
+    };
+
+    static Request getSceneState(ConnectionKey key, ClientInfo info) {
+        return {GET_SCENE_STATE, key, info, nullptr};
+    };
+
+    static Request getObject(ConnectionKey key, ClientInfo info,
+                             Scene::UUID objectUUID) {
+        return {GET_SCENE_STATE, key, info, new GetObject({objectUUID})};
+    };
+
+    typedef RefPtr<ClientInfo> pClientInfo;
+
+  private:
+    Type type;
+    void *data;
+    ConnectionKey key;
+    ClientInfo info;
+};
+
+class Response {
+  public:
+    enum Type {
+        JOIN_ACCEPT,
+        JOIN_REFUSE,
+        SEND_OBJECT,
+        SEND_SCENE_STATE,
+        SEND_ERROR, // TODO
+    };
+
+  private:
+    template <typename T> void init(Type ty, T obj) {
+        type = ty;
+        data = malloc(sizeof(T));
+        memcpy(data, (void *)&obj, sizeof(T));
+    }
+
+  public:
+    ~Response() { free(data); };
+
+    struct JoinAccept {
+        ConnectionKey key;
+    };
+
+    RefPtr<JoinAccept> getAcceptData() {
+        if (type == JOIN_ACCEPT)
+            return RefPtr<JoinAccept>(data_copy<JoinAccept>());
+        return nullptr;
+    }
+
+    struct JoinRefuse {
+        String msg;
+    };
+
+    RefPtr<JoinRefuse> getRefuseData() {
+        if (type == JOIN_REFUSE)
+            return RefPtr<JoinAccept>(data_copy<JoinAccept>());
+        return nullptr;
+    }
+
+    struct SendObject {
+        pObject object;
+    };
+
+    RefPtr<SendObject> getObject() {
+        if (type == SEND_OBJECT)
+            return RefPtr<SendObject>(data_copy<SendObject>());
+        return nullptr;
+    }
+
+    struct SendSceneState {
+        vec<ObjectData> objects_state;
+    };
+
+    RefPtr<SendSceneState> getSceneState() {
+        if (type == SEND_SCENE_STATE)
+            return RefPtr<SendSceneState>(data_copy<SendSceneState>());
+        return nullptr;
+    }
+
+    struct SendError {
+        String msg;
+    };
+
+    Response(JoinAccept data) { init<JoinAccept>(JOIN_ACCEPT, data); }
+    Response(JoinRefuse data) { init<JoinRefuse>(JOIN_REFUSE, data); }
+    Response(SendObject data) { init<SendObject>(SEND_OBJECT, data); }
+    Response(SendSceneState data) {
+        init<SendSceneState>(SEND_SCENE_STATE, data);
+    }
+    Response(SendError data) { init<SendError>(SEND_ERROR, data); }
+
+  private:
+    Type type;
+    void *data;
+
+    template <typename T> T *data_copy() {
+        T *copy;
+        memcpy((void *)copy, data, sizeof(T));
+        return copy;
+    };
+};
+
+NSP_NET_END

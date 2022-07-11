@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "BetterCpp/Objects/PtrTypes.hpp"
 #ifndef NDEBUG
 #ifndef _DEBUG
 #define _DEBUG

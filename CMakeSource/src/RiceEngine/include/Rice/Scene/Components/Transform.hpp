@@ -41,17 +41,17 @@ public:
     position = pos;
   }
 
-  void SetRotation(Quaternion q) {
+  void setRotation(Quaternion q) {
     std::unique_lock l(mut);
     rotation = q;
   }
 
-  void SetScale(Vector3 s) {
+  void setScale(Vector3 s) {
     std::unique_lock l(mut);
     scale = s;
   }
 
-  void SetPRS(Vector3 pos = Vector3::zero,
+  void setPRS(Vector3 pos = Vector3::zero,
               Quaternion rot = Quaternion::identity, Vector3 s = Vector3::one) {
     std::unique_lock l(mut);
     position = pos;
@@ -59,21 +59,21 @@ public:
     scale = s;
   }
 
-  Matrix4x4 GetTransformationMatrix() {
+  Matrix4x4 getTransformationMatrix() {
     std::shared_lock l(mut);
     if (parent != nullptr)
       return Matrix4x4::TRS(position, rotation, scale) *
-             parent->GetTransformationMatrix();
+             parent->getTransformationMatrix();
     return Matrix4x4::TRS(position, rotation, scale);
   }
 
-  Matrix4x4 GetInvTransformationMatrix() {
+  Matrix4x4 getInvTransformationMatrix() {
     std::shared_lock l(mut);
     auto mat = Matrix4x4::Translation(-position) *
                Matrix4x4::Rotation(rotation.Opposite()) *
                Matrix4x4::Scale(1 / scale);
     if (parent != nullptr)
-      return parent->GetInvTransformationMatrix() * mat;
+      return parent->getInvTransformationMatrix() * mat;
     return mat;
   }
 };

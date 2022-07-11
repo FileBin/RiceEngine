@@ -8,7 +8,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "VulkanHelper.hpp"
+#include "Vulkan_API_code/VulkanHelper.hpp"
 
 NSP_GL_BEGIN
 
@@ -122,21 +122,6 @@ vk::PipelineColorBlendAttachmentState VulkanHelper::color_blend_attachment_state
 	colorBlendAttachment.colorWriteMask = colorMask;
 	colorBlendAttachment.blendEnable = TO_VK_BOOL(blendEnable);
 	return colorBlendAttachment;
-}
-
-//TODO expand pipeline layout
-vk::PipelineLayoutCreateInfo VulkanHelper::pipeline_layout_create_info() {
-	vk::PipelineLayoutCreateInfo info {};
-	info.sType = vk::StructureType::ePipelineLayoutCreateInfo;
-	info.pNext = nullptr;
-
-	//empty defaults
-	info.flags = {};
-	info.setLayoutCount = 0;
-	info.pSetLayouts = nullptr;
-	info.pushConstantRangeCount = 0;
-	info.pPushConstantRanges = nullptr;
-	return info;
 }
 
 

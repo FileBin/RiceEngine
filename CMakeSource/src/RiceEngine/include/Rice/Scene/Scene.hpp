@@ -1,4 +1,5 @@
 #include "../stdafx.hpp"
+#include "BetterCpp/Objects/PtrTypes.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -15,7 +16,8 @@ NSP_ENGINE_END
 NSP_ENGINE_BEGIN
 
 class Scene {
-public:
+  public:
+    typedef uint64_t UUID;
     void setup(pEngine engine);
     void init();
 
@@ -24,6 +26,13 @@ public:
     void close();
 
     bool isLoaded();
+
+    pObject getObject(UUID uuid);
+
+    pObject createEmpty();
+
+  private:
+    RegisterCollection<pObject, UUID> all_objects;
 };
 
 NSP_ENGINE_END
