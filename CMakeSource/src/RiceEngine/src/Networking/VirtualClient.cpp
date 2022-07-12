@@ -1,6 +1,8 @@
+#include "BetterCpp/Functions.hpp"
 #include "Rice/Engine/Log.hpp"
 #include "Rice/Math/Vectors/Vector3.hpp"
 #include "Rice/Networking/NetProtocol.hpp"
+#include "Rice/Scene/Object.hpp"
 #include "Rice/defines.h"
 #include "pch.h"
 
@@ -8,6 +10,7 @@
 #include "Rice/Scene/Components/Transform.hpp"
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <stop_token>
 
 NSP_NET_BEGIN
@@ -62,12 +65,14 @@ void VirtualClient::clientThreadFn(std::stop_token stoken) {
             auto scene_obj = scene->getObject(obj.objectUUID);
             if (scene_obj.isNull()) {
                 // push it into the scene
-                auto obj_resp = server->response(
-                    Request::getObject(key, info, obj.objectUUID));
 
-                scene_obj = obj_resp.getObject()->object;
+                auto get_obj_func = [this](UUID uuid) {
+                    auto obj_resp =
+                        server->response(Request::getObject(key, info, uuid));
+                    return obj_resp.getObject()->object_data;
+                };
 
-                scene->pushObjectWithUUID(scene_obj, obj.objectUUID);
+                get_obj_func(obj.objectUUID).unpack(scene, get_obj_func);
             }
 
             auto transform = scene_obj->getComponent<Components::Transform>();
@@ -94,8 +99,11 @@ void VirtualClient::updateClock(num srv_tick) {
     client_clock = now;
 }
 
-dbl VirtualClient::getTickOffset() { using namespace std::chrono; 
-    dbl dt = duration<dbl, milliseconds::period>(high_resolution_clock::now() - client_clock).count();
+dbl VirtualClient::getTickOffset() {
+    using namespace std::chrono;
+    dbl dt = duration<dbl, milliseconds::period>(high_resolution_clock::now() -
+                                                 client_clock)
+                 .count();
     dbl t = duration<dbl, milliseconds::period>(tick_duration).count();
     return dt / t;
 }

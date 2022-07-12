@@ -29,7 +29,9 @@ using uset = std::unordered_set<T>;
 
 typedef vec<byte> data_t;
 
-typedef long long num;
+typedef uint64_t UUID;
+
+typedef int64_t num;
 typedef double dbl;
 
 #include "Math.hpp"

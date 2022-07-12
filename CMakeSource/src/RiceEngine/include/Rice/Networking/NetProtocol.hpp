@@ -1,7 +1,4 @@
 #include "../stdafx.hpp"
-#include "BetterCpp/Objects/String.hpp"
-#include "Rice/defines.h"
-#include <cstdint>
 
 NSP_NET_BEGIN
 
@@ -32,18 +29,18 @@ struct ClientInfo {
     String email; // for join from other device or account recovery
 };
 
-struct ObjectData {
-    Scene::UUID objectUUID;
+struct ObjectSendData {
+    UUID objectUUID;
     struct TickData {
-        num tick;
         Vector3 position;
         Quaternion rotation;
         Vector3 scale;
     } tick_data, prev_tick_data;
 };
 
+
 struct PlayerData {
-    ObjectData obj_data;
+    ObjectSendData obj_data;
     dbl renderDistance;
 };
 
@@ -59,7 +56,7 @@ class Request {
     };
 
     struct GetObject {
-        Scene::UUID uuid;
+        UUID uuid;
     };
 
   private:
@@ -80,7 +77,7 @@ class Request {
     };
 
     static Request getObject(ConnectionKey key, ClientInfo info,
-                             Scene::UUID objectUUID) {
+                             UUID objectUUID) {
         return {GET_SCENE_STATE, key, info, new GetObject({objectUUID})};
     };
 
@@ -141,7 +138,7 @@ class Response {
     }
 
     struct SendObject {
-        pObject object;
+        ObjectData object_data;
     };
 
     RefPtr<SendObject> getObject() {
@@ -152,7 +149,7 @@ class Response {
 
     struct SendSceneState {
         num server_tick;
-        vec<ObjectData> objects_state;
+        vec<ObjectSendData> objects_state;
     };
 
     RefPtr<SendSceneState> getSceneState() {

@@ -1,5 +1,4 @@
 #include "../stdafx.hpp"
-#include "BetterCpp/Objects/PtrTypes.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -17,7 +16,6 @@ NSP_ENGINE_BEGIN
 
 class Scene {
   public:
-    typedef uint64_t UUID;
     void setup(pEngine engine);
     void init();
 
@@ -29,13 +27,15 @@ class Scene {
 
     pObject getObject(UUID uuid);
 
-    //NOTE: can throw exception if UUID is exists in the scene
-    void pushObjectWithUUID(pObject original, UUID uuid);
-
     pObject createEmpty();
 
   private:
-    RegisterCollection<pObject, UUID> all_objects;
+    RegisterCollection<pObject, UUID> all_objects;\
+
+    friend struct ObjectData;
+
+    //NOTE: can throw exception if UUID is exists in the scene
+    void pushObjectWithUUID(pObject original, UUID uuid);
 };
 
 NSP_ENGINE_END
