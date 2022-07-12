@@ -1,4 +1,7 @@
 #include "../stdafx.hpp"
+#include "BetterCpp/Objects/String.hpp"
+#include "Rice/defines.h"
+#include <cstdint>
 
 NSP_NET_BEGIN
 
@@ -13,7 +16,6 @@ NSP_NET_END
 
 #include "../Engine/Engine.hpp"
 #include "../Scene/Scene.hpp"
-#include "VirtualServer.hpp"
 
 NSP_NET_BEGIN
 
@@ -24,13 +26,25 @@ struct ConnectionKey {
     uint64_t hash = 0;
 };
 
+struct ClientInfo {
+    String clientVersion;
+    String nickname;
+    String email; // for join from other device or account recovery
+};
+
 struct ObjectData {
     Scene::UUID objectUUID;
     struct TickData {
+        num tick;
         Vector3 position;
         Quaternion rotation;
         Vector3 scale;
     } tick_data, prev_tick_data;
+};
+
+struct PlayerData {
+    ObjectData obj_data;
+    dbl renderDistance;
 };
 
 typedef RefPtr<ConnectionKey> pConnectionKey;
@@ -41,13 +55,7 @@ class Request {
         JOIN,
         GET_SCENE_STATE,
         GET_OBJECT,
-        SEND_INPUT,
-    };
-
-    struct ClientInfo {
-        String clientVersion;
-
-        dbl renderDistance;
+        SEND_PLAYER_DATA,
     };
 
     struct GetObject {
@@ -76,6 +84,11 @@ class Request {
         return {GET_SCENE_STATE, key, info, new GetObject({objectUUID})};
     };
 
+    static Request sendPlayerData(ConnectionKey key, ClientInfo info,
+                                  PlayerData data) {
+        return {SEND_PLAYER_DATA, key, info, new PlayerData({data})};
+    };
+
     typedef RefPtr<ClientInfo> pClientInfo;
 
   private:
@@ -92,7 +105,8 @@ class Response {
         JOIN_REFUSE,
         SEND_OBJECT,
         SEND_SCENE_STATE,
-        SEND_ERROR, // TODO
+        SEND_ERROR,
+        SEND_OK,
     };
 
   private:
@@ -107,6 +121,7 @@ class Response {
 
     struct JoinAccept {
         ConnectionKey key;
+        PlayerData initial_data;
     };
 
     RefPtr<JoinAccept> getAcceptData() {
@@ -136,6 +151,7 @@ class Response {
     }
 
     struct SendSceneState {
+        num server_tick;
         vec<ObjectData> objects_state;
     };
 
@@ -156,6 +172,8 @@ class Response {
         init<SendSceneState>(SEND_SCENE_STATE, data);
     }
     Response(SendError data) { init<SendError>(SEND_ERROR, data); }
+
+    bool is(Type ty) { return type == ty; };
 
   private:
     Type type;

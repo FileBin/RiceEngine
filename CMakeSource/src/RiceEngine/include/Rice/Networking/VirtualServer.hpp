@@ -12,11 +12,11 @@ NSP_NET_END
 #include "../Engine/Engine.hpp"
 #include "../Scene/Scene.hpp"
 #include "NetProtocol.hpp"
-#include "VirtualClient.hpp"
+#include "IServer.hpp"
 
 NSP_NET_BEGIN
 
-class VirtualServer {
+class VirtualServer : public IServer {
   public:
     struct IManager {
       private:
@@ -27,8 +27,8 @@ class VirtualServer {
       protected:
         pVirtualServer getServer();
         pScene getScene();
-        virtual Response onJoin(pVirtualClient client, Request request);
-        virtual void onLeave(pVirtualClient cleint);
+        virtual Response onJoin(ClientInfo client, Request request);
+        virtual void onLeave(ClientInfo cleint);
     };
 
     typedef RefPtr<IManager> pIManager;
@@ -37,12 +37,12 @@ class VirtualServer {
 
     void setScene(pScene scene);
 
-    Response getResponse(Request request);
+    Response response(Request request) override;
 
   private:
     pIManager manager;
     pScene scene;
-    RegisterCollection<pVirtualClient> clients;
+    RegisterCollection<ClientInfo> clients;
 };
 
 NSP_NET_END

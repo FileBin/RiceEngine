@@ -38,6 +38,7 @@ public:
 
   void setPosition(Vector3 pos) {
     std::unique_lock l(mut);
+    //TODO make set position global
     position = pos;
   }
 
