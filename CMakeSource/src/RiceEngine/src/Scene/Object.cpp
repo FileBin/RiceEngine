@@ -1,8 +1,8 @@
 #include "pch.h"
 
-#include "Rice/Scene/Component.hpp"
 #include "Rice/Scene/Object.hpp"
 #include "Rice/namespaces.h"
+#include "Rice/Scene/Component.hpp"
 
 NSP_ENGINE_BEGIN
 

@@ -32,6 +32,8 @@ NSP_GL_BEGIN
 		const TextureArray GetTextures() const;*/
 
 		pShader getShader() { return shader; }
+        
+        //can be null
 		pUniformBuffer getUniformBuffer() { return uniformBuffer; }
 	private:
 		pShader shader;

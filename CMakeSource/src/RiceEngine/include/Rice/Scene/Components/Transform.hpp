@@ -70,6 +70,7 @@ public:
 
   Matrix4x4 getInvTransformationMatrix() {
     std::shared_lock l(mut);
+    //TODO make it better
     auto mat = Matrix4x4::Translation(-position) *
                Matrix4x4::Rotation(rotation.Opposite()) *
                Matrix4x4::Scale(1 / scale);

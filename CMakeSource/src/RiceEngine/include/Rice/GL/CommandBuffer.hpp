@@ -28,6 +28,8 @@ NSP_GL_END
 #include "UniformBuffer.hpp"
 
 NSP_GL_BEGIN
+
+//TODO make function that checks if buffers updated and recreates cmd buffer
 class CommandBuffer : GraphicsComponentBase {
 public:
 	friend class GraphicsManager;

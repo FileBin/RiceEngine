@@ -7,10 +7,14 @@ typedef RefPtr<ModelData> pModelData;
 
 NSP_GL_END
 
+#pragma once
+
 NSP_GL_BEGIN
 
-struct ModelData {
-    Matrix4x4f world = Matrix4x4f::identity, view = Matrix4x4f::identity, projection = Matrix4x4f::identity;
+struct alignas(16) ModelData {
+    Matrix4x4f world = Matrix4x4f::identity;
+    Matrix4x4f view = Matrix4x4f::identity;
+    Matrix4x4f projection = Matrix4x4f::identity;
 };
 
 NSP_GL_END

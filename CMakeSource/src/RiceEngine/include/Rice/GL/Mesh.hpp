@@ -6,6 +6,8 @@
  */
 
 #include "../stdafx.hpp"
+#include "Rice/GL/IndexBuffer.hpp"
+#include <sys/types.h>
 
 NSP_GL_BEGIN
 
@@ -40,7 +42,7 @@ inline const VertexLayout Vertex::vertexLayout(
 	}
 );
 
-class Mesh {
+struct Mesh {
 	struct Bounds {
 		Vector3f min {}, max {};
 		vec<Vector3f> getCorners();
@@ -49,7 +51,7 @@ class Mesh {
 	};
 	Bounds bounds;
 	RefPtr<VertexList> vertexBuffer;
-	vec<uint> indexBuffer = {};
+	vec<index_t> indexBuffer = {};
 	static const Mesh quad;
 
 	void rotate(Quaternion q);

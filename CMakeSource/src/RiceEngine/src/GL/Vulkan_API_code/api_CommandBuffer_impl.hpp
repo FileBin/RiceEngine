@@ -15,7 +15,7 @@
 
 NSP_GL_BEGIN
 
-void CommandBuffer_API_data::build(GraphicsManager_API_data& api_data) {
+inline void CommandBuffer_API_data::build(GraphicsManager_API_data& api_data) {
 	//allocate the default command buffer that we will use for rendering
 	vk::CommandBufferAllocateInfo info = {};
 
@@ -26,7 +26,7 @@ void CommandBuffer_API_data::build(GraphicsManager_API_data& api_data) {
 	cmd = api_data.device.allocateCommandBuffers(info);
 }
 
-void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Extent2D window, uint i) {
+inline void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Extent2D window, uint i) {
 	uint n = cmd.size();
 	vk::CommandBufferBeginInfo cmdBeginInfo;
 
@@ -63,7 +63,7 @@ void CommandBuffer_API_data::begin(GraphicsManager_API_data& api_data, vk::Exten
 
 
 
-void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command, uint i) {
+inline void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command, uint i) {
 	using namespace vk;
 
 	uint n = cmd.size();
@@ -152,20 +152,20 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command, u
 	}
 }
 
-void CommandBuffer_API_data::end(uint i) {
+inline void CommandBuffer_API_data::end(uint i) {
 	cmd[i].endRenderPass();
 	cmd[i].end();
 }
 
-void CommandBuffer_API_data::reset(uint i) {
+inline void CommandBuffer_API_data::reset(uint i) {
 	cmd[i].reset();
 }
 
-uint CommandBuffer_API_data::bufCount() {
+inline uint CommandBuffer_API_data::bufCount() {
 	return cmd.size();
 }
 
-void CommandBuffer_API_data::cleanup(GraphicsManager_API_data& api_data) {
+inline void CommandBuffer_API_data::cleanup(GraphicsManager_API_data& api_data) {
 	api_data.device.free(api_data.commandPool, cmd);
 }
 

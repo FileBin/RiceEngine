@@ -6,7 +6,9 @@
 NSP_TESTS_BEGIN
 
 class CubeTestScene : Scene {
-    void init() override {}
+    void init() override {
+        
+    }
 };
 
 NSP_TESTS_END
