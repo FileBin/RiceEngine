@@ -24,7 +24,7 @@ void IndexBuffer::cleanup() {
 	}
 }
 
-void IndexBuffer::reset(vec<uint> data) {
+void IndexBuffer::reset(vec<index_t> data) {
 	cleanup();
 	if(!data.empty()) {
 		uint n = data.size();
@@ -53,5 +53,7 @@ vec<index_t> IndexBuffer::getIndexData(uint pos, uint count) {
 void IndexBuffer::updateIndices(vec<index_t> indices, uint pos) {
 	setData(indices.data(), indices.size() * stride, pos * stride);
 }
+
+uint IndexBuffer::indexCount() { return current_count; }
 
 NSP_GL_END

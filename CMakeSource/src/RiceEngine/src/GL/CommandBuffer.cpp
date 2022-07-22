@@ -5,6 +5,7 @@
  *      Author: FileBinsLapTop
  */
 
+#include "Rice/GL/IndexBuffer.hpp"
 #include "pch.h"
 
 #include <Rice/GL/CommandBuffer.hpp>
@@ -55,9 +56,9 @@ void CommandBuffer::drawVertices(uint count) {
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
-void CommandBuffer::drawIndexed(uint count) {
+void CommandBuffer::drawIndexed(pIndexBuffer indexBuffer) {
 
-	commands.push_back(new_ref<Command>(Command::DrawIndexed, count, 1, 0, 0, 0));
+	commands.push_back(new_ref<Command>(Command::DrawIndexed, indexBuffer));
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 

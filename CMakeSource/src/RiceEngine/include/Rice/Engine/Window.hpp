@@ -15,7 +15,7 @@ NSP_ENGINE_END
 NSP_ENGINE_BEGIN
 
 struct DescWindow {
-    String caption{L"Game"};
+    String caption{L"Window"};
     int width{640};
     int height{480};
     bool resizing{true};

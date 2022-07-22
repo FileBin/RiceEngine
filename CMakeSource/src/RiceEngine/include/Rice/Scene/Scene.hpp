@@ -10,18 +10,20 @@ NSP_ENGINE_END
 #pragma once
 
 #include "Object.hpp"
-#include "Rice/Engine/Engine.hpp"
+#include "../Engine/Engine.hpp"
+#include "SceneRender.hpp"
 
 NSP_ENGINE_BEGIN
 
 class Scene {
+    friend class SceneRender;
   public:
     void setup(pEngine engine);
-    void init();
+    virtual void init() = 0;
 
     void render();
 
-    void close();
+    virtual void close() {};
 
     bool isLoaded();
 
@@ -30,7 +32,7 @@ class Scene {
     pObject createEmpty();
 
   private:
-    RegisterCollection<pObject, UUID> all_objects;\
+    RegisterCollection<pObject, UUID> all_objects;
 
     friend struct ObjectData;
 

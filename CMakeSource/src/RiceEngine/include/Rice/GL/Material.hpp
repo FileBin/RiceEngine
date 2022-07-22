@@ -1,16 +1,18 @@
 ﻿#include "../stdafx.hpp"
+#include "BetterCpp/Objects/PtrTypes.hpp"
+#include "Rice/GL/UniformBuffer.hpp"
 
 NSP_GL_BEGIN
 
 class Material;
-typedef SmartPtr<Material> pMaterial;
+typedef RefPtr<Material> pMaterial;
 
 NSP_GL_END
 
 #pragma once
 #include "GraphicsManager.hpp"
 #include "Shader.hpp"
-#include "Texture2D.hpp"
+//TODO #include "Texture2D.hpp"
 
 NSP_GL_BEGIN
 
@@ -23,25 +25,19 @@ NSP_GL_BEGIN
 		Material(pGraphicsManager manager, pShader sh);
 		~Material() {}
 
-		void UpdateBuffer();
+		void updateBuffer();
 
-		//TODO make set VAR
-		/*template<typename T>
-		void SetVar(String name, T val) {
-			mapping.SetData(name, &val, sizeof(val));
-		}*/
-
-		void AddTexture(pTexture2D tex);
+		/*void AddTexture(pTexture2D tex);
 		pTexture2D GetTexture(size_t idx);
-		const TextureArray GetTextures() const;
+		const TextureArray GetTextures() const;*/
 
-		pShader GetShader() { return shader; }
-		//Buffer* GetBuffer() { return constantBuffer; }
+		pShader getShader() { return shader; }
+		pUniformBuffer getUniformBuffer() { return uniformBuffer; }
 	private:
 		pShader shader;
-		//Buffer* constantBuffer = nullptr;
+		pUniformBuffer uniformBuffer;
 		pGraphicsManager graphics_manager;
-		vec<pTexture2D> textureArr{};
+		//TODO vec<pTexture2D> textureArr{};
 	};
 
 NSP_GL_END

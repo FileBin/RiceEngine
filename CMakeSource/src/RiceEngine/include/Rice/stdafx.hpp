@@ -5,6 +5,7 @@
 
 #include <mutex>
 #include <shared_mutex>
+#include <filesystem>
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
@@ -28,3 +29,4 @@ NSP_ENGINE_END
 #include "defines.h"
 
 #include "Math.hpp"
+#include "Util.hpp"

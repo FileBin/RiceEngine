@@ -136,7 +136,7 @@ public:
 	void clear();
 
 	void drawVertices(uint count);
-	void drawIndexed(uint index_count);
+	void drawIndexed(pIndexBuffer indexBuffer);
 	void setActiveShader(pShader shader);
 
 	void bindVertexBuffer(pBuffer buffer);

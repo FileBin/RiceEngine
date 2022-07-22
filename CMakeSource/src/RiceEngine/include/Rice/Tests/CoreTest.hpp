@@ -1,14 +1,16 @@
 /*
- * QuadTest.hpp
+ * CoreTest.hpp
  *
- *  Created on: May 14, 2022
+ *  Created on: June 14, 2022
  *      Author: filebin
  */
 
 #include "../stdafx.hpp"
 #include "../Engine/Core.hpp"
+#include "../Engine/DefaultCoreLoader.hpp"
 
-#include "CoreTest/all.hpp"
+#include "BetterCpp/Functions.hpp"
+#include "Scenes/CubeTest.hpp"
 
 
 NSP_TESTS_BEGIN
@@ -29,7 +31,7 @@ public:
 private:
 
 	void entrypoint() {
-        Core::runNew(new_ref<PreInitScript>());
+        Core::runNew(new_ref<DefaultCoreLoader>("CubeTest",new_ref<CubeTestScene>()));
 	}
 
     void cleanup() override {}

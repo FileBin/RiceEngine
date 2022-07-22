@@ -31,7 +31,7 @@ public:
 	void updateIndices(vec<index_t> indices, uint start_pos);
 	index_t getIndexData(uint pos);
 	vec<index_t> getIndexData(uint pos, uint count);
-
+    uint indexCount();
 	void cleanup() override;
 };
 

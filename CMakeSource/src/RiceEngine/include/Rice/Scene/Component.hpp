@@ -6,6 +6,8 @@ class Component;
 typedef RefPtr<Component> pComponent;
 
 struct ComponentData;
+typedef RefPtr<ComponentData> pComponentData;
+
 
 NSP_COMPONENTS_END
 
@@ -15,7 +17,7 @@ NSP_COMPONENTS_END
 
 NSP_COMPONENTS_BEGIN
 
-class Component {
+class Component : public IPackable<pComponentData> {
 protected:
   pObject object;
 
@@ -33,7 +35,7 @@ public:
   bool isEnabled();
 };
 
-struct ComponentData {
+struct ComponentData : public IPackable<data_t> {
     UUID objectUUID;
 
     virtual pComponent createComponent();

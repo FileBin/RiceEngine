@@ -91,7 +91,7 @@ private:
 
 		//cmd->pushConstants<VertConstData>(const_data, test_shader);
 		cmd->bindUniformBuffer(uniformBuffer);
-		cmd->drawIndexed(6);
+		cmd->drawIndexed(indexBuffer);
 		cmd->buildAll();
 
 		while(win.update())

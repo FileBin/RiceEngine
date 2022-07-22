@@ -3,6 +3,7 @@
 #include "Rice/Math/Vectors/Vector3.hpp"
 #include "Rice/Networking/NetProtocol.hpp"
 #include "Rice/Scene/Object.hpp"
+#include "Rice/Util.hpp"
 #include "Rice/defines.h"
 #include "pch.h"
 
@@ -10,19 +11,40 @@
 #include "Rice/Scene/Components/Transform.hpp"
 #include <chrono>
 #include <cstdint>
+#include <filesystem>
 #include <functional>
+#include <mutex>
 #include <stop_token>
+#include <string>
+#include <thread>
+
+using namespace std;
 
 NSP_NET_BEGIN
 
-VirtualClient::VirtualClient(ClientInfo info)
+std::filesystem::path VirtualClient::config_path =
+    Util::getAppDirectory() / "config";
+std::filesystem::path VirtualClient::config_file = "client_keys.json";
+
+VirtualClient::VirtualClient(
+    ClientInfo info, std::chrono::high_resolution_clock::duration update_rate)
     : info(info), client_thread([this](std::stop_token stoken) {
           clientThreadFn(stoken);
       }) {}
 
 VirtualClient::JoinResult VirtualClient::join(pIServer serv) {
-    // TODO try to get key from local storage
-    auto response = serv->response(Request::joinRequest(info));
+    lock_guard<mutex> lock{client_mutex};
+    auto response = serv->response(Request::getServerUUID());
+
+    if (!response.is(Response::SEND_UUID))
+        THROW_EXCEPTION("Server response is not valid");
+
+    auto servUUID = response.getUUID();
+
+    // try get key from local storage
+    bool has_key = tryGetKey(*servUUID, key);
+
+    response = serv->response(Request::joinRequest(info, key));
     if (response.is(Response::JOIN_REFUSE))
         return {false, response.getRefuseData()->msg};
 
@@ -31,15 +53,45 @@ VirtualClient::JoinResult VirtualClient::join(pIServer serv) {
 
     auto acceptData = response.getAcceptData();
     player_data = acceptData->initial_data;
-    key = acceptData->key;
+    if (!has_key) {
+        //if connected first time add key to local storage
+        auto new_key = acceptData->key;
+        Util::writeToJSON(config_path / config_file,
+                          std::to_string(servUUID->getVal()),
+                          new_key.toStdString());
+        key = new_key;
+    }
 
     server = serv;
 
     return {true, "Yay, you joined the server!"};
 }
 
+void VirtualClient::leave() {
+    //TODO leave
+}
+
+bool VirtualClient::tryGetKey(UUID servUUID, ConnectionKey &out_key) {
+    if (!filesystem::exists(config_path)) {
+        filesystem::create_directory(config_path);
+    }
+    std::string key_str;
+    if (!Util::getFromJson(config_path / config_file,
+                           std::to_string(servUUID.getVal()), key_str))
+        return false;
+
+    out_key = ConnectionKey::fromStdString(key_str);
+    return true;
+}
+
 void VirtualClient::clientThreadFn(std::stop_token stoken) {
     while (!stoken.stop_requested()) {
+        if (server.isNull()) {
+            using namespace std;
+            this_thread::sleep_for(100ms);
+            continue;
+        }
+        client_mutex.lock();
         auto resp =
             server->response(Request::sendPlayerData(key, info, player_data));
         if (!resp.is(Response::SEND_OK)) {
@@ -87,6 +139,7 @@ void VirtualClient::clientThreadFn(std::stop_token stoken) {
             dir = obj.tick_data.scale - obj.prev_tick_data.scale;
             transform->setScale(obj.prev_tick_data.scale + dir * tick_offset);
         }
+        client_mutex.unlock();
     }
 }
 
@@ -101,14 +154,14 @@ void VirtualClient::updateClock(num srv_tick) {
 
 dbl VirtualClient::getTickOffset() {
     using namespace std::chrono;
-    dbl dt = duration<dbl, milliseconds::period>(high_resolution_clock::now() -
-                                                 client_clock)
-                 .count();
-    dbl t = duration<dbl, milliseconds::period>(tick_duration).count();
+    using dms = duration<dbl, milliseconds::period>;
+    dbl dt = dms(high_resolution_clock::now() - client_clock).count();
+    dbl t = dms(tick_duration).count();
     return dt / t;
 }
 
 VirtualClient::~VirtualClient() {
+    leave();
     client_thread.request_stop();
     client_thread.join();
 };

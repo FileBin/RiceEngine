@@ -1,4 +1,5 @@
 #include "../stdafx.hpp"
+#include <thread>
 
 NSP_NET_BEGIN
 
@@ -40,6 +41,8 @@ class VirtualServer : public IServer {
     Response response(Request request) override;
 
   private:
+    std::jthread server_thread;
+
     pIManager manager;
     pScene scene;
     RegisterCollection<ClientInfo> clients;

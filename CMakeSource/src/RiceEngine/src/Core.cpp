@@ -48,27 +48,34 @@ bool Core::init() {
     wnd = new_ref<Window>();
 
     if (wnd.isNull()) {
-        Log::log(Log::Error, L"Window could not be constructed");
+        Log::log(Log::Error, "Window could not be constructed");
         return false;
     }
 
-    loader->setupCore();
+    SetupParams setupParams;
 
-    if (!wnd->create(desc)) {
-        Log::log(Log::Error, L"Window could not be created");
+    loader->setupCore(setupParams);
+
+    if (!wnd->create(setupParams.window_desc)) {
+        Log::log(Log::Error, "Window could not be created");
         return false;
     }
 
     graphics_manager->init(wnd);
 
-    loader->onInit();
+    InitParams initParams;
 
-    loadingScreenScene->setup(engine);
-    loadingScreenScene->init();
+    loader->initCore(initParams);
+
+    if (initParams.loading_scene.isNotNull()) {
+        loadingScreenScene = initParams.loading_scene;
+        loadingScreenScene->setup(engine);
+        loadingScreenScene->init();
+    }
     // loadingScreenScene->PostInit();
 
     is_init = true;
-    loader->postInit();
+    loader->postInitCore(engine);
     return true;
 }
 void Core::run() {
@@ -103,7 +110,7 @@ void Core::run() {
 }
 
 void Core::close() {
-    loader->onClose();
+    loader->onClose(engine);
     is_init = false;
     loadingScreenScene->close();
     loadingScreenScene.release();
@@ -127,7 +134,11 @@ bool Core::runFrame() {
         // }
     }
     if (activeScene.isNull() || !activeScene->isLoaded()) {
-        loadingScreenScene->render();
+        if (loadingScreenScene.isNotNull())
+            loadingScreenScene->render();
+        else {
+            Log::log(Log::Warning, "Can't render frame! Loading screen render is not set up!");
+        }
     } else {
         activeScene->render();
     }

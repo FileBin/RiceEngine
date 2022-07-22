@@ -10,3 +10,5 @@
 
 #define USE_VULKAN_API
 #define _DEBUG
+
+#define APPNAME "Rice"

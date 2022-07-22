@@ -17,7 +17,7 @@ NSP_ENGINE_END
 
 NSP_ENGINE_BEGIN
 
-class Object {
+class Object : IPackable<ObjectData> {
   private:
     UUID selfUUID;
 
@@ -35,7 +35,7 @@ class Object {
     static pObject createEmpty();
 
   public:
-    ObjectData pack();
+    ObjectData pack() override;
 
     template <typename T> vec<RefPtr<T>> getComponents() {
         vec<RefPtr<T>> vec = {};
@@ -59,26 +59,25 @@ class Object {
     }
 };
 
-struct ObjectData {
+struct ObjectData : public IPackable<data_t> {
     bool active;
     bool enabled;
     String name;
     UUID parentUUID, selfUUID;
     vec<UUID> childrenUUID;
 
-    vec<Components::ComponentData *> componentsData;
+    vec<Components::pComponentData> componentsData;
 
-    data_t zip();
+    data_t pack() override;
 
-    static ObjectData unzip(data_t);
+    static ObjectData unpack(data_t);
 
     pObject unpack(pScene scene,
                    std::function<ObjectData(UUID)> getRelativesData);
 
-    ~ObjectData();
-
   private:
-    pObject unpack(pObject parent, std::function<ObjectData(UUID)> getRelativesData);
+    pObject unpack(pObject parent,
+                   std::function<ObjectData(UUID)> getRelativesData);
 };
 
 NSP_ENGINE_END

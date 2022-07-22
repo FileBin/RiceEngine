@@ -1,4 +1,8 @@
 #include "../stdafx.hpp"
+#include "BetterCpp/Objects/PtrTypes.hpp"
+#include "Rice/defines.h"
+#include <cstdlib>
+#include <string>
 
 NSP_NET_BEGIN
 
@@ -19,8 +23,31 @@ NSP_NET_BEGIN
 #undef GetObject
 
 struct ConnectionKey {
-    uint64_t connection_id = 0;
-    uint64_t hash = 0;
+    byte hash[64] = { 0 }; // 512 bit secure hash
+
+    std::string toStdString() {
+        char buf[] = "00000000""00000000""00000000""00000000"
+                     "00000000""00000000""00000000""00000000"
+                     "00000000""00000000""00000000""00000000"
+                     "00000000""00000000""00000000""00000000";
+        short buf_pos = 0x7f;
+        for (uint i = 0; i < 64; i++) {
+            byte b = hash[i];
+            buf[buf_pos--] = '0' + b % 0x10;
+            buf[buf_pos--] = '0' + b / 0x10;
+        }
+        return buf;
+    }
+
+    static ConnectionKey fromStdString(std::string str) {
+        ConnectionKey key;
+        short buf_pos = 0x7f;
+        for (uint i = 0; i < 64; i++) {
+            key.hash[i] = str[buf_pos--] - '0';
+            key.hash[i] += (str[buf_pos--] - '0')* 0x10;
+        }
+        return key;
+    }
 };
 
 struct ClientInfo {
@@ -38,7 +65,6 @@ struct ObjectSendData {
     } tick_data, prev_tick_data;
 };
 
-
 struct PlayerData {
     ObjectSendData obj_data;
     dbl renderDistance;
@@ -52,6 +78,7 @@ class Request {
         JOIN,
         GET_SCENE_STATE,
         GET_OBJECT,
+        GET_SERVER_UUID,
         SEND_PLAYER_DATA,
     };
 
@@ -68,8 +95,12 @@ class Request {
   public:
     ~Request() { free(data); }
 
-    static Request joinRequest(ClientInfo info) {
-        return {JOIN, {}, info, nullptr};
+    static Request getServerUUID() {
+        return {GET_SERVER_UUID, {}, {}, nullptr};
+    };
+
+    static Request joinRequest(ClientInfo info, ConnectionKey key = {}) {
+        return {JOIN, key, info, nullptr};
     };
 
     static Request getSceneState(ConnectionKey key, ClientInfo info) {
@@ -104,17 +135,34 @@ class Response {
         SEND_SCENE_STATE,
         SEND_ERROR,
         SEND_OK,
+        SEND_UUID,
     };
 
   private:
     template <typename T> void init(Type ty, T obj) {
         type = ty;
         data = malloc(sizeof(T));
+        data_len = sizeof(T);
         memcpy(data, (void *)&obj, sizeof(T));
     }
 
   public:
-    ~Response() { free(data); };
+    Response(const Response &other)
+        : type(other.type), data(other.data_copy()), data_len(other.data_len) {}
+
+    const Response &operator=(const Response &other) {
+        if (data)
+            free(data);
+        data = other.data_copy();
+        data_len = other.data_len;
+        type = other.type;
+        return *this;
+    }
+
+    ~Response() {
+        if (data)
+            free(data);
+    };
 
     struct JoinAccept {
         ConnectionKey key;
@@ -123,7 +171,7 @@ class Response {
 
     RefPtr<JoinAccept> getAcceptData() {
         if (type == JOIN_ACCEPT)
-            return RefPtr<JoinAccept>(data_copy<JoinAccept>());
+            return RefPtr<JoinAccept>(data_copyT<JoinAccept>());
         return nullptr;
     }
 
@@ -133,7 +181,7 @@ class Response {
 
     RefPtr<JoinRefuse> getRefuseData() {
         if (type == JOIN_REFUSE)
-            return RefPtr<JoinAccept>(data_copy<JoinAccept>());
+            return RefPtr<JoinAccept>(data_copyT<JoinAccept>());
         return nullptr;
     }
 
@@ -143,7 +191,7 @@ class Response {
 
     RefPtr<SendObject> getObject() {
         if (type == SEND_OBJECT)
-            return RefPtr<SendObject>(data_copy<SendObject>());
+            return RefPtr<SendObject>(data_copyT<SendObject>());
         return nullptr;
     }
 
@@ -154,7 +202,13 @@ class Response {
 
     RefPtr<SendSceneState> getSceneState() {
         if (type == SEND_SCENE_STATE)
-            return RefPtr<SendSceneState>(data_copy<SendSceneState>());
+            return RefPtr<SendSceneState>(data_copyT<SendSceneState>());
+        return nullptr;
+    }
+
+    RefPtr<UUID> getUUID() {
+        if (type == SEND_UUID)
+            return RefPtr<UUID>(data_copyT<UUID>());
         return nullptr;
     }
 
@@ -170,15 +224,24 @@ class Response {
     }
     Response(SendError data) { init<SendError>(SEND_ERROR, data); }
 
+    Response(UUID data) { init<UUID>(SEND_UUID, data); }
+
     bool is(Type ty) { return type == ty; };
 
   private:
     Type type;
+    uint data_len;
     void *data;
 
-    template <typename T> T *data_copy() {
+    template <typename T> T *data_copyT() {
         T *copy;
         memcpy((void *)copy, data, sizeof(T));
+        return copy;
+    };
+
+    void *data_copy() const {
+        void *copy;
+        memcpy((void *)copy, data, data_len);
         return copy;
     };
 };

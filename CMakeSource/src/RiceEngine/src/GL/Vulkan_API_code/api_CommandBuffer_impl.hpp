@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Rice/GL/IndexBuffer.hpp"
 #include "api_CommandBuffer.hpp"
 #include "api_Shader.hpp"
 #include "api_Buffer.hpp"
@@ -79,11 +80,12 @@ void CommandBuffer_API_data::doCommand(RefPtr<CommandBuffer::Command> command, u
 
 		case CommandBuffer::Command::DrawIndexed: {
 			CommandBuffer::Command::ArgIterator it = command->arg_chain;
-			auto count = *(uint*)(it++).current->getData();
-			auto instCount = *(uint*)(it++).current->getData();
-			auto index_offset = *(uint*)(it++).current->getData();
-			auto vert_begin = *(uint*)(it++).current->getData();
-			auto inst_begin = *(uint*)(it++).current->getData();
+            pIndexBuffer ib = *(pIndexBuffer*)(it++).current->getData();
+			auto count = ib->indexCount();
+			auto instCount = 1;
+			auto index_offset = 0;
+			auto vert_begin = 0;
+			auto inst_begin = 0;
 			cmd[i].drawIndexed(count, instCount, index_offset, vert_begin, inst_begin);
 		} break;
 
