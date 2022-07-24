@@ -1,50 +1,33 @@
-﻿#pragma once
+﻿#include "../../stdafx.hpp"
 
-#include "../stdafx.hpp"
+NSP_COMPONENTS_BEGIN
+class PTR_PROTO(ModelRender);
+NSP_COMPONENTS_END
 
-#include "../Scene/Component.hpp"
-#include "../GL/RenderingMesh.hpp"
+#pragma once
 
-namespace Game {
+#include "../../GL/RenderingMesh.hpp"
+#include "../Component.hpp"
 
-	using std::vector;
+NSP_COMPONENTS_BEGIN
 
-	class Material;
+class ModelRender : public Component {
+  private:
+    void onInit();
 
-	class ModelRender : public Component, public IRenderable {
-	public:
-		void OnInit();
+    void onEnable();
+    void onDisable();
 
-		void OnEnable();
-		void OnDisable();
+  public:
+    void setMaterial(Graphics::pMaterial material, uint subMeshIdx);
+    void setModel(Graphics::pModel model);
+    Graphics::pModel getModel();
+    Graphics::pMaterial getMaterial(size_t subMeshIdx) const;
 
-		void Register(size_t);
-		size_t Unregister();
-
-		void DeleteModel() { model.Release(); }
-
-		void SetMaterial(SmartPtr<Material> material, size_t subMeshIdx);
-		void SetModel(SmartPtr<Model> model);
-		SmartPtr<Model> GetModel();
-		SmartPtr<Material> GetMaterial(size_t subMeshIdx) const;
-
-		void Render(Matrix4x4&, Matrix4x4&, Matrix4x4&, RenderType type);
-		void Render(Matrix4x4, Matrix4x4, Matrix4x4);
-		void RenderTransparent(Matrix4x4, Matrix4x4, Matrix4x4);
-	private:
-		struct RenderData {
-			Microsoft::WRL::ComPtr<Buffer> indexBuffer{ 0 }, vertexBuffer{ 0 };
-			SmartPtr<Material> material;
-		};
-
-		SmartPtr<Transform> transform;
-		size_t idx;
-		std::mutex renderMutex;
-		::std::shared_mutex modelMutex;
-		SmartPtr<Device> device;
-		SmartPtr<Model> model;
-		std::vector<RenderData> meshes;
-
-		void setActiveMaterial(SmartPtr<Material> mat);
-	};
-}
+  private:
+    pTransform transform;
+    uint idx;
+    Graphics::pModel model;
+    vec<Graphics::RenderingMesh> meshes;
+};
+NSP_COMPONENTS_END

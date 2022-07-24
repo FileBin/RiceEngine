@@ -1,9 +1,9 @@
 #include "../stdafx.hpp"
+#include "Rice/macros.h"
 
 NSP_GL_BEGIN
 
-class Texture2D;
-typedef SmartPtr<Texture2D> pTexture2D;
+class PTR_PROTO(Texture2D);
 typedef vec<pTexture2D> TextureArray;
 
 NSP_GL_END

@@ -1,9 +1,10 @@
 ﻿#include "../stdafx.hpp"
+#include "BetterCpp/Objects/PtrTypes.hpp"
+#include "Rice/macros.h"
 
 NSP_ENGINE_BEGIN
 
-class Engine;
-typedef RefPtr<Engine> pEngine;
+class PTR_PROTO(Engine);
 
 NSP_ENGINE_END
 

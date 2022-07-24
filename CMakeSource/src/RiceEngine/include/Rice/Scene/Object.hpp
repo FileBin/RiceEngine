@@ -1,10 +1,10 @@
 #include "../stdafx.hpp"
-#include "Rice/defines.h"
+#include "BetterCpp/Functions.hpp"
+#include "Rice/macros.h"
 
 NSP_ENGINE_BEGIN
 
-class Object;
-typedef RefPtr<Object> pObject;
+class PTR_PROTO(Object);
 
 struct ObjectData;
 
@@ -17,7 +17,7 @@ NSP_ENGINE_END
 
 NSP_ENGINE_BEGIN
 
-class Object : IPackable<ObjectData> {
+better_class(Object) better_implements(IPackable<ObjectData>) {
   private:
     UUID selfUUID;
 
@@ -32,9 +32,13 @@ class Object : IPackable<ObjectData> {
 
     friend struct ObjectData;
 
-    static pObject createEmpty();
-
   public:
+    pObject createEmpty();
+
+    void addComponent(Components::pComponent component);
+
+    Object(pScene scene);
+
     ObjectData pack() override;
 
     template <typename T> vec<RefPtr<T>> getComponents() {
@@ -50,9 +54,9 @@ class Object : IPackable<ObjectData> {
 
     template <typename T> RefPtr<T> getComponent() {
         for (auto c : components) {
-            auto o = dynamic_cast<T *>(c.get());
+            auto o = as<T>(c);
             if (o != nullptr) {
-                return c;
+                return o;
             }
         }
         return nullptr;

@@ -22,7 +22,7 @@ private:
   Vector3 scale = Vector3::one;
 
 public:
-  void onEnable() override;
+  //TODO void onEnable();
 
   Vector3 getPosition();
 

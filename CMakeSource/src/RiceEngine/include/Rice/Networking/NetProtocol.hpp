@@ -181,7 +181,7 @@ class Response {
 
     RefPtr<JoinRefuse> getRefuseData() {
         if (type == JOIN_REFUSE)
-            return RefPtr<JoinAccept>(data_copyT<JoinAccept>());
+            return RefPtr<JoinRefuse>(data_copyT<JoinRefuse>());
         return nullptr;
     }
 

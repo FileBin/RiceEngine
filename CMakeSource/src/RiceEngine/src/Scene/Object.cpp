@@ -1,3 +1,5 @@
+#include "BetterCpp/Functions.hpp"
+#include "Rice/Scene/Scene.hpp"
 #include "pch.h"
 
 #include "Rice/Scene/Object.hpp"
@@ -5,6 +7,19 @@
 #include "Rice/Scene/Component.hpp"
 
 NSP_ENGINE_BEGIN
+
+Object::Object(pScene scene) : scene(scene) {}
+
+pObject Object::createEmpty() {
+    auto obj = new_ref<Object>(scene);
+    obj->parent = refptr_this();
+    children.push_back(obj);
+    return obj;
+}
+
+void Object::addComponent(Components::pComponent component) {
+    components.push_back(component);
+}
 
 ObjectData Object::pack() {
     ObjectData data;
@@ -46,7 +61,7 @@ pObject ObjectData::unpack(pScene scene,
 
 pObject ObjectData::unpack(pObject parent,
                            std::function<ObjectData(UUID)> getRelativesData) {
-    pObject inst = Object::createEmpty();
+    pObject inst = new_ref<Object>(parent->scene);
     inst->active = active;
     inst->enabled = enabled;
     inst->name = name;

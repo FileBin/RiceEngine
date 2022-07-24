@@ -61,7 +61,8 @@ void writeToJSONT(fs::path filename, std::string key, T value) {
               fstream::out | fstream::trunc); // reopen it in truncate mode
 
     OStreamWrapper osw(file);
-    d.Accept(osw); // rewrite file contents
+    Writer<OStreamWrapper> writer(osw);
+    d.Accept(writer); // rewrite file contents
     file.flush();
     file.close();
 }
@@ -87,7 +88,21 @@ bool getFromJsonT(std::filesystem::path filename, std::string key, T &out_val) {
 
 bool getFromJson(std::filesystem::path filename, std::string key,
                  std::string &out_value) {
-    return getFromJsonT(filename, key, out_value);
+    using namespace rapidjson;
+    using namespace std;
+    fstream file(filename, fstream::in);
+
+    if (!file.is_open())
+        return false;
+
+    Document d;
+    IStreamWrapper isw(file);
+    d.ParseStream(isw); // parse file contents
+    auto &v = d[key.c_str()];
+    if (v.IsNull())
+        return false;
+    out_value = v.GetString();
+    return true;
 }
 
 bool getFromJson(std::filesystem::path filename, std::string key,
@@ -105,7 +120,34 @@ bool getFromJson(std::filesystem::path filename, std::string key,
 
 void writeToJSON(std::filesystem::path filename, std::string key,
                  std::string value) {
-    writeToJSONT(filename, key, value);
+    using namespace rapidjson;
+    using namespace std;
+    fstream file;
+    file.open(filename, fstream::in); // open file
+
+    Document d;
+    IStreamWrapper isw(file);
+    d.ParseStream(isw); // parse file contents
+
+    auto &alloc = d.GetAllocator();
+
+    rapidjson::Value keyPart;
+    keyPart.SetString(key.c_str(), alloc);
+
+    rapidjson::Value valuePart;
+    keyPart.SetString(value.c_str(), alloc);
+
+    d.AddMember(keyPart, valuePart, alloc); // modify JSON data
+
+    file.close(); // close file
+    file.open(filename,
+              fstream::out | fstream::trunc); // reopen it in truncate mode
+
+    OStreamWrapper osw(file);
+    Writer<OStreamWrapper> writer(osw);
+    d.Accept(writer); // rewrite file contents
+    file.flush();
+    file.close();
 }
 
 void writeToJSON(std::filesystem::path filename, std::string key, num value) {

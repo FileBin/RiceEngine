@@ -54,7 +54,7 @@ void Shader::cleanupDescriptorSetLayout() {
 }
 
 void Shader::loadShader(String path, Type type) {
-	data_t buffer = Util::readFile(path);
+	data_t buffer = Util::readFile(path.toUtf8());
 
 	//create a new shader module, using the buffer we loaded
 	vk::ShaderModuleCreateInfo createInfo = {};

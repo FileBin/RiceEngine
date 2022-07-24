@@ -41,7 +41,7 @@ void Core::loadSceneImmediate() {
 }
 
 bool Core::init() {
-    engine = new_ref<Engine>(*this);
+    engine = new_ref<Engine>(refptr_this());
 
     // TODO AL::Init();
     Log::init();
@@ -140,6 +140,7 @@ bool Core::runFrame() {
             Log::log(Log::Warning, "Can't render frame! Loading screen render is not set up!");
         }
     } else {
+        activeScene->update();
         activeScene->render();
     }
 

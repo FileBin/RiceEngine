@@ -1,4 +1,5 @@
 ﻿#include "../stdafx.hpp"
+#include "BetterCpp/Objects/BasePtr.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -18,7 +19,7 @@ NSP_ENGINE_END
 
 NSP_ENGINE_BEGIN
 
-class Core {
+class Core : public EnableThisRefPtr<Core> {
   public:
     struct SetupParams {
         DescWindow window_desc;
@@ -26,16 +27,15 @@ class Core {
 
     struct InitParams {
         pScene loading_scene;
-
     };
 
     class Loader {
       protected:
         friend class Core;
         // executes after window creation before core inits
-        virtual void setupCore(SetupParams& setupParams) {};
+        virtual void setupCore(SetupParams &setupParams){};
         // executes after all manager inits
-        virtual void initCore(InitParams& initParams) {};
+        virtual void initCore(InitParams &initParams){};
         // executes after init
         virtual void postInitCore(pEngine engine){};
         // executes when window closing
@@ -95,7 +95,11 @@ class Core {
 
   private:
     Core(pLoader loader);
+
+  public:
     ~Core();
+
+  private:
     friend class Engine;
 
     bool init();

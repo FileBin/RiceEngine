@@ -1,14 +1,12 @@
 #include "../../stdafx.hpp"
-#include "Rice/Math/Matrixes.hpp"
-#include "Rice/Scene/Components/Transform.hpp"
 
 NSP_COMPONENTS_BEGIN
-class Camera;
-typedef RefPtr<Camera> pCamera;
+class PTR_PROTO(Camera);
 NSP_COMPONENTS_END
 
 #pragma once
 
+#include "Transform.hpp"
 #include "../Component.hpp"
 
 NSP_COMPONENTS_BEGIN

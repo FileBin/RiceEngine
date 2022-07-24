@@ -31,7 +31,7 @@ struct UUID {
     uint64_t getVal() { return val; }
 };
 
-bool operator==(UUID one, UUID two) { return one.val == two.val; }
+inline bool operator==(UUID one, UUID two) { return one.val == two.val; }
 
 NSP_UTIL_BEGIN
 

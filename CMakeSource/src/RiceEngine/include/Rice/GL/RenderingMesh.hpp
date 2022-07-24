@@ -32,7 +32,7 @@ class RenderingMesh : public IRegistrable {
     pMesh orig;
     pMaterial material;
     pUniformBuffer constBuffer = nullptr;
-    pUniformBuffer indexBuffer = nullptr;
+    pIndexBuffer indexBuffer = nullptr;
     pVertexBuffer vertexBuffer = nullptr;
     pCommandBuffer cmdBuffer;
 

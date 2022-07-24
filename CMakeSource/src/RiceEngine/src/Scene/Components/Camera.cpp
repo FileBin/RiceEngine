@@ -1,7 +1,3 @@
-#include "Rice/Math/Matrixes.hpp"
-#include "Rice/Scene/Components/Transform.hpp"
-#include "Rice/Scene/SceneRender.hpp"
-#include "Rice/namespaces.h"
 #include "pch.h"
 
 #include <Rice/Scene/Components/Camera.hpp>

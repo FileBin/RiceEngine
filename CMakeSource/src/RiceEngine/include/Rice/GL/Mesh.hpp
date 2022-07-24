@@ -57,7 +57,7 @@ struct Mesh {
 	void rotate(Quaternion q);
 	void translate(Vector3 offset);
 	void scale(Vector3 scale);
-	void combine(Mesh& other);
+	void combine(const Mesh& other);
 	void recalculateNormals();
 	void reclaculateBounds();
 
