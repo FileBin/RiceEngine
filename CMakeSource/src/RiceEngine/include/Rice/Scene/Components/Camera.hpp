@@ -6,14 +6,17 @@ NSP_COMPONENTS_END
 
 #pragma once
 
+#include "../PackableComponent.hpp"
 #include "Transform.hpp"
-#include "../Component.hpp"
 
 NSP_COMPONENTS_BEGIN
 
-class Camera : public Component {
+class Camera : public PackableComponent<Camera, RefTuple<dbl>, RefTuple<>> {
     dbl fov = 60;
-public:
+
+  public:
+    Camera();
+
     pTransform getTransform();
     Matrix4x4f getViewMatrix();
     Matrix4x4f getProjectionMatrix();

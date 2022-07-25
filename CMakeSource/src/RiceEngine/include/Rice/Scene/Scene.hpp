@@ -19,10 +19,12 @@ NSP_ENGINE_BEGIN
 
 class Scene : public EnableThisRefPtr<Scene> {
     friend class SceneRender;
+    friend class Components::Component;
 
+  protected:
+    pEngine getEngine();
   public:
-
-   virtual ~Scene() {}
+    virtual ~Scene() {}
     void setup(pEngine engine);
     virtual void init() = 0;
 
@@ -42,7 +44,7 @@ class Scene : public EnableThisRefPtr<Scene> {
     void destroyObject(UUID uuid);
 
   private:
-    RegisterCollection<pObject, uint64_t> all_objects;
+    RegisterCollection<Object, uint64_t> all_objects;
     pObject root = new_ref<Object>(refptr_this());
 
     pEngine engine;

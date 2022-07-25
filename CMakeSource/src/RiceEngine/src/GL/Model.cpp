@@ -1,194 +1,201 @@
-﻿#include "pch.h"
+﻿#include "Rice/GL/Mesh.hpp"
+#include "Rice/GL/ModelData.hpp"
+#include "Rice/GL/VertexLayout.hpp"
+#include "Rice/namespaces.h"
+#include "pch.h"
 
+#include <Rice/GL/Model.hpp>
 
-//TODO: Implement
-/*
-#include <GameEngine/Model.h>
-#include <GameEngine\Math.h>
+NSP_GL_BEGIN
 
-namespace Game {
-	using std::vector;
-	const Mesh Mesh::quad = {
-		{ {-.5f, -.5f, 0}, {.5f, .5f, 0} },
-		{
-			{ {-.5f, -.5f, 0 }, { 0,0,1 } },
-			{ {.5f, -.5f, 0 }, { 0,0,1 } },
-			{ {.5f, .5f, 0 }, { 0,0,1 } },
-			{ {-.5f, .5f, 0 }, { 0,0,1 } },
-		}, 
-		{
-			0, 1, 2,
-			2, 3, 0 
-		},
-		Vertex::GetLayout() 
-	};
-	void Mesh::Rotate(Quaternion q) {
-		auto n = vertexBuffer.size();
-		for (size_t i = 0; i < n; i++) {
-			Vector3 p;
-			p = vertexBuffer[i].position;
-			p *= q;
-			vertexBuffer[i].position = p;
-			p = vertexBuffer[i].normal;
-			p *= q;
-			vertexBuffer[i].normal = p;
-		}
-	}
+const Mesh Mesh::quad = {
+    {{{{-.5f, -.5f, 0}, {0, 0, 1}},
+      {{.5f, -.5f, 0}, {0, 0, 1}},
+      {{.5f, .5f, 0}, {0, 0, 1}},
+      {{-.5f, .5f, 0}, {0, 0, 1}}}}, // vertices
+    {0, 1, 2, 2, 3, 0},              // indices
+};
 
-	void Mesh::Translate(Vector3 o) {
-		Vector3f p;
-		p = o;
-		auto n = vertexBuffer.size();
-		for (size_t i = 0; i < n; i++) {
-			vertexBuffer[i].position += p;
-		}
-	}
+inline const VertexLayout Vertex::vertexLayout({
+    VertexInput("POSITION", 0, offsetof(Vertex, pos), VertexInput::float3),
+    VertexInput("NORMAL", 0, offsetof(Vertex, norm), VertexInput::float3),
+    VertexInput("TEXCOORD0", 0, offsetof(Vertex, tex_coord0),
+                VertexInput::float2),
+});
 
-	void Mesh::Scale(Vector3 s) {
-		Vector3f p;
-		p = s;
-		auto n = vertexBuffer.size();
-		for (size_t i = 0; i < n; i++) {
-			vertexBuffer[i].position.x *= p.x;
-			vertexBuffer[i].position.y *= p.y;
-			vertexBuffer[i].position.z *= p.z;
-		}
-	}
-
-	void Mesh::Combine(Mesh& other) {
-		auto s = vertexBuffer.size();
-		vertexBuffer.insert(vertexBuffer.end(), other.vertexBuffer.begin(), other.vertexBuffer.end());
-		auto n = indexBuffer.size();
-		indexBuffer.insert(indexBuffer.end(), other.indexBuffer.begin(), other.indexBuffer.end());
-		auto m = indexBuffer.size();
-		for (size_t i = n; i < m; i++) {
-			indexBuffer[i] += s;
-		}
-	}
-
-	void Mesh::RecalculateNormals() {
-		auto vbsize = vertexBuffer.size();
-		auto ibsize = indexBuffer.size();
-		vector<dbl> nCounts(vbsize);
-		for (auto idx : indexBuffer) {
-			nCounts[idx] += 1;
-		}
-		for (size_t i = 0; i < vertexBuffer.size(); i++) {
-			auto& n = vertexBuffer[i].normal;
-			n = { 0,0,0 };
-		}
-		for (size_t i = 2; i < ibsize; i+=3) {
-			Vertex* triangle[3] = {
-				&vertexBuffer[indexBuffer[i-2]],
-				&vertexBuffer[indexBuffer[i-1]],
-				&vertexBuffer[indexBuffer[i]],
-			};
-			auto v1 = triangle[1]->position - triangle[2]->position;
-			auto v2 = triangle[2]->position - triangle[0]->position;
-			auto n = Vector3f::Cross(v1, v2);
-			n.Qnormalize();
-
-			triangle[0]->normal += n;
-			triangle[1]->normal += n;
-			triangle[2]->normal += n;
-		}
-		for (size_t i = 0; i < vertexBuffer.size(); i++) {
-			auto& n = vertexBuffer[i].normal;
-			n.Qnormalize();
-		}
-	}
-
-	void Mesh::ReclaculateBounds() {
-		if (vertexBuffer.empty()) return;
-		bounds.Min = vertexBuffer[0].position;
-		bounds.Max = bounds.Min;
-		auto n = vertexBuffer.size();
-		for (size_t i = 1; i < n; i++) {
-			auto& vert = vertexBuffer[i];
-			auto& min = bounds.Min;
-			auto& max = bounds.Max;
-			min.x = Math::Min(min.x, vert.position.x);
-			min.y = Math::Min(min.y, vert.position.y);
-			min.z = Math::Min(min.z, vert.position.z);
-
-			max.x = Math::Max(max.x, vert.position.x);
-			max.y = Math::Max(max.y, vert.position.y);
-			max.z = Math::Max(max.z, vert.position.z);
-			//max = max.ApplyFunc([&vert](float x, size_t idx) { return Math::Max(x, vert.position[idx]); });
-		}
-	}
-
-	bool Mesh::CheckVisiblity(ConstantBufferData WVP) {
-		auto corners = bounds.GetPoints();
-		auto boxSize = bounds.GetSize().SqrLength() * 5;
-		WVP.World.c41 = WVP.World.c42 = WVP.World.c43 = 0;
-		auto matrix = WVP.WorldView;
-		for (size_t i = 0; i < 9; i++) {
-			auto proj = corners[i] * matrix;
-			if (proj.SqrLength() < boxSize) return true;
-			proj = proj * WVP.Projection;
-			auto b = proj.z * 1.2f;
-			if (proj.x < b && proj.x > -b && proj.y < b && proj.y > -b) { return true; }
-		}
-		return false;
-	}
-
-	bool Model::CheckVisiblity(ConstantBufferData WVP, size_t idx) {
-		return subMeshes[idx]->CheckVisiblity(WVP);
-	}
-
-	size_t Model::GetSubMeshesCount() {
-		return subMeshes.size();
-	}
-
-	SmartPtr<Mesh> Model::GetSubMesh(size_t idx){
-		return subMeshes[idx];
-	}
-
-	Model::~Model() {
-		for (auto m : subMeshes) {
-			m.Release();
-		}
-		subMeshes.clear();
-	}
-
-	void Model::SetSubMeshesCount(size_t count) {
-		subMeshes.resize(count);
-	}
-
-	void Model::SetSubMesh(SmartPtr<Mesh> subMesh, size_t idx) {
-		subMeshes[idx] = subMesh;
-	}
-
-	std::vector<Vector3f> Mesh::Bounds::GetCorners() {
-		return {
-			Min,
-			{ Max.x, Min.y, Min.z },
-			{ Min.x, Max.y, Min.z },
-			{ Max.x, Max.y, Min.z },
-			{ Min.x, Min.y, Max.z },
-			{ Max.x, Min.y, Max.z },
-			{ Min.x, Max.y, Max.z },
-			Max,
-		};
-	}
-
-	std::vector<Vector3f> Mesh::Bounds::GetPoints() {
-		return {
-			(Min + Max)*.5f,
-			Min,
-			{ Max.x, Min.y, Min.z },
-			{ Min.x, Max.y, Min.z },
-			{ Max.x, Max.y, Min.z },
-			{ Min.x, Min.y, Max.z },
-			{ Max.x, Min.y, Max.z },
-			{ Min.x, Max.y, Max.z },
-			Max,
-		};
-	}
-
-	Vector3f Mesh::Bounds::GetSize() {
-		return Max - Min;
-	}
+Mesh::Mesh(VertexListT<Vertex> vertices, vec<index_t> indices, bool calcBounds)
+    : vertexBuffer(vertices), indexBuffer(indices) {
+    if (calcBounds)
+        recalculateBounds();
 }
-*/
+
+Mesh::Mesh(vec<Vector3f> vertices, vec<index_t> indices)
+    : vertexBuffer(vertices), indexBuffer(indices) {
+    recalculateNormals();
+    recalculateBounds();
+}
+
+pMesh Mesh::clone() const {
+    pMesh mesh = new_ref<Mesh>(vertexBuffer, indexBuffer, false);
+    mesh->bounds = bounds;
+    return mesh;
+}
+
+void Mesh::translate(Vector3 o) {
+    Vector3f p;
+    p = o;
+    auto n = vertexBuffer.count();
+    for (size_t i = 0; i < n; i++) {
+        vertexBuffer.getVertex(i).pos += p;
+    }
+}
+
+void Mesh::rotate(Quaternion q) {
+    auto n = vertexBuffer.count();
+    for (size_t i = 0; i < n; i++) {
+        Vector3 p;
+        p = vertexBuffer.getVertex(i).pos;
+        p *= q;
+        vertexBuffer.getVertex(i).pos = p;
+        p = vertexBuffer.getVertex(i).norm;
+        p *= q;
+        vertexBuffer.getVertex(i).norm = p;
+    }
+}
+
+void Mesh::scale(Vector3 s) {
+    Vector3f p;
+    p = s;
+    auto n = vertexBuffer.count();
+    for (size_t i = 0; i < n; i++) {
+        vertexBuffer.getVertex(i).pos.x *= p.x;
+        vertexBuffer.getVertex(i).pos.y *= p.y;
+        vertexBuffer.getVertex(i).pos.z *= p.z;
+    }
+}
+
+void Mesh::combine(const Mesh &other) {
+    auto s = vertexBuffer.count();
+    vertexBuffer.addVertices(other.vertexBuffer);
+    auto n = indexBuffer.size();
+    indexBuffer.insert(indexBuffer.end(), other.indexBuffer.begin(),
+                       other.indexBuffer.end());
+    auto m = indexBuffer.size();
+    for (size_t i = n; i < m; i++) {
+        indexBuffer[i] += s;
+    }
+}
+
+void Mesh::recalculateNormals() {
+    auto vbsize = vertexBuffer.count();
+    auto ibsize = indexBuffer.size();
+    vec<dbl> nCounts(vbsize);
+    for (auto idx : indexBuffer) {
+        nCounts[idx] += 1;
+    }
+    for (size_t i = 0; i < vertexBuffer.count(); i++) {
+        auto &n = vertexBuffer.getVertex(i).norm;
+        n = {0, 0, 0};
+    }
+    for (size_t i = 2; i < ibsize; i += 3) {
+        Vertex *triangle[3] = {
+            &vertexBuffer.getVertex(indexBuffer[i - 2]),
+            &vertexBuffer.getVertex(indexBuffer[i - 1]),
+            &vertexBuffer.getVertex(indexBuffer[i]),
+        };
+        auto v1 = triangle[1]->pos - triangle[2]->pos;
+        auto v2 = triangle[2]->pos - triangle[0]->pos;
+        auto n = Vector3f::cross(v1, v2);
+        n.qnormalize();
+
+        triangle[0]->norm += n;
+        triangle[1]->norm += n;
+        triangle[2]->norm += n;
+    }
+    for (size_t i = 0; i < vertexBuffer.count(); i++) {
+        auto &n = vertexBuffer.getVertex(i).norm;
+        n.qnormalize();
+    }
+}
+
+void Mesh::recalculateBounds() {
+    auto vbsize = vertexBuffer.count();
+    if (vbsize <= 0) {
+        bounds = {{0, 0, 0}, {0, 0, 0}};
+    }
+    constexpr dbl max = std::numeric_limits<float>::max();
+    bounds.min = {max, max, max};
+    bounds.max = {-max, -max, -max};
+    for (size_t i = 0; i < vbsize; i++) {
+        auto &v = vertexBuffer.getVertex(i);
+        bounds.min.x = std::min(bounds.min.x, v.pos.x);
+        bounds.min.y = std::min(bounds.min.y, v.pos.y);
+        bounds.min.z = std::min(bounds.min.z, v.pos.z);
+        bounds.max.x = std::max(bounds.max.x, v.pos.x);
+        bounds.max.y = std::max(bounds.max.y, v.pos.y);
+        bounds.max.z = std::max(bounds.max.z, v.pos.z);
+    }
+}
+
+bool Mesh::checkVisiblity(ModelData matrix) {
+    auto corners = bounds.getCorners();
+    auto boxSize = bounds.getSize().sqrLength() * 5.;
+    matrix.world.c41 = matrix.world.c42 = matrix.world.c43 = 0;
+    auto temp = matrix.view * matrix.world;
+    for (size_t i = 0; i < 9; i++) {
+        auto proj = corners[i] * temp;
+        if (proj.sqrLength() < boxSize)
+            return true;
+        proj = proj * matrix.projection;
+        auto b = proj.z * 1.2f; // correction for perspective
+        if (proj.x < b && proj.x > -b && proj.y < b && proj.y > -b) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Model::checkVisiblity(ModelData matrix, size_t idx) {
+    return subMeshes[idx]->checkVisiblity(matrix);
+}
+
+uint Model::getSubMeshesCount() { return subMeshes.size(); }
+
+pMesh Model::getSubMesh(uint idx) { return subMeshes[idx]; }
+
+Model::~Model() { subMeshes.clear(); }
+
+void Model::setSubMeshesCount(uint count) { subMeshes.resize(count); }
+
+void Model::setSubMesh(pMesh subMesh, uint idx) { subMeshes[idx] = subMesh; }
+
+std::vector<Vector3f> Mesh::Bounds::getCorners() {
+    return {
+        min,
+        {max.x, min.y, min.z},
+        {min.x, max.y, min.z},
+        {max.x, max.y, min.z},
+        {min.x, min.y, max.z},
+        {max.x, min.y, max.z},
+        {min.x, max.y, max.z},
+        max,
+    };
+}
+
+vec<Vector3f> Mesh::Bounds::getPoints() {
+    return {
+        (min + max) * .5f, // center
+        min,
+        {max.x, min.y, min.z},
+        {min.x, max.y, min.z},
+        {max.x, max.y, min.z},
+        {min.x, min.y, max.z},
+        {max.x, min.y, max.z},
+        {min.x, max.y, max.z},
+        max,
+    };
+}
+
+Vector3f Mesh::Bounds::getSize() { return max - min; }
+
+NSP_GL_END

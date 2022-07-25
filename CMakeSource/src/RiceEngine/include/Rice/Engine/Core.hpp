@@ -85,6 +85,7 @@ class Core : public EnableThisRefPtr<Core> {
 
     static void runTask(std::function<void(void)> func) {
         // TODO make tasks
+        func(); //temporary replacement
     }
 
     void loadScene(pScene scene);

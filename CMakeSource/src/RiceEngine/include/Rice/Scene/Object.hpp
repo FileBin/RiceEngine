@@ -1,6 +1,5 @@
 #include "../stdafx.hpp"
-#include "BetterCpp/Functions.hpp"
-#include "Rice/macros.h"
+#include "Rice/Util.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -33,7 +32,10 @@ better_class(Object) better_implements(IPackable<ObjectData>) {
     friend struct ObjectData;
 
   public:
+    pScene getScene();
     pObject createEmpty();
+
+    UUID getUUID() { return selfUUID; }
 
     void addComponent(Components::pComponent component);
 
@@ -72,7 +74,11 @@ struct ObjectData : public IPackable<data_t> {
 
     vec<Components::pComponentData> componentsData;
 
-    data_t pack() override;
+    data_t pack() override {
+        // TODO make packing
+        Log::log(Log::Warning, "Packing not implemented");
+        return {};
+    }
 
     static ObjectData unpack(data_t);
 

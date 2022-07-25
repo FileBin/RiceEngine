@@ -6,6 +6,7 @@
  */
 
 #include "../stdafx.hpp"
+#include "Rice/Math/Vectors/Vector3f.hpp"
 
 NSP_GL_BEGIN
 
@@ -36,6 +37,13 @@ private:
 	vec<T> vertices;
 public:
 	VertexListT(vec<T> init_data) : vertices(init_data) {}
+    VertexListT(const VertexListT& other) : vertices(other.vertices) {}
+    VertexListT(vec<Vector3f> init_data) { //constructor for vertices with only position
+        vertices.resize(init_data.size());
+        for (uint i = 0; i < init_data.size(); i++) {
+            vertices[i].pos = init_data[i];
+        }
+    }
 
 	uint getStride() const override {
 		return sizeof(T);
@@ -50,6 +58,14 @@ public:
 	T& getVertex(uint i) {
 		return vertices[i];
 	}
+
+    void addVertex(T v) {
+        vertices.push_back(v);
+    }
+
+    void addVertices(VertexListT<T> v) {
+        vertices.insert(vertices.end(), v.vertices.begin(), v.vertices.end());
+    }
 
 	uint count() const override {
 		return vertices.size();

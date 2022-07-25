@@ -17,6 +17,8 @@ pObject Object::createEmpty() {
     return obj;
 }
 
+pScene Object::getScene() { return scene; }
+
 void Object::addComponent(Components::pComponent component) {
     components.push_back(component);
 }

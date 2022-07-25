@@ -21,16 +21,16 @@ public:
 	float& operator[](size_t idx);
 	Vector3f operator-();
 
-	Vector3f Normalized();
+	Vector3f normalized();
 
-	void Normalize();
-	void Qnormalize();
+	void normalize();
+	void qnormalize();
 
-	static dbl Dot(Vector3f a, Vector3f b);
-	static Vector3f Cross(Vector3f a, Vector3f b);
-	static Vector3f Lerp(Vector3f a, Vector3f b, float t);
-	dbl SqrLength();
-	dbl Length();
+	static dbl dot(Vector3f a, Vector3f b);
+	static Vector3f cross(Vector3f a, Vector3f b);
+	static Vector3f lerp(Vector3f a, Vector3f b, float t);
+	dbl sqrLength();
+	dbl length();
 };
 
 bool operator==(Vector3f a, Vector3f b);

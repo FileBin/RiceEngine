@@ -7,7 +7,8 @@
 
 #include "../stdafx.hpp"
 #include "Rice/GL/IndexBuffer.hpp"
-#include <sys/types.h>
+#include "Rice/GL/ModelData.hpp"
+#include "Rice/defines.h"
 
 NSP_GL_BEGIN
 
@@ -34,14 +35,6 @@ struct Vertex {
 	static const VertexLayout vertexLayout;
 };
 
-inline const VertexLayout Vertex::vertexLayout(
-	{
-		VertexInput("POSITION", 0, offsetof(Vertex, pos), VertexInput::float3),
-		VertexInput("NORMAL", 0,  offsetof(Vertex, norm), VertexInput::float3),
-		VertexInput("TEXCOORD0", 0, offsetof(Vertex, tex_coord0), VertexInput::float2),
-	}
-);
-
 struct Mesh {
 	struct Bounds {
 		Vector3f min {}, max {};
@@ -49,8 +42,14 @@ struct Mesh {
 		vec<Vector3f> getPoints();
 		Vector3f getSize();
 	};
+    Mesh(VertexListT<Vertex> vertices, vec<index_t> indices, bool calcBounds = true);
+    Mesh(vec<Vector3f> vertices, vec<index_t> indices);
+
+
+    pMesh clone() const;
+
 	Bounds bounds;
-	RefPtr<VertexList> vertexBuffer;
+	VertexListT<Vertex> vertexBuffer;
 	vec<index_t> indexBuffer = {};
 	static const Mesh quad;
 
@@ -59,13 +58,13 @@ struct Mesh {
 	void scale(Vector3 scale);
 	void combine(const Mesh& other);
 	void recalculateNormals();
-	void reclaculateBounds();
+	void recalculateBounds();
 
 	bool isEmpty() {
-		return vertexBuffer->count() == 0;
+		return vertexBuffer.count() == 0;
 	}
 
-	//bool CheckVisiblity(ConstantBufferData WVPm);
+	bool checkVisiblity(ModelData matrix);
 };
 
 NSP_GL_END

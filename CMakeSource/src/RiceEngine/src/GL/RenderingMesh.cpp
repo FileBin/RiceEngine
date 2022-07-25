@@ -1,3 +1,4 @@
+#include "Rice/Engine/Log.hpp"
 #include "Rice/GL/CommandBuffer.hpp"
 #include "Rice/GL/GraphicsManager.hpp"
 #include "Rice/GL/Model.hpp"
@@ -21,7 +22,7 @@ RenderingMesh::RenderingMesh(pGraphicsManager g_mgr, pMesh mesh,
     constBuffer->setBinding(0, sizeof(ModelData));
     constBuffer->updateDataAll<ModelData>({});
     vertexBuffer = new_ref<VertexBuffer, pGraphicsManager, VertexList &>(
-        g_mgr, *mesh->vertexBuffer);
+        g_mgr, mesh->vertexBuffer);
     indexBuffer = new_ref<IndexBuffer>(g_mgr, mesh->indexBuffer);
 
     pCommandBuffer cmd = new_ref<CommandBuffer>(g_mgr);
@@ -40,6 +41,11 @@ RenderingMesh::RenderingMesh(pGraphicsManager g_mgr, pMesh mesh,
     cmd->buildAll();
 
     cmdBuffer = cmd;
+}
+
+void RenderingMesh::updateCmdBuffer() {
+    //TODO update cmdBuffer
+    Log::log(Log::Warning, "RenderingMesh::updateCmdBuffer() not implemented");
 }
 
 void RenderingMesh::updateConstBuffer(Matrix4x4f view, Matrix4x4f proj) {

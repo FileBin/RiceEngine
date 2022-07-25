@@ -22,7 +22,7 @@ NSP_GL_BEGIN
 	public:
 		RenderType renderType = RenderType::Solid;
 
-		Material(pGraphicsManager manager, pShader sh);
+		Material(pGraphicsManager manager, pShader shader);
 		~Material() {}
 
 		void updateBuffer();

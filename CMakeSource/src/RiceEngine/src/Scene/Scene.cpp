@@ -1,9 +1,14 @@
+#include "Rice/Engine/Engine.hpp"
 #include "Rice/Scene/SceneRender.hpp"
 #include "pch.h"
 
 #include <Rice/Scene/Scene.hpp>
 
 NSP_ENGINE_BEGIN
+
+pEngine Scene::getEngine() {
+    return engine;
+}
 
 void Scene::setup(pEngine en) {
     engine = en;
@@ -24,7 +29,12 @@ void Scene::render() {
 }
 
 pObject Scene::createEmpty() {
+    //FIXME add uuid to the object
     return root->createEmpty();
+}
+
+pObject Scene::getObject(UUID uuid) {
+    return all_objects.getElemAt(uuid.getVal());
 }
 
 void Scene::setActiveCamera(Components::pCamera camera) {

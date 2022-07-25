@@ -491,34 +491,34 @@ float& Vector3f::operator[](size_t idx) {
     THROW_INDEX_OUT_OF_RANGE_EXCEPTION;
 }
 
-double Vector3f::Length() {
-    return sqrt(SqrLength());
+double Vector3f::length() {
+    return sqrt(sqrLength());
 }
 
-double Vector3f::SqrLength() {
+double Vector3f::sqrLength() {
     return x * x + y * y + z * z;
 }
 
-Vector3f Vector3f::Normalized() {
-    float l = 1 / sqrt(SqrLength());
+Vector3f Vector3f::normalized() {
+    float l = 1 / sqrt(sqrLength());
     return { x * l, y * l, z * l };
 }
 
-void Vector3f::Normalize() {
-    float l = 1 / sqrt(SqrLength());
+void Vector3f::normalize() {
+    float l = 1 / sqrt(sqrLength());
     x *= l;
     y *= l;
     z *= l;
 }
 
-void Vector3f::Qnormalize() {
-    float l = Math::qrsqrt(SqrLength());
+void Vector3f::qnormalize() {
+    float l = Math::qrsqrt(sqrLength());
     x *= l;
     y *= l;
     z *= l;
 }
 
-double Vector3f::Dot(Vector3f a, Vector3f b) {
+double Vector3f::dot(Vector3f a, Vector3f b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
@@ -530,14 +530,14 @@ Vector3f operator*(Quaternion q, Vector3f v) {
     return (Vector3)v * Matrix4x4::Rotation(q);
 }
 
-Vector3f Vector3f::Cross(Vector3f left, Vector3f right) {
+Vector3f Vector3f::cross(Vector3f left, Vector3f right) {
     return {
         left.y * right.z - left.z * right.y,
         left.z * right.x - left.x * right.z,
         left.x * right.y - left.y * right.x };
 }
 
-Vector3f Vector3f::Lerp(Vector3f a, Vector3f b, float t) {
+Vector3f Vector3f::lerp(Vector3f a, Vector3f b, float t) {
     return a * (1 - t) + b * t;
 }
 

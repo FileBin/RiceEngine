@@ -1,4 +1,5 @@
 #include "../../stdafx.hpp"
+#include <shared_mutex>
 
 NSP_COMPONENTS_BEGIN
 
@@ -9,19 +10,20 @@ NSP_COMPONENTS_END
 
 #pragma once
 
-#include "../Component.hpp"
+#include "../PackableComponent.hpp"
 
 NSP_COMPONENTS_BEGIN
 
-class Transform : public Component {
+class Transform : public PackableComponent<Transform, RefTuple<Vector3, Quaternion, Vector3>, RefTuple<pTransform>> {
 private:
   std::shared_mutex mut;
   pTransform parent = nullptr;
   Vector3 position = Vector3::zero;
   Quaternion rotation = Quaternion::identity;
   Vector3 scale = Vector3::one;
-
 public:
+    Transform() : PackableComponent<Transform, RefTuple<Vector3, Quaternion, Vector3>, RefTuple<pTransform>>(
+        {position, rotation, scale}, {parent}) {}
   //TODO void onEnable();
 
   Vector3 getPosition();

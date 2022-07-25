@@ -2,8 +2,9 @@
 
 #include "Core.hpp"
 #include "Rice/Scene/Scene.hpp"
+#include "Rice/namespaces.h"
 
-NSP_TESTS_BEGIN
+NSP_ENGINE_BEGIN
 
 class DefaultCoreLoader : public Core::Loader {
     String windowCaption;
@@ -17,9 +18,11 @@ class DefaultCoreLoader : public Core::Loader {
         params.window_desc.caption = windowCaption;
     }
 
-    void initCore(Core::InitParams &params) override {}
+    void initCore(Core::InitParams &params) override {
+        params.loading_scene = nullptr;
+    }
 
     void postInitCore(pEngine engine) override { engine->loadScene(scene); }
 };
 
-NSP_TESTS_END
+NSP_ENGINE_END

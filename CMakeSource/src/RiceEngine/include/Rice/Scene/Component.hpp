@@ -1,5 +1,5 @@
 #include "../stdafx.hpp"
-#include "Rice/namespaces.h"
+#include "BetterCpp/Objects/BasePtr.hpp"
 
 NSP_COMPONENTS_BEGIN
 
@@ -15,37 +15,43 @@ NSP_COMPONENTS_END
 
 NSP_ENGINE_BEGIN
 class PTR_PROTO(Object);
+class PTR_PROTO(Engine);
 NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN
 
-class Component : public IPackable<pComponentData> {
+class Component : public EnableThisRefPtr<Component> ,public IPackable<pComponentData> {
+    friend class ComponentData;
+
   protected:
+    pEngine getEngine();
+
     pObject object;
-    virtual void onInit() {}
-    virtual void onEnable() {}
-    virtual void onDisable() {}
-    virtual void start() {}
-    virtual void preUpdate() {}
-    virtual void update() {}
+    virtual void onInit();
+    virtual void onEnable();
+    virtual void onDisable();
+    virtual void start();
+    virtual void preUpdate();
+    virtual void update();
 
   public:
     pObject getObject();
-
-    virtual pComponentData pack() override;
 
     void enable();
     void disable();
 
     bool isEnabled();
+
+    virtual ~Component() {}
 };
 
 struct ComponentData : public IPackable<data_t> {
     UUID objectUUID;
 
-    virtual pComponent createComponent();
+    ComponentData(pComponent component);
+
+    virtual pComponent createComponent() = 0;
+    virtual ~ComponentData() {}
 };
 
 NSP_COMPONENTS_END
-
-#include "Object.hpp"

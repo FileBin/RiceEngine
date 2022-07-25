@@ -1,4 +1,5 @@
-﻿#include "pch.h"
+﻿#include "Rice/Engine/Log.hpp"
+#include "pch.h"
 #include <Rice/Engine/InputManager.hpp>
 #include <Rice/Math.hpp>
 
@@ -12,7 +13,8 @@ pInputManager InputManager::init(WindowHandle _handle) {
 		instance->handle = _handle;
 		return instance;
 	}
-	THROW_EXCEPTION("Input is already initialized!");
+	Log::log(Log::Warning ,"Input is already initialized!");
+    return instance;
 }
 InputManager::InputManager() {
 	mouseRect = {};
