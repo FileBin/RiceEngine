@@ -1,0 +1,1 @@
+#include "Rice/Math/stdafx.hpp"

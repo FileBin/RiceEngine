@@ -94,5 +94,5 @@
         "valarray": "cpp",
         "variant": "cpp"
     },
-    "cmake.sourceDirectory": "${workspaceFolder}/CMakeSource",
+    "cmake.sourceDirectory": "${workspaceFolder}/.",
 }
