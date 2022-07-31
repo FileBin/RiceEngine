@@ -2,8 +2,6 @@
 
 NSP_ENGINE_BEGIN
 
-Scene::Scene(ptr<Engine> en) : engine(en), root(Object::create(shared_from_this())) {}
-
 ptr<Engine> Scene::getEngine() {
     return engine;
 }
@@ -11,6 +9,7 @@ ptr<Engine> Scene::getEngine() {
 void Scene::setup(ptr<Engine> en) {
     engine = en;
     scene_render = new_ptr<SceneRender>(shared_from_this(), engine);
+    root = Object::create(shared_from_this());
     // TODO InitResourceManager();
 }
 

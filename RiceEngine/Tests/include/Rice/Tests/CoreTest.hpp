@@ -30,7 +30,7 @@ public:
 private:
 
 	void entrypoint() {
-        Core::runNew(new_ref<DefaultCoreLoader>("CubeTest", new_ref<CubeTestScene>()));
+        Core::runNew(new_ptr<DefaultCoreLoader>("CubeTest", CubeTestScene::create()));
 	}
 
     void cleanup() override {}

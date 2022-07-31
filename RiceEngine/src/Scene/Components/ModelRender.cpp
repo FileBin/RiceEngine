@@ -1,5 +1,5 @@
-#include <Rice/Scene/Components/ModelRender.hpp>
 #include <Rice/Engine/Engine.hpp>
+#include <Rice/Scene/Components/ModelRender.hpp>
 using namespace Rice::Graphics;
 
 NSP_COMPONENTS_BEGIN
@@ -18,7 +18,10 @@ void ModelRender::onInit() {
     }
 }
 
-void ModelRender::setModel(ptr<Model> model) { this->model = model; }
+void ModelRender::setModel(ptr<Model> model) {
+    this->model = model;
+    materials.resize(model->getSubMeshesCount());
+}
 
 ptr<Model> ModelRender::getModel() { return model; }
 

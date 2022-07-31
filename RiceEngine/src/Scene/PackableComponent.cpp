@@ -4,6 +4,8 @@
 
 NSP_COMPONENTS_BEGIN
 
+Util::RegisterCollection<ComponentPacker> PackableComponent::packers;
+
 data_t PackableComponent::pack() {
     data_t data;
     ByteStream stream(data);

@@ -2,10 +2,15 @@
 #include "Rice/Scene/Component.hpp"
 #include "Rice/Scene/PackableComponent.hpp"
 #include "Rice/Util/ByteStream.hpp"
+#include "Rice/defines.h"
 
 NSP_ENGINE_BEGIN
 
 Object::Object(ptr<Scene> scene) : scene(scene) {}
+
+ptr<Object> Object::create(ptr<Scene> scene) {
+    return ptr<Object>(new Object(scene));
+}
 
 ptr<Object> Object::createEmpty() {
     ptr<Object> obj{new Object(getScene())};

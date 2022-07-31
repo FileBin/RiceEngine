@@ -18,15 +18,16 @@ class Scene : public enable_ptr<Scene> {
 
   protected:
     ptr<Engine> getEngine();
-
-  private:
-    Scene(ptr<Engine> engine);
+    Scene() = default;
 
   public:
-    static ptr<Scene> create(ptr<Engine> engine);
     virtual ~Scene() {}
     void setup(ptr<Engine> engine);
     virtual void init() = 0;
+    void load() {
+        init();
+        loaded = true;
+    }
 
     void update();
     void render();

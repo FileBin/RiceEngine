@@ -165,7 +165,9 @@ ptr<Mesh> Model::getSubMesh(uint idx) { return subMeshes[idx]; }
 
 Model::~Model() { subMeshes.clear(); }
 
-void Model::setSubMeshesCount(uint count) { subMeshes.resize(count); }
+void Model::setSubMeshesCount(uint count) {
+     subMeshes.resize(count); 
+     }
 
 void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) { subMeshes[idx] = subMesh; }
 
