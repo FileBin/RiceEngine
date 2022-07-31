@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
 project("GameMain")
 
+add_subdirectory("res")
+
 set(CMAKE_CXX_STANDARD 20)
 
 #file search
@@ -49,11 +51,11 @@ target_link_libraries(${PROJECT_NAME}
 	${OTHER_LIBS}
 )
 
-add_dependencies(${PROJECT_NAME} ${RICE_NAME})
+add_dependencies(${PROJECT_NAME} ${RICE_NAME} ${GAME_RESOURCES_NAME})
 
 if(WIN32)
     #copy dll
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD   # Adds a post-build event to MyTest
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD   # Adds a post-build event to the target
         COMMAND ${CMAKE_COMMAND}
             -E copy_if_different                    # which executes "cmake - E copy_if_different..."
             ${RICE_DLLs_x64}                        # <--this is in-file

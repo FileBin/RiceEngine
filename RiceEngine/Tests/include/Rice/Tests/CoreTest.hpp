@@ -5,11 +5,10 @@
  *      Author: filebin
  */
 
-#include "../stdafx.hpp"
-#include "../Engine/Core.hpp"
-#include "../Engine/DefaultCoreLoader.hpp"
+#include "Rice/stdafx.hpp"
+#include "Rice/Engine/Core.hpp"
+#include "Rice/Engine/DefaultCoreLoader.hpp"
 
-#include "BetterCpp/Functions.hpp"
 #include "Scenes/CubeTest.hpp"
 
 
@@ -31,7 +30,7 @@ public:
 private:
 
 	void entrypoint() {
-        Core::runNew(new_ref<DefaultCoreLoader>("CubeTest",new_ref<CubeTestScene>()));
+        Core::runNew(new_ref<DefaultCoreLoader>("CubeTest", new_ref<CubeTestScene>()));
 	}
 
     void cleanup() override {}

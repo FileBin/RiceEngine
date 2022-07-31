@@ -5,11 +5,11 @@
  *      Author: root
  */
 
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 
 NSP_GL_BEGIN
 
-class PTR_PROTO(VertexBuffer);
+class VertexBuffer;
 
 NSP_GL_END
 
@@ -22,7 +22,7 @@ NSP_GL_BEGIN
 
 class VertexBuffer : public Buffer {
 public:
-	VertexBuffer(pGraphicsManager g_mgr, VertexList& initialData);
+	VertexBuffer(ptr<GraphicsManager> g_mgr, VertexList& initialData);
 	void reset(VertexList& initialData);
 
 	template<typename Vertex>

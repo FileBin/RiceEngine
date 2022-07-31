@@ -1,8 +1,8 @@
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 
 NSP_GL_BEGIN
 
-struct PTR_PROTO(ModelData);
+struct ModelData;
 
 NSP_GL_END
 

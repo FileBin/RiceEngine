@@ -4,37 +4,38 @@
 #include "Rice/Scene/Components/Transform.hpp"
 
 NSP_COMPONENTS_BEGIN
-class PTR_PROTO(ModelRender);
+class ModelRender;
 NSP_COMPONENTS_END
 
 #pragma once
 
-#include "../../GL/RenderingMesh.hpp"
 #include "../PackableComponent.hpp"
+#include "Rice/GL/RenderingMesh.hpp"
 
 NSP_COMPONENTS_BEGIN
 
-class ModelRender : public PackableComponent<ModelRender, RefTuple<Graphics::pModel, vec<Graphics::pMaterial>, vec<Graphics::RenderingMesh>>, RefTuple<pTransform>> {
+class ModelRender
+    : virtual public PackableComponentT<ModelRender> {
   private:
     void onInit() override;
 
-   //TODO void onEnable() override;
-   //TODO void onDisable() override;
+    // TODO void onEnable() override;
+    // TODO void onDisable() override;
 
   public:
     ModelRender();
-    ModelRender(Graphics::pModel model);
+    ModelRender(ptr<Graphics::Model> model);
 
-    void setMaterial(Graphics::pMaterial material, uint subMeshIdx);
-    void setModel(Graphics::pModel model);
-    Graphics::pModel getModel();
-    Graphics::pMaterial getMaterial(size_t subMeshIdx) const;
+    void setMaterial(ptr<Graphics::Material> material, uint subMeshIdx);
+    void setModel(ptr<Graphics::Model> model);
+    ptr<Graphics::Model> getModel();
+    ptr<Graphics::Material> getMaterial(size_t subMeshIdx) const;
 
   private:
-    pTransform transform;
+    wptr<Transform> transform;
     uint idx;
-    Graphics::pModel model;
-    vec<Graphics::pMaterial> materials;
+    ptr<Graphics::Model> model;
+    vec<ptr<Graphics::Material>> materials;
     vec<Graphics::RenderingMesh> meshes;
 };
 NSP_COMPONENTS_END

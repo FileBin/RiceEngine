@@ -1,18 +1,12 @@
-#include "Rice/Scene/Components/Transform.hpp"
-#include "Rice/namespaces.h"
-#include "pch.h"
-
 #include <Rice/Scene/Components/ModelRender.hpp>
+#include <Rice/Engine/Engine.hpp>
+using namespace Rice::Graphics;
 
 NSP_COMPONENTS_BEGIN
 
-typedef PackableComponent<ModelRender, RefTuple<Graphics::pModel, vec<Graphics::pMaterial>, vec<Graphics::RenderingMesh>>, RefTuple<pTransform>> base;
+ModelRender::ModelRender(ptr<Model> model) { this->model = model; }
 
-#define BASE_CTOR base({model, materials, meshes}, {transform})
-
-ModelRender::ModelRender(Graphics::pModel model) : BASE_CTOR { this->model = model; }
-
-ModelRender::ModelRender() : BASE_CTOR {}
+ModelRender::ModelRender() {}
 
 void ModelRender::onInit() {
     auto g_mgr = getEngine()->getGraphicsManager();
@@ -24,11 +18,11 @@ void ModelRender::onInit() {
     }
 }
 
-void ModelRender::setModel(Graphics::pModel model) { this->model = model; }
+void ModelRender::setModel(ptr<Model> model) { this->model = model; }
 
-Graphics::pModel ModelRender::getModel() { return model; }
+ptr<Model> ModelRender::getModel() { return model; }
 
-void ModelRender::setMaterial(Graphics::pMaterial material, uint subMeshIdx) {
+void ModelRender::setMaterial(ptr<Material> material, uint subMeshIdx) {
     materials[subMeshIdx] = material;
 }
 

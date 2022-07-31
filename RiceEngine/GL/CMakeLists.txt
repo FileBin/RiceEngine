@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.19)
 project("RiceGL")
 
 set(RICE_GL_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-set(RICE_GL_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(RICE_GL_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -23,5 +23,6 @@ set(APPEND DXSDK_INCLUDE_PATH "$ENV{DXSDK_DIR}/Include")
 include_directories(${PROJECT_NAME} ${VULKAN_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${DXSDK_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
+include_directories(${PROJECT_NAME} ${RICE_UTIL_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${RICE_MATH_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)

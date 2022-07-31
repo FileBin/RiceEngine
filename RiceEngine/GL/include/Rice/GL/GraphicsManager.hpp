@@ -1,47 +1,54 @@
-﻿#include "../stdafx.hpp"
+﻿#include "Rice/defines.h"
+#include "stdafx.hpp"
 NSP_GL_BEGIN
-class PTR_PROTO(GraphicsManager);
+class GraphicsManager;
 
-struct PTR_PROTO(GraphicsManager_API_data);
+struct GraphicsManager_API_data;
 
-class PTR_PROTO(CommandBuffer);
+class CommandBuffer;
 
 NSP_GL_END
 #pragma once
 
-#include "../Engine/Window.hpp"
+#include "Rice/Engine/Window.hpp"
 
 NSP_GL_BEGIN
-class_with_ref_ptr(GraphicsManager) better_implements(public ICleanable) {
-public:
-	typedef Event<> DestroyEvent;
-	typedef Event<Vector2i> ResizeEvent;
-private:
-	friend class GraphicsComponentBase;
-	friend struct GraphicsManager_API_data;
-	bool is_initialized = false;
+class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
+  public:
+    typedef Util::Event<> DestroyEvent;
+    typedef Util::Event<Vector2i> ResizeEvent;
 
-	EventRegistration resizeReg;
+  private:
+    GraphicsManager();
+    friend class GraphicsComponentBase;
+    friend struct GraphicsManager_API_data;
+    bool is_initialized = false;
 
-	pGraphicsManager_API_data api_data;
+    Util::EventRegistration resizeReg;
 
-	pWindow window;
+    uptr<GraphicsManager_API_data> api_data;
 
-	bool isDrawing = false;
-public:
-    ResizeEvent resizePipelines, resizeRenderPasses, resizeCommandBuffers;
-    DestroyEvent destroyEvent;
+    ptr<Window> window;
 
-	GraphicsManager() = default;
-	~GraphicsManager() override { cleanup(); }
+    bool isDrawing = false;
 
-	pWindow getWindow() { return window; }
+  public:
+    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(),
+                     resizeRenderPasses = ResizeEvent::create(),
+                     resizeCommandBuffers = ResizeEvent::create();
+    ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
 
-	void init(pWindow window);
+    static ptr<GraphicsManager> create();
 
-	void executeCmd(pCommandBuffer cmd);
-	void executeCmds(vec<pCommandBuffer> cmds);
-	void cleanup() override;
+    ~GraphicsManager() override;
+
+    ptr<Window> getWindow() { return window; }
+
+    void init(ptr<Window> window);
+
+    void executeCmd(ptr<CommandBuffer> cmd);
+    void executeCmds(vec<ptr<CommandBuffer>> cmds);
+    void cleanup() override;
 };
 
 NSP_GL_END

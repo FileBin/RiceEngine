@@ -8,10 +8,10 @@ NSP_ENGINE_BEGIN
 
 class DefaultCoreLoader : public Core::Loader {
     String windowCaption;
-    pScene scene;
+    ptr<Scene> scene;
 
   public:
-    DefaultCoreLoader(String windowCaption, pScene scene)
+    DefaultCoreLoader(String windowCaption, ptr<Scene> scene)
         : windowCaption(windowCaption), scene(scene) {}
 
     void setupCore(Core::SetupParams &params) override {
@@ -22,7 +22,7 @@ class DefaultCoreLoader : public Core::Loader {
         params.loading_scene = nullptr;
     }
 
-    void postInitCore(pEngine engine) override { engine->loadScene(scene); }
+    void postInitCore(ptr<Engine> engine) override { engine->loadScene(scene); }
 };
 
 NSP_ENGINE_END

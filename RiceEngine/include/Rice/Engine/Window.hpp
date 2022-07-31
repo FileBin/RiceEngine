@@ -1,4 +1,5 @@
 ﻿#include "../stdafx.hpp"
+#include "Rice/defines.h"
 
 NSP_ENGINE_BEGIN
 
@@ -14,7 +15,7 @@ NSP_ENGINE_END
 NSP_ENGINE_BEGIN
 
 struct DescWindow {
-    String caption{L"Window"};
+    String caption;
     int width{640};
     int height{480};
     bool resizing{true};
@@ -22,16 +23,17 @@ struct DescWindow {
     int posy{SDL_WINDOWPOS_UNDEFINED};
 };
 
-class Window : public ICleanable {
+class Window : public enable_ptr<Window>, public ICleanable {
   public:
-    typedef Event<Window> ResizeEvent;
+    typedef Util::Event<ptr<Window>> ResizeEvent;
 
+  private:
     Window();
+    Window(const Window &other) = default;
+  public:
+    static ptr<Window> create(DescWindow desc);
     ~Window() { cleanup(); }
 
-    Window(const Window &other) = default;
-
-    bool create(DescWindow desc);
     bool update();
     void close() { cleanup(); }
     void cleanup() override;
@@ -42,18 +44,18 @@ class Window : public ICleanable {
     int getTop() const { return desc.posy; }
     int getWidth() const {
         int x, y;
-        SDL_GetWindowSize(handle.cget(), &x, &y);
+        SDL_GetWindowSize(handle.get(), &x, &y);
         return x;
     }
     int getHeight() const {
         int x, y;
-        SDL_GetWindowSize(handle.cget(), &x, &y);
+        SDL_GetWindowSize(handle.get(), &x, &y);
         return y;
     }
 
     Vector2i getSize() const {
         Vector2i size;
-        SDL_GetWindowSize(handle.cget(), (int *)&size.x, (int *)&size.y);
+        SDL_GetWindowSize(handle.get(), (int *)&size.x, (int *)&size.y);
         return size;
     }
 
@@ -65,11 +67,11 @@ class Window : public ICleanable {
     void updateWindowState();
 
   private:
-    void handleEvent(SDL_Event & e);
-    void handleWindowEvent(SDL_WindowEvent & e);
+    void handleEvent(SDL_Event &e);
+    void handleWindowEvent(SDL_WindowEvent &e);
 
   public:
-    ResizeEvent resize_event;
+    ptr<ResizeEvent> resize_event = ResizeEvent::create();
 
   private:
     friend class Core;
@@ -79,7 +81,7 @@ class Window : public ICleanable {
     bool is_exit;
     bool is_active;
     bool created = false;
-    pInputManager inputmgr;
+    ptr<InputManager> inputmgr;
 };
 
 NSP_ENGINE_END

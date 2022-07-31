@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "Rice/Math/Math.hpp"
 
-#include "Rice/Util/Exceptions.hpp"
+#include "Rice/Util/Util.hpp"
 
 using namespace Rice;
 

@@ -7,7 +7,7 @@
 
 NSP_GL_BEGIN
 
-Material::Material(pGraphicsManager manager, pShader shader)
+Material::Material(ptr<GraphicsManager> manager, ptr<Shader> shader)
     : graphics_manager(manager), shader(shader) {}
 
 void Material::updateBuffer() {

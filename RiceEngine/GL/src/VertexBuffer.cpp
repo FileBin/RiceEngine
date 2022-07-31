@@ -13,7 +13,7 @@
 
 NSP_GL_BEGIN
 
-VertexBuffer::VertexBuffer(pGraphicsManager g_mgr, VertexList& initialData) : Buffer(g_mgr), stride(0), current_count(0) {
+VertexBuffer::VertexBuffer(ptr<GraphicsManager> g_mgr, VertexList& initialData) : Buffer(g_mgr), stride(0), current_count(0) {
 	reset(initialData);
 }
 

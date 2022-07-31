@@ -1,14 +1,14 @@
 #pragma once
 
-#define THROW_VK_EX(res) throw ::Rice::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
+#define THROW_VK_EX(res) throw ::Rice::Graphics::VulkanException(((vk::Result)(res)), __LINE__, __FILE__)
 
 
 #define THROW_VK_EX_IF_BAD(res) if(((int)(res))<0) THROW_VK_EX(res)
 
 
-NSP_ENGINE_BEGIN
+NSP_GL_BEGIN
 
-better_class_extends(VulkanException, Exception) {
+class VulkanException : public Util::Exception {
 public:
 
 	VulkanException(vk::Result res, int line, const char* file) : Exception("VulkanException", line, file) {
@@ -31,4 +31,4 @@ private:
 	}
 };
 
-NSP_ENGINE_END
+NSP_GL_END

@@ -5,7 +5,7 @@
 
 #include <exception>
 
-#define THROW_EXCEPTION(wtf) throw ::NSP_BETTERCPP::Exception(wtf, __LINE__, __FILE__)
+#define THROW_EXCEPTION(wtf) throw NSP_UTIL::Exception(wtf, __LINE__, __FILE__)
 
 NSP_UTIL_BEGIN
 

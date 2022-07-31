@@ -5,17 +5,16 @@
  *      Author: root
  */
 
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 #include "Rice/Math/Vectors/Vector3f.hpp"
 
 NSP_GL_BEGIN
 
 class VertexList;
 
-struct PTR_PROTO(VertexInput);
+struct VertexInput;
 
 typedef vec<VertexInput> VertexLayout;
-typedef RefPtr<VertexLayout> pVertexLayout;
 
 NSP_GL_END
 

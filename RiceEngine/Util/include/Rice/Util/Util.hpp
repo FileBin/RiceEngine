@@ -1,10 +1,17 @@
 ﻿#include "stdafx.hpp"
+
+#include "String.hpp"
+#include "Exceptions.hpp"
+#include "Event.hpp"
 #include "Interfaces.hpp"
-#include "stdafx.hpp"
+#include "ByteStream.hpp"
+#include "Packer.hpp"
+
 #include <cstdint>
 #include <filesystem>
 #include <limits>
 #include <string>
+#include <type_traits>
 
 #pragma once
 
@@ -52,4 +59,25 @@ void writeToJSON(std::filesystem::path filename, std::string key, num value);
 void writeToJSON(std::filesystem::path filename, std::string key, UUID value);
 std::filesystem::path getHomeDirectory();
 std::filesystem::path getAppDirectory();
+
+template <typename T> data_t pack(T t) {
+    if constexpr (std::is_base_of<IPackable<data_t>, T>::value) {
+        return t.pack();
+    }
+    constexpr auto l = sizeof(T);
+    data_t data(l);
+    memcpy(data.data(), &t, l);
+    return data;
+}
+
+template <typename T> T unpack(data_t data) {
+    if constexpr (std::is_base_of<IPackable<data_t>, T>::value) {
+        return T::unpack(data);
+    }
+    constexpr auto l = sizeof(T);
+    T t;
+    memcpy(&t, data.data(), l);
+    return t;
+}
+
 NSP_UTIL_END

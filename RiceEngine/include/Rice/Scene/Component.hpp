@@ -1,32 +1,31 @@
 #include "../stdafx.hpp"
-#include "BetterCpp/Objects/BasePtr.hpp"
+#include "Rice/Util/Interfaces.hpp"
+#include "Rice/defines.h"
+#include <limits>
+#include <memory>
 
 NSP_COMPONENTS_BEGIN
 
 class Component;
-typedef RefPtr<Component> pComponent;
-
-struct ComponentData;
-typedef RefPtr<ComponentData> pComponentData;
 
 NSP_COMPONENTS_END
 
 #pragma once
 
 NSP_ENGINE_BEGIN
-class PTR_PROTO(Object);
-class PTR_PROTO(Engine);
+class Object;
+class Engine;
 NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN
 
-class Component : public EnableThisRefPtr<Component> ,public IPackable<pComponentData> {
-    friend class ComponentData;
+class Component : public enable_ptr<Component> , public IPackable<data_t>{
+    friend class Rice::Object;
 
   protected:
-    pEngine getEngine();
+    ptr<Engine> getEngine();
 
-    pObject object;
+    wptr<Object> object;
     virtual void onInit();
     virtual void onEnable();
     virtual void onDisable();
@@ -34,8 +33,11 @@ class Component : public EnableThisRefPtr<Component> ,public IPackable<pComponen
     virtual void preUpdate();
     virtual void update();
 
+  protected:
+    Component() = default;
+
   public:
-    pObject getObject();
+    ptr<Object> getObject();
 
     void enable();
     void disable();
@@ -43,15 +45,6 @@ class Component : public EnableThisRefPtr<Component> ,public IPackable<pComponen
     bool isEnabled();
 
     virtual ~Component() {}
-};
-
-struct ComponentData : public IPackable<data_t> {
-    UUID objectUUID;
-
-    ComponentData(pComponent component);
-
-    virtual pComponent createComponent() = 0;
-    virtual ~ComponentData() {}
 };
 
 NSP_COMPONENTS_END

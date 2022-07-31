@@ -1,35 +1,39 @@
-#include "BetterCpp/Functions.hpp"
-#include "Rice/Scene/Scene.hpp"
-#include "pch.h"
-
 #include "Rice/Scene/Object.hpp"
-#include "Rice/namespaces.h"
 #include "Rice/Scene/Component.hpp"
+#include "Rice/Scene/PackableComponent.hpp"
+#include "Rice/Util/ByteStream.hpp"
 
 NSP_ENGINE_BEGIN
 
-Object::Object(pScene scene) : scene(scene) {}
+Object::Object(ptr<Scene> scene) : scene(scene) {}
 
-pObject Object::createEmpty() {
-    auto obj = new_ref<Object>(scene);
-    obj->parent = refptr_this();
+ptr<Object> Object::createEmpty() {
+    ptr<Object> obj{new Object(getScene())};
+    obj->parent = shared_from_this();
     children.push_back(obj);
     return obj;
 }
 
-pScene Object::getScene() { return scene; }
+ptr<Scene> Object::getScene() {
+    auto scene_lock = scene.lock();
+    if (!scene_lock)
+        THROW_NULL_PTR_EXCEPTION(scene_lock.get());
+    return scene_lock;
+}
 
-void Object::addComponent(Components::pComponent component) {
-    components.push_back(component);
+void Object::addComponent(ptr<Components::PackableComponent> component) {
+    components.registerPtr(component);
 }
 
 ObjectData Object::pack() {
+    auto parent_lock = parent.lock();
+
     ObjectData data;
     data.active = active;
     data.enabled = enabled;
     data.selfUUID = selfUUID;
-    if (parent.isNotNull())
-        data.parentUUID = parent->selfUUID;
+    if (parent_lock)
+        data.parentUUID = parent_lock->selfUUID;
     else
         data.parentUUID = 0;
 
@@ -39,20 +43,25 @@ ObjectData Object::pack() {
         data.childrenUUID[i] = children[i]->selfUUID;
     }
 
-    n = components.size();
-    data.componentsData.resize(n);
+    auto components_vec = components.getCollection();
+
+    n = components_vec.size();
+
+    ByteStream stream(data.componentsData);
+
     for (uint i = 0; i < n; i++) {
-        data.componentsData[i] = components[i]->pack();
+        stream.write(components_vec[i]->pack());
     }
 
     return data;
 }
 
-pObject ObjectData::unpack(pScene scene,
-                           std::function<ObjectData(UUID)> getRelativesData) {
+ptr<Object>
+ObjectData::unpack(ptr<Scene> scene,
+                   std::function<ObjectData(UUID)> getRelativesData) {
     auto parent = scene->getObject(parentUUID);
 
-    if (parent.isNull()) {
+    if (!parent) {
         parent = getRelativesData(parentUUID).unpack(scene, getRelativesData);
     }
 
@@ -61,17 +70,20 @@ pObject ObjectData::unpack(pScene scene,
     return self_obj;
 }
 
-pObject ObjectData::unpack(pObject parent,
-                           std::function<ObjectData(UUID)> getRelativesData) {
-    pObject inst = new_ref<Object>(parent->scene);
+ptr<Object>
+ObjectData::unpack(ptr<Object> parent,
+                   std::function<ObjectData(UUID)> getRelativesData) {
+    ptr<Object> inst{new Object(parent->getScene())};
     inst->active = active;
     inst->enabled = enabled;
     inst->name = name;
     inst->parent = parent;
     inst->selfUUID = selfUUID;
 
-    for (auto c : componentsData) {
-        inst->components.push_back(c->createComponent());
+    ByteStream stream(componentsData);
+    while (!stream.empty()) {
+        auto component = Components::PackableComponent::unpack(stream);
+        inst->addComponent(component);
     }
 
     for (auto childUUID : childrenUUID) {

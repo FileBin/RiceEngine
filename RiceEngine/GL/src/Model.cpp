@@ -35,8 +35,8 @@ Mesh::Mesh(vec<Vector3f> vertices, vec<index_t> indices)
     recalculateBounds();
 }
 
-pMesh Mesh::clone() const {
-    pMesh mesh = new_ref<Mesh>(vertexBuffer, indexBuffer, false);
+ptr<Mesh> Mesh::clone() const {
+    ptr<Mesh> mesh { new Mesh(vertexBuffer, indexBuffer, false) };
     mesh->bounds = bounds;
     return mesh;
 }
@@ -161,15 +161,15 @@ bool Model::checkVisiblity(ModelData matrix, size_t idx) {
 
 uint Model::getSubMeshesCount() { return subMeshes.size(); }
 
-pMesh Model::getSubMesh(uint idx) { return subMeshes[idx]; }
+ptr<Mesh> Model::getSubMesh(uint idx) { return subMeshes[idx]; }
 
 Model::~Model() { subMeshes.clear(); }
 
 void Model::setSubMeshesCount(uint count) { subMeshes.resize(count); }
 
-void Model::setSubMesh(pMesh subMesh, uint idx) { subMeshes[idx] = subMesh; }
+void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) { subMeshes[idx] = subMesh; }
 
-std::vector<Vector3f> Mesh::Bounds::getCorners() {
+vec<Vector3f> Mesh::Bounds::getCorners() {
     return {
         min,
         {max.x, min.y, min.z},

@@ -1,18 +1,16 @@
-#include "Rice/Engine/Engine.hpp"
-#include "Rice/Scene/SceneRender.hpp"
-#include "pch.h"
-
 #include <Rice/Scene/Scene.hpp>
 
 NSP_ENGINE_BEGIN
 
-pEngine Scene::getEngine() {
+Scene::Scene(ptr<Engine> en) : engine(en), root(Object::create(shared_from_this())) {}
+
+ptr<Engine> Scene::getEngine() {
     return engine;
 }
 
-void Scene::setup(pEngine en) {
+void Scene::setup(ptr<Engine> en) {
     engine = en;
-    scene_render = new_ref<SceneRender>(refptr_this(), engine);
+    scene_render = new_ptr<SceneRender>(shared_from_this(), engine);
     // TODO InitResourceManager();
 }
 
@@ -21,23 +19,23 @@ void Scene::update() {
 }
 
 void Scene::render() {
-    if (active_camera.isNotNull()) {
+    if (active_camera) {
         scene_render->draw(active_camera);
     } else {
         // TODO draw no camera label
     }
 }
 
-pObject Scene::createEmpty() {
+ptr<Object> Scene::createEmpty() {
     //FIXME add uuid to the object
     return root->createEmpty();
 }
 
-pObject Scene::getObject(UUID uuid) {
+ptr<Object> Scene::getObject(UUID uuid) {
     return all_objects.getElemAt(uuid.getVal());
 }
 
-void Scene::setActiveCamera(Components::pCamera camera) {
+void Scene::setActiveCamera(ptr<Components::Camera> camera) {
     active_camera = camera;
 }
 

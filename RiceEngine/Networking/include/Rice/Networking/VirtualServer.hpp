@@ -1,17 +1,16 @@
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 #include <thread>
 
 NSP_NET_BEGIN
 
 class VirtualServer;
-typedef RefPtr<VirtualServer> pVirtualServer;
 
 NSP_NET_END
 
 #pragma once
 
-#include "../Engine/Engine.hpp"
-#include "../Scene/Scene.hpp"
+#include "Rice/Engine/Engine.hpp"
+#include "Rice/Scene/Scene.hpp"
 #include "NetProtocol.hpp"
 #include "IServer.hpp"
 
@@ -22,30 +21,28 @@ class VirtualServer : public IServer {
     struct IManager {
       private:
         friend class VirtualServer;
-        pVirtualServer server;
-        pScene scene;
+        ptr<VirtualServer> server;
+        ptr<Scene> scene;
 
       protected:
-        pVirtualServer getServer();
-        pScene getScene();
+        ptr<VirtualServer> getServer();
+        ptr<Scene> getScene();
         virtual Response onJoin(ClientInfo client, Request request);
         virtual void onLeave(ClientInfo cleint);
     };
 
-    typedef RefPtr<IManager> pIManager;
+    VirtualServer(ptr<IManager> manager);
 
-    VirtualServer(pIManager manager);
-
-    void setScene(pScene scene);
+    void setScene(ptr<Scene> scene);
 
     Response response(Request request) override;
 
   private:
     std::jthread server_thread;
 
-    pIManager manager;
-    pScene scene;
-    RegisterCollection<ClientInfo> clients;
+    ptr<IManager> manager;
+    ptr<Scene> scene;
+    Util::RegisterCollection<ClientInfo> clients;
 };
 
 NSP_NET_END

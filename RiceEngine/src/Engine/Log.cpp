@@ -1,5 +1,4 @@
-﻿#include "pch.h"
-#include <Rice/Engine/Log.hpp>
+﻿#include <Rice/Engine/Log.hpp>
 #include <ios>
 #include <locale.h>
 #include <iostream>
@@ -34,12 +33,12 @@ String get_timer() {
 
 NSP_ENGINE_BEGIN
 
-RefPtr<Log> Log::instance = nullptr;
+uptr<Log> Log::instance = nullptr;
 Log::Localization Log::llocale = { };
 
 void Log::init() {
-	if (instance.isNull()) {
-		instance = RefPtr<Log>{new Log()};
+	if (!instance) {
+		instance.reset(new Log());
 	} else
 		log(LogLevel::Error, llocale.log_is_already_created);
 }
@@ -54,7 +53,7 @@ Log::~Log() {
 }
 
 void Log::close() {
-	instance.release();
+	delete instance.release();
 }
 
 void Log::_init() {
@@ -68,11 +67,11 @@ void Log::_init() {
 
 	file.imbue(utf8);
 	if (file.is_open()) {
-		file << String::format( // @suppress("Invalid arguments")
+		file << fmt::format(
 						L"{}: {}.\n---------------------------------------\n\n",
-						llocale.log_begin, get_date()).toWide();
+						llocale.log_begin, get_date());
 	} else {
-		wprintf(llocale.log_creation_error.toWide());
+		wprintf(llocale.log_creation_error.c_str());
 	}
 }
 
@@ -80,18 +79,18 @@ void Log::_close() {
 	if (!file)
 		return;
 
-	file << String::format( // @suppress("Invalid arguments")
+	file << fmt::format(
 					L"\n---------------------------------------\n{}: {}\nTotal execution time: {}",
-					llocale.log_end, get_date(), get_timer()).toWide();
+					llocale.log_end, get_date(), get_timer());
 	file.flush();
 	file.close();
 }
 
 void Log::print(String levtext, String text) {
 
-	String str = String::format("{}: [{}] {}\n", get_timer(), levtext, text); // @suppress("Invalid arguments")
+	String str = fmt::format(L"{}: [{}] {}\n", get_timer(), levtext, text);
 
-	std::wstring wstr = str.toWide();
+	std::wstring wstr = str.c_str();
 
 	std::wcout << wstr;
 	fflush(stdout);

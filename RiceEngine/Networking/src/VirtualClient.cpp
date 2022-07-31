@@ -1,10 +1,3 @@
-#include "BetterCpp/Functions.hpp"
-#include "Rice/Engine/Log.hpp"
-#include "Rice/Math/Vectors/Vector3.hpp"
-#include "Rice/Networking/NetProtocol.hpp"
-#include "Rice/Scene/Object.hpp"
-#include "Rice/Util.hpp"
-#include "Rice/defines.h"
 #include "pch.h"
 
 #include "Rice/Networking/VirtualClient.hpp"
@@ -32,7 +25,7 @@ VirtualClient::VirtualClient(
           clientThreadFn(stoken);
       }) {}
 
-VirtualClient::JoinResult VirtualClient::join(pIServer serv) {
+VirtualClient::JoinResult VirtualClient::join(ptr<IServer> serv) {
     lock_guard<mutex> lock{client_mutex};
     auto response = serv->response(Request::getServerUUID());
 
@@ -86,7 +79,7 @@ bool VirtualClient::tryGetKey(UUID servUUID, ConnectionKey &out_key) {
 
 void VirtualClient::clientThreadFn(std::stop_token stoken) {
     while (!stoken.stop_requested()) {
-        if (server.isNull()) {
+        if (!server) {
             using namespace std;
             this_thread::sleep_for(100ms);
             continue;
@@ -115,7 +108,7 @@ void VirtualClient::clientThreadFn(std::stop_token stoken) {
         for (uint i = 0; i < n; i++) {
             auto &obj = objects[i];
             auto scene_obj = scene->getObject(obj.objectUUID);
-            if (scene_obj.isNull()) {
+            if (!scene_obj) {
                 // push it into the scene
 
                 auto get_obj_func = [this](UUID uuid) {

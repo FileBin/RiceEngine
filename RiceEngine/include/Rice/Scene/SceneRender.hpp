@@ -4,42 +4,39 @@
 #include <cstddef>
 
 NSP_ENGINE_BEGIN
-
 class SceneRender;
-typedef RefPtr<SceneRender> pSceneRender;
-
 NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN
-
 class Camera;
-typedef RefPtr<Camera> pCamera;
-
 NSP_COMPONENTS_END
 
 #pragma once
 
 #include "Scene.hpp"
 #include "../Engine/Engine.hpp"
-#include "../GL/RenderingMesh.hpp"
+
+NSP_GL_BEGIN
+class RenderingMesh;
+NSP_GL_END
 
 NSP_ENGINE_BEGIN
 
 class SceneRender {
 private:
-    pScene scene;
-    pEngine engine;
-    RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
-    vec<Graphics::pCommandBuffer> commandBuffers;
+    wptr<Scene> scene;
+    ptr<Engine> engine;
+    Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
+    vec<ptr<Graphics::CommandBuffer>> commandBuffers;
 
-    uint update(Components::pCamera camera);
-    vec<Graphics::pCommandBuffer> getCmds(uint count);
+    uint update(ptr<Components::Camera> camera);
+    vec<ptr<Graphics::CommandBuffer>> getCmds(uint count);
 
 public:
-    SceneRender(pScene scene, pEngine engine);
-    void registerMesh(Graphics::pRenderingMesh mesh);
-    void unregisterMesh(Graphics::pRenderingMesh mesh);
-    void draw(Components::pCamera camera);
+    SceneRender(ptr<Scene> scene, ptr<Engine> engine);
+    void registerMesh(ptr<Graphics::RenderingMesh> mesh);
+    void unregisterMesh(ptr<Graphics::RenderingMesh> mesh);
+    void draw(ptr<Components::Camera> camera);
 };
 
 NSP_ENGINE_END

@@ -34,3 +34,9 @@ typedef vec<byte> data_t;
 
 typedef int64_t num;
 typedef double dbl;
+typedef uint32_t index_t;
+
+template<typename T, typename... Args>
+inline ptr<T> new_ptr (Args&&... args) {
+    return ptr<T>(new T(args...));
+}

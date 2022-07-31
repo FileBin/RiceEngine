@@ -1,16 +1,17 @@
-﻿#include "../stdafx.hpp"
+﻿#include "stdafx.hpp"
 NSP_GL_BEGIN
-class PTR_PROTO(Shader);
 
-struct PTR_PROTO(Shader_API_Data);
+class Shader;
+struct Shader_API_Data;
+
 NSP_GL_END
 
 #pragma once
 
 #include "GraphicsManager.hpp"
 #include "GraphicsComponentBase.hpp"
-#include "../Math.hpp"
 #include "VertexLayout.hpp"
+#include "Rice/Math/Math.hpp"
 
 NSP_GL_BEGIN
 class Shader : public GraphicsComponentBase {
@@ -18,7 +19,7 @@ public:
 	enum Type {
 		Vertex, Geometry, Fragment,
 	};
-	Shader(pGraphicsManager g_mgr);
+	Shader(ptr<GraphicsManager> g_mgr);
 	~Shader() override;
 
 	void cleanup() override;
@@ -45,9 +46,9 @@ public:
 private:
 	friend struct CommandBuffer_API_data;
 	friend class UniformBuffer;
-	AutoPtr<Shader_API_Data> api_data;
+	uptr<Shader_API_Data> api_data;
 
-	EventRegistration resizeReg;
+	Util::EventRegistration resizeReg;
 
 	uint vertexStride = 0;
 	VertexLayout vertexLayout;

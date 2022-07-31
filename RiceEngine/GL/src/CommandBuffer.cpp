@@ -17,19 +17,19 @@
 
 NSP_GL_BEGIN
 
-void _build(uint i, CommandBuffer_API_data* api_data, std::vector<AutoPtr<CommandBuffer::Command>>& commands, GraphicsManager_API_data& data, vk::Extent2D window) {
+void _build(uint i, CommandBuffer_API_data* api_data, vec<ptr<CommandBuffer::Command>>& commands, GraphicsManager_API_data& data, vk::Extent2D window) {
 	data.sync();
 	api_data->reset(i);
 	api_data->begin(data, window, i);
-	for(RefPtr<CommandBuffer::Command> cmd : commands)
+	for(ptr<CommandBuffer::Command> cmd : commands)
 		api_data->doCommand(cmd, i);
 	api_data->end(i);
 }
 
-CommandBuffer::CommandBuffer(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr), api_data(new CommandBuffer_API_data) {
+CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr) : GraphicsComponentBase(g_mgr), api_data(new CommandBuffer_API_data) {
 	api_data->build(get_api_data());
 
-	g_mgr->resizeCommandBuffers.subscribe(resizeReg, [this](Vector2i size) { // @suppress("Invalid arguments")
+	g_mgr->resizeCommandBuffers->subscribe(resizeReg, [this](Vector2i size) { // @suppress("Invalid arguments")
 		uint n = api_data->bufCount();
 		for (uint i = 0; i < n; ++i)
 			_build(i, api_data.get(), commands, get_api_data(), vk::Extent2D(size.x, size.y));
@@ -37,50 +37,44 @@ CommandBuffer::CommandBuffer(pGraphicsManager g_mgr) : GraphicsComponentBase(g_m
 }
 
 void CommandBuffer::clear() {
-	uint n = commands.size();
-	for (uint i = 0; i < n; ++i) {
-		commands[i].release();
-	}
-
 	commands.clear();
-	n = api_data->bufCount();
+	auto n = api_data->bufCount();
 	for (uint i = 0; i < n; ++i)
 		api_data->reset(i);
 }
 
-using pCmd = RefPtr<CommandBuffer::Command>;
+using pCmd = ptr<CommandBuffer::Command>;
 
 void CommandBuffer::drawVertices(uint count) {
-
-	commands.push_back(new_ref<Command>(Command::Draw, count, 1, 0, 0));
+	commands.push_back(new_ptr<Command>(Command::Draw, count, 1, 0, 0));
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
-void CommandBuffer::drawIndexed(pIndexBuffer indexBuffer) {
+void CommandBuffer::drawIndexed(ptr<IndexBuffer> indexBuffer) {
 
-	commands.push_back(new_ref<Command>(Command::DrawIndexed, indexBuffer));
+	commands.push_back(new_ptr<Command>(Command::DrawIndexed, indexBuffer));
 	//api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
-void CommandBuffer::setActiveShader(pShader shader) {
-	commands.push_back(new_ref<Command>(Command::SetShader, shader));
+void CommandBuffer::setActiveShader(ptr<Shader> shader) {
+	commands.push_back(new_ptr<Command>(Command::SetShader, shader));
 	//api_data->doCommand({ Command::SetShader, shader->api_data->pipeline });
 }
 
-void CommandBuffer::bindVertexBuffer(pBuffer buffer) {
-	commands.push_back(new_ref<Command>(Command::BindVertexBuffer, buffer));
+void CommandBuffer::bindVertexBuffer(ptr<Buffer> buffer) {
+	commands.push_back(new_ptr<Command>(Command::BindVertexBuffer, buffer));
 }
 
-void CommandBuffer::bindVertexBuffer(pVertexBuffer buffer) {
-	commands.push_back(new_ref<Command>(Command::BindVertexBuffer, (pBuffer)buffer));
+void CommandBuffer::bindVertexBuffer(ptr<VertexBuffer> buffer) {
+	commands.push_back(new_ptr<Command>(Command::BindVertexBuffer, buffer));
 }
 
-void CommandBuffer::bindIndexBuffer(pIndexBuffer buffer) {
-	commands.push_back(new_ref<Command>(Command::BindIndexBuffer, (pBuffer)buffer));
+void CommandBuffer::bindIndexBuffer(ptr<IndexBuffer> buffer) {
+	commands.push_back(new_ptr<Command>(Command::BindIndexBuffer, buffer));
 }
 
-void CommandBuffer::bindUniformBuffer(pUniformBuffer buffer) {
-	commands.push_back(new_ref<Command>(Command::BindUniformBuffer, buffer));
+void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> buffer) {
+	commands.push_back(new_ptr<Command>(Command::BindUniformBuffer, buffer));
 }
 
 void CommandBuffer::build() {
@@ -99,7 +93,11 @@ void CommandBuffer::cleanup() {
 	clear();
 	GraphicsManager_API_data* data = &get_api_data();
 	api_data->cleanup(*data);
-	api_data.release();
+	delete api_data.release();
+}
+
+CommandBuffer::~CommandBuffer() {
+    cleanup();
 }
 NSP_GL_END
 

@@ -4,14 +4,13 @@ set(LIB_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 set(LIB_BIN_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 if(WIN32)
-    set(LIB_BIN_PATH "${LIB_BIN_PATH}/win64")
+    set(LIB_BIN_PATH ${LIB_BIN_PATH}/win64)
 endif(WIN32)
 if(UNIX)
-    set(LINKER_FLAGS "-no-pie")
-    set(LIB_BIN_PATH "${LIB_BIN_PATH}/linux64")
+    set(LIB_BIN_PATH ${LIB_BIN_PATH}/linux64)
 endif(UNIX)
 
-set(ANY_LIB_BIN_PATH "${LIB_BIN_PATH}/any")
+set(ANY_LIB_BIN_PATH ${LIB_BIN_PATH}/any CACHE INTERNAL "")
 
 message("lib any path: ${ANY_LIB_BIN_PATH}")
 
@@ -32,6 +31,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/W4 /WX-)
   	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc")
 endif()
+
+set(LIB_BIN_PATH ${LIB_BIN_PATH} CACHE INTERNAL "")
 
 message("lib compiler path: ${LIB_BIN_PATH}")
 

@@ -1,15 +1,14 @@
 ﻿#include "Rice/Engine/Log.hpp"
-#include "pch.h"
 #include <Rice/Engine/InputManager.hpp>
-#include <Rice/Math.hpp>
+#include <Rice/Math/Math.hpp>
 
 NSP_ENGINE_BEGIN
 
-pInputManager InputManager::instance = nullptr;
+ptr<InputManager> InputManager::instance = nullptr;
 
-pInputManager InputManager::init(WindowHandle _handle) {
+ptr<InputManager> InputManager::init(WindowHandle _handle) {
 	if (instance == nullptr) {
-		instance = pInputManager { new InputManager() };
+		instance.reset(new InputManager());
 		instance->handle = _handle;
 		return instance;
 	}

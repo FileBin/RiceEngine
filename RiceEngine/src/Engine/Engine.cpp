@@ -1,33 +1,43 @@
-﻿#include "pch.h"
-
-#include "Rice/Engine/Core.hpp"
-#include <Rice/Engine/Engine.hpp>
+﻿#include "Rice/Engine/Core.hpp"
 #include "Rice/GL/GraphicsManager.hpp"
 #include "Rice/GL/Material.hpp"
 #include "Rice/GL/Shader.hpp"
+#include "Rice/Util/Exceptions/NullPtrException.hpp"
+#include <Rice/Engine/Engine.hpp>
 NSP_ENGINE_BEGIN
 
-Engine::Engine(pCore core) : core(core) {}
+
+Engine::Engine(ptr<Core> core) : core(core) {}
+ptr<Engine> Engine::create(ptr<Core> core) {
+    return ptr<Engine>(new Engine(core));
+}
 Engine::~Engine() {}
 
-void Engine::loadScene(pScene scene) { core->loadScene(scene); }
+void Engine::loadScene(ptr<Scene> scene) { lock_core()->loadScene(scene); }
 
-void Engine::setFps(dbl fps) { core->fps = fps; }
+void Engine::setFps(dbl fps) { lock_core()->fps = fps; }
 
-dbl Engine::getFps() { return core->fps; }
+dbl Engine::getFps() { return lock_core()->fps; }
 
-dbl Engine::getFixedDeltaTime() { return core->fixedDeltaTime; }
+dbl Engine::getFixedDeltaTime() { return lock_core()->fixedDeltaTime; }
 
-dbl Engine::getDeltaTime() { return core->deltaTime; }
+dbl Engine::getDeltaTime() { return lock_core()->deltaTime; }
 
-dbl Engine::getTime() { return core->time; }
+dbl Engine::getTime() { return lock_core()->time; }
 
-Graphics::pShader Engine::getOrCreateShader(
-    String name, std::function<void(Graphics::pShader)> shader_creator) {
+ptr<Core> Engine::lock_core() {
+    auto core_lock = core.lock();
+    if (!core_lock)
+        THROW_NULL_PTR_EXCEPTION(core_lock.get());
+    return core_lock;
+}
+
+ptr<Graphics::Shader> Engine::getOrCreateShader(
+    String name, std::function<void(ptr<Graphics::Shader>)> shader_creator) {
     auto it = shaders.find(name); // try to find shader in map
     if (it == shaders.end()) {
-        auto shader =
-            new_ref<Graphics::Shader>(getGraphicsManager()); // create shader
+        ptr<Graphics::Shader> shader{
+            new Graphics::Shader(getGraphicsManager())}; // create shader
         shader_creator(shader); // call creator function to setup shader
         shaders[name] = shader; // add to map
         return shader;
@@ -35,21 +45,23 @@ Graphics::pShader Engine::getOrCreateShader(
     return it->second;
 }
 
-Graphics::pMaterial Engine::getOrCreateMaterial(
-    String name, std::function<Graphics::pShader(pEngine)> shader_factory) {
+ptr<Graphics::Material> Engine::getOrCreateMaterial(
+    String name,
+    std::function<ptr<Graphics::Shader>(ptr<Engine>)> shader_factory) {
+    auto core_lock = lock_core();
     auto it = materials.find(name); // try to find material in map
     if (it == materials.end()) {
-        auto material = new_ref<Graphics::Material>(
-            core->graphics_manager,
-            shader_factory(refptr_this())); // create material
-        materials[name] = material;         // add to map
+        ptr<Graphics::Material> material{new Graphics::Material(
+            core_lock->graphics_manager,
+            shader_factory(shared_from_this()))}; // create material
+        materials[name] = material;               // add to map
         return material;
     }
     return it->second;
 }
 
-Graphics::pGraphicsManager Engine::getGraphicsManager() {
-    return core->graphics_manager;
+ptr<Graphics::GraphicsManager> Engine::getGraphicsManager() {
+    return lock_core()->graphics_manager;
 }
 
 NSP_ENGINE_END

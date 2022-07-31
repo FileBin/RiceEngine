@@ -1,9 +1,8 @@
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 
 NSP_NET_BEGIN
 
 struct IServer;
-typedef RefPtr<IServer> pIServer;
 
 NSP_NET_END
 

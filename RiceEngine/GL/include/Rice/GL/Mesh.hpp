@@ -5,22 +5,20 @@
  *      Author: root
  */
 
-#include "../stdafx.hpp"
-#include "Rice/GL/IndexBuffer.hpp"
-#include "Rice/GL/ModelData.hpp"
-#include "Rice/defines.h"
+#include "stdafx.hpp"
 
 NSP_GL_BEGIN
 
-struct PTR_PROTO(Vertex);
+struct Vertex;
 
-class PTR_PROTO(Mesh);
+class Mesh;
 
 NSP_GL_END
 
 #pragma once
 
-#include "../Math.hpp"
+#include "ModelData.hpp"
+#include "Rice/Math/Math.hpp"
 #include "VertexLayout.hpp"
 
 NSP_GL_BEGIN
@@ -44,7 +42,7 @@ struct Mesh {
     Mesh(vec<Vector3f> vertices, vec<index_t> indices);
 
 
-    pMesh clone() const;
+    ptr<Mesh> clone() const;
 
 	Bounds bounds;
 	VertexListT<Vertex> vertexBuffer;

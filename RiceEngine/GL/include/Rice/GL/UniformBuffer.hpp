@@ -5,11 +5,11 @@
  *      Author: filebin
  */
 
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 
 NSP_GL_BEGIN
 
-class PTR_PROTO(UniformBuffer);
+class UniformBuffer;
 
 struct UniformBuffer_API_Data;
 
@@ -24,10 +24,11 @@ NSP_GL_BEGIN
 
 class UniformBuffer : public GraphicsComponentBase {
 public:
-	UniformBuffer(pGraphicsManager g_mgr, uint size);
+	UniformBuffer(ptr<GraphicsManager> g_mgr, uint size);
+    ~UniformBuffer() override;
 	void reset(uint size);
 
-	void setShader(pShader shader);
+	void setShader(ptr<Shader> shader);
 	void setBinding(uint binding, uint size);
 
 	template<typename T>
@@ -57,7 +58,7 @@ public:
 private:
 	void get_data(void* d, uint n);
 	friend class CommandBuffer_API_data;
-	RefPtr<UniformBuffer_API_Data> api_data;
+	uptr<UniformBuffer_API_Data> api_data;
 };
 
 NSP_GL_END

@@ -1,6 +1,4 @@
-﻿#include "pch.h"
-#include <Rice/Engine/Core.hpp>
-#include <chrono>
+﻿#include <Rice/Engine/Core.hpp>
 
 using namespace std::chrono;
 using namespace std::this_thread;
@@ -9,29 +7,29 @@ NSP_ENGINE_BEGIN
 
 //runs new instance of Core via core loader
 //interface defined by user or default implementation
-void Core::runNew(pLoader core_loader) {
+void Core::runNew(ptr<Loader> core_loader) {
     Core core(core_loader);
     core.init();
     core.run();
     core.close();
 }
 
-Core::Core(pLoader core_loader) : loader(core_loader) {}
+Core::Core(ptr<Loader> core_loader) : loader(core_loader) {}
 
 Core::~Core() {}
 
 //scene loading function in parallel with the main thread
-void Core::loadScene(pScene new_scene) {
-    if (loadingScene.isNotNull())
+void Core::loadScene(ptr<Scene> new_scene) {
+    if (loadingScene)
         return;
     loadingScene = new_scene;
 }
 
 //scene checking and loading function
 void Core::loadSceneImmediate() {
-    if (loadingScene.isNull())
+    if (!loadingScene)
         return;
-    if (activeScene.isNotNull()) {
+    if (activeScene) {
         activeScene->close();
     }
     activeScene = loadingScene;
@@ -44,33 +42,29 @@ void Core::loadSceneImmediate() {
 }
 //init core
 bool Core::init() {
-    engine = new_ref<Engine>(refptr_this());
+    engine = Engine::create(shared_from_this());
 
     // TODO AL::Init();
     Log::init();
-    wnd = new_ref<Window>();
-
-    if (wnd.isNull()) {
-        Log::log(Log::Error, "Window could not be constructed");
-        return false;
-    }
 
     SetupParams setupParams;
 
     loader->setupCore(setupParams);
 
-    if (!wnd->create(setupParams.window_desc)) {
+    wnd = Window::create(setupParams.window_desc);
+
+    if (!wnd) {
         Log::log(Log::Error, "Window could not be created");
         return false;
     }
-    graphics_manager = new_ref<Graphics::GraphicsManager>();
+    graphics_manager = Graphics::GraphicsManager::create();
     graphics_manager->init(wnd);
 
     InitParams initParams;
 
     loader->initCore(initParams);
 
-    if (initParams.loading_scene.isNotNull()) {
+    if (initParams.loading_scene) {
         loadingScreenScene = initParams.loading_scene;
         loadingScreenScene->setup(engine);
         loadingScreenScene->init();
@@ -118,7 +112,6 @@ void Core::close() {
     loader->onClose(engine);
     is_init = false;
     loadingScreenScene->close();
-    loadingScreenScene.release();
     wnd->cleanup();
     Log::close();
 }
@@ -138,10 +131,10 @@ bool Core::runFrame() {
         //   activeScene->Resize();
         // }
     }
-    if (activeScene.isNull() || !activeScene->isLoaded()) {
-        if (loadingScreenScene.isNotNull())
+    if (!activeScene || !activeScene->isLoaded()) {
+        if (loadingScreenScene) {
             loadingScreenScene->render();
-        else {
+        } else {
             Log::log(Log::Warning, "Can't render frame! Loading screen render is not set up!");
         }
     } else {

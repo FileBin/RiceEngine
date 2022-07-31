@@ -39,7 +39,7 @@ public:
 
 	vk::Extent2D windowExcent;
 
-	pGraphicsManager g_mgr;
+	wptr<GraphicsManager> g_mgr;
 
 	uint swapchainImageIndex = 0;
 
@@ -59,7 +59,7 @@ public:
 	}
 	friend class GraphicsManager;
 
-	GraphicsManager_API_data(pGraphicsManager g_mgr);
+	GraphicsManager_API_data(ptr<GraphicsManager> g_mgr);
 	void sync();
 private:
 	void recreateSwapchain();

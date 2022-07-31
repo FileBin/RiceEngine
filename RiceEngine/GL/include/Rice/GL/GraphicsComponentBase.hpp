@@ -9,7 +9,7 @@
 
 NSP_GL_BEGIN
 
-class PTR_PROTO(GraphicsComponentBase);
+class GraphicsComponentBase;
 
 NSP_GL_END
 
@@ -20,12 +20,12 @@ NSP_GL_BEGIN
 
 class GraphicsComponentBase : public ICleanable {
 protected:
-	EventRegistration deleteReg;
-	pGraphicsManager graphics_mgr;
+	Util::EventRegistration deleteReg;
+	ptr<GraphicsManager> graphics_mgr;
 
 	GraphicsManager_API_data& get_api_data();
 public:
-	GraphicsComponentBase(pGraphicsManager g_mgr);
+	GraphicsComponentBase(ptr<GraphicsManager> g_mgr);
 };
 
 NSP_GL_END

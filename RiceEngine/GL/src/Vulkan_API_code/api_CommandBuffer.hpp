@@ -25,7 +25,7 @@ struct CommandBuffer_API_data {
 	void end(uint i);
 	void reset(uint i);
 
-	void doCommand(RefPtr<CommandBuffer::Command> command, uint i);
+	void doCommand(ptr<CommandBuffer::Command> command, uint i);
 
 	void cleanup(GraphicsManager_API_data& api_data);
 };

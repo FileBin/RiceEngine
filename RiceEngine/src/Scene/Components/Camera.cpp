@@ -1,16 +1,12 @@
-#include "pch.h"
-#include "Rice/Scene/PackableComponent.hpp"
 
-
+#include "Rice/Scene/Object.hpp"
 #include <Rice/Scene/Components/Camera.hpp>
 
 NSP_COMPONENTS_BEGIN
 
-typedef PackableComponent<Camera, RefTuple<dbl>, RefTuple<>> base;
+Camera::Camera() {}
 
-Camera::Camera() : base({fov}, {}) {}
-
-pTransform Camera::getTransform() {
+ptr<Transform> Camera::getTransform() {
     return getObject()->getComponent<Transform>();
 }
 

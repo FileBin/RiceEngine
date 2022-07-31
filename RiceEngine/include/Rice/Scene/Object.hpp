@@ -1,9 +1,8 @@
 #include "../stdafx.hpp"
-#include "Rice/Util.hpp"
 
 NSP_ENGINE_BEGIN
 
-class PTR_PROTO(Object);
+class Object;
 
 struct ObjectData;
 
@@ -13,40 +12,45 @@ NSP_ENGINE_END
 
 #include "Component.hpp"
 #include "Scene.hpp"
+#include "Rice/Scene/PackableComponent.hpp"
+#include "Rice/Util/RegisterCollection.hpp"
 
 NSP_ENGINE_BEGIN
 
-better_class(Object) better_implements(IPackable<ObjectData>) {
+class Object : public enable_ptr<Object>, public IPackable<ObjectData> {
   private:
     UUID selfUUID;
 
-    pObject parent;
-    vec<pObject> children;
+    wptr<Object> parent;
+    vec<ptr<Object>> children;
 
     bool active;
     bool enabled;
-    pScene scene;
+    wptr<Scene> scene;
     String name;
-    vec<Components::pComponent> components;
+    RegisterCollection<Components::PackableComponent> components;
 
     friend struct ObjectData;
 
   public:
-    pScene getScene();
-    pObject createEmpty();
+    ptr<Scene> getScene();
+    ptr<Object> createEmpty();
 
     UUID getUUID() { return selfUUID; }
 
-    void addComponent(Components::pComponent component);
+    void addComponent(ptr<Components::PackableComponent> component);
 
-    Object(pScene scene);
+  private:
+    Object(ptr<Scene> scene);
 
+  public:
+    static ptr<Object> create(ptr<Scene> scene);
     ObjectData pack() override;
 
-    template <typename T> vec<RefPtr<T>> getComponents() {
-        vec<RefPtr<T>> vec = {};
-        for (auto c : components) {
-            auto o = dynamic_cast<T *>(c.get());
+    template <typename T> vec<ptr<T>> getComponents() {
+        vec<ptr<T>> vec = {};
+        for (auto c : components.getCollection()) {
+            auto o = std::dynamic_pointer_cast<T>(c);
             if (o != nullptr) {
                 vec.push_back(c);
             }
@@ -54,15 +58,17 @@ better_class(Object) better_implements(IPackable<ObjectData>) {
         return vec;
     }
 
-    template <typename T> RefPtr<T> getComponent() {
-        for (auto c : components) {
-            auto o = as<T>(c);
+    template <typename T> ptr<T> getComponent() {
+        for (auto c : components.getCollection()) {
+            auto o = std::dynamic_pointer_cast<T>(c);
             if (o != nullptr) {
                 return o;
             }
         }
         return nullptr;
     }
+
+    ptr<Components::Component> getComponent(uint comp_id);
 };
 
 struct ObjectData : public IPackable<data_t> {
@@ -72,7 +78,7 @@ struct ObjectData : public IPackable<data_t> {
     UUID parentUUID, selfUUID;
     vec<UUID> childrenUUID;
 
-    vec<Components::pComponentData> componentsData;
+    data_t componentsData;
 
     data_t pack() override {
         // TODO make packing
@@ -82,12 +88,12 @@ struct ObjectData : public IPackable<data_t> {
 
     static ObjectData unpack(data_t);
 
-    pObject unpack(pScene scene,
-                   std::function<ObjectData(UUID)> getRelativesData);
+    ptr<Object> unpack(ptr<Scene> scene,
+                       std::function<ObjectData(UUID)> getRelativesData);
 
   private:
-    pObject unpack(pObject parent,
-                   std::function<ObjectData(UUID)> getRelativesData);
+    ptr<Object> unpack(ptr<Object> parent,
+                       std::function<ObjectData(UUID)> getRelativesData);
 };
 
 NSP_ENGINE_END

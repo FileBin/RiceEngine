@@ -4,48 +4,55 @@
 
 #include <Rice/GL/CommandBuffer.hpp>
 
-#include "Vulkan_API_code/api_GraphicsManager_impl.hpp"
 #include "Vulkan_API_code/api_CommandBuffer.hpp"
+#include "Vulkan_API_code/api_GraphicsManager_impl.hpp"
 
 NSP_GL_BEGIN
 
-void GraphicsManager::init(pWindow _window) {
-	window = _window;
-	api_data = new_ref<GraphicsManager_API_data>(refptr_this());
-	Log::debug("GraphicsManager initializing...");
+GraphicsManager::GraphicsManager() = default;
 
-	is_initialized = true;
-	Log::debug("Successfully initialized!");
-
-	_window->resize_event.subscribe(resizeReg, // @suppress("Invalid arguments")
-	[this](pWindow win) {
-		api_data->recreateSwapchain();
-		api_data->resizing = false;
-	});
-
+ptr<GraphicsManager> GraphicsManager::create() {
+    return ptr<GraphicsManager>(new GraphicsManager());
 }
 
-void GraphicsManager::executeCmd(pCommandBuffer cmd) {
-	api_data->executeCmd({ cmd->api_data->cmd[api_data->swapchainImageIndex] });
+void GraphicsManager::init(ptr<Window> _window) {
+    window = _window;
+    api_data.reset(new GraphicsManager_API_data(shared_from_this()));
+    Log::debug("GraphicsManager initializing...");
+
+    is_initialized = true;
+    Log::debug("Successfully initialized!");
+
+    _window->resize_event->subscribe(
+        resizeReg, // @suppress("Invalid arguments")
+        [this](ptr<Window> win) {
+            api_data->recreateSwapchain();
+            api_data->resizing = false;
+        });
 }
 
-void GraphicsManager::executeCmds(vec<pCommandBuffer> cmds) {
-	uint n = cmds.size();
-	vec<vk::CommandBuffer> c(n);
-	for (uint i = 0; i < n; ++i)
-		c[i] = cmds[i]->api_data->cmd[api_data->swapchainImageIndex];
-
-	api_data->executeCmd(c);
+void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
+    api_data->executeCmd({cmd->api_data->cmd[api_data->swapchainImageIndex]});
 }
 
+void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
+    uint n = cmds.size();
+    vec<vk::CommandBuffer> c(n);
+    for (uint i = 0; i < n; ++i)
+        c[i] = cmds[i]->api_data->cmd[api_data->swapchainImageIndex];
 
-//FINALIZER
+    api_data->executeCmd(c);
+}
+
+// FINALIZER
 void GraphicsManager::cleanup() {
-	if(is_initialized) {
-		Log::debug("Graphics manager cleanup...");
-		api_data.release();
-	}
-	is_initialized = false;
+    if (is_initialized) {
+        Log::debug("Graphics manager cleanup...");
+        delete api_data.release();
+    }
+    is_initialized = false;
 }
+
+GraphicsManager::~GraphicsManager() { cleanup(); }
 
 NSP_GL_END

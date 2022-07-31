@@ -1,22 +1,16 @@
-#include "../stdafx.hpp"
-#include "BetterCpp/Objects/PtrTypes.hpp"
-#include "Rice/defines.h"
-#include <cstdlib>
-#include <string>
+#include "stdafx.hpp"
 
 NSP_NET_BEGIN
 
 struct Request;
 struct Response;
-typedef RefPtr<Request> pRequest;
-typedef RefPtr<Request> pResponse;
 
 NSP_NET_END
 
 #pragma once
 
-#include "../Engine/Engine.hpp"
-#include "../Scene/Scene.hpp"
+#include "Rice/Engine/Engine.hpp"
+#include "Rice/Scene/Scene.hpp"
 
 NSP_NET_BEGIN
 
@@ -70,8 +64,6 @@ struct PlayerData {
     dbl renderDistance;
 };
 
-typedef RefPtr<ConnectionKey> pConnectionKey;
-
 class Request {
   public:
     enum Type {
@@ -116,8 +108,6 @@ class Request {
                                   PlayerData data) {
         return {SEND_PLAYER_DATA, key, info, new PlayerData({data})};
     };
-
-    typedef RefPtr<ClientInfo> pClientInfo;
 
   private:
     Type type;
@@ -169,9 +159,9 @@ class Response {
         PlayerData initial_data;
     };
 
-    RefPtr<JoinAccept> getAcceptData() {
+    ptr<JoinAccept> getAcceptData() {
         if (type == JOIN_ACCEPT)
-            return RefPtr<JoinAccept>(data_copyT<JoinAccept>());
+            return ptr<JoinAccept>(data_copyT<JoinAccept>());
         return nullptr;
     }
 
@@ -179,9 +169,9 @@ class Response {
         String msg;
     };
 
-    RefPtr<JoinRefuse> getRefuseData() {
+    ptr<JoinRefuse> getRefuseData() {
         if (type == JOIN_REFUSE)
-            return RefPtr<JoinRefuse>(data_copyT<JoinRefuse>());
+            return ptr<JoinRefuse>(data_copyT<JoinRefuse>());
         return nullptr;
     }
 
@@ -189,9 +179,9 @@ class Response {
         ObjectData object_data;
     };
 
-    RefPtr<SendObject> getObject() {
+    ptr<SendObject> getObject() {
         if (type == SEND_OBJECT)
-            return RefPtr<SendObject>(data_copyT<SendObject>());
+            return ptr<SendObject>(data_copyT<SendObject>());
         return nullptr;
     }
 
@@ -200,15 +190,15 @@ class Response {
         vec<ObjectSendData> objects_state;
     };
 
-    RefPtr<SendSceneState> getSceneState() {
+    ptr<SendSceneState> getSceneState() {
         if (type == SEND_SCENE_STATE)
-            return RefPtr<SendSceneState>(data_copyT<SendSceneState>());
+            return ptr<SendSceneState>(data_copyT<SendSceneState>());
         return nullptr;
     }
 
-    RefPtr<UUID> getUUID() {
+    ptr<UUID> getUUID() {
         if (type == SEND_UUID)
-            return RefPtr<UUID>(data_copyT<UUID>());
+            return ptr<UUID>(data_copyT<UUID>());
         return nullptr;
     }
 

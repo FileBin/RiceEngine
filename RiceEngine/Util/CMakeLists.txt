@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.19)
 project("RiceUtil")
 
 set(RICE_UTIL_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-set(RICE_UTIL_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(RICE_UTIL_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -14,6 +14,5 @@ file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CUR
 add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
 target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
 
-include_directories(${PROJECT_NAME} ${RICE_UTIL_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)

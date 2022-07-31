@@ -14,7 +14,7 @@ constexpr auto stride = sizeof(index_t);
 
 NSP_GL_BEGIN
 
-IndexBuffer::IndexBuffer(pGraphicsManager g_mgr, vec<index_t> data) : Buffer(g_mgr) {
+IndexBuffer::IndexBuffer(ptr<GraphicsManager> g_mgr, vec<index_t> data) : Buffer(g_mgr) {
 	reset(data);
 }
 

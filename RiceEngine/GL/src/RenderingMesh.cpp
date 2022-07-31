@@ -3,6 +3,7 @@
 #include "Rice/GL/GraphicsManager.hpp"
 #include "Rice/GL/Model.hpp"
 #include "Rice/GL/ModelData.hpp"
+#include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexLayout.hpp"
 #include "Rice/Math/Matrixes.hpp"
 #include "Rice/namespaces.h"
@@ -12,23 +13,23 @@
 
 NSP_GL_BEGIN
 
-RenderingMesh::RenderingMesh(pGraphicsManager g_mgr, pMesh mesh,
-                             pMaterial mat) {
+RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
+                             ptr<Material> mat) {
     material = mat;
     orig = mesh;
 
-    constBuffer = new_ref<UniformBuffer>(g_mgr, sizeof(ModelData));
+    constBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(ModelData));
     constBuffer->setShader(material->getShader());
     constBuffer->setBinding(0, sizeof(ModelData));
     constBuffer->updateDataAll<ModelData>({});
-    vertexBuffer = new_ref<VertexBuffer, pGraphicsManager, VertexList &>(
+    vertexBuffer = new_ptr<VertexBuffer>(
         g_mgr, mesh->vertexBuffer);
-    indexBuffer = new_ref<IndexBuffer>(g_mgr, mesh->indexBuffer);
+    indexBuffer = new_ptr<IndexBuffer>(g_mgr, mesh->indexBuffer);
 
-    pCommandBuffer cmd = new_ref<CommandBuffer>(g_mgr);
+    auto cmd = new_ptr<CommandBuffer>(g_mgr);
 
     auto ub = material->getUniformBuffer();
-    if (ub.isNotNull())
+    if (ub)
         cmd->bindUniformBuffer(ub);
 
     cmd->setActiveShader(material->getShader());

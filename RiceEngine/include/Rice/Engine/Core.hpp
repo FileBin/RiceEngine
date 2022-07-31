@@ -10,8 +10,8 @@ NSP_ENGINE_END
 
 #include "Engine.hpp"
 
-#include "../GL/GraphicsManager.hpp"
 #include "../Scene/Scene.hpp"
+#include "Rice/GL/GraphicsManager.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -38,8 +38,6 @@ class Core : public enable_ptr<Core> {
         virtual void onClose(ptr<Engine> engine){};
     };
 
-    typedef RefPtr<Loader> pLoader;
-
   private:
     template <typename RetT, typename... ArgsT>
     static RetT
@@ -47,7 +45,7 @@ class Core : public enable_ptr<Core> {
                                    ArgsT... args) {
         try {
             return fn(args...);
-        } catch (Exception &e) {
+        } catch (Util::Exception &e) {
             Log::log(Log::Error, "Not handled exception occured: {}",
                      String(typeid(e).name()));
             Log::log(Log::Error, "Line {}", std::to_wstring(e.line()));
@@ -67,21 +65,21 @@ class Core : public enable_ptr<Core> {
     }
 
   public:
-    static void runNew(pLoader core_loader);
+    static void runNew(ptr<Loader> core_loader);
 
     template <class... ArgsT>
-    static RefPtr<std::thread> runThread(std::function<void(ArgsT...)> func,
-                                         ArgsT... args) {
-        return new_ref<std::thread>(
+    static ptr<std::thread> runThread(std::function<void(ArgsT...)> func,
+                                      ArgsT... args) {
+        return ptr<std::thread>(new std::thread(
             [](std::function<void(ArgsT...)> _Fx, ArgsT... _Ax) {
                 executeFuncAndHandleExceptions<void, ArgsT...>(_Fx, _Ax...);
             },
-            func, args...);
+            func, args...));
     }
 
     static void runTask(std::function<void(void)> func) {
         // TODO make tasks
-        func(); //temporary replacement
+        func(); // temporary replacement
     }
 
     void loadScene(ptr<Scene> scene);
@@ -111,7 +109,7 @@ class Core : public enable_ptr<Core> {
 
     ptr<Window> wnd;
     ptr<Loader> loader;
-    Graphics::pGraphicsManager graphics_manager;
+    ptr<Graphics::GraphicsManager> graphics_manager;
     ptr<Engine> engine;
     bool is_init = false;
     dbl fps = 60.;

@@ -10,8 +10,8 @@
 
 NSP_GL_BEGIN
 
-Shader::Shader(pGraphicsManager g_mgr) : GraphicsComponentBase(g_mgr), api_data { new_ref<Shader_API_Data>() } {
-	graphics_mgr->resizePipelines.subscribe(resizeReg, [this](Vector2i win){ onResize(win); }); // @suppress("Invalid arguments")
+Shader::Shader(ptr<GraphicsManager> g_mgr) : GraphicsComponentBase(g_mgr), api_data { new Shader_API_Data() } {
+	graphics_mgr->resizePipelines->subscribe(resizeReg, [this](Vector2i win){ onResize(win); }); // @suppress("Invalid arguments")
 }
 Shader::~Shader() { cleanup(); }
 
@@ -54,7 +54,7 @@ void Shader::cleanupDescriptorSetLayout() {
 }
 
 void Shader::loadShader(String path, Type type) {
-	data_t buffer = Util::readFile(path.toUtf8());
+	data_t buffer = Util::readFile(path.toUTF8String());
 
 	//create a new shader module, using the buffer we loaded
 	vk::ShaderModuleCreateInfo createInfo = {};

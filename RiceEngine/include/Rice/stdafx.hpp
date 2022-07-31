@@ -25,5 +25,9 @@
 #include "defines.h"
 
 #include "Rice/Math/Math.hpp"
-#include "Util/String.hpp"
-#include "Util.hpp"
+#include "Rice/Util/String.hpp"
+#include "Rice/Util/Util.hpp"
+
+NSP_ENGINE_BEGIN
+using namespace Util;
+NSP_ENGINE_END

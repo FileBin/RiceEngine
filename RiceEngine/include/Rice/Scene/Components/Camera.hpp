@@ -1,7 +1,7 @@
 #include "../../stdafx.hpp"
 
 NSP_COMPONENTS_BEGIN
-class PTR_PROTO(Camera);
+class Camera;
 NSP_COMPONENTS_END
 
 #pragma once
@@ -11,13 +11,13 @@ NSP_COMPONENTS_END
 
 NSP_COMPONENTS_BEGIN
 
-class Camera : public PackableComponent<Camera, RefTuple<dbl>, RefTuple<>> {
+class Camera : virtual public PackableComponentT<Camera> {
     dbl fov = 60;
 
   public:
     Camera();
 
-    pTransform getTransform();
+    ptr<Transform> getTransform();
     Matrix4x4f getViewMatrix();
     Matrix4x4f getProjectionMatrix();
 };

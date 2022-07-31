@@ -1,7 +1,4 @@
-#include "../stdafx.hpp"
-#include "BetterCpp/Objects/String.hpp"
-#include "Rice/Util.hpp"
-#include "Rice/defines.h"
+#include "stdafx.hpp"
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -12,14 +9,13 @@
 NSP_NET_BEGIN
 
 class VirtualClient;
-typedef RefPtr<VirtualClient> pVirtualClient;
 
 NSP_NET_END
 
 #pragma once
 
-#include "../Engine/Engine.hpp"
-#include "../Scene/Scene.hpp"
+#include "Rice/Engine/Engine.hpp"
+#include "Rice/Scene/Scene.hpp"
 #include "IServer.hpp"
 #include "NetProtocol.hpp"
 
@@ -32,8 +28,8 @@ class VirtualClient {
         String msg;
     };
   private:
-    pScene scene;
-    pIServer server;
+    ptr<Scene> scene;
+    ptr<IServer> server;
     PlayerData player_data;
     ClientInfo info;
     ConnectionKey key; //TODO: add local key storage
@@ -61,7 +57,7 @@ class VirtualClient {
   public:
     VirtualClient(ClientInfo info, std::chrono::high_resolution_clock::duration update_rate = std::chrono::milliseconds(20));
     ~VirtualClient();
-    JoinResult join(pIServer server);
+    JoinResult join(ptr<IServer> server);
     void leave();
     private:
     bool tryGetKey(UUID servUUID, ConnectionKey &out_key);

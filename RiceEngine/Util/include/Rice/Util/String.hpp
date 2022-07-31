@@ -5,6 +5,7 @@
  *      Author: FileBinsLapTop
  */
 #include "stdafx.hpp"
+#include <string>
 
 struct String;
 struct IPrintable;
@@ -16,20 +17,29 @@ struct IPrintable {
     virtual ~IPrintable() {}
 };
 
-typedef std::wstring std_wstring;
+struct String : public std::wstring {
+    String() : std::wstring() {}
+    String(const String &str) : std::wstring(str) {}
+    String(const char *pstr)
+        : std::wstring(
+              std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(
+                  pstr)) {}
+    String(const wchar_t *pwstr) : std::wstring(pwstr) {}
+    String(const std::string &str)
+        : std::wstring(
+              std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(
+                  str.c_str())) {}
+    String(const std::wstring &wstr) : std::wstring(wstr) {}
+    //String toString() override { return *this; }
 
-struct String : public std_wstring, public IPrintable {
-    String() : std_wstring() {}
-    String(const wchar_t *wstr) : std_wstring(wstr, wcslen(wstr)) {}
-
-    String(const char *cstr);
-
-    String(const std_wstring &wstr) : std_wstring(wstr) {}
-    String toString() override { return *this; }
-
-    String operator=(wchar_t ch) {
+    const String &operator=(wchar_t ch) {
         *this = String();
         at(0) = ch;
+        return *this;
+    }
+
+    const String &operator=(const String& other) {
+        static_cast<std::wstring*>(this)->assign(static_cast<const std::wstring&>(other));
         return *this;
     }
 
@@ -38,11 +48,6 @@ struct String : public std_wstring, public IPrintable {
         return utf8_conv.to_bytes(*this);
     }
 };
-
-inline String::String(const char *cstr) {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    *this = utf8_conv.from_bytes(cstr);
-}
 
 inline String operator+(const char *cstr, String s) { return String(cstr) + s; }
 

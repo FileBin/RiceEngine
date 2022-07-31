@@ -1,16 +1,13 @@
-﻿#include "../stdafx.hpp"
+﻿#include "stdafx.hpp"
 
 NSP_GL_BEGIN
 
-struct PTR_PROTO(Mesh);
-
-class PTR_PROTO(Model);
+class Model;
 
 NSP_GL_END
 
 #pragma once
 
-#include "ModelData.hpp"
 #include "Mesh.hpp"
 
 NSP_GL_BEGIN
@@ -20,15 +17,15 @@ public:
     bool checkVisiblity(ModelData WVPm, size_t meshIdx);
     uint getSubMeshesCount();
     void setSubMeshesCount(uint count);
-    void setSubMesh(pMesh subMesh, uint idx);
-    pMesh getSubMesh(uint idx);
+    void setSubMesh(ptr<Mesh> subMesh, uint idx);
+    ptr<Mesh> getSubMesh(uint idx);
 
     bool isEmpty();
 	bool show = true;
 
 	~Model();
 private:
-    vec<pMesh> subMeshes = {};
+    vec<ptr<Mesh>> subMeshes = {};
 };
 
 

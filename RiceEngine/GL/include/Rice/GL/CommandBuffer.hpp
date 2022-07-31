@@ -5,13 +5,13 @@
  *      Author: FileBinsLapTop
  */
 
-#include "../stdafx.hpp"
+#include "stdafx.hpp"
 
 NSP_GL_BEGIN
 
-class PTR_PROTO(CommandBuffer);
+class CommandBuffer;
 
-struct PTR_PROTO(CommandBuffer_API_data);
+struct CommandBuffer_API_data;
 
 NSP_GL_END
 
@@ -28,11 +28,11 @@ NSP_GL_END
 NSP_GL_BEGIN
 
 //TODO make function that checks if buffers updated and recreates cmd buffer
-class CommandBuffer : GraphicsComponentBase {
+class CommandBuffer : public GraphicsComponentBase {
 public:
 	friend class GraphicsManager;
 	friend struct CommandBuffer_API_data;
-	better_class(Command) {
+	class Command {
 	public:
 		enum Type {
 			BindVertexBuffer,
@@ -125,27 +125,27 @@ public:
 	};
 
 protected:
-	EventRegistration resizeReg;
-	AutoPtr<CommandBuffer_API_data> api_data;
+	Util::EventRegistration resizeReg;
+	uptr<CommandBuffer_API_data> api_data;
 
-	std::vector<AutoPtr<Command>> commands;
+	vec<ptr<Command>> commands;
 public:
-	CommandBuffer(pGraphicsManager g_mgr);
-	~CommandBuffer() { cleanup(); }
+	CommandBuffer(ptr<GraphicsManager> g_mgr);
+	~CommandBuffer() override;
 
 	void clear();
 
 	void drawVertices(uint count);
-	void drawIndexed(pIndexBuffer indexBuffer);
-	void setActiveShader(pShader shader);
+	void drawIndexed(ptr<IndexBuffer> indexBuffer);
+	void setActiveShader(ptr<Shader> shader);
 
-	void bindVertexBuffer(pBuffer buffer);
-	void bindVertexBuffer(pVertexBuffer vertexBuffer);
-	void bindIndexBuffer(pIndexBuffer indexBuffer);
-	void bindUniformBuffer(pUniformBuffer uniformBuffer);
+	void bindVertexBuffer(ptr<Buffer> buffer);
+	void bindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
+	void bindIndexBuffer(ptr<IndexBuffer> indexBuffer);
+	void bindUniformBuffer(ptr<UniformBuffer> uniformBuffer);
 
 	template<typename T>
-	void pushConstants(T data, pShader shader, Shader::Type stage = Shader::Vertex) {
+	void pushConstants(T data, ptr<Shader> shader, Shader::Type stage = Shader::Vertex) {
 		commands.push_back(new_ref<Command>(Command::PushConstants, shader, stage, (uint)sizeof(data), data));
 	}
 

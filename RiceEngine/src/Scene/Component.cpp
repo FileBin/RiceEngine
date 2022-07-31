@@ -1,6 +1,6 @@
-#include "Rice/Engine/Engine.hpp"
-#include "pch.h"
-
+#include "Rice/Util/Exceptions/NullPtrException.hpp"
+#include "Rice/Util/Interfaces.hpp"
+#include "Rice/Util/Util.hpp"
 #include <Rice/Scene/Component.hpp>
 #include <Rice/Scene/Object.hpp>
 NSP_COMPONENTS_BEGIN
@@ -10,18 +10,12 @@ void Component::onEnable() {}
 void Component::onDisable() {}
 void Component::start() {}
 void Component::preUpdate() {}
-void Component::update() {} 
+void Component::update() {}
 
-pEngine Component::getEngine() {
-    return object->getScene()->getEngine();
+ptr<Engine> Component::getEngine() {
+    return getObject()->getScene()->getEngine();
 }
 
-pObject Component::getObject() {
-    return object;
-}
-
-ComponentData::ComponentData(pComponent component) {
-    objectUUID = component->object->getUUID();
-}
+ptr<Object> Component::getObject() { return object.lock(); }
 
 NSP_COMPONENTS_END

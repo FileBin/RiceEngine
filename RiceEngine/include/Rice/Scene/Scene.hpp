@@ -1,12 +1,7 @@
 #include "../stdafx.hpp"
-#include "BetterCpp/Functions.hpp"
-#include <cstdint>
 
 NSP_ENGINE_BEGIN
-
 class Scene;
-typedef RefPtr<Scene> pScene;
-
 NSP_ENGINE_END
 
 #pragma once
@@ -17,15 +12,20 @@ NSP_ENGINE_END
 
 NSP_ENGINE_BEGIN
 
-class Scene : public EnableThisRefPtr<Scene> {
+class Scene : public enable_ptr<Scene> {
     friend class SceneRender;
     friend class Components::Component;
 
   protected:
-    pEngine getEngine();
+    ptr<Engine> getEngine();
+
+  private:
+    Scene(ptr<Engine> engine);
+
   public:
+    static ptr<Scene> create(ptr<Engine> engine);
     virtual ~Scene() {}
-    void setup(pEngine engine);
+    void setup(ptr<Engine> engine);
     virtual void init() = 0;
 
     void update();
@@ -35,27 +35,27 @@ class Scene : public EnableThisRefPtr<Scene> {
 
     bool isLoaded() { return loaded; }
 
-    void setActiveCamera(Components::pCamera camera);
+    void setActiveCamera(ptr<Components::Camera> camera);
 
-    pObject getObject(UUID uuid);
+    ptr<Object> getObject(UUID uuid);
 
-    pObject createEmpty();
+    ptr<Object> createEmpty();
 
     void destroyObject(UUID uuid);
 
   private:
-    RegisterCollection<Object, uint64_t> all_objects;
-    pObject root = new_ref<Object>(refptr_this());
+    Util::RegisterCollection<Object, uint64_t> all_objects;
+    ptr<Object> root;
 
-    pEngine engine;
-    pSceneRender scene_render;
-    Components::pCamera active_camera;
+    ptr<Engine> engine;
+    ptr<SceneRender> scene_render;
+    ptr<Components::Camera> active_camera;
 
     bool loaded = false;
     friend struct ObjectData;
 
     // NOTE: can throw exception if UUID is exists in the scene
-    void pushObjectWithUUID(pObject original, UUID uuid);
+    void pushObjectWithUUID(ptr<Object> original, UUID uuid);
 };
 
 NSP_ENGINE_END

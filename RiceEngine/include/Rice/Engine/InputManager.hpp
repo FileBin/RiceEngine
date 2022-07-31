@@ -1,5 +1,5 @@
 ﻿#include "../stdafx.hpp"
-#include "../Math/Vectors/Vector2.hpp"
+#include "Rice/Math/Vectors/Vector2.hpp"
 #include "Rice/macros.h"
 
 NSP_ENGINE_BEGIN
@@ -16,7 +16,7 @@ NSP_ENGINE_BEGIN
 
 class InputManager {
 public:
-	static pInputManager init(WindowHandle handle);
+	static ptr<InputManager> init(WindowHandle handle);
 	InputManager();
 	~InputManager();
 
@@ -31,7 +31,7 @@ public:
 	static void unlockMouse();
 	static void setActive(bool active = true);
 private:
-	static pInputManager instance;
+	static ptr<InputManager> instance;
 
 	friend class Window;
 	bool active = true;
