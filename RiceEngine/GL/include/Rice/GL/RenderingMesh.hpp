@@ -33,7 +33,8 @@ class RenderingMesh : public IRegistrable {
     ptr<CommandBuffer> cmdBuffer;
 
   public:
-    RenderingMesh(ptr<GraphicsManager> graphics_manager, ptr<Mesh> mesh, ptr<Material> material);
+    RenderingMesh(ptr<GraphicsManager> graphics_manager, ptr<Mesh> mesh, ptr<Material> material,
+                  ptr<Components::Transform> transform);
     ptr<Components::Transform> getTransform() { return transform; }
     ptr<Material> getMaterial() { return material; }
     ptr<CommandBuffer> getCmd() { return cmdBuffer; }

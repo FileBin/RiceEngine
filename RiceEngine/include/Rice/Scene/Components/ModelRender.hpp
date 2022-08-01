@@ -17,15 +17,14 @@ NSP_COMPONENTS_BEGIN
 class ModelRender
     : virtual public PackableComponentT<ModelRender> {
   private:
-    void onInit() override;
-
-    // TODO void onEnable() override;
-    // TODO void onDisable() override;
+    void onEnable() override;
+    void onDisable() override;
 
   public:
     ModelRender();
     ModelRender(ptr<Graphics::Model> model);
 
+    void updateRenderData();
     void setMaterial(ptr<Graphics::Material> material, uint subMeshIdx);
     void setModel(ptr<Graphics::Model> model);
     ptr<Graphics::Model> getModel();
@@ -36,6 +35,6 @@ class ModelRender
     uint idx;
     ptr<Graphics::Model> model;
     vec<ptr<Graphics::Material>> materials;
-    vec<Graphics::RenderingMesh> meshes;
+    vec<ptr<Graphics::RenderingMesh>> rendering_meshes;
 };
 NSP_COMPONENTS_END

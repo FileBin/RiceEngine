@@ -78,8 +78,6 @@ vk::PipelineInputAssemblyStateCreateInfo VulkanHelper::input_assembly_create_inf
 
 vk::PipelineRasterizationStateCreateInfo VulkanHelper::rasterization_state_create_info(vk::PolygonMode polygonMode, float line_width, vk::CullModeFlags cull_mode_flags, vk::FrontFace front_face) {
 	vk::PipelineRasterizationStateCreateInfo info = {};
-	info.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
-	info.pNext = nullptr;
 
 	info.depthClampEnable = VK_FALSE;
 	//discards all primitives before the rasterization stage if enabled which we don't want

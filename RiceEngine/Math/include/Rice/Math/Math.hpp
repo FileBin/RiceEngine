@@ -12,34 +12,34 @@ NSP_ENGINE_BEGIN
 class Math {
 public:
 	static double abs(double x) {
-		return abs(x);
+		return std::abs(x);
 	}
 
 	static Vector3 getNorm(std::function<double(Vector3)> func, Vector3 pos,
 			dbl eps = .00001);
 
 	static double asin(double x) {
-		return toDegrees(asin(x));
+		return toDegrees(std::asin(x));
 	}
 	static double acos(double x) {
-		return toDegrees(acos(x));
+		return toDegrees(std::acos(x));
 	}
 	static double atan(double x) {
-		return toDegrees(atan(x));
+		return toDegrees(std::atan(x));
 	}
 
 	static double atan(double y, double x) {
-		return toDegrees(atan2(y, x));
+		return toDegrees(std::atan2(y, x));
 	}
 
 	static double sin(double x) {
-		return sin(toRadians(x));
+		return std::sin(toRadians(x));
 	}
 	static double cos(double x) {
-		return cos(toRadians(x));
+		return std::cos(toRadians(x));
 	}
 	static double tan(double x) {
-		return tan(toRadians(x));
+		return std::tan(toRadians(x));
 	}
 
 	static double toRadians(double x) {

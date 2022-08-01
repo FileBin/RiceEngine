@@ -1,4 +1,5 @@
 ﻿#include "Rice/Engine/Log.hpp"
+#include "SDL2/SDL_mouse.h"
 #include <Rice/Engine/InputManager.hpp>
 #include <Rice/Math/Math.hpp>
 
@@ -82,6 +83,7 @@ void InputManager::setActive(bool active) {
 
 void InputManager::update() {
 	if (active) {
+        eventCursor();
 		if (is_mouse_locked) {
 			Vector2 center;
 			center.x = mouseRect.w;
@@ -103,7 +105,7 @@ void InputManager::eventKey(KeyCode key, bool rs_state) {
 
 void InputManager::eventCursor() {
 	Vector2i pos;
-	SDL_GetMouseState((int*)&pos.x, (int*)&pos.y);
+	SDL_GetGlobalMouseState((int*)&pos.x, (int*)&pos.y);
 	mousePos = (Vector2)pos;
 }
 

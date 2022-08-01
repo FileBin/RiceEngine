@@ -78,9 +78,9 @@ class Transform
 
         auto parent_ref = parent.lock();
         // TODO make it better
-        auto mat = Matrix4x4::Translation(-position) *
-                   Matrix4x4::Rotation(rotation.Opposite()) *
-                   Matrix4x4::Scale(1 / scale);
+        auto mat = Matrix4x4::translation(-position) *
+                   Matrix4x4::rotation(rotation.opposite()) *
+                   Matrix4x4::scale(1 / scale);
         if (parent_ref)
             return parent_ref->getInvTransformationMatrix() * mat;
         return mat;

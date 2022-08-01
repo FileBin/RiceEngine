@@ -23,13 +23,13 @@ template <typename ElemT, typename Id_t = uint> class RegisterCollection {
   public:
     RegisterCollection() { emptyPositions.reserve(0xfff); }
 
-    const vec<ptr_t> &getCollection() const {
+    const vec<ptr_t> getCollection() const {
         vec<ptr_t> list{};
         auto n = collection.size();
         list.reserve(n);
         for (Id_t i = 0; i < n; i++) {
-            const auto &elem = collection[i];
-            if (elem != nullptr)
+            ptr_t elem = collection[i];
+            if (elem)
                 list.push_back(elem);
         }
         return list;

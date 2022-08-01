@@ -309,7 +309,7 @@ Vector3 operator-(Vector3 A, Vector3 b) {
 }
 
 Vector3 operator*(Quaternion q, Vector3 v) {
-    return v * Matrix4x4::Rotation(q);
+    return v * Matrix4x4::rotation(q);
 }
 
 Vector3 Vector3::cross(Vector3 left, Vector3 right) {
@@ -418,7 +418,7 @@ Vector3i operator-(Vector3i A, Vector3i b) {
 }
 
 Vector3i operator*(Quaternion q, Vector3i v) {
-    return v * Matrix4x4::Rotation(q);
+    return v * Matrix4x4::rotation(q);
 }
 
 Vector3i Vector3i::Cross(Vector3i left, Vector3i right) {
@@ -529,7 +529,7 @@ Vector3f operator-(Vector3f a, Vector3f b) {
 }
 
 Vector3f operator*(Quaternion q, Vector3f v) {
-    return (Vector3)v * Matrix4x4::Rotation(q);
+    return (Vector3)v * Matrix4x4::rotation(q);
 }
 
 Vector3f Vector3f::cross(Vector3f left, Vector3f right) {
@@ -635,7 +635,7 @@ Quaternion Quaternion::fromAxisAngle(Vector3 axis, double angle) {
     return q;
 }
 
-Quaternion Quaternion::LookAt(Vector3 sourcePoint, Vector3 destPoint) {
+Quaternion Quaternion::lookAt(Vector3 sourcePoint, Vector3 destPoint) {
     Vector3 forwardVector = (destPoint - sourcePoint).Normalized();
 
     auto dot = Vector3::Dot(Vector3::forward, forwardVector);
@@ -670,7 +670,7 @@ Quaternion Quaternion::fromEulerAngles(double x, double y, double z) {
     return q;
 }
 
-double Quaternion::Magnitude() {
+double Quaternion::magnitude() {
     auto l = w * w + x * x + y * y + z * z;
     return sqrt(l);
 }
@@ -679,8 +679,8 @@ Quaternion Quaternion::operator-() {
     return { -x,-y,-z,-w };
 }
 
-Quaternion Quaternion::Inversed() {
-    auto norm = Magnitude();
+Quaternion Quaternion::inversed() {
+    auto norm = magnitude();
     if (norm > 0) {
         norm = 1 / norm;
         return { -x * norm, -y * norm, -z * norm, -w * norm };
@@ -688,17 +688,17 @@ Quaternion Quaternion::Inversed() {
     return (*this);
 }
 
-Quaternion Quaternion::Opposite() {
-    return FromAxisAngle(-ToAxisAngle());
+Quaternion Quaternion::opposite() {
+    return fromAxisAngle(-toAxisAngle());
 }
 
-Quaternion Quaternion::Normalized() {
+Quaternion Quaternion::normalized() {
     auto l = w * w + x * x + y * y + z * z;
     l = sqrt(l);
     return { x / l, y / l, z / l, w / l };
 }
 
-Vector3 Quaternion::ToEulerAngles() {
+Vector3 Quaternion::toEulerAngles() {
     Vector3 angles;
 
     // roll (x-axis rotation)
@@ -721,7 +721,7 @@ Vector3 Quaternion::ToEulerAngles() {
     return angles;
 }
 
-Vector3 Quaternion::ToAxisAngle() {
+Vector3 Quaternion::toAxisAngle() {
     auto angle = 2 * Math::acos(w);
     auto s = sqrt(1 - w * w);
     if (s > 0) {

@@ -1,4 +1,6 @@
 #include "../stdafx.hpp"
+#include "Rice/Util/Event.hpp"
+#include <cstdint>
 
 NSP_ENGINE_BEGIN
 class Scene;
@@ -15,19 +17,25 @@ NSP_ENGINE_BEGIN
 class Scene : public enable_ptr<Scene> {
     friend class SceneRender;
     friend class Components::Component;
+    friend class Object;
 
   protected:
+    ptr<SceneRender> getSceneRender();
     ptr<Engine> getEngine();
     Scene() = default;
 
   public:
-    virtual ~Scene() {}
+    struct Events {
+        ptr<Event<>> processEvents = Event<>::create();
+        ptr<Event<>> update = Event<>::create();
+
+        ptr<Event<>> close = Event<>::create();
+    } events;
+
+    virtual ~Scene() { close(); }
     void setup(ptr<Engine> engine);
     virtual void init() = 0;
-    void load() {
-        init();
-        loaded = true;
-    }
+    void load();
 
     void update();
     void render();
@@ -40,11 +48,15 @@ class Scene : public enable_ptr<Scene> {
 
     ptr<Object> getObject(UUID uuid);
 
-    ptr<Object> createEmpty();
+    ptr<Object> createEmpty(String name);
+    ptr<Object> createEnabled(String name);
 
     void destroyObject(UUID uuid);
 
   private:
+    uint64_t uuid_counter = 0;
+    UUID getNextUUID();
+
     Util::RegisterCollection<Object, uint64_t> all_objects;
     ptr<Object> root;
 

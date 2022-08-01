@@ -1,12 +1,8 @@
 #include "../stdafx.hpp"
 
-#include "Component.hpp"
-#include "Rice/Util/ByteStream.hpp"
-#include "Rice/Util/RegisterCollection.hpp"
-#include "Rice/defines.h"
-#include <functional>
-
 #pragma once
+
+#include "Component.hpp"
 
 NSP_ENGINE_BEGIN
 class Object;

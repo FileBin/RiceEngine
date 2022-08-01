@@ -1,5 +1,6 @@
 
 #include "Rice/Scene/Object.hpp"
+#include "Rice/Util/Exceptions/Exception.hpp"
 #include <Rice/Scene/Components/Camera.hpp>
 
 NSP_COMPONENTS_BEGIN
@@ -7,10 +8,14 @@ NSP_COMPONENTS_BEGIN
 Camera::Camera() {}
 
 ptr<Transform> Camera::getTransform() {
-    return getObject()->getComponent<Transform>();
+    auto transform = getObject()->getComponent<Transform>();
+    if(!transform) {
+        THROW_EXCEPTION("Object has no Transform component!");
+    }
+    return transform;
 }
-
-Matrix4x4f Camera::getProjectionMatrix() { return Matrix4x4::Perspective(fov); }
+//TODO add aspect ratio
+Matrix4x4f Camera::getProjectionMatrix() { return Matrix4x4::perspective(fov); }
 
 Matrix4x4f Camera::getViewMatrix() {
     return getTransform()->getInvTransformationMatrix();

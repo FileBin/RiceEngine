@@ -14,9 +14,9 @@ layout(binding = 0) uniform Constants {
 void main() {
 	//output the position of each vertex
 	vec4 pos = vec4(inPosition, 1.0);
-    pos = constants.world * pos;
-    pos = constants.view * pos;
-    pos = constants.projection * pos;
+    pos = pos * constants.world;
+    pos = pos * constants.view;
+    pos = pos * constants.projection;
     gl_Position = pos;
     
 	outColor = inColor;

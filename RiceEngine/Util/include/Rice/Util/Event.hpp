@@ -36,8 +36,8 @@ struct EventRegistration : public ICleanable {
         : event_ref(event_ref), coll_id(unregistered_id){};
 
   private:
-    uint coll_id;
     ptr<EventBase> event_ref;
+    uint coll_id;
 
   public:
     EventRegistration() : event_ref(nullptr), coll_id(unregistered_id) {}
@@ -71,7 +71,7 @@ template <typename... args_t> class Event : virtual public EventBase {
 
   public:
     static ptr<Event<args_t...>> create() {
-        return ptr<Event<args_t...>>{ new Event<args_t...>() };
+        return ptr<Event<args_t...>>{new Event<args_t...>()};
     }
 
     void subscribe(EventRegistration &reg, std_func_t function) {

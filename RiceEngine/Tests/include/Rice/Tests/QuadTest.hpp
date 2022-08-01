@@ -45,8 +45,8 @@ class QuadTest : public ICleanable {
 
         g_mgr = GraphicsManager::create();
 
-        const_data.renderMatrix = Matrix4x4::Scale({.5, .5, .5}) *
-                                  Matrix4x4::Translation({0, 0, -.5});
+        const_data.renderMatrix = Matrix4x4::scale({.5, .5, .5}) *
+                                  Matrix4x4::translation({0, 0, -.5});
 
         win = Window::create({"QuadTest"});
         // if(in_stack)
@@ -107,7 +107,7 @@ class QuadTest : public ICleanable {
         VertConstData data = {const_data.renderMatrix};
 
         data.renderMatrix =
-            Matrix4x4::Scale({sin(time), cos(time), 1}) * data.renderMatrix;
+            Matrix4x4::scale({sin(time), cos(time), 1}) * data.renderMatrix;
 
         uniformBuffer->updateData<VertConstData>(data);
 

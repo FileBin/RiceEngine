@@ -8,4 +8,15 @@
 //    USE_DIRECT_X_12 (not implemented)
 //	  USE_OPENGL (not implemented)
 
+#include "Rice/config.h"
+#ifdef GL_API_VULKAN
 #define USE_VULKAN_API
+#endif
+#ifdef GL_API_OPENGL
+#define USE_OPENGL
+#endif
+#ifdef GL_API_DIRECTX
+//Choose one of the following
+#define USE_DIRECT_X_11
+//#define USE_DIRECT_X_12
+#endif

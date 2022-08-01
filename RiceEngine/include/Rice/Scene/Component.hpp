@@ -1,8 +1,5 @@
 #include "../stdafx.hpp"
-#include "Rice/Util/Interfaces.hpp"
-#include "Rice/defines.h"
-#include <limits>
-#include <memory>
+#include "Rice/Util/Event.hpp"
 
 NSP_COMPONENTS_BEGIN
 
@@ -13,25 +10,40 @@ NSP_COMPONENTS_END
 #pragma once
 
 NSP_ENGINE_BEGIN
+class Scene;
+class SceneRender;
 class Object;
 class Engine;
 NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN
 
-class Component : public enable_ptr<Component> , public IPackable<data_t>{
+class Component : public enable_ptr<Component>, public IPackable<data_t> {
     friend class Rice::Object;
 
-  protected:
-    ptr<Engine> getEngine();
-
+  private:
+    typedef uint flags_t;
     wptr<Object> object;
-    virtual void onInit();
+    EventRegistration stateChangedRegistration;
+    EventRegistration updateRegistration;
+    EventRegistration enableRegistration;
+    EventRegistration disableRegistration;
+
+    void init(ptr<Object> object);
+
+    void forceEnable();
+    void forceDisable();
+
+  protected:
+    bool isSceneLoaded();
+
+    ptr<Engine> getEngine();
+    ptr<Scene> getScene();
+    ptr<SceneRender> getSceneRender();
+
     virtual void onEnable();
     virtual void onDisable();
-    virtual void start();
-    virtual void preUpdate();
-    virtual void update();
+    virtual void onUpdate();
 
   protected:
     Component() = default;
@@ -44,7 +56,7 @@ class Component : public enable_ptr<Component> , public IPackable<data_t>{
 
     bool isEnabled();
 
-    virtual ~Component() {}
+    virtual ~Component();
 };
 
 NSP_COMPONENTS_END

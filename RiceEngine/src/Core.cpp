@@ -128,7 +128,8 @@ void Core::close() {
 bool Core::runFrame() {
     wnd->update();
 
-    wnd->inputmgr->setActive(wnd->isActive());
+    wnd->inputmgr->setActive(true);
+    wnd->inputmgr->update();
 
     if (wnd->isExit())
         return false;

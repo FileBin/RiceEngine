@@ -1,30 +1,37 @@
 ﻿#include "pch.h"
-
+#include "Rice/Math/Matrixes.hpp"
 #include "Rice/Math/Math.hpp"
+#include <cmath>
 
 const Matrix4x4 Matrix4x4::identity = {
-    1,0,0,0,
-    0,1,0,0,
-    0,0,1,0,
-    0,0,0,1,
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
 };
 
 const Matrix4x4f Matrix4x4f::identity = Matrix4x4::identity;
 
-Matrix4x4 Matrix4x4::Perspective(double fov, double aspect, double nearPlane, double farPlane) {
+Matrix4x4 Matrix4x4::perspective(double fov, double aspect, double nearPlane,
+                                 double farPlane) {
+
     double yScale = 1. / Rice::Math::tan(fov / 2);
     double xScale = yScale / aspect;
     double nearmfar = farPlane - nearPlane;
-
+    double zScale = (farPlane + nearPlane) / nearmfar;
+    double zNearmfar = -2 * farPlane * nearPlane / nearmfar;
     return {
-        xScale, 0, 0, 0,
-        0, yScale, 0, 0,
-        0, 0, (farPlane + nearPlane) / nearmfar, -(farPlane * nearPlane) / nearmfar,
-        0, 0, 1, 0
-    };
+            xScale, 0, 0, 0,
+            0, yScale, 0, 0,
+            0, 0, zScale, zNearmfar,
+            0, 0, 1, 0
+        };
+
+    // OpenGL implementation
 }
 
-Matrix4x4 Matrix4x4::Ortographic(Vector2 size, double nearPlane, double farPlane) {
+Matrix4x4 Matrix4x4::ortographic(Vector2 size, double nearPlane,
+                                 double farPlane) {
     double nearmfar = farPlane - nearPlane;
 
     return {
@@ -35,52 +42,56 @@ Matrix4x4 Matrix4x4::Ortographic(Vector2 size, double nearPlane, double farPlane
     };
 }
 
-Matrix4x4 Matrix4x4::Ortographic(Vector3 size) {
+Matrix4x4 Matrix4x4::ortographic(Vector3 size) {
     return {
-        2/size.x, 0, 0, 0,
-        0, 2/size.y, 0, 0,
-        0, 0, 1/size.z, .5,
-        0, 0, 0, 1
+        2 / size.x, 0, 0, 0,
+        0, 2 / size.y, 0, 0,
+        0, 0, 1 / size.z, .5,
+        0, 0, 0, 1};
+}
+
+Matrix4x4 Matrix4x4::translation(Vector3 v) {
+    return {
+        1, 0, 0, v.x, 0, 1, 0, v.y, 0, 0, 1, v.z, 0, 0, 0, 1,
     };
 }
 
-Matrix4x4 Matrix4x4::Translation(Vector3 v) {
+Matrix4x4 Matrix4x4::scale(Vector3 v) {
     return {
-        1,0,0,v.x,
-        0,1,0,v.y,
-        0,0,1,v.z,
-        0,0,0,1,
+        v.x, 0, 0, 0, 0, v.y, 0, 0, 0, 0, v.z, 0, 0, 0, 0, 1,
     };
 }
 
-Matrix4x4 Matrix4x4::Scale(Vector3 v) {
+Matrix4x4 Matrix4x4::rotation(Quaternion q) {
     return {
-        v.x,0,0,0,
-        0,v.y,0,0,
-        0,0,v.z,0,
-        0,0,0,1,
-    };
-}
-
-Matrix4x4 Matrix4x4::Rotation(Quaternion q) {
-    return {
-        1 - 2 * (q.y*q.y + q.z*q.z), 2 * (q.x*q.y - q.w*q.z), 2 * (q.x*q.z + q.w * q.y), 0,
-        2 * (q.x*q.y + q.w*q.z), 1 - 2 * (q.x*q.x + q.z*q.z), 2 * (q.y*q.z - q.w * q.x), 0,
-        2 * (q.x*q.z - q.w*q.y), 2 * (q.y*q.z + q.w*q.x), 1 - 2 * (q.x*q.x + q.y * q.y), 0,
-        0, 0, 0, 1,
+        1 - 2 * (q.y * q.y + q.z * q.z),
+        2 * (q.x * q.y - q.w * q.z),
+        2 * (q.x * q.z + q.w * q.y),
+        0,
+        2 * (q.x * q.y + q.w * q.z),
+        1 - 2 * (q.x * q.x + q.z * q.z),
+        2 * (q.y * q.z - q.w * q.x),
+        0,
+        2 * (q.x * q.z - q.w * q.y),
+        2 * (q.y * q.z + q.w * q.x),
+        1 - 2 * (q.x * q.x + q.y * q.y),
+        0,
+        0,
+        0,
+        0,
+        1,
     };
 }
 
 Matrix4x4 Matrix4x4::TRS(Vector3 translate, Quaternion rotate, Vector3 scale) {
-    return Matrix4x4::Scale(scale) * Matrix4x4::Rotation(rotate) * Matrix4x4::Translation(translate);
+    return Matrix4x4::scale(scale) * Matrix4x4::rotation(rotate) *
+           Matrix4x4::translation(translate);
 }
 
-Matrix4x4 Matrix4x4::Transpose() {
+Matrix4x4 Matrix4x4::transpose() {
     return {
-        c11, c21, c31, c41,
-        c12, c22, c32, c42,
-        c13, c23, c33, c43,
-        c14, c24, c34, c44,
+        c11, c21, c31, c41, c12, c22, c32, c42,
+        c13, c23, c33, c43, c14, c24, c34, c44,
     };
 }
 
@@ -91,7 +102,6 @@ Vector3 operator*(Vector3 vec, Matrix4x4 mat) {
         vec.x * mat.c31 + vec.y * mat.c32 + vec.z * mat.c33 + mat.c34,
     };
 }
-
 
 Vector3f operator*(Vector3f vec, Matrix4x4f mat) {
     return {
@@ -148,6 +158,3 @@ Matrix4x4f operator*(Matrix4x4f a, Matrix4x4f b) {
         a.c14 * b.c41 + a.c24 * b.c42 + a.c34 * b.c43 + a.c44 * b.c44,
     };
 }
-
-
-

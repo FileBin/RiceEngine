@@ -1,4 +1,5 @@
 #include "../stdafx.hpp"
+#include "Rice/Util/Event.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -11,57 +12,84 @@ NSP_ENGINE_END
 #pragma once
 
 #include "Component.hpp"
-#include "Scene.hpp"
 #include "Rice/Scene/PackableComponent.hpp"
 #include "Rice/Util/RegisterCollection.hpp"
+#include "Scene.hpp"
 
 NSP_ENGINE_BEGIN
 
 class Object : public enable_ptr<Object>, public IPackable<ObjectData> {
+    friend class Scene;
+    friend class Components::Component;
+
   private:
     UUID selfUUID;
 
     wptr<Object> parent;
     vec<ptr<Object>> children;
 
-    bool active;
-    bool enabled;
     wptr<Scene> scene;
     String name;
     RegisterCollection<Components::PackableComponent> components;
 
+    EventRegistration stateChangedRegistration;
+    EventRegistration updateRegistration;
+    EventRegistration enableRegistration;
+    EventRegistration disableRegistration;
+
     friend struct ObjectData;
 
+    Object(ptr<Scene> scene, String name, UUID uuid);
+
+    void init(ptr<Object> parent);
+    void update();
+
+    void onEnable();
+    void onDisable();
+
+    bool canUpdate();
+
+    ptr<Object> getParent();
+
   public:
+    struct Events {
+        ptr<Event<bool>> stateChanged = Event<bool>::create();
+        ptr<Event<>> update = Event<>::create();
+    } events;
     ptr<Scene> getScene();
-    ptr<Object> createEmpty();
+    ptr<Object> createEmpty(String name);
+    ptr<Object> createEnabled(String name);
 
     UUID getUUID() { return selfUUID; }
 
     void addComponent(ptr<Components::PackableComponent> component);
 
-  private:
-    Object(ptr<Scene> scene);
-
   public:
-    static ptr<Object> create(ptr<Scene> scene);
+    void enable();
+    void disable();
+
+    bool isEnabled();
+
+    void forceEnable();
+    void forceDisable();
     ObjectData pack() override;
 
     template <typename T> vec<ptr<T>> getComponents() {
         vec<ptr<T>> vec = {};
         for (auto c : components.getCollection()) {
             auto o = std::dynamic_pointer_cast<T>(c);
-            if (o != nullptr) {
-                vec.push_back(c);
+            if (o) {
+                vec.push_back(o);
             }
         }
         return vec;
     }
 
     template <typename T> ptr<T> getComponent() {
-        for (auto c : components.getCollection()) {
+        auto coll = components.getCollection();
+        for (auto c : coll) {
             auto o = std::dynamic_pointer_cast<T>(c);
-            if (o != nullptr) {
+            if (o) {
                 return o;
             }
         }
@@ -72,7 +100,6 @@ class Object : public enable_ptr<Object>, public IPackable<ObjectData> {
 };
 
 struct ObjectData : public IPackable<data_t> {
-    bool active;
     bool enabled;
     String name;
     UUID parentUUID, selfUUID;

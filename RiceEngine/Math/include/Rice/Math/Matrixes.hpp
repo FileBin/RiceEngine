@@ -2,22 +2,24 @@
 #include "stdafx.hpp"
 
 struct Quaternion;
+struct Vector2;
 struct Vector3;
 struct Vector3f;
+struct Matrix4x4f;
 
 struct Matrix4x4 {
 public:
 
-	static Matrix4x4 Perspective(double fov, double aspect = 1, double nearPlane = .001, double farPlane = 1000.);
-	static Matrix4x4 Ortographic(Vector2 size, double nearPlane = .001, double farPlane = 1000.);
-	static Matrix4x4 Ortographic(Vector3 size);
+	static Matrix4x4 perspective(double fov, double aspect = 1, double nearPlane = .001, double farPlane = 1000.);
+	static Matrix4x4 ortographic(Vector2 size, double nearPlane = .001, double farPlane = 1000.);
+	static Matrix4x4 ortographic(Vector3 size);
 
-	static Matrix4x4 Translation(Vector3 v);
-	static Matrix4x4 Scale(Vector3 v);
-	static Matrix4x4 Rotation(Quaternion q);
+	static Matrix4x4 translation(Vector3 v);
+	static Matrix4x4 scale(Vector3 v);
+	static Matrix4x4 rotation(Quaternion q);
 	static Matrix4x4 TRS(Vector3 translate, Quaternion rotate, Vector3 scale);
 
-	Matrix4x4 Transpose();
+	Matrix4x4 transpose();
 
 	const static Matrix4x4 identity;
 
