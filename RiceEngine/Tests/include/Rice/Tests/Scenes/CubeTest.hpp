@@ -26,7 +26,7 @@ class CubeTestScene : public virtual Scene {
 
         auto cam_obj = createEnabled("Camera");
         auto cam_transform = new_ptr<Components::Transform>();
-        cam_transform->setPosition({0, .0, 0});
+        cam_transform->setPosition({0, 0, -5});
         auto cam_comp = new_ptr<Components::Camera>();
         cam_obj->addComponent(cam_transform);
         cam_obj->addComponent(cam_comp);
@@ -36,7 +36,7 @@ class CubeTestScene : public virtual Scene {
         auto cube_obj = createEnabled("Cube");
         auto cube_transform = new_ptr<Components::Transform>();
 
-        cube_transform->setPosition({0, 0, 5});
+        cube_transform->setPosition({0, 0, 0});
 
         auto cube_render = new_ptr<Components::ModelRender>();
 

@@ -74,13 +74,8 @@ class Transform
     }
 
     Matrix4x4 getInvTransformationMatrix() {
-        std::shared_lock l(mut);
-
         auto parent_ref = parent.lock();
-        // TODO make it better
-        auto mat = Matrix4x4::translation(-position) *
-                   Matrix4x4::rotation(rotation.opposite()) *
-                   Matrix4x4::scale(1 / scale);
+        auto mat = getTransformationMatrix().inverse();
         if (parent_ref)
             return parent_ref->getInvTransformationMatrix() * mat;
         return mat;

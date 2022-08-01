@@ -14,6 +14,7 @@ public:
 	static Matrix4x4 ortographic(Vector2 size, double nearPlane = .001, double farPlane = 1000.);
 	static Matrix4x4 ortographic(Vector3 size);
 
+    Matrix4x4 inverse();
 	static Matrix4x4 translation(Vector3 v);
 	static Matrix4x4 scale(Vector3 v);
 	static Matrix4x4 rotation(Quaternion q);
