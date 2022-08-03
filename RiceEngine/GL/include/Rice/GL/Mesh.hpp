@@ -48,6 +48,7 @@ struct Mesh {
 	VertexListT<Vertex> vertexBuffer;
 	vec<index_t> indexBuffer = {};
 	static const Mesh quad;
+    static Mesh cube();
 
 	void rotate(Quaternion q);
 	void translate(Vector3 offset);

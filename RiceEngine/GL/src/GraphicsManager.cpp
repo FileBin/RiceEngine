@@ -5,7 +5,7 @@
 #include <Rice/GL/CommandBuffer.hpp>
 
 #include "Vulkan_API_code/api_CommandBuffer.hpp"
-#include "Vulkan_API_code/api_GraphicsManager_impl.hpp"
+#include "Vulkan_API_code/api_GraphicsManager_impl.inl"
 
 NSP_GL_BEGIN
 
@@ -26,9 +26,15 @@ void GraphicsManager::init(ptr<Window> _window) {
     _window->resize_event->subscribe(
         resizeReg, // @suppress("Invalid arguments")
         [this](ptr<Window> win) {
-            api_data->recreateSwapchain();
-            api_data->resizing = false;
+            api_data->resizing = true;
         });
+}
+
+void GraphicsManager::update() {
+    if (api_data->resizing) {
+        api_data->resizing = false;
+        api_data->recreateSwapchain();
+    }
 }
 
 void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
@@ -48,6 +54,7 @@ void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
 void GraphicsManager::cleanup() {
     if (is_initialized) {
         Log::debug("Graphics manager cleanup...");
+        api_data->cleanup();
         delete api_data.release();
     }
     is_initialized = false;

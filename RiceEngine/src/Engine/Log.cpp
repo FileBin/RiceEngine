@@ -5,7 +5,7 @@
 
 #include <codecvt>
 
-#define LOGNAME "log.txt"
+#define LOGNAME "latest.log"
 
 using namespace std::chrono;
 
@@ -16,7 +16,7 @@ String get_date() {
 	auto t = std::time(0);
 	std::tm time = *std::localtime(&t);
 	wchar_t buf[0x100];
-	wcsftime(buf,0x100, L"%X %x %Z", &time);
+	wcsftime(buf, 0x100, L"%X %x %Z", &time);
 	return buf;
 	//return std::to_string(std::put_time(&time, "%c %Z"));
 	/*return fmt::format(L"{}:{}:{}, {:%A}, {} {}, {}", // @suppress("Invalid arguments")
@@ -76,7 +76,7 @@ void Log::_init() {
 }
 
 void Log::_close() {
-	if (!file)
+	if (!file || !file.is_open())
 		return;
 
 	file << fmt::format(

@@ -22,22 +22,8 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     GraphicsManager();
     friend class GraphicsComponentBase;
     friend struct GraphicsManager_API_data;
-    bool is_initialized = false;
-
-    Util::EventRegistration resizeReg;
-
-    uptr<GraphicsManager_API_data> api_data;
-
-    ptr<Window> window;
-
-    bool isDrawing = false;
 
   public:
-    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(),
-                     resizeRenderPasses = ResizeEvent::create(),
-                     resizeCommandBuffers = ResizeEvent::create();
-    ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
-
     static ptr<GraphicsManager> create();
 
     ~GraphicsManager() override;
@@ -45,10 +31,28 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     ptr<Window> getWindow() { return window; }
 
     void init(ptr<Window> window);
+    void update();
 
     void executeCmd(ptr<CommandBuffer> cmd);
     void executeCmds(vec<ptr<CommandBuffer>> cmds);
     void cleanup() override;
+
+  public:
+    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(),
+                     resizeRenderPasses = ResizeEvent::create(),
+                     resizeCommandBuffers = ResizeEvent::create(),
+                     resizeGraphicsComponents = ResizeEvent::create();
+    ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
+
+  private:
+    Util::EventRegistration resizeReg;
+
+    uptr<GraphicsManager_API_data> api_data;
+
+    ptr<Window> window;
+
+    bool is_drawing = false;
+    bool is_initialized = false;
 };
 
 NSP_GL_END

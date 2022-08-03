@@ -5,6 +5,7 @@
  *      Author: filebin
  */
 
+#include "Rice/Util/Event.hpp"
 #include "stdafx.hpp"
 
 NSP_GL_BEGIN
@@ -53,12 +54,20 @@ public:
 	void updateDataAll(void* pData, uint nData);
 
 	bool isAllocated();
-
+    void build();
 	void cleanup() override;
 private:
+    void onResize();
 	void get_data(void* d, uint n);
 	friend class CommandBuffer_API_data;
 	uptr<UniformBuffer_API_Data> api_data;
+    wptr<Shader> shader;
+    struct Binding {
+        uint binding;
+        uint size;
+    } binding;
+
+    EventRegistration resizeReg;
 };
 
 NSP_GL_END

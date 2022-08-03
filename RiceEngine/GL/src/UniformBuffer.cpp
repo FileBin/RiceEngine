@@ -9,25 +9,41 @@
 
 #include "Vulkan_API_code/api_Shader.hpp"
 #include "Vulkan_API_code/api_UniformBuffer.hpp"
-#include "Vulkan_API_code/api_UniformBuffer_impl.hpp"
+#include "Vulkan_API_code/api_UniformBuffer_impl.inl"
 #include <Rice/GL/UniformBuffer.hpp>
 
 NSP_GL_BEGIN
 
 UniformBuffer::UniformBuffer(ptr<GraphicsManager> g_mgr, uint n)
     : GraphicsComponentBase(g_mgr) {
-    api_data =
-        std::move(uptr<UniformBuffer_API_Data>(new UniformBuffer_API_Data(
-            get_api_data(), get_api_data().device, get_api_data().GPU)));
+    api_data.reset(new UniformBuffer_API_Data(get_api_data()));
     api_data->allocate(n);
+    g_mgr->resizeGraphicsComponents->subscribe(resizeReg, [this](Vector2i win) {
+        onResize();
+    }); // @suppress("Invalid arguments")
 }
 
-void UniformBuffer::setShader(ptr<Shader> shader) {
-    api_data->allocateDescriptorSets(shader->api_data->descriptorSetLayout,
-                                     shader->api_data->layout);
+void UniformBuffer::onResize() {
+    // FIXME do resize correctly
+    api_data->freeDescriptorSets();
+    build();
 }
 
-void UniformBuffer::setBinding(uint b, uint n) { api_data->setBinding(b, n); }
+void UniformBuffer::setShader(ptr<Shader> sh) { shader = sh; }
+
+void UniformBuffer::setBinding(uint b, uint n) {
+    binding.binding = b;
+    binding.size = n;
+}
+
+void UniformBuffer::build() {
+    auto sh = shader.lock();
+    if (sh) {
+        api_data->allocateDescriptorSets(sh->api_data->descriptorSetLayout,
+                                         sh->api_data->layout);
+        api_data->setBinding(binding.binding, binding.size);
+    }
+}
 
 void UniformBuffer::cleanup() {
     if (isAllocated())

@@ -1,5 +1,7 @@
 #include "../stdafx.hpp"
+#include "Rice/Scene/Components/Camera.hpp"
 #include "Rice/Util/Event.hpp"
+#include "Rice/defines.h"
 #include <cstdint>
 
 NSP_ENGINE_BEGIN
@@ -40,10 +42,13 @@ class Scene : public enable_ptr<Scene> {
     void update();
     void render();
 
-    virtual void close(){};
+
+    void close();
+    virtual void onclose(){};
 
     bool isLoaded() { return loaded; }
 
+    ptr<Components::Camera> getActiveCamera();
     void setActiveCamera(ptr<Components::Camera> camera);
 
     ptr<Object> getObject(UUID uuid);

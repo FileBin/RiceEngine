@@ -6,4 +6,4 @@
  */
 #include "pch.h"
 
-#include "Vulkan_API_code/helper_impl.hpp"
+#include "Vulkan_API_code/helper_impl.inl"

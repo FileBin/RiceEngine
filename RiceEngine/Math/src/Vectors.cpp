@@ -654,7 +654,7 @@ Quaternion Quaternion::lookAt(Vector3 sourcePoint, Vector3 destPoint) {
 }
 
 Quaternion Quaternion::fromEulerAngles(double x, double y, double z) {
-    double cy = Math::cos(y * 0.5);
+    double cy = Math::cos(z * 0.5);
     double sy = Math::sin(z * 0.5);
     double cp = Math::cos(y * 0.5);
     double sp = Math::sin(y * 0.5);

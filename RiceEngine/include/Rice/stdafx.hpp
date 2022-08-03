@@ -14,11 +14,6 @@
 
 #include <magic_enum/magic_enum.hpp>
 
-#define SDL_MAIN_HANDLED
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
-
 #include "namespaces.h"
 #include "macros.h"
 

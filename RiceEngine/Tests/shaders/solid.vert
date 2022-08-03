@@ -17,6 +17,7 @@ void main() {
     pos = pos * constants.world;
     pos = pos * constants.view;
     pos = pos * constants.projection;
+    pos.y = -pos.y;
     gl_Position = pos;
     
 	outColor = inColor;

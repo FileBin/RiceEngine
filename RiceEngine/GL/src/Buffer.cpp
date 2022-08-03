@@ -12,7 +12,7 @@
 #include <Rice/GL/Buffer.hpp>
 #include <algorithm>
 
-#include "Vulkan_API_code/api_Buffer_impl.hpp"
+#include "Vulkan_API_code/api_Buffer_impl.inl"
 #include "Vulkan_API_code/api_GraphicsManager.hpp"
 
 NSP_GL_BEGIN

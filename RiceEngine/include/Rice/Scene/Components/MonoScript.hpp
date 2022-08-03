@@ -1,20 +1,19 @@
-﻿#pragma once
-#include "../Scene/Component.h"
+﻿#include "Rice/stdafx.hpp"
 
-namespace Game {
-	class Engine;
-	class SceneRender;
-	class Scene;
+NSP_COMPONENTS_BEGIN
+template <typename T>
+class MonoScript;
+NSP_COMPONENTS_END
 
-	class MonoScript : public Component {
-	public:
-		void OnInit();
-		virtual ~MonoScript() = 0;
-	protected:
-		Scene& GetScene();
-		SceneRender& GetRender();
-		Engine& GetEngine();
-	private:
-		Scene* scene;
+#pragma once
+#include "Rice/Scene/PackableComponentT.hpp"
+
+#include "Rice/Scene/Scene.hpp"
+#include "Rice/Scene/SceneRender.hpp"
+#include "Rice/Engine/Engine.hpp"
+
+NSP_COMPONENTS_BEGIN
+    template<typename T>
+	class MonoScript : public virtual PackableComponentT<T> {
 	};
-}
+NSP_COMPONENTS_END

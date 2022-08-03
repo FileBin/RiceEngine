@@ -64,4 +64,6 @@ ptr<Graphics::GraphicsManager> Engine::getGraphicsManager() {
     return lock_core()->graphics_manager;
 }
 
+ptr<InputManager> Engine::getInputManager() { return lock_core()->wnd->getInputManager(); }
+
 NSP_ENGINE_END

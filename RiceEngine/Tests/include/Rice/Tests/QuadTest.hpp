@@ -60,10 +60,10 @@ class QuadTest : public ICleanable {
         test_shader->setVertexStrideAndLayout<Vertex>();
         test_shader->build();
 
-        uniformBuffer =
-            new_ptr<UniformBuffer>(g_mgr, sizeof(VertConstData));
+        uniformBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(VertConstData));
         uniformBuffer->setShader(test_shader);
         uniformBuffer->setBinding(0, sizeof(VertConstData));
+        uniformBuffer->build();
         uniformBuffer->updateDataAll<VertConstData>(const_data);
 
         VertexListT<Vertex> vertices({
@@ -89,12 +89,14 @@ class QuadTest : public ICleanable {
         cmd->drawIndexed(indexBuffer);
         cmd->buildAll();
 
-        while (win->update())
+        while (win->isOpen())
             loop();
     }
 
     void loop() {
         using namespace Graphics;
+
+        g_mgr->update();
 
         static auto startTime = std::chrono::high_resolution_clock::now();
 

@@ -24,7 +24,10 @@ class Transform
   public:
     // TODO void onEnable();
 
-    Vector3 getPosition();
+    Vector3 getPosition() {
+        std::shared_lock lock(mut);
+        return position;
+    }
 
     Quaternion getRotation() {
         std::shared_lock l(mut);

@@ -36,6 +36,11 @@ void Scene::render() {
     }
 }
 
+void Scene::close() {
+    events.close->invoke();
+    scene_render->cleanup();
+}
+
 ptr<Object> Scene::createEmpty(String name) { return root->createEmpty(name); }
 ptr<Object> Scene::createEnabled(String name) {
     return root->createEnabled(name);
@@ -50,6 +55,8 @@ ptr<SceneRender> Scene::getSceneRender() { return scene_render; }
 void Scene::setActiveCamera(ptr<Components::Camera> camera) {
     active_camera = camera;
 }
+
+ptr<Components::Camera> Scene::getActiveCamera() { return active_camera; }
 
 UUID Scene::getNextUUID() { return UUID(uuid_counter++); }
 

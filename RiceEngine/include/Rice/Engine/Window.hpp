@@ -1,5 +1,13 @@
 ﻿#include "../stdafx.hpp"
+#include "Rice/Math/Vectors/Vector2i.hpp"
 #include "Rice/defines.h"
+#include <shared_mutex>
+#include <stop_token>
+#include <thread>
+
+typedef struct SDL_Window SDL_Window;
+typedef union SDL_Event SDL_Event;
+typedef struct SDL_WindowEvent SDL_WindowEvent;
 
 NSP_ENGINE_BEGIN
 
@@ -15,12 +23,13 @@ NSP_ENGINE_END
 NSP_ENGINE_BEGIN
 
 struct DescWindow {
+    static const int windowPosUndefined;
     String caption;
     int width{640};
     int height{480};
     bool resizing{true};
-    int posx{SDL_WINDOWPOS_UNDEFINED};
-    int posy{SDL_WINDOWPOS_UNDEFINED};
+    int posx{windowPosUndefined};
+    int posy{windowPosUndefined};
 };
 
 class Window : public enable_ptr<Window>, public ICleanable {
@@ -29,59 +38,61 @@ class Window : public enable_ptr<Window>, public ICleanable {
 
   private:
     Window();
-    Window(const Window &other) = default;
+
   public:
     static ptr<Window> create(DescWindow desc);
     ~Window() { cleanup(); }
 
-    bool update();
+    void join();
     void close() { cleanup(); }
     void cleanup() override;
-    void setInputMgr(ptr<InputManager> inputmgr);
+    ptr<InputManager> getInputManager() { return inputmgr; }
 
-    WindowHandle getHandle() { return handle; }
+    WindowHandle getHandle();
     int getLeft() const { return desc.posx; }
     int getTop() const { return desc.posy; }
     int getWidth() const {
-        int x, y;
-        SDL_GetWindowSize(handle.get(), &x, &y);
-        return x;
-    }
-    int getHeight() const {
-        int x, y;
-        SDL_GetWindowSize(handle.get(), &x, &y);
-        return y;
+        return getSize().x;
     }
 
-    Vector2i getSize() const {
-        Vector2i size;
-        SDL_GetWindowSize(handle.get(), (int *)&size.x, (int *)&size.y);
-        return size;
+    Vector2i getMousePos() const;
+
+    int getHeight() const {
+        return getSize().y;
     }
+
+    Vector2i getSize() const;
+
+    void setCursorShow(bool show);
 
     String getCaption() const { return desc.caption; }
     bool isExit() const { return is_exit; }
+    bool isOpen() const { return !is_exit; }
     bool isActive() const { return is_active; }
-    bool isResize() const;
     bool isMinimized() const;
     void updateWindowState();
 
+    void grabMouse(bool grab);
+
   private:
+    void update(std::stop_token stoken);
     void handleEvent(SDL_Event &e);
     void handleWindowEvent(SDL_WindowEvent &e);
+    void setCursorPosition(Vector2i pos);
 
   public:
     ptr<ResizeEvent> resize_event = ResizeEvent::create();
-
   private:
-    friend class Core;
+    friend class InputManager;
 
     DescWindow desc;
     WindowHandle handle;
-    bool is_exit;
-    bool is_active;
-    bool created = false;
     ptr<InputManager> inputmgr;
+    uptr<std::jthread> update_thread;
+    std::shared_mutex update_mutex;
+    bool is_exit = false;
+    bool is_active = true;
+    bool created = false;
 };
 
 NSP_ENGINE_END

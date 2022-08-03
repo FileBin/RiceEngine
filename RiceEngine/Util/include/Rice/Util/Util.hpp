@@ -1,11 +1,13 @@
 ﻿#include "stdafx.hpp"
 
+#include "Rect.hpp"
 #include "String.hpp"
 #include "Exceptions.hpp"
 #include "Event.hpp"
 #include "Interfaces.hpp"
 #include "ByteStream.hpp"
 #include "Packer.hpp"
+
 
 #include <cstdint>
 #include <filesystem>

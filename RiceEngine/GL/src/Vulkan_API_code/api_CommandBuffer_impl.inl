@@ -155,7 +155,7 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command,
         vk::DescriptorSet &set = buffer->api_data->sets[i];
         cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                   buffer->api_data->pip_layout, 0, 1,
-                                  &buffer->api_data->sets[i], 0, nullptr);
+                                  &set, 0, nullptr);
     } break;
 
     default:

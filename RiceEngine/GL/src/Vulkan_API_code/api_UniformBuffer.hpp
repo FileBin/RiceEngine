@@ -36,13 +36,15 @@ public:
 	uint buffer_count;
 
 	bool allocated = false;
+    bool built = false;
 
-	UniformBuffer_API_Data(GraphicsManager_API_data& api_data, vk::Device& dev, vk::PhysicalDevice& gpu);
+	UniformBuffer_API_Data(GraphicsManager_API_data& api_data);
 
 	UniformBuffer_API_Data& allocate(size_t size);
 	UniformBuffer_API_Data& free();
 
 	void allocateDescriptorSets(vk::DescriptorSetLayout layout, vk::PipelineLayout pip_layout);
+    void freeDescriptorSets();
 	void setBinding(uint binding, uint size);
 
 	UniformBuffer_API_Data& setData(uint i, void* pSrc, size_t nData, size_t offset);

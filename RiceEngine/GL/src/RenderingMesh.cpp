@@ -23,6 +23,7 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     constBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(ModelData));
     constBuffer->setShader(material->getShader());
     constBuffer->setBinding(0, sizeof(ModelData));
+    constBuffer->build();
     constBuffer->updateDataAll<ModelData>({});
     vertexBuffer = new_ptr<VertexBuffer>(g_mgr, mesh->vertexBuffer);
     indexBuffer = new_ptr<IndexBuffer>(g_mgr, mesh->indexBuffer);

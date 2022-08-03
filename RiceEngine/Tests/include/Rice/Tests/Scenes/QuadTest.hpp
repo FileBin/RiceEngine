@@ -6,7 +6,6 @@
 #include "Rice/Scene/Components/ModelRender.hpp"
 #include "Rice/Scene/Components/Transform.hpp"
 #include "Rice/Scene/Scene.hpp"
-#include "Rice/Tests/Scripts/CameraMover.hpp"
 #include "Rice/defines.h"
 #include "Rice/stdafx.hpp"
 
@@ -14,12 +13,12 @@
 
 NSP_TESTS_BEGIN
 
-class CubeTestScene : public virtual Scene {
-    CubeTestScene() = default;
+class QuadTestScene : public virtual Scene {
+    QuadTestScene() = default;
 
   public:
-    static ptr<CubeTestScene> create() {
-        return ptr<CubeTestScene>(new CubeTestScene());
+    static ptr<QuadTestScene> create() {
+        return ptr<QuadTestScene>(new QuadTestScene());
     }
 
     void init() override {
@@ -29,11 +28,8 @@ class CubeTestScene : public virtual Scene {
         auto cam_transform = new_ptr<Components::Transform>();
         cam_transform->setPosition({0, 0, -5});
         auto cam_comp = new_ptr<Components::Camera>();
-        auto cam_mover = new_ptr<Tests::CameraMover>();
-
         cam_obj->addComponent(cam_transform);
         cam_obj->addComponent(cam_comp);
-        cam_obj->addComponent(cam_mover);
 
         setActiveCamera(cam_comp);
 
@@ -49,7 +45,7 @@ class CubeTestScene : public virtual Scene {
 
         auto cube_model = new_ptr<Graphics::Model>();
 
-        auto cube_mesh = Graphics::Mesh::cube().clone();
+        auto cube_mesh = Graphics::Mesh::quad.clone();
         //cube_mesh->rotate(Quaternion::fromEulerAngles({0, 180, 0}));
 
         cube_model->setSubMeshesCount(1);

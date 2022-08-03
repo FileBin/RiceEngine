@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Rice/Util/String.hpp"
+#include "VkBootstrap.h"
 #include "api_GraphicsManager.hpp"
 
 #include <Rice/Engine/Log.hpp>
@@ -15,8 +17,39 @@
 #include <Rice/Math/Math.hpp>
 
 #include <Rice/Engine/Window.hpp>
+#include <vulkan/vulkan_core.h>
+
+#include "SDL2/SDL_vulkan.h"
+
+#include "Rice/Engine/Log.hpp"
 
 NSP_GL_BEGIN
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL
+debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+              VkDebugUtilsMessageTypeFlagsEXT messageType,
+              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+              void *pUserData) {
+
+                String message = pCallbackData->pMessage;
+
+    switch (messageType) {
+    case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+        Log::log(Log::Info, "[Vulkan] {}", message);
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+        Log::log(Log::Error, "[Vulkan] {}", message);
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+        Log::log(Log::Warning, "[Vulkan] {}", message);
+        break;
+    default:
+        Log::log(Log::Info, "[Vulkan] {}", message);
+        break;
+    }
+
+    return VK_FALSE;
+}
 
 GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     vkb::InstanceBuilder builder;
@@ -24,11 +57,15 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     g_mgr = mgr;
 
     // make the Vulkan instance
-    auto inst_ret = builder.set_app_name("Riced Field")
-                        .request_validation_layers(true)
-                        .require_api_version(1, 1, 0)
-                        .use_default_debug_messenger()
-                        .build();
+    auto inst_ret =
+        builder.set_app_name("Riced Field")
+            .require_api_version(1, 1, 0)
+#ifdef DEBUG_MODE
+            .request_validation_layers(true)
+            .use_default_debug_messenger()
+            .set_debug_callback(debugCallback)
+#endif
+            .build();
 
     if (!inst_ret.has_value())
         THROW_VK_EX(inst_ret.vk_result());
@@ -275,10 +312,11 @@ void GraphicsManager_API_data::recreateSwapchain() {
 
     graphicsManager->resizePipelines->invoke(window_size);
     init_framebuffers();
+    graphicsManager->resizeGraphicsComponents->invoke(window_size);
     graphicsManager->resizeCommandBuffers->invoke(window_size);
 }
 
-void GraphicsManager_API_data::cleanupSwapchain(bool destroy) {
+inline void GraphicsManager_API_data::cleanupSwapchain(bool destroy) {
 
     uint n = framebuffers.size();
     for (size_t i = 0; i < n; i++) {
@@ -393,15 +431,19 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
         resizing = true;
 }
 
-GraphicsManager_API_data::~GraphicsManager_API_data() {
+GraphicsManager_API_data::~GraphicsManager_API_data() { cleanup(); }
+
+void GraphicsManager_API_data::cleanup() {
+    if (!instance)
+        return;
     auto graphicsManager = g_mgr.lock();
 
     device.waitIdle();
 
-    cleanupSwapchain();
-
-    if (graphicsManager)
+    if (graphicsManager) {
         graphicsManager->destroyEvent->invoke();
+    }
+    cleanupSwapchain();
 
     device.destroy(def_renderPass);
 

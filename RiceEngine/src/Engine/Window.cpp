@@ -1,7 +1,49 @@
-﻿#include <Rice/Engine/Log.hpp>
+﻿#include "Rice/Engine/InputManager.hpp"
+#include "Rice/Math/Vectors/Vector2i.hpp"
+#include "SDL2/SDL_mouse.h"
+#include <Rice/Engine/Log.hpp>
 #include <Rice/Engine/Window.hpp>
 
+#define SDL_MAIN_HANDLED
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_vulkan.h>
+
+#include <stop_token>
+#include <thread>
+
 NSP_ENGINE_BEGIN
+
+const int DescWindow::windowPosUndefined = SDL_WINDOWPOS_UNDEFINED;
+
+bool Window::isMinimized() const {
+    return SDL_GetWindowFlags(handle.get()) & SDL_WINDOW_MINIMIZED;
+}
+
+Vector2i Window::getMousePos() const {
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    return Vector2i(x, y);
+}
+
+Vector2i Window::getSize() const {
+    Vector2i size;
+    SDL_GetWindowSize(handle.get(), (int *)&size.x, (int *)&size.y);
+    return size;
+}
+
+WindowHandle Window::getHandle() { return handle; }
+
+void Window::setCursorShow(bool show) { SDL_ShowCursor(show ? 1 : 0); }
+
+void Window::setCursorPosition(Vector2i pos) {
+    SDL_WarpMouseInWindow(handle.get(), pos.x, pos.y);
+}
+
+void Window::grabMouse(bool grab) {
+    SDL_SetRelativeMouseMode(grab ? SDL_TRUE : SDL_FALSE);
+}
 
 Window::Window()
     : inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true) {}
@@ -24,8 +66,9 @@ ptr<Window> Window::create(DescWindow desc) {
 
     window->created = true;
 
-    window->inputmgr = InputManager::init(window->handle);
+    window->inputmgr = InputManager::create(window);
 
+    // set minimum window size to avoid problems with Vulkan
     SDL_SetWindowMinimumSize(window->handle.get(), 64, 64);
 
     if (!window->handle) {
@@ -36,16 +79,30 @@ ptr<Window> Window::create(DescWindow desc) {
 
     window->updateWindowState();
 
+    // start thread for window update
+    window->update_thread.reset(new std::jthread(
+        [window](std::stop_token stoken) { window->update(stoken); }));
+
     Log::debug("Window successfully created!");
     return window;
 }
 
-bool Window::update() {
-    SDL_Event event;
-    SDL_PollEvent(&event);
-    handleEvent(event);
-    return !is_exit;
+void Window::update(std::stop_token stoken) {
+    while (true) {
+        SDL_Event event;
+        SDL_PollEvent(&event);
+        handleEvent(event);
+
+        inputmgr->update();
+
+        if (is_exit || stoken.stop_requested()) {
+            is_exit = true;
+            return;
+        }
+    }
 }
+
+void Window::join() { update_thread->join(); }
 
 void Window::cleanup() {
     if (created) {
@@ -71,6 +128,17 @@ void Window::handleEvent(SDL_Event &e) {
         break;
     case SDL_MOUSEWHEEL:
         inputmgr->eventMouseWheel(e.wheel.y);
+        break;
+    case SDL_MOUSEMOTION:
+        inputmgr->eventCursor({(double)e.motion.x, (double)e.motion.y},
+                              {e.motion.xrel, e.motion.yrel});
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+        inputmgr->eventMouse(e.button.button, true);
+        break;
+    case SDL_MOUSEBUTTONUP:
+        inputmgr->eventMouse(e.button.button, false);
+        break;
     }
 }
 
@@ -83,6 +151,7 @@ void Window::handleWindowEvent(SDL_WindowEvent &e) {
     case SDL_WINDOWEVENT_HIDDEN:
     case SDL_WINDOWEVENT_FOCUS_LOST:
         is_active = false;
+        inputmgr->reset();
         break;
     case SDL_WINDOWEVENT_CLOSE:
         is_exit = true;
@@ -96,23 +165,8 @@ void Window::handleWindowEvent(SDL_WindowEvent &e) {
     }
 }
 
-void Window::setInputMgr(ptr<InputManager> inputmgr) {
-    this->inputmgr = inputmgr;
-    updateWindowState();
-}
-
-bool Window::isResize() const {
-    int w, h;
-    SDL_GetWindowSize(handle.get(), &w, &h);
-    return w != desc.width || h != desc.height;
-}
-
-bool Window::isMinimized() const {
-    return SDL_GetWindowFlags(handle.get()) & SDL_WINDOW_MINIMIZED;
-}
-
 void Window::updateWindowState() {
-    SDL_Rect rect;
+    Util::Rect rect;
     SDL_GetWindowPosition(handle.get(), &rect.x, &rect.y);
     SDL_GetWindowSize(handle.get(), &rect.w, &rect.h);
     desc.posx = rect.x;

@@ -27,7 +27,6 @@ private:
     wptr<Scene> scene;
     ptr<Engine> engine;
     Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
-    vec<ptr<Graphics::CommandBuffer>> commandBuffers;
 
     uint update(ptr<Components::Camera> camera);
     vec<ptr<Graphics::CommandBuffer>> getCmds(uint count);
@@ -37,6 +36,7 @@ public:
     void registerMesh(ptr<Graphics::RenderingMesh> mesh);
     void unregisterMesh(ptr<Graphics::RenderingMesh> mesh);
     void draw(ptr<Components::Camera> camera);
+    void cleanup();
 };
 
 NSP_ENGINE_END

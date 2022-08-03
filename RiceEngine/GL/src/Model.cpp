@@ -16,6 +16,23 @@ const Mesh Mesh::quad = {
     {0, 1, 2, 2, 3, 0},              // indices
 };
 
+Mesh Mesh::cube() {
+    auto quad = Mesh::quad;
+    quad.translate({0, 0, 0.5});
+    auto one_third = quad;
+    quad.rotate(Quaternion::fromEulerAngles({0, 180, 0}));
+    one_third.combine(quad);
+    //Z axis
+    Mesh cube = one_third;
+    //X axis
+    one_third.rotate(Quaternion::fromEulerAngles({0, 90, 0}));
+    cube.combine(one_third);
+    //Y axis
+    one_third.rotate(Quaternion::fromEulerAngles({0, 0, 90}));
+    cube.combine(one_third);
+    return cube;
+};
+
 inline const VertexLayout Vertex::vertexLayout({
     VertexInput("POSITION", 0, offsetof(Vertex, pos), VertexInput::float3),
     VertexInput("NORMAL", 0, offsetof(Vertex, norm), VertexInput::float3),
@@ -36,7 +53,7 @@ Mesh::Mesh(vec<Vector3f> vertices, vec<index_t> indices)
 }
 
 ptr<Mesh> Mesh::clone() const {
-    ptr<Mesh> mesh { new Mesh(vertexBuffer, indexBuffer, false) };
+    ptr<Mesh> mesh{new Mesh(vertexBuffer, indexBuffer, false)};
     mesh->bounds = bounds;
     return mesh;
 }
@@ -165,11 +182,11 @@ ptr<Mesh> Model::getSubMesh(uint idx) { return subMeshes[idx]; }
 
 Model::~Model() { subMeshes.clear(); }
 
-void Model::setSubMeshesCount(uint count) {
-     subMeshes.resize(count); 
-     }
+void Model::setSubMeshesCount(uint count) { subMeshes.resize(count); }
 
-void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) { subMeshes[idx] = subMesh; }
+void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) {
+    subMeshes[idx] = subMesh;
+}
 
 vec<Vector3f> Mesh::Bounds::getCorners() {
     return {

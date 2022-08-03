@@ -92,8 +92,8 @@ void Core::run() {
         do {                      // loop until the window is not closed
             loadSceneImmediate(); // load scene if it is not loaded yet
             // loader->update();
-            wnd->inputmgr->update(); // update input manager state
-            b = runFrame();          // do frame update and draw
+            // wnd->inputmgr->update(); // update input manager state
+            b = runFrame(); // do frame update and draw
             // engine->postUpdate();
             sleep_until(begin_time); // limit framerate
             time = std::chrono::duration<dbl, std::chrono::seconds::period>(
@@ -121,26 +121,18 @@ void Core::close() {
     is_init = false;
     if (loadingScreenScene)
         loadingScreenScene->close();
+    //FIXME: GraphicsManager fails to close
+    graphics_manager->cleanup();
     wnd->cleanup();
     Log::close();
 }
 
 bool Core::runFrame() {
-    wnd->update();
-
-    wnd->inputmgr->setActive(true);
-    wnd->inputmgr->update();
-
     if (wnd->isExit())
         return false;
 
-    if (wnd->isResize()) {
-        // device->Resize();
-        // loadingScreenScene->Resize();
-        // if (!activeScene.IsNull()) {
-        //   activeScene->Resize();
-        // }
-    }
+    graphics_manager->update();
+
     if (!activeScene || !activeScene->isLoaded()) {
         if (loadingScreenScene) {
             loadingScreenScene->render();

@@ -111,9 +111,9 @@ class Core : public enable_ptr<Core> {
     ptr<Loader> loader;
     ptr<Graphics::GraphicsManager> graphics_manager;
     ptr<Engine> engine;
-    bool is_init = false;
     dbl fps = 60.;
     dbl fixedDeltaTime = 0, deltaTime = 0, time = 0;
+    bool is_init = false;
 };
 
 NSP_ENGINE_END

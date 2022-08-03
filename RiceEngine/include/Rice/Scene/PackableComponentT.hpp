@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Rice/Util/Exceptions/Exception.hpp"
 #include "Rice/stdafx.hpp"
 

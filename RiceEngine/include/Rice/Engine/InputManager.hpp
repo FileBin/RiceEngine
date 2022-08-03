@@ -1,6 +1,9 @@
 ﻿#include "../stdafx.hpp"
 #include "Rice/Math/Vectors/Vector2.hpp"
+#include "Rice/Math/Vectors/Vector2i.hpp"
+#include "Rice/defines.h"
 #include "Rice/macros.h"
+#include <shared_mutex>
 
 NSP_ENGINE_BEGIN
 
@@ -15,37 +18,43 @@ NSP_ENGINE_END
 NSP_ENGINE_BEGIN
 
 class InputManager {
-public:
-	static ptr<InputManager> init(WindowHandle handle);
-	InputManager();
-	~InputManager();
+  public:
+    static ptr<InputManager> create(ptr<Window> window);
+    InputManager();
+    ~InputManager();
 
-	static bool getKey(KeyCode key);
-	static const Vector2 getMousePos();
-	static Vector2 getMouseDelta();
-	static void setMousePos(Vector2 pos);
+    ptr<Window> getWindow();
 
-	void setMouseRect(SDL_Rect rect);
-	void update();
-	static void lockMouse();
-	static void unlockMouse();
-	static void setActive(bool active = true);
-private:
-	static ptr<InputManager> instance;
+    bool getKey(KeyCode key);
+    Vector2 getMousePos();
+    Vector2i getMouseInfinitePos();
+    void setMousePos(Vector2 pos);
 
-	friend class Window;
-	bool active = true;
-	bool is_mouse_locked = false;
-	bool* keyStates;
-	bool* mouseStates;
-	short mouseScrollDelta = 0, mouseWheel = 0;
-	Vector2 mousePos = {}, mouseDelta = {};
-	WindowHandle handle;
-	SDL_Rect mouseRect;
-	void eventKey(KeyCode key, bool rs_state);
-	void eventCursor();
-	void eventMouse(KeyCode key, bool rs_state);
-	void eventMouseWheel(short value);
+    void setMouseRect(Util::Rect rect);
+    void update();
+    void lockMouse();
+    void unlockMouse();
+
+  private:
+    void reset();
+
+    Vector2 getCenter();
+
+    friend class Window;
+    bool is_mouse_locked = false;
+    map<int,bool> keyStates;
+    map<int,bool> mouseStates;
+    short mouseScrollDelta = 0, mouseWheel = 0;
+    Vector2 mousePos = {};
+    Vector2i mouseInfinitePos = {}, mouseDelta = {};
+    wptr<Window> window;
+    Util::Rect mouseRect;
+    void eventKey(KeyCode key, bool rs_state);
+    void eventCursor(Vector2 newPos, Vector2i delta);
+    void eventMouse(int mouse_key, bool rs_state);
+    void eventMouseWheel(short value);
+
+    std::shared_mutex update_mutex;
 };
 
 NSP_ENGINE_END

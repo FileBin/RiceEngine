@@ -1,4 +1,5 @@
 ﻿#include "../stdafx.hpp"
+#include "Rice/Engine/InputManager.hpp"
 
 NSP_ENGINE_BEGIN
 class Engine;
@@ -38,6 +39,7 @@ class Engine : public enable_ptr<Engine> {
         String name,
         std::function<ptr<Graphics::Shader>(ptr<Engine>)> shader_factory);
     ptr<Graphics::GraphicsManager> getGraphicsManager();
+    ptr<InputManager> getInputManager();
 
   private:
     ptr<Core> lock_core();

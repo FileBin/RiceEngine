@@ -12,7 +12,7 @@
 
 #include <Rice/GL/GraphicsComponentBase.hpp>
 
-#include "Vulkan_API_code/api_CommandBuffer_impl.hpp"
+#include "Vulkan_API_code/api_CommandBuffer_impl.inl"
 #include  "Vulkan_API_code/api_Shader.hpp"
 
 NSP_GL_BEGIN
@@ -90,6 +90,7 @@ void CommandBuffer::buildAll() {
 }
 
 void CommandBuffer::cleanup() {
+    if(!api_data) return;
 	clear();
 	GraphicsManager_API_data* data = &get_api_data();
 	api_data->cleanup(*data);

@@ -1,117 +1,138 @@
-﻿#include "Rice/Engine/Log.hpp"
-#include "SDL2/SDL_mouse.h"
+﻿#include "Rice/Engine/InputButtons.hpp"
+#include "Rice/Engine/Log.hpp"
+#include "Rice/Engine/Window.hpp"
+#include "Rice/Math/Vectors/Vector2.hpp"
+#include "Rice/Math/Vectors/Vector2i.hpp"
 #include <Rice/Engine/InputManager.hpp>
 #include <Rice/Math/Math.hpp>
+#include <cstddef>
+#include <mutex>
+#include <shared_mutex>
 
 NSP_ENGINE_BEGIN
 
-ptr<InputManager> InputManager::instance = nullptr;
-
-ptr<InputManager> InputManager::init(WindowHandle _handle) {
-	if (instance == nullptr) {
-		instance.reset(new InputManager());
-		instance->handle = _handle;
-		return instance;
-	}
-	Log::log(Log::Warning ,"Input is already initialized!");
-    return instance;
+ptr<InputManager> InputManager::create(ptr<Window> window) {
+    auto inputmgr = ptr<InputManager>(new InputManager());
+    inputmgr->window = window;
+    return inputmgr;
 }
 InputManager::InputManager() {
-	mouseRect = {};
-	size_t n = (size_t) KeyCode::Max;
-	keyStates = new bool[n];
-	ZeroMemory(keyStates, n);
-
-	mouseStates = new bool[10];
+    mouseRect = {};
+    reset();
 }
 
-InputManager::~InputManager() {
-	_DELETE_ARRAY(keyStates);
+InputManager::~InputManager() {}
+
+ptr<Window> InputManager::getWindow() {
+    auto window_lock = window.lock();
+    if (!window_lock)
+        THROW_NULL_PTR_EXCEPTION(window_lock.get());
+    return window_lock;
 }
 
 bool InputManager::getKey(KeyCode key) {
-	if (instance->active)
-		return instance->keyStates[(size_t) key];
-	return false;
+    return keyStates[static_cast<int>(key)];
 }
 
-const Vector2 InputManager::getMousePos() {
-	return instance->mousePos;
-}
+Vector2 InputManager::getMousePos() { return mousePos; }
 
-Vector2 InputManager::getMouseDelta() {
-	if (!instance->is_mouse_locked)
-		return Vector2::zero;
-	return instance->mouseDelta;
+Vector2i InputManager::getMouseInfinitePos() {
+    std::shared_lock lock(update_mutex);
+    //Log::debug("Mouse infinite pos: (x: {} y: {})", mouseInfinitePos.x,
+               //mouseInfinitePos.y);
+    return mouseInfinitePos;
 }
 
 void InputManager::setMousePos(Vector2 pos) {
-	SDL_WarpMouseInWindow(instance->handle.get(), pos.x, pos.y);
-	instance->mousePos = pos;
+    getWindow()->setCursorPosition({(int)pos.x, (int)pos.y});
 }
 
-void InputManager::setMouseRect(SDL_Rect rect) {
-	mouseRect.x = rect.x;
-	mouseRect.y = rect.y;
-	mouseRect.w = rect.w;
-	mouseRect.h = rect.h;
+void InputManager::setMouseRect(Rect rect) {
+    mouseRect.x = rect.x;
+    mouseRect.y = rect.y;
+    mouseRect.w = rect.w;
+    mouseRect.h = rect.h;
+}
+
+Vector2 InputManager::getCenter() {
+    Vector2 center;
+    center.x = mouseRect.w;
+    center.y = mouseRect.h;
+    center *= .5;
+    return center;
 }
 
 void InputManager::lockMouse() {
-	if (instance->active) {
-		if (!instance->is_mouse_locked) {
-			instance->is_mouse_locked = true;
-			SDL_ShowCursor(0);
-		}
-	}
+    if (getWindow()->isActive()) {
+        if (!is_mouse_locked) {
+            getWindow()->grabMouse(true);
+            is_mouse_locked = true;
+            //getWindow()->setCursorShow(false);
+        }
+    }
 }
 
 void InputManager::unlockMouse() {
-	if (instance->active) {
-		if (instance->is_mouse_locked) {
-			instance->is_mouse_locked = false;
-			SDL_ShowCursor(1);
-		}
-	}
-}
-
-void InputManager::setActive(bool active) {
-	if (!active)
-		unlockMouse();
-	instance->active = active;
+    if (is_mouse_locked) {
+        getWindow()->grabMouse(false);
+        is_mouse_locked = false;
+        //getWindow()->setCursorShow(true);
+    }
 }
 
 void InputManager::update() {
-	if (active) {
-        eventCursor();
-		if (is_mouse_locked) {
-			Vector2 center;
-			center.x = mouseRect.w;
-			center.y = mouseRect.h;
-			center *= .5;
-			setMousePos(center);
-			if (getKey(KeyCode::Escape)) {
-				unlockMouse();
-			}
-		}
-	}
+    if (is_mouse_locked) {
+        std::unique_lock lock(update_mutex);
+        auto center = getCenter();
+        mouseInfinitePos += mouseDelta;
+        mouseDelta = {};
+        if (getKey(KeyCode::Escape)) {
+            unlockMouse();
+        }
+    }
+}
 
-	mouseDelta = {0,0};
+void InputManager::eventCursor(Vector2 newpos, Vector2i delta) {
+    mousePos = newpos;
+    mouseDelta = delta;
 }
 
 void InputManager::eventKey(KeyCode key, bool rs_state) {
-	keyStates[static_cast<size_t>(key)] = rs_state;
+    keyStates[static_cast<int>(key)] = rs_state;
 }
 
-void InputManager::eventCursor() {
-	Vector2i pos;
-	SDL_GetGlobalMouseState((int*)&pos.x, (int*)&pos.y);
-	mousePos = (Vector2)pos;
+void InputManager::eventMouse(int mouse_key, bool rs_state) {
+    mouseStates[mouse_key] = rs_state;
+    switch (mouse_key) {
+    case 1:
+        eventKey(KeyCode::MouseLeft, rs_state);
+        break;
+    case 3:
+        eventKey(KeyCode::MouseRight, rs_state);
+        break;
+    case 2:
+        eventKey(KeyCode::MouseMiddle, rs_state);
+        break;
+    case 4:
+        eventKey(KeyCode::XButton1, rs_state);
+        break;
+    case 5:
+        eventKey(KeyCode::XButton2, rs_state);
+        break;
+    }
 }
+
+void InputManager::reset() {
+    unlockMouse();
+    keyStates.clear();
+    mouseStates.clear();
+}
+
+// void InputManager::eventCursor(Vector2 newPos) { mousePos = newPos; }
 
 void InputManager::eventMouseWheel(short value) {
-	mouseScrollDelta = value - mouseWheel;
-	mouseWheel = value;
+    mouseScrollDelta = value - mouseWheel;
+    mouseWheel = value;
 }
 
 NSP_ENGINE_END

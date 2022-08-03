@@ -13,65 +13,69 @@
 NSP_GL_BEGIN
 
 struct GraphicsManager_API_data {
-public:
-	vk::Instance instance; // Vulkan library handle
-	vk::DebugUtilsMessengerEXT debug_messenger;// Vulkan debug output handle
-	vk::PhysicalDevice GPU;// GPU chosen as the default device
-	vk::Device device;// Vulkan device for commands
-	vk::SurfaceKHR surface;// Vulkan window surface
+  public:
+    vk::Instance instance;                      // Vulkan library handle
+    vk::DebugUtilsMessengerEXT debug_messenger; // Vulkan debug output handle
+    vk::PhysicalDevice GPU; // GPU chosen as the default device
+    vk::Device device;      // Vulkan device for commands
+    vk::SurfaceKHR surface; // Vulkan window surface
 
-	vk::SwapchainKHR swapchain = nullptr;
-	vk::Format swapchainImageFormat = vk::Format::eUndefined;// image format expected by the windowing system
+    vk::SwapchainKHR swapchain = nullptr;
+    vk::Format swapchainImageFormat =
+        vk::Format::eUndefined; // image format expected by the windowing system
 
-	vec<vk::Image> swapchainImages = {};//array of images from the swapchain
-	vec<vk::ImageView> swapchainImageViews = {};//array of image-views from the swapchain
-	vec<vk::Framebuffer> framebuffers = {};
+    vec<vk::Image> swapchainImages = {}; // array of images from the swapchain
+    vec<vk::ImageView> swapchainImageViews =
+        {}; // array of image-views from the swapchain
+    vec<vk::Framebuffer> framebuffers = {};
 
-	vk::Queue graphicsQueue;//queue we will submit to
-	uint graphicsQueueFamily = 0;//family of that queue
+    vk::Queue graphicsQueue;      // queue we will submit to
+    uint graphicsQueueFamily = 0; // family of that queue
 
-	vk::CommandPool commandPool;//the command pool for our commands
+    vk::CommandPool commandPool; // the command pool for our commands
 
-	vk::RenderPass def_renderPass;
+    vk::RenderPass def_renderPass;
 
-	vk::Semaphore presentSemaphore, renderSemaphore;
-	vk::Fence renderFence;
+    vk::Semaphore presentSemaphore, renderSemaphore;
+    vk::Fence renderFence;
 
-	vk::Extent2D windowExcent;
+    vk::Extent2D windowExcent;
 
-	wptr<GraphicsManager> g_mgr;
+    wptr<GraphicsManager> g_mgr;
 
-	uint swapchainImageIndex = 0;
+    uint swapchainImageIndex = 0;
 
-	bool resizing = false;
+    bool resizing = false;
 
     static constexpr bool use_hdr =
 #ifdef USE_HDR
-    		true;
+        true;
 #else
-    		false;
+        false;
 #endif
 
-	~GraphicsManager_API_data();
+    ~GraphicsManager_API_data();
 
-	vk::Framebuffer getCurrentFrambuffer() {
-		return framebuffers[swapchainImageIndex];
-	}
-	friend class GraphicsManager;
+    vk::Framebuffer getCurrentFrambuffer() {
+        return framebuffers[swapchainImageIndex];
+    }
+    friend class GraphicsManager;
 
-	GraphicsManager_API_data(ptr<GraphicsManager> g_mgr);
-	void sync();
-private:
-	void recreateSwapchain();
-	void init_swapchain();
-	void init_commands();
-	void init_def_renderpass();
-	void init_framebuffers();
-	void init_sync_structures();
+    GraphicsManager_API_data(ptr<GraphicsManager> g_mgr);
+    void sync();
 
-	void cleanupSwapchain(bool destroy = true);
+  private:
+    void recreateSwapchain();
+    void init_swapchain();
+    void init_commands();
+    void init_def_renderpass();
+    void init_framebuffers();
+    void init_sync_structures();
 
-	void executeCmd(vec<vk::CommandBuffer> cmd);
+    void cleanupSwapchain(bool destroy = true);
+
+    void executeCmd(vec<vk::CommandBuffer> cmd);
+    void cleanup();
 };
 
 NSP_GL_END

@@ -1,8 +1,8 @@
 #include "Rice/Engine/InputManager.hpp"
 #include "Rice/Math/Vectors/Vector2.hpp"
 #include "Rice/Scene/Components/Camera.hpp"
-#include <Rice/Scene/SceneRender.hpp>
 #include <Rice/GL/RenderingMesh.hpp>
+#include <Rice/Scene/SceneRender.hpp>
 
 NSP_ENGINE_BEGIN
 
@@ -25,18 +25,20 @@ void SceneRender::draw(ptr<Components::Camera> camera) {
 }
 
 uint SceneRender::update(ptr<Components::Camera> camera) {
-    //TODO remove this
-    //Vector2 mouse_pos = InputManager::getMousePos();
-    //mouse_pos *= 2;
-    //mouse_pos -= Vector2(0.5, 0.5);
-    //Log::log(Log::Info, "Mouse pos: {} {}", mouse_pos.x, mouse_pos.y);
-    //camera->getTransform()->setRotation(Quaternion::fromEulerAngles(mouse_pos.y, mouse_pos.x, 0));
+    // TODO remove this
+    // Vector2 mouse_pos = InputManager::getMousePos();
+    // mouse_pos *= 2;
+    // mouse_pos -= Vector2(0.5, 0.5);
+    // Log::log(Log::Info, "Mouse pos: {} {}", mouse_pos.x, mouse_pos.y);
+    // camera->getTransform()->setRotation(Quaternion::fromEulerAngles(mouse_pos.y,
+    // mouse_pos.x, 0));
     uint count = 0;
     auto coll = mesh_collection.getCollectionWithGaps();
     for (auto ptr : coll) {
         if (ptr) {
+            auto proj = camera->getProjectionMatrix();
             ptr->updateConstBuffer(camera->getViewMatrix(),
-                                   camera->getProjectionMatrix());
+                                   proj);
             ptr->updateCmdBuffer();
             count++;
         }
@@ -54,6 +56,10 @@ vec<ptr<Graphics::CommandBuffer>> SceneRender::getCmds(uint count) {
         }
     }
     return output;
+}
+
+void SceneRender::cleanup() {
+    mesh_collection.cleanup();
 }
 
 NSP_ENGINE_END
