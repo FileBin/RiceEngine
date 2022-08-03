@@ -20,3 +20,8 @@
 #define USE_DIRECT_X_11
 //#define USE_DIRECT_X_12
 #endif
+
+#ifdef DEBUG_MODE 
+//NOTE: uncomment this line to enable graphics debug mode
+#define GL_DEBUG_MODE
+#endif

@@ -7,6 +7,7 @@
 #include "Vulkan_API_code/api_Shader.hpp"
 
 #include <Rice/GL/Mesh.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 NSP_GL_BEGIN
 
@@ -217,7 +218,9 @@ void Shader::buildPipeline(Vector2i extent) {
 
     // input assembly is the configuration for drawing triangle lists, strips,
     // or individual points. we are just going to draw triangle list
-    pipelineBuilder.vk_inputAssembly = help::input_assembly_create_info();
+    pipelineBuilder.vk_inputAssembly =
+        PipelineInputAssemblyStateCreateInfo().setTopology(
+            PrimitiveTopology::eTriangleList);
 
     // build viewport and scissor from the swapchain extents
     pipelineBuilder.vk_viewport.x = 0.0f;
@@ -231,14 +234,26 @@ void Shader::buildPipeline(Vector2i extent) {
     pipelineBuilder.vk_scissor.extent = vk::Extent2D(extent.x, extent.y);
 
     // configure the rasterizer to draw filled triangles
-    pipelineBuilder.vk_rasterizer = help::rasterization_state_create_info();
+    pipelineBuilder.vk_rasterizer =
+        PipelineRasterizationStateCreateInfo()
+            .setLineWidth(1)
+            .setCullMode(CullModeFlagBits::eBack)
+            .setFrontFace(FrontFace::eClockwise)
+            .setPolygonMode(PolygonMode::eFill)
+            .setDepthClampEnable(false);
 
     // we don't use multisampling, so just run the default one
-    pipelineBuilder.vk_multisampling = help::multisampling_state_create_info();
+    pipelineBuilder.vk_multisampling =
+        PipelineMultisampleStateCreateInfo().setRasterizationSamples(
+            SampleCountFlagBits::e1);
 
     // a single blend attachment with no blending and writing to RGBA
     pipelineBuilder.vk_colorBlendAttachment =
-        help::color_blend_attachment_state();
+        PipelineColorBlendAttachmentState()
+            .setColorWriteMask(
+                ColorComponentFlagBits::eR | ColorComponentFlagBits::eG |
+                ColorComponentFlagBits::eB | ColorComponentFlagBits::eA)
+            .setBlendEnable(false);
 
     // use the triangle layout we created
     pipelineBuilder.vk_pipelineLayout = api_data->layout;

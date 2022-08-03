@@ -70,8 +70,6 @@ vk::PipelineVertexInputStateCreateInfo VulkanHelper::vertex_input_state_create_i
 
 vk::PipelineInputAssemblyStateCreateInfo VulkanHelper::input_assembly_create_info(vk::PrimitiveTopology topology) {
 	vk::PipelineInputAssemblyStateCreateInfo info = {};
-	info.sType = vk::StructureType::ePipelineInputAssemblyStateCreateInfo;
-	info.pNext = nullptr;
 
 	info.topology = topology;
 	info.primitiveRestartEnable = VK_FALSE;
@@ -81,8 +79,6 @@ vk::PipelineInputAssemblyStateCreateInfo VulkanHelper::input_assembly_create_inf
 
 vk::PipelineRasterizationStateCreateInfo VulkanHelper::rasterization_state_create_info(vk::PolygonMode polygonMode, float line_width, vk::CullModeFlags cull_mode_flags, vk::FrontFace front_face) {
 	vk::PipelineRasterizationStateCreateInfo info = {};
-	info.sType = vk::StructureType::ePipelineRasterizationStateCreateInfo;
-	info.pNext = nullptr;
 
 	info.depthClampEnable = VK_FALSE;
 	//discards all primitives before the rasterization stage if enabled which we don't want
@@ -104,8 +100,6 @@ vk::PipelineRasterizationStateCreateInfo VulkanHelper::rasterization_state_creat
 
 vk::PipelineMultisampleStateCreateInfo VulkanHelper::multisampling_state_create_info(vk::SampleCountFlagBits nSamples) {
 	vk::PipelineMultisampleStateCreateInfo info = {};
-	info.sType = vk::StructureType::ePipelineMultisampleStateCreateInfo;
-	info.pNext = nullptr;
 
 	info.sampleShadingEnable = VK_FALSE;
 	//multisampling defaulted to no multisampling (1 sample per pixel)

@@ -60,7 +60,7 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     auto inst_ret =
         builder.set_app_name("Riced Field")
             .require_api_version(1, 1, 0)
-#ifdef DEBUG_MODE
+#ifdef GL_DEBUG_MODE
             .request_validation_layers(true)
             .use_default_debug_messenger()
             .set_debug_callback(debugCallback)
