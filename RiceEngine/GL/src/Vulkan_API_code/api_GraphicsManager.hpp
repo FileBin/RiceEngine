@@ -34,7 +34,7 @@ struct GraphicsManager_API_data {
 
     vk::CommandPool commandPool; // the command pool for our commands
 
-    vk::RenderPass def_renderPass;
+    vk::RenderPass begin_renderPass, def_renderPass; // the default render pass
 
     vk::Semaphore presentSemaphore, renderSemaphore;
     vk::Fence renderFence;

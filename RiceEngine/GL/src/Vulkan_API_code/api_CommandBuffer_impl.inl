@@ -32,8 +32,6 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
     uint n = cmd.size();
     vk::CommandBufferBeginInfo cmdBeginInfo;
 
-    cmdBeginInfo.setFlags(vk::CommandBufferUsageFlagBits::eRenderPassContinue);
-
     cmd[i].begin(cmdBeginInfo);
 
     vk::ClearValue clearValue;
@@ -44,14 +42,18 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
     clearValue.color.float32[3] = 1.f;
 
     // start the main renderpass.
-    // We will use the clear color from above, and the framebuffer of the index
-    // the swapchain gave us
+    // We will use the clear color from above, and the framebuffer of the
+    // index the swapchain gave us
     vk::RenderPassBeginInfo rpInfo = {};
 
     // windowExcent.width = window->getWidth();
     // windowExcent.height = window->getHeight();
 
-    rpInfo.renderPass = api_data.def_renderPass;
+    if (begin_pass) {
+        rpInfo.renderPass = api_data.begin_renderPass;
+    } else {
+        rpInfo.renderPass = api_data.def_renderPass;
+    }
     rpInfo.renderArea.offset.x = 0;
     rpInfo.renderArea.offset.y = 0;
     rpInfo.renderArea.extent = window;
@@ -65,8 +67,7 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
 }
 
 inline void
-CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command,
-                                  uint i) {
+CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
     using namespace vk;
 
     uint n = cmd.size();
@@ -154,8 +155,8 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command,
         auto buffer = *(ptr<UniformBuffer> *)(it++).current->getData();
         vk::DescriptorSet &set = buffer->api_data->sets[i];
         cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                  buffer->api_data->pip_layout, 0, 1,
-                                  &set, 0, nullptr);
+                                  buffer->api_data->pip_layout, 0, 1, &set, 0,
+                                  nullptr);
     } break;
 
     default:

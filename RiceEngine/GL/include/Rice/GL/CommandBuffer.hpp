@@ -132,7 +132,7 @@ protected:
 
     void needRecreate(bool value = true);
 public:
-	CommandBuffer(ptr<GraphicsManager> g_mgr);
+	CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass = true);
 	~CommandBuffer() override;
 
 	void clear();

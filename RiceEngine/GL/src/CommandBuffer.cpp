@@ -29,9 +29,11 @@ void _build(uint i, CommandBuffer_API_data *api_data,
     api_data->end(i);
 }
 
-CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr)
+CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass)
     : GraphicsComponentBase(g_mgr), api_data(new CommandBuffer_API_data) {
     api_data->build(get_api_data());
+
+    api_data->begin_pass = begin_pass;
 
     uint n = api_data->bufCount();
     need_recreate.resize(n);

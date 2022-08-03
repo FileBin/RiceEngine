@@ -18,6 +18,7 @@
 
 #include <Rice/Engine/Window.hpp>
 #include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
 
 #include "SDL2/SDL_vulkan.h"
 
@@ -246,6 +247,12 @@ void GraphicsManager_API_data::init_def_renderpass() {
     render_pass_info.pSubpasses = &subpass;
 
     auto res =
+        device.createRenderPass(&render_pass_info, nullptr, &begin_renderPass);
+    THROW_VK_EX_IF_BAD(res);
+
+    color_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
+
+    res =
         device.createRenderPass(&render_pass_info, nullptr, &def_renderPass);
     THROW_VK_EX_IF_BAD(res);
 }

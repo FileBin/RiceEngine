@@ -7,7 +7,10 @@
 NSP_ENGINE_BEGIN
 
 SceneRender::SceneRender(ptr<Scene> scene, ptr<Engine> engine)
-    : scene(scene), engine(engine) {}
+    : scene(scene), engine(engine) {
+        begin_cmd = new_ptr<Graphics::CommandBuffer>(engine->getGraphicsManager(), true);
+        begin_cmd->buildAll();
+    }
 
 void SceneRender::registerMesh(ptr<Graphics::RenderingMesh> mesh) {
     mesh->Register(mesh_collection.registerPtr(mesh));
@@ -40,8 +43,9 @@ uint SceneRender::update(ptr<Components::Camera> camera) {
 }
 
 vec<ptr<Graphics::CommandBuffer>> SceneRender::getCmds(uint count) {
-    vec<ptr<Graphics::CommandBuffer>> output(count);
+    vec<ptr<Graphics::CommandBuffer>> output(count + 1);
     uint i = 0;
+    output[i++] = begin_cmd;
     auto coll = mesh_collection.getCollectionWithGaps();
     for (auto ptr : coll) {
         if (ptr) {

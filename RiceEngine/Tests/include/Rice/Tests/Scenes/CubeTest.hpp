@@ -9,6 +9,7 @@
 #include "Rice/Tests/Scripts/CameraMover.hpp"
 #include "Rice/defines.h"
 #include "Rice/stdafx.hpp"
+#include "fmt/xchar.h"
 
 #pragma once
 
@@ -37,41 +38,46 @@ class CubeTestScene : public virtual Scene {
 
         setActiveCamera(cam_comp);
 
-        auto cube_obj = createEnabled("Cube");
-        auto cube_transform = new_ptr<Components::Transform>();
+        for (uint i = 0; i < 20; ++i) {
 
-        cube_transform->setPosition({0, 0, 0});
+            auto cube_obj = createEnabled(fmt::format("Cube {}", i));
+            auto cube_transform = new_ptr<Components::Transform>();
 
-        auto cube_render = new_ptr<Components::ModelRender>();
+            cube_transform->setPosition({i*2. - 5., 0, 0});
 
-        cube_obj->addComponent(cube_transform);
-        cube_obj->addComponent(cube_render);
+            auto cube_render = new_ptr<Components::ModelRender>();
 
-        auto cube_model = new_ptr<Graphics::Model>();
+            cube_obj->addComponent(cube_transform);
+            cube_obj->addComponent(cube_render);
 
-        auto cube_mesh = Graphics::Mesh::cube().clone();
-        //cube_mesh->rotate(Quaternion::fromEulerAngles({0, 180, 0}));
+            auto cube_model = new_ptr<Graphics::Model>();
 
-        cube_model->setSubMeshesCount(1);
-        cube_model->setSubMesh(cube_mesh, 0);
-        cube_render->setModel(cube_model);
+            auto cube_mesh = Graphics::Mesh::cube().clone();
+            // cube_mesh->rotate(Quaternion::fromEulerAngles({0, 180, 0}));
 
-        auto cube_material = en->getOrCreateMaterial(
-            "cube_material", [](ptr<Engine> en) -> ptr<Graphics::Shader> {
-                auto shader = en->getOrCreateShader(
-                    "solid", [](ptr<Graphics::Shader> shader) -> void {
-                        shader->loadShader("shaders/solid.vert.spv",
-                                           Graphics::Shader::Vertex);
-                        shader->loadShader("shaders/solid.frag.spv",
-                                           Graphics::Shader::Fragment);
-                        shader->addUniformBuffer(0, Graphics::Shader::Vertex);
-                        shader->setVertexStrideAndLayout<Graphics::Vertex>();
-                        shader->build();
-                    });
-                return shader;
-            });
+            cube_model->setSubMeshesCount(1);
+            cube_model->setSubMesh(cube_mesh, 0);
+            cube_render->setModel(cube_model);
 
-        cube_render->setMaterial(cube_material, 0);
+            auto cube_material = en->getOrCreateMaterial(
+                "cube_material", [](ptr<Engine> en) -> ptr<Graphics::Shader> {
+                    auto shader = en->getOrCreateShader(
+                        "solid", [](ptr<Graphics::Shader> shader) -> void {
+                            shader->loadShader("shaders/solid.vert.spv",
+                                               Graphics::Shader::Vertex);
+                            shader->loadShader("shaders/solid.frag.spv",
+                                               Graphics::Shader::Fragment);
+                            shader->addUniformBuffer(0,
+                                                     Graphics::Shader::Vertex);
+                            shader
+                                ->setVertexStrideAndLayout<Graphics::Vertex>();
+                            shader->build();
+                        });
+                    return shader;
+                });
+
+            cube_render->setMaterial(cube_material, 0);
+        }
     }
 };
 

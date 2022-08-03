@@ -28,7 +28,7 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     vertexBuffer = new_ptr<VertexBuffer>(g_mgr, mesh->vertexBuffer);
     indexBuffer = new_ptr<IndexBuffer>(g_mgr, mesh->indexBuffer);
 
-    auto cmd = new_ptr<CommandBuffer>(g_mgr);
+    auto cmd = new_ptr<CommandBuffer>(g_mgr, false);
 
     auto ub = material->getUniformBuffer();
     if (ub)

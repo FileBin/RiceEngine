@@ -27,6 +27,7 @@ private:
     wptr<Scene> scene;
     ptr<Engine> engine;
     Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
+    ptr<Graphics::CommandBuffer> begin_cmd;
 
     uint update(ptr<Components::Camera> camera);
     vec<ptr<Graphics::CommandBuffer>> getCmds(uint count);

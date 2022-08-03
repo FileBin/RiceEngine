@@ -16,6 +16,7 @@ NSP_GL_BEGIN
 
 struct CommandBuffer_API_data {
 	vec<vk::CommandBuffer> cmd;
+    bool begin_pass;
 
 	uint bufCount();
 
