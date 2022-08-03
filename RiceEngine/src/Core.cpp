@@ -121,7 +121,6 @@ void Core::close() {
     is_init = false;
     if (loadingScreenScene)
         loadingScreenScene->close();
-    //FIXME: GraphicsManager fails to close
     graphics_manager->cleanup();
     wnd->cleanup();
     Log::close();

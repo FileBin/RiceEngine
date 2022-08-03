@@ -6,7 +6,6 @@
 #include <Rice/Engine/Engine.hpp>
 NSP_ENGINE_BEGIN
 
-
 Engine::Engine(ptr<Core> core) : core(core) {}
 ptr<Engine> Engine::create(ptr<Core> core) {
     return ptr<Engine>(new Engine(core));
@@ -24,6 +23,11 @@ dbl Engine::getFixedDeltaTime() { return lock_core()->fixedDeltaTime; }
 dbl Engine::getDeltaTime() { return lock_core()->deltaTime; }
 
 dbl Engine::getTime() { return lock_core()->time; }
+
+dbl Engine::getAspectRatio() {
+    auto size = lock_core()->wnd->getSize();
+    return (dbl)size.x / size.y;
+}
 
 ptr<Core> Engine::lock_core() {
     auto core_lock = core.lock();
@@ -64,6 +68,8 @@ ptr<Graphics::GraphicsManager> Engine::getGraphicsManager() {
     return lock_core()->graphics_manager;
 }
 
-ptr<InputManager> Engine::getInputManager() { return lock_core()->wnd->getInputManager(); }
+ptr<InputManager> Engine::getInputManager() {
+    return lock_core()->wnd->getInputManager();
+}
 
 NSP_ENGINE_END

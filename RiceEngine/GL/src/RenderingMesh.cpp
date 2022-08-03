@@ -47,16 +47,16 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
 }
 
 void RenderingMesh::updateCmdBuffer() {
-    // TODO update cmdBuffer
-    Log::log(Log::Warning, "RenderingMesh::updateCmdBuffer() not implemented");
+    // TODO recreate when vertex count changes
+    cmdBuffer->update();
 }
 
 void RenderingMesh::updateConstBuffer(Matrix4x4f view, Matrix4x4f proj) {
     ModelData data;
-    data.world = Matrix4x4::translation({0,0,4});
+    data.world = transform->getTransformationMatrix();
     data.view = view;
     data.projection = proj;
-    constBuffer->updateData(data); // test
+    constBuffer->updateData(data);
 }
 
 NSP_GL_END

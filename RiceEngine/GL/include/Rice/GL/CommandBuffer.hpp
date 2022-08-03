@@ -27,7 +27,6 @@ NSP_GL_END
 
 NSP_GL_BEGIN
 
-//TODO make function that checks if buffers updated and recreates cmd buffer
 class CommandBuffer : public GraphicsComponentBase {
 public:
 	friend class GraphicsManager;
@@ -129,6 +128,9 @@ protected:
 	uptr<CommandBuffer_API_data> api_data;
 
 	vec<ptr<Command>> commands;
+    vec<bool> need_recreate = {};
+
+    void needRecreate(bool value = true);
 public:
 	CommandBuffer(ptr<GraphicsManager> g_mgr);
 	~CommandBuffer() override;
@@ -151,6 +153,7 @@ public:
 
 	void cleanup() override;
 
+    void update();
 	void build();
 	void buildAll();
 };

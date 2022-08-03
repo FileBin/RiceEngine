@@ -33,6 +33,8 @@ class Engine : public enable_ptr<Engine> {
     dbl getDeltaTime();
     dbl getTime();
 
+    dbl getAspectRatio();
+
     ptr<Graphics::Shader> getOrCreateShader(
         String name, std::function<void(ptr<Graphics::Shader>)> shader_creator);
     ptr<Graphics::Material> getOrCreateMaterial(

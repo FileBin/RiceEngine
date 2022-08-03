@@ -15,7 +15,9 @@ ptr<Transform> Camera::getTransform() {
     return transform;
 }
 //TODO add aspect ratio
-Matrix4x4f Camera::getProjectionMatrix() { return Matrix4x4::perspective(fov); }
+Matrix4x4f Camera::getProjectionMatrix() { 
+    return Matrix4x4::perspective(fov, getEngine()->getAspectRatio()); 
+    }
 
 Matrix4x4f Camera::getViewMatrix() {
     return getTransform()->getInvTransformationMatrix();

@@ -32,7 +32,7 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
     uint n = cmd.size();
     vk::CommandBufferBeginInfo cmdBeginInfo;
 
-    // cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+    cmdBeginInfo.setFlags(vk::CommandBufferUsageFlagBits::eRenderPassContinue);
 
     cmd[i].begin(cmdBeginInfo);
 
