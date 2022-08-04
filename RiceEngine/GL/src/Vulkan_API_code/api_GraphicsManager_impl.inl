@@ -9,6 +9,7 @@
 
 #include "Rice/Util/String.hpp"
 #include "VkBootstrap.h"
+#include "VulkanException.hpp"
 #include "api_GraphicsManager.hpp"
 
 #include <Rice/Engine/Log.hpp>
@@ -19,6 +20,8 @@
 #include <Rice/Engine/Window.hpp>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 #include "SDL2/SDL_vulkan.h"
 
@@ -32,7 +35,7 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
               void *pUserData) {
 
-                String message = pCallbackData->pMessage;
+    String message = pCallbackData->pMessage;
 
     switch (messageType) {
     case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
@@ -58,15 +61,14 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     g_mgr = mgr;
 
     // make the Vulkan instance
-    auto inst_ret =
-        builder.set_app_name("Riced Field")
-            .require_api_version(1, 1, 0)
+    auto inst_ret = builder.set_app_name("Riced Field")
+                        .require_api_version(1, 1, 0)
 #ifdef GL_DEBUG_MODE
-            .request_validation_layers(true)
-            .use_default_debug_messenger()
-            .set_debug_callback(debugCallback)
+                        .request_validation_layers(true)
+                        .use_default_debug_messenger()
+                        .set_debug_callback(debugCallback)
 #endif
-            .build();
+                        .build();
 
     if (!inst_ret.has_value())
         THROW_VK_EX(inst_ret.vk_result());
@@ -133,6 +135,7 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
 
     init_swapchain();
     init_commands();
+    init_depth_image();
     init_def_renderpass();
     init_framebuffers();
     init_sync_structures();
@@ -165,6 +168,8 @@ void GraphicsManager_API_data::init_swapchain() {
             device.destroy(swapchainImageViews[i]);
         }
 
+        auto old_swapchain = swapchain;
+
         windowExcent.width = w;
         windowExcent.height = h;
         vkb::Swapchain vkbSwapchain =
@@ -173,9 +178,12 @@ void GraphicsManager_API_data::init_swapchain() {
                     (VkPresentModeKHR)
                         vk::PresentModeKHR::eFifo) // use v-sync present mode
                 //.set_desired_extent(windowExcent.width, windowExcent.height)
-                .set_old_swapchain((VkSwapchainKHR)swapchain)
+                .set_old_swapchain((VkSwapchainKHR)old_swapchain)
                 .build()
                 .value();
+        
+        if (old_swapchain)
+            device.destroy(old_swapchain);
 
         // store swapchain and its related images
         swapchain = vkbSwapchain.swapchain;
@@ -202,6 +210,117 @@ void GraphicsManager_API_data::init_commands() {
     // allocate the default command buffer that we will use for rendering
 }
 
+vk::Format
+GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &candidates,
+                                              vk::ImageTiling tiling,
+                                              vk::FormatFeatureFlags features) {
+    for (vk::Format format : candidates) {
+        vk::FormatProperties props = GPU.getFormatProperties(format);
+
+        if (tiling == vk::ImageTiling::eLinear &&
+            (props.linearTilingFeatures & features) == features) {
+            return format;
+        } else if (tiling == vk::ImageTiling::eOptimal &&
+                   (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+    THROW_EXCEPTION("Failed to find supported format!");
+}
+
+uint GraphicsManager_API_data::findMemoryType(
+    uint typeFilter, vk::MemoryPropertyFlags properties) {
+    using namespace vk;
+    PhysicalDeviceMemoryProperties memprop = GPU.getMemoryProperties();
+
+    for (uint i = 0; i < memprop.memoryTypeCount; ++i) {
+        if ((typeFilter & (1 << i)) &&
+            (memprop.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+    return 0xffffffff;
+}
+
+void GraphicsManager_API_data::createImage(
+    uint w, uint h, vk::Format format, vk::ImageTiling tiling,
+    vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties,
+    vk::ImageLayout layout, vk::Image &image, vk::DeviceMemory &imageMemory) {
+    using namespace vk;
+    ImageCreateInfo imageInfo{};
+    imageInfo.imageType = ImageType::e2D;
+    imageInfo.extent.width = w;
+    imageInfo.extent.height = h;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = format;
+    imageInfo.tiling = tiling;
+    imageInfo.initialLayout = layout;
+    imageInfo.usage = usage;
+    imageInfo.samples = SampleCountFlagBits::e1;
+    imageInfo.sharingMode = SharingMode::eExclusive;
+
+    auto res = device.createImage(&imageInfo, nullptr, &image);
+    THROW_VK_EX_IF_BAD(res);
+
+    MemoryRequirements memRequirements =
+        device.getImageMemoryRequirements(image);
+
+    MemoryAllocateInfo allocInfo{};
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex =
+        findMemoryType(memRequirements.memoryTypeBits, properties);
+
+    res = device.allocateMemory(&allocInfo, nullptr, &imageMemory);
+    THROW_VK_EX_IF_BAD(res);
+
+    device.bindImageMemory(image, imageMemory, 0);
+}
+
+vk::ImageView
+GraphicsManager_API_data::createImageView(vk::Image image, vk::Format format,
+                                          vk::ImageAspectFlags aspectFlags) {
+    using namespace vk;
+    ImageViewCreateInfo viewInfo{};
+    viewInfo.image = image;
+    viewInfo.viewType = ImageViewType::e2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = aspectFlags;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    ImageView imageView;
+    auto res = device.createImageView(&viewInfo, nullptr, &imageView);
+    THROW_VK_EX_IF_BAD(res);
+
+    return imageView;
+}
+void GraphicsManager_API_data::init_depth_image() {
+    using namespace vk;
+    // create a depth image
+    depthFormat = findSupportedFormat(
+        {Format::eD32SfloatS8Uint, Format::eD32Sfloat, Format::eD24UnormS8Uint},
+        ImageTiling::eOptimal, FormatFeatureFlagBits::eDepthStencilAttachment);
+
+    ImageAspectFlags aspectFlags = ImageAspectFlagBits::eDepth;
+
+    if (depthFormat == vk::Format::eD16UnormS8Uint ||
+        depthFormat == vk::Format::eD24UnormS8Uint ||
+        depthFormat == vk::Format::eD32SfloatS8Uint) {
+        aspectFlags |= vk::ImageAspectFlagBits::eStencil;
+    }
+
+    createImage(windowExcent.width, windowExcent.height, depthFormat,
+                ImageTiling::eOptimal,
+                ImageUsageFlagBits::eDepthStencilAttachment,
+                MemoryPropertyFlagBits::eDeviceLocal, ImageLayout::eUndefined,
+                depthImage, depthImageMemory);
+    depthImageView = createImageView(depthImage, depthFormat, aspectFlags);
+}
+
 void GraphicsManager_API_data::init_def_renderpass() {
     vk::AttachmentDescription color_attachment;
     // the attachment will have the format needed by the swapchain
@@ -209,7 +328,7 @@ void GraphicsManager_API_data::init_def_renderpass() {
     // 1 sample, we won't be doing MSAA
     color_attachment.samples = vk::SampleCountFlagBits::e1;
     // we Clear when this attachment is loaded
-    color_attachment.loadOp = vk::AttachmentLoadOp::eClear;
+    color_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
     // we keep the attachment stored when the renderpass ends
     color_attachment.storeOp = vk::AttachmentStoreOp::eStore;
     // we don't care about stencil
@@ -219,11 +338,23 @@ void GraphicsManager_API_data::init_def_renderpass() {
         vk::AttachmentStoreOp::eDontCare; // vk::AttachmentStoreOp::eStore;
 
     // we don't know or care about the starting layout of the attachment
-    color_attachment.initialLayout = vk::ImageLayout::eUndefined;
+    color_attachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
 
     // after the renderpass ends, the image has to be on a layout ready for
     // display
     color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+    vk::AttachmentDescription depth_attachment{};
+    depth_attachment.format = depthFormat;
+    depth_attachment.samples = vk::SampleCountFlagBits::e1;
+    depth_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+    depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
+    depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eLoad;
+    depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eStore;
+    depth_attachment.initialLayout =
+        vk::ImageLayout::eDepthStencilAttachmentOptimal;
+    depth_attachment.finalLayout =
+        vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
     vk::AttachmentReference color_attachment_ref = {};
     // attachment number will index into the pAttachments array in the parent
@@ -231,28 +362,43 @@ void GraphicsManager_API_data::init_def_renderpass() {
     color_attachment_ref.attachment = 0;
     color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
 
+    vk::AttachmentReference depthAttachmentRef{};
+    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
     // we are going to create 1 subpass, which is the minimum you can do
     vk::SubpassDescription subpass = {};
     subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+    vk::SubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.dstStageMask = dependency.srcStageMask =
+        vk::PipelineStageFlagBits::eAllGraphics;
+    dependency.dstAccessMask = dependency.srcAccessMask =
+        vk::AccessFlagBits::eColorAttachmentRead |
+        vk::AccessFlagBits::eColorAttachmentWrite |
+        vk::AccessFlagBits::eDepthStencilAttachmentRead |
+        vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+    std::array<vk::AttachmentDescription, 2> attachments = {color_attachment,
+                                                            depth_attachment};
 
     vk::RenderPassCreateInfo render_pass_info = {};
-
     // connect the color attachment to the info
-    render_pass_info.attachmentCount = 1;
-    render_pass_info.pAttachments = &color_attachment;
+    render_pass_info.attachmentCount = attachments.size();
+    render_pass_info.pAttachments = attachments.data();
     // connect the subpass to the info
     render_pass_info.subpassCount = 1;
     render_pass_info.pSubpasses = &subpass;
+    // connect the dependency to the info
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &dependency;
 
     auto res =
-        device.createRenderPass(&render_pass_info, nullptr, &begin_renderPass);
-    THROW_VK_EX_IF_BAD(res);
-
-    color_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
-
-    res =
         device.createRenderPass(&render_pass_info, nullptr, &def_renderPass);
     THROW_VK_EX_IF_BAD(res);
 }
@@ -263,7 +409,6 @@ void GraphicsManager_API_data::init_framebuffers() {
     vk::FramebufferCreateInfo fb_info = {};
 
     fb_info.renderPass = def_renderPass;
-    fb_info.attachmentCount = 1;
     fb_info.width = windowExcent.width;
     fb_info.height = windowExcent.height;
     fb_info.layers = 1;
@@ -274,7 +419,10 @@ void GraphicsManager_API_data::init_framebuffers() {
 
     // create framebuffers for each of the swapchain image views
     for (int i = 0; i < swapchain_imagecount; i++) {
-        fb_info.pAttachments = &swapchainImageViews[i];
+        std::array<vk::ImageView, 2> attachments = {swapchainImageViews[i],
+                                                    depthImageView};
+        fb_info.attachmentCount = attachments.size();
+        fb_info.pAttachments = attachments.data();
         framebuffers[i] = device.createFramebuffer(fb_info);
     }
 }
@@ -311,6 +459,7 @@ void GraphicsManager_API_data::recreateSwapchain() {
     cleanupSwapchain(false);
 
     init_swapchain();
+    init_depth_image();
 
     Vector2i window_size;
 
@@ -330,12 +479,15 @@ inline void GraphicsManager_API_data::cleanupSwapchain(bool destroy) {
         device.destroy(framebuffers[i]);
     }
 
+    device.destroy(depthImageView);
+    device.destroy(depthImage);
+    device.free(depthImageMemory);
+
     if (destroy) {
         n = swapchainImages.size();
         for (size_t i = 0; i < n; i++) {
             device.destroy(swapchainImageViews[i]);
         }
-
         swapchainImageViews.clear();
 
         device.destroy(swapchain);

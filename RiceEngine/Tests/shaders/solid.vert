@@ -20,5 +20,5 @@ void main() {
     pos.y = -pos.y;
     gl_Position = pos;
     
-	outColor = inColor;
+	outColor = inColor;//vec3(pos.z / pos.w)*.5;
 }

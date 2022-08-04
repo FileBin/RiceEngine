@@ -240,7 +240,8 @@ void Shader::buildPipeline(Vector2i extent) {
             .setCullMode(CullModeFlagBits::eBack)
             .setFrontFace(FrontFace::eClockwise)
             .setPolygonMode(PolygonMode::eFill)
-            .setDepthClampEnable(false);
+            .setDepthClampEnable(false)
+            .setDepthBiasEnable(false);
 
     // we don't use multisampling, so just run the default one
     pipelineBuilder.vk_multisampling =
@@ -254,6 +255,12 @@ void Shader::buildPipeline(Vector2i extent) {
                 ColorComponentFlagBits::eR | ColorComponentFlagBits::eG |
                 ColorComponentFlagBits::eB | ColorComponentFlagBits::eA)
             .setBlendEnable(false);
+
+    pipelineBuilder.vk_depthStencil =
+        PipelineDepthStencilStateCreateInfo()
+            .setDepthTestEnable(true)
+            .setDepthWriteEnable(true)
+            .setDepthCompareOp(CompareOp::eLess);
 
     // use the triangle layout we created
     pipelineBuilder.vk_pipelineLayout = api_data->layout;

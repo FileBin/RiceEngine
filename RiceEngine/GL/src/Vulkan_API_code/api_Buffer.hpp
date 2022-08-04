@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Rice/GL/GraphicsManager.hpp"
 #include "VulkanHelper.hpp"
 #include <Rice/GL/Buffer.hpp>
 
@@ -25,16 +26,13 @@ public:
 
 	Buffer_API_Data(vk::Device& dev, vk::PhysicalDevice& gpu);
 
-	Buffer_API_Data& allocate(size_t size, BufferUsage usage);
+	Buffer_API_Data& allocate(GraphicsManager_API_data& api_data, size_t size, BufferUsage usage);
 	Buffer_API_Data& free();
 
 	Buffer_API_Data& setData(void* pSrc, size_t nData, size_t offset);
 	Buffer_API_Data& getData(void* pDst, size_t nData, size_t offset);
 
 	~Buffer_API_Data();
-
-private:
-	uint findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties);
 };
 
 NSP_GL_END

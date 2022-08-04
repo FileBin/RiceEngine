@@ -15,12 +15,12 @@
 
 NSP_TESTS_BEGIN
 
-class CubeTestScene : public virtual Scene {
-    CubeTestScene() = default;
+class MultiCubePerformanceTestScene : public virtual Scene {
+    MultiCubePerformanceTestScene() = default;
 
   public:
-    static ptr<CubeTestScene> create() {
-        return ptr<CubeTestScene>(new CubeTestScene());
+    static ptr<MultiCubePerformanceTestScene> create() {
+        return ptr<MultiCubePerformanceTestScene>(new MultiCubePerformanceTestScene());
     }
 
     void init() override {
@@ -37,13 +37,21 @@ class CubeTestScene : public virtual Scene {
         cam_obj->addComponent(cam_mover);
 
         setActiveCamera(cam_comp);
-
-        for (uint i = 0; i < 2; ++i) {
-
+        constexpr uint cx = 10;
+        constexpr uint cy = 20;
+        constexpr uint cz = 10;
+        constexpr uint count = cx * cy * cz;
+        for (uint i = 0; i < count; ++i) {
+            dbl x = i % cx;
+            dbl y = (i / cx) % cy;
+            dbl z = (dbl)i / (cx * cy);
+            Vector3 pos{x, y, z};
+            pos *= 2.;
+            pos -= Vector3{cx, cy, cz} * .5;
             auto cube_obj = createEnabled(fmt::format("Cube {}", i));
             auto cube_transform = new_ptr<Components::Transform>();
 
-            cube_transform->setPosition({i*2., 0, 0});
+            cube_transform->setPosition(pos);
 
             auto cube_render = new_ptr<Components::ModelRender>();
 

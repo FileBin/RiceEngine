@@ -20,11 +20,11 @@ Matrix4x4 Matrix4x4::perspective(double fov, double aspect, double nearPlane,
     double xScale = yScale / aspect;
     double nearmfar = farPlane - nearPlane;
     double zScale = (farPlane + nearPlane) / nearmfar;
-    double zNearmfar = -2 * farPlane * nearPlane / nearmfar;
+    double zNearmfar = (farPlane * nearPlane) / nearmfar;
     return {
             xScale, 0, 0, 0,
             0, yScale, 0, 0,
-            0, 0, zScale, zNearmfar,
+            0, 0, zScale, -zNearmfar,
             0, 0, 1, 0
         };
 

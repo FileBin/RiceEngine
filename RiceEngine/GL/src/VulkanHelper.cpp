@@ -145,8 +145,6 @@ vk::Pipeline VulkanHelper::PipelineBuilder::build_pipeline(vk::Device device, vk
 	//build the actual pipeline
 	//we now use all of the info structs we have been writing into into this one to create the pipeline
 	vk::GraphicsPipelineCreateInfo pipelineInfo = {};
-	pipelineInfo.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
-	pipelineInfo.pNext = nullptr;
 
 	pipelineInfo.stageCount = vk_shaderStages.size();
 	pipelineInfo.pStages = vk_shaderStages.data();
@@ -156,6 +154,7 @@ vk::Pipeline VulkanHelper::PipelineBuilder::build_pipeline(vk::Device device, vk
 	pipelineInfo.pRasterizationState = &vk_rasterizer;
 	pipelineInfo.pMultisampleState = &vk_multisampling;
 	pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.pDepthStencilState = &vk_depthStencil;
 	pipelineInfo.layout = vk_pipelineLayout;
 	pipelineInfo.renderPass = pass;
 	pipelineInfo.subpass = 0;

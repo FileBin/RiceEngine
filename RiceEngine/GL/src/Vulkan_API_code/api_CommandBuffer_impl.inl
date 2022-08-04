@@ -13,6 +13,8 @@
 #include "api_CommandBuffer.hpp"
 #include "api_Shader.hpp"
 #include "api_UniformBuffer.hpp"
+#include <array>
+#include <vulkan/vulkan_structs.hpp>
 
 NSP_GL_BEGIN
 
@@ -34,13 +36,24 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
 
     cmd[i].begin(cmdBeginInfo);
 
-    vk::ClearValue clearValue;
+    std::vector<vk::ClearAttachment> clearValues;
+    clearValues.resize(2);
 
-    clearValue.color.float32[0] = .1f;
-    clearValue.color.float32[1] = .2f;
-    clearValue.color.float32[2] = .8f;
-    clearValue.color.float32[3] = 1.f;
+    clearValues[0].setAspectMask(vk::ImageAspectFlagBits::eColor);
+    clearValues[0].setClearValue(
+        vk::ClearColorValue(std::array<float, 4>{0.1f, 0.2f, 0.8f, 1.0f}));
+    clearValues[0].setColorAttachment(0);
+    clearValues[1].setAspectMask(vk::ImageAspectFlagBits::eDepth);
+    clearValues[1].setClearValue(vk::ClearDepthStencilValue(1.0f, 0));
+    clearValues[1].setColorAttachment(1);
 
+    /*clearValues[0].clearValue.color.float32[0] = .1f;
+    clearValues[0].clearValue.color.float32[1] = .2f;
+    clearValues[0].clearValue.color.float32[2] = .8f;
+    clearValues[0].clearValue.color.float32[3] = 1.f;
+
+    clearValues[1].clearValue.depthStencil.depth = 1.01f;
+    clearValues[1].clearValue.depthStencil.stencil = 0;*/
     // start the main renderpass.
     // We will use the clear color from above, and the framebuffer of the
     // index the swapchain gave us
@@ -49,21 +62,26 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
     // windowExcent.width = window->getWidth();
     // windowExcent.height = window->getHeight();
 
-    if (begin_pass) {
-        rpInfo.renderPass = api_data.begin_renderPass;
-    } else {
-        rpInfo.renderPass = api_data.def_renderPass;
-    }
+    // if (begin_pass) {
+    //     rpInfo.renderPass = api_data.begin_renderPass;
+    // } else {
+    rpInfo.renderPass = api_data.def_renderPass;
+    //}
     rpInfo.renderArea.offset.x = 0;
     rpInfo.renderArea.offset.y = 0;
     rpInfo.renderArea.extent = window;
     rpInfo.framebuffer = api_data.framebuffers[i];
 
-    // connect clear values
-    rpInfo.clearValueCount = 1;
-    rpInfo.pClearValues = &clearValue;
+    vk::ClearRect rect = {};
+    rect.rect.extent = window;
+    rect.layerCount = 1;
 
     cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
+
+    if (begin_pass) {
+        cmd[i].clearAttachments(clearValues.size(), clearValues.data(), 1,
+                                &rect);
+    }
 }
 
 inline void

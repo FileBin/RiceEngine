@@ -36,7 +36,8 @@ public:
 	uint buffer_count;
 
 	bool allocated = false;
-    bool built = false;
+    bool sets_allocated = false;
+    bool pool_allocated = false;
 
 	UniformBuffer_API_Data(GraphicsManager_API_data& api_data);
 
@@ -45,6 +46,7 @@ public:
 
 	void allocateDescriptorSets(vk::DescriptorSetLayout layout, vk::PipelineLayout pip_layout);
     void freeDescriptorSets();
+    void freeDescriptorPool();
 	void setBinding(uint binding, uint size);
 
 	UniformBuffer_API_Data& setData(uint i, void* pSrc, size_t nData, size_t offset);

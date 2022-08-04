@@ -10,7 +10,7 @@ struct Matrix4x4f;
 struct Matrix4x4 {
 public:
 
-	static Matrix4x4 perspective(double fov, double aspect = 1, double nearPlane = .001, double farPlane = 1000.);
+	static Matrix4x4 perspective(double fov, double aspect = 1, double nearPlane = .1, double farPlane = 100.);
 	static Matrix4x4 ortographic(Vector2 size, double nearPlane = .001, double farPlane = 1000.);
 	static Matrix4x4 ortographic(Vector3 size);
 

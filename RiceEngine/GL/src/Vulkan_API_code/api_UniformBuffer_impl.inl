@@ -40,6 +40,15 @@ UniformBuffer_API_Data::UniformBuffer_API_Data(
     poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
     pool = device.createDescriptorPool(poolInfo);
+
+    pool_allocated = true;
+}
+
+void UniformBuffer_API_Data::freeDescriptorPool() {
+    if (pool_allocated) {
+        device.destroyDescriptorPool(pool);
+        pool_allocated = false;
+    }
 }
 
 void UniformBuffer_API_Data::allocateDescriptorSets(
@@ -53,13 +62,13 @@ void UniformBuffer_API_Data::allocateDescriptorSets(
 
     sets = device.allocateDescriptorSets(allocInfo);
 
-    built = true;
+    sets_allocated = true;
 }
 
 void UniformBuffer_API_Data::freeDescriptorSets() {
-    if (built)
+    if (sets_allocated)
         device.freeDescriptorSets(pool, sets);
-    built = false;
+    sets_allocated = false;
 }
 
 void UniformBuffer_API_Data::setBinding(uint binding, uint size) {
@@ -150,6 +159,7 @@ UniformBuffer_API_Data &UniformBuffer_API_Data::free() {
 
     allocated = false;
     freeDescriptorSets();
+    freeDescriptorPool();
     return *this;
 }
 

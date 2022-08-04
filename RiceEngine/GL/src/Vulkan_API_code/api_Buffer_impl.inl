@@ -7,13 +7,15 @@
 
 #pragma once
 
+#include "Rice/GL/GraphicsManager.hpp"
 #include "api_Buffer.hpp"
+#include "api_GraphicsManager.hpp"
 
 NSP_GL_BEGIN
 
 Buffer_API_Data::Buffer_API_Data(vk::Device& dev, vk::PhysicalDevice& gpu) : device(dev), GPU(gpu) {}
 
-Buffer_API_Data& Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
+Buffer_API_Data& Buffer_API_Data::allocate(GraphicsManager_API_data& api_data, size_t size, BufferUsage usage) {
 	using namespace vk;
 	if(!allocated) {
 		buffer_size = size;
@@ -40,7 +42,7 @@ Buffer_API_Data& Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
 
 		MemoryAllocateInfo allocInfo;
 		allocInfo.allocationSize = memReq.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memReq.memoryTypeBits,
+		allocInfo.memoryTypeIndex = api_data.findMemoryType(memReq.memoryTypeBits,
 				MemoryPropertyFlagBits::eHostVisible | MemoryPropertyFlagBits::eHostCoherent);
 
 		memory = device.allocateMemory(allocInfo);
@@ -80,18 +82,6 @@ Buffer_API_Data& Buffer_API_Data::free() {
 
 Buffer_API_Data::~Buffer_API_Data() {
 	free();
-}
-
-uint Buffer_API_Data::findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties) {
-	using namespace vk;
-	PhysicalDeviceMemoryProperties memprop = GPU.getMemoryProperties();
-
-	for (uint i = 0; i < memprop.memoryTypeCount; ++i) {
-		if ((typeFilter & (1 << i))	&& (memprop.memoryTypes[i].propertyFlags & properties) == properties) {
-			return i;
-		}
-	}
-	return 0xffffffff;
 }
 
 NSP_GL_END
