@@ -51,15 +51,11 @@ ptr<Graphics::Shader> Engine::getOrCreateShader(
 
 ptr<Graphics::Material> Engine::getOrCreateMaterial(
     String name,
-    std::function<ptr<Graphics::Shader>(ptr<Engine>)> shader_factory) {
+    std::function<ptr<Graphics::Material>(ptr<Engine>)> material_factory) {
     auto core_lock = lock_core();
     auto it = materials.find(name); // try to find material in map
     if (it == materials.end()) {
-        ptr<Graphics::Material> material{new Graphics::Material(
-            core_lock->graphics_manager,
-            shader_factory(shared_from_this()))}; // create material
-        materials[name] = material;               // add to map
-        return material;
+        return materials[name] = material_factory(shared_from_this()); // add to map
     }
     return it->second;
 }

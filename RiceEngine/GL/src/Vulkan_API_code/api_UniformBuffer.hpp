@@ -24,8 +24,8 @@ struct UniformBuffer_API_Data {
 public:
 	vk::Device& device;
 	vk::PhysicalDevice& GPU;
-	vec<vk::Buffer> buffers;
-	vec<vk::DeviceMemory> memories;
+	vk::Buffer buffer;
+	vk::DeviceMemory memory;
 	vk::PipelineLayout pip_layout;
 
 	vk::DescriptorPool pool;
@@ -37,7 +37,6 @@ public:
 
 	bool allocated = false;
     bool sets_allocated = false;
-    bool pool_allocated = false;
 
 	UniformBuffer_API_Data(GraphicsManager_API_data& api_data);
 
@@ -46,7 +45,6 @@ public:
 
 	void allocateDescriptorSets(vk::DescriptorSetLayout layout, vk::PipelineLayout pip_layout);
     void freeDescriptorSets();
-    void freeDescriptorPool();
 	void setBinding(uint binding, uint size);
 
 	UniformBuffer_API_Data& setData(uint i, void* pSrc, size_t nData, size_t offset);

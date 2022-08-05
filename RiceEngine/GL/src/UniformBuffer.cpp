@@ -5,44 +5,38 @@
  *      Author: filebin
  */
 
+#include "Rice/GL/Buffer.hpp"
+#include "Rice/Util/Exceptions/Exception.hpp"
 #include "pch.h"
 
+#include "Vulkan_API_code/api_Buffer.hpp"
 #include "Vulkan_API_code/api_Shader.hpp"
-#include "Vulkan_API_code/api_UniformBuffer.hpp"
-#include "Vulkan_API_code/api_UniformBuffer_impl.inl"
 #include <Rice/GL/UniformBuffer.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 NSP_GL_BEGIN
 
 UniformBuffer::UniformBuffer(ptr<GraphicsManager> g_mgr, uint n)
-    : GraphicsComponentBase(g_mgr) {
-    api_data.reset(new UniformBuffer_API_Data(get_api_data()));
-    api_data->allocate(n);
-    g_mgr->resizeGraphicsComponents->subscribe(resizeReg, [this](Vector2i win) {
-        onResize();
-    }); // @suppress("Invalid arguments")
-}
+    : Buffer(g_mgr, BufferUsage::Uniform, n) {}
 
-void UniformBuffer::onResize() {
-    // FIXME do resize correctly
-    api_data->freeDescriptorSets();
-    build();
-}
+void UniformBuffer::setShader(ptr<Shader> sh, uint binding) {
+    shader = sh;
+    using namespace vk;
 
-void UniformBuffer::setShader(ptr<Shader> sh) { shader = sh; }
+    DescriptorBufferInfo info;
+    info.buffer = api_data->buffer;
+    info.offset = 0;
+    info.range = api_data->buffer_size;
 
-void UniformBuffer::setBinding(uint b, uint n) {
-    binding.binding = b;
-    binding.size = n;
-}
+    auto write = WriteDescriptorSet()
+                     .setDescriptorType(DescriptorType::eUniformBuffer)
+                     .setDescriptorCount(1)
+                     .setDstSet(sh->api_data->descriptorSet)
+                     .setDstBinding(binding)
+                     .setPBufferInfo(&info);
 
-void UniformBuffer::build() {
-    auto sh = shader.lock();
-    if (sh) {
-        api_data->allocateDescriptorSets(sh->api_data->descriptorSetLayout,
-                                         sh->api_data->layout);
-        api_data->setBinding(binding.binding, binding.size);
-    }
+    get_api_data().device.updateDescriptorSets(1, &write, 0, nullptr);
 }
 
 void UniformBuffer::cleanup() {
@@ -56,21 +50,8 @@ void UniformBuffer::reset(uint size) {
     cleanup();
 
     if (size != 0) {
-        api_data->allocate(size);
+        api_data->allocate(get_api_data(), size, BufferUsage::Uniform);
     }
 }
-
-void UniformBuffer::updateData(void *pData, uint nData) {
-    api_data->setData(get_api_data().swapchainImageIndex, pData, nData, 0);
-}
-
-void UniformBuffer::updateDataAll(void *pData, uint nData) {
-    for (uint i = 0; i < api_data->buffer_count; i++)
-        api_data->setData(i, pData, nData, 0);
-}
-
-void UniformBuffer::get_data(void *d, uint n) { api_data->getData(0, d, n, 0); }
-
-UniformBuffer::~UniformBuffer() { cleanup(); }
 
 NSP_GL_END

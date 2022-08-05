@@ -41,6 +41,7 @@ struct GraphicsManager_API_data {
     uint graphicsQueueFamily = 0; // family of that queue
 
     vk::CommandPool commandPool; // the command pool for our commands
+    vk::DescriptorPool descriptorPool; // the descriptor pool for our descriptors
 
     vk::RenderPass def_renderPass; // the default render pass
 
@@ -90,6 +91,7 @@ struct GraphicsManager_API_data {
     void recreateSwapchain();
     void init_swapchain();
     void init_commands();
+    void init_descriptor_pool();
     void init_def_renderpass();
     void init_framebuffers();
     void init_sync_structures();

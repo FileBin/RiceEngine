@@ -158,7 +158,7 @@ bool Mesh::checkVisiblity(ModelData matrix) {
     auto corners = bounds.getCorners();
     auto boxSize = bounds.getSize().sqrLength() * 5.;
     matrix.world.c41 = matrix.world.c42 = matrix.world.c43 = 0;
-    auto temp = matrix.view * matrix.world;
+    auto temp = matrix.world_view * matrix.world;
     for (size_t i = 0; i < 9; i++) {
         auto proj = corners[i] * temp;
         if (proj.sqrLength() < boxSize)

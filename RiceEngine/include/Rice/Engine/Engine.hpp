@@ -39,7 +39,7 @@ class Engine : public enable_ptr<Engine> {
         String name, std::function<void(ptr<Graphics::Shader>)> shader_creator);
     ptr<Graphics::Material> getOrCreateMaterial(
         String name,
-        std::function<ptr<Graphics::Shader>(ptr<Engine>)> shader_factory);
+        std::function<ptr<Graphics::Material>(ptr<Engine>)> material_factory);
     ptr<Graphics::GraphicsManager> getGraphicsManager();
     ptr<InputManager> getInputManager();
 

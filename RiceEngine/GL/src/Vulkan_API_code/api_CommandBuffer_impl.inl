@@ -113,9 +113,13 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
     } break;
 
     case CommandBuffer::Command::SetShader: {
+        auto& sh_api_data =
+            (*(ptr<Shader> *)command->arg_chain->getData())->api_data;
         cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics,
-                            (*(ptr<Shader> *)command->arg_chain->getData())
-                                ->api_data->pipeline);
+                            sh_api_data->pipeline);
+        cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                  sh_api_data->layout, 0, 1,
+                                  &sh_api_data->descriptorSet, 0, nullptr);
     } break;
 
     case CommandBuffer::Command::BindVertexBuffer: {
@@ -166,15 +170,6 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
             flags = vk::ShaderStageFlagBits::eGeometry;
 
         cmd[i].pushConstants(shader->api_data->layout, flags, 0, nData, pData);
-    } break;
-
-    case CommandBuffer::Command::BindUniformBuffer: {
-        CommandBuffer::Command::ArgIterator it = command->arg_chain;
-        auto buffer = *(ptr<UniformBuffer> *)(it++).current->getData();
-        vk::DescriptorSet &set = buffer->api_data->sets[i];
-        cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                  buffer->api_data->pip_layout, 0, 1, &set, 0,
-                                  nullptr);
     } break;
 
     default:

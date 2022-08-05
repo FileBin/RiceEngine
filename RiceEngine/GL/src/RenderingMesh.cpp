@@ -21,25 +21,25 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     transform = t;
 
     constBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(ModelData));
-    constBuffer->setShader(material->getShader());
-    constBuffer->setBinding(0, sizeof(ModelData));
-    constBuffer->build();
-    constBuffer->updateDataAll<ModelData>({});
+    constBuffer->setShader(material->getShader(), 0);
+    constBuffer->updateData<ModelData>({});
     vertexBuffer = new_ptr<VertexBuffer>(g_mgr, mesh->vertexBuffer);
     indexBuffer = new_ptr<IndexBuffer>(g_mgr, mesh->indexBuffer);
 
     auto cmd = new_ptr<CommandBuffer>(g_mgr, false);
 
     auto ub = material->getUniformBuffer();
-    if (ub)
-        cmd->bindUniformBuffer(ub);
 
     cmd->setActiveShader(material->getShader());
     cmd->bindVertexBuffer(vertexBuffer);
     cmd->bindIndexBuffer(indexBuffer);
 
-    // cmd->pushConstants<VertConstData>(const_data, test_shader);
-    cmd->bindUniformBuffer(constBuffer);
+    vec<ptr<UniformBuffer>> uniform_buffers = {constBuffer};
+    if(ub) {
+        uniform_buffers.push_back(ub);
+    }
+
+    //cmd->bindUniformBuffers(uniform_buffers);
     cmd->drawIndexed(indexBuffer);
     cmd->buildAll();
 
@@ -53,8 +53,9 @@ void RenderingMesh::updateCmdBuffer() {
 
 void RenderingMesh::updateConstBuffer(Matrix4x4f view, Matrix4x4f proj) {
     ModelData data;
-    data.world = transform->getTransformationMatrix();
-    data.view = view;
+    auto world = transform->getTransformationMatrix();
+    data.world = world;
+    data.world_view = world * view;
     data.projection = proj;
     constBuffer->updateData(data);
 }

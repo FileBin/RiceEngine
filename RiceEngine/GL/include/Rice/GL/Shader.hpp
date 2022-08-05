@@ -46,6 +46,7 @@ public:
 private:
 	friend struct CommandBuffer_API_data;
 	friend class UniformBuffer;
+    friend class UniformBuffer_API_Data;
 	uptr<Shader_API_Data> api_data;
 
 	Util::EventRegistration resizeReg;
@@ -57,12 +58,6 @@ private:
 	bool uses_depth_buffer = false;
 
 	void onResize(Vector2i windowSize);
-	void cleanupPipeline();
-	void cleanupShaders();
-	void cleanupDescriptorSetLayout();
-
-	void buildPipeline(Vector2i extent);
-	void buildDescriptorSet();
 };
 NSP_GL_END
 

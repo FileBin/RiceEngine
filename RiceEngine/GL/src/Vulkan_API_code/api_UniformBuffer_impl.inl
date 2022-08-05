@@ -23,36 +23,16 @@ NSP_GL_BEGIN
 
 UniformBuffer_API_Data::UniformBuffer_API_Data(
     GraphicsManager_API_data &api_data)
-    : device(api_data.device), GPU(api_data.GPU) {
+    : device(api_data.device), GPU(api_data.GPU), pool(api_data.descriptorPool) {
     buffer_count = api_data.swapchainImages.size();
 
     buffers.resize(buffer_count);
     memories.resize(buffer_count);
-
-    vk::DescriptorPoolSize poolSize{};
-    poolSize.type = vk::DescriptorType::eUniformBuffer;
-    poolSize.descriptorCount = buffer_count;
-
-    vk::DescriptorPoolCreateInfo poolInfo{};
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = buffer_count;
-    poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
-
-    pool = device.createDescriptorPool(poolInfo);
-
-    pool_allocated = true;
-}
-
-void UniformBuffer_API_Data::freeDescriptorPool() {
-    if (pool_allocated) {
-        device.destroyDescriptorPool(pool);
-        pool_allocated = false;
-    }
 }
 
 void UniformBuffer_API_Data::allocateDescriptorSets(
     vk::DescriptorSetLayout layout, vk::PipelineLayout pipeline_layout) {
+        //move sets to the Shader class
     pip_layout = pipeline_layout;
     std::vector<vk::DescriptorSetLayout> layouts(buffer_count, layout);
     vk::DescriptorSetAllocateInfo allocInfo{};
@@ -159,7 +139,6 @@ UniformBuffer_API_Data &UniformBuffer_API_Data::free() {
 
     allocated = false;
     freeDescriptorSets();
-    freeDescriptorPool();
     return *this;
 }
 

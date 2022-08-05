@@ -96,11 +96,6 @@ void CommandBuffer::bindIndexBuffer(ptr<IndexBuffer> buffer) {
     commands.push_back(new_ptr<Command>(Command::BindIndexBuffer, buffer));
 }
 
-void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> buffer) {
-    needRecreate();
-    commands.push_back(new_ptr<Command>(Command::BindUniformBuffer, buffer));
-}
-
 void CommandBuffer::update() {
     GraphicsManager_API_data &d = get_api_data();
     if (need_recreate[d.swapchainImageIndex]) {

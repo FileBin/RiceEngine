@@ -4,6 +4,7 @@
 #include "Vectors.hpp"
 #include "Matrixes.hpp"
 
+#include <cstdlib>
 #include <math.h>
 #include <cmath>
 
@@ -50,7 +51,7 @@ public:
 	}
 
 	static dbl random(double _min = 0., double _max = 1.) {
-		return ((dbl) rand() / SHRT_MAX) * (_max - _min) + _min;
+		return ((dbl) rand() / RAND_MAX) * (_max - _min) + _min;
 	}
 
 	static dbl qrsqrt(dbl x) {

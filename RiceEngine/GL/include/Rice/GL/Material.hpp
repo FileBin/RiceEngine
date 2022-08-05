@@ -8,37 +8,50 @@ NSP_GL_END
 
 #pragma once
 
-#include "UniformBuffer.hpp"
 #include "GraphicsManager.hpp"
 #include "Shader.hpp"
-//TODO #include "Texture2D.hpp"
+#include "UniformBuffer.hpp"
+// TODO #include "Texture2D.hpp"
 
 NSP_GL_BEGIN
 
-	enum class RenderType { Solid = 0, Transparent = 1 };
+enum class RenderType { Solid = 0, Transparent = 1 };
 
-	class Material {
-	public:
-		RenderType renderType = RenderType::Solid;
+class Material {
+  public:
+    RenderType renderType = RenderType::Solid;
 
-		Material(ptr<GraphicsManager> manager, ptr<Shader> shader);
-		~Material() {}
+    Material(ptr<GraphicsManager> manager, ptr<Shader> shader);
 
-		void updateBuffer();
+    template <typename T> void initUniformBuffer(const T &init_data) {
+        uniform_buffer = new_ptr<UniformBuffer>(graphics_manager, sizeof(T));
+        uniform_buffer->setShader(shader, 1);
+        uniform_buffer->updateData<T>(init_data);
+    }
 
-		/*void AddTexture(pTexture2D tex);
-		pTexture2D GetTexture(size_t idx);
-		const TextureArray GetTextures() const;*/
+    template <typename T> void initUniformBuffer() {
+        uniform_buffer = new_ptr<UniformBuffer>(graphics_manager, sizeof(T));
+        uniform_buffer->setShader(shader, 1);
+    }
 
-		ptr<Shader> getShader() { return shader; }
-        
-        //can be null
-		ptr<UniformBuffer> getUniformBuffer() { return uniformBuffer; }
-	private:
-		ptr<Shader> shader;
-		ptr<UniformBuffer> uniformBuffer;
-		ptr<GraphicsManager> graphics_manager;
-		//TODO vec<pTexture2D> textureArr{};
-	};
+    ~Material() {}
+
+    void updateBuffer();
+
+    /*void AddTexture(pTexture2D tex);
+    pTexture2D GetTexture(size_t idx);
+    const TextureArray GetTextures() const;*/
+
+    ptr<Shader> getShader() { return shader; }
+
+    // can be nullptr if no buffer is set
+    ptr<UniformBuffer> getUniformBuffer() { return uniform_buffer; }
+
+  private:
+    ptr<Shader> shader;
+    ptr<UniformBuffer> uniform_buffer;
+    ptr<GraphicsManager> graphics_manager;
+    // TODO vec<pTexture2D> textureArr{};
+};
 
 NSP_GL_END

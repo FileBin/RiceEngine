@@ -135,6 +135,7 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
 
     init_swapchain();
     init_commands();
+    init_descriptor_pool();
     init_depth_image();
     init_def_renderpass();
     init_framebuffers();
@@ -208,6 +209,21 @@ void GraphicsManager_API_data::init_commands() {
     commandPool = device.createCommandPool(commandPoolInfo);
 
     // allocate the default command buffer that we will use for rendering
+}
+
+void GraphicsManager_API_data::init_descriptor_pool() {
+    auto n = swapchainImages.size();
+vk::DescriptorPoolSize poolSize{};
+    poolSize.type = vk::DescriptorType::eUniformBuffer;
+    poolSize.descriptorCount = n;
+
+    vk::DescriptorPoolCreateInfo poolInfo{};
+    poolInfo.poolSizeCount = 1;
+    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.maxSets = n * 0x10000;
+    poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+
+    descriptorPool = device.createDescriptorPool(poolInfo);
 }
 
 vk::Format
@@ -602,6 +618,7 @@ void GraphicsManager_API_data::cleanup() {
     if (graphicsManager) {
         graphicsManager->destroyEvent->invoke();
     }
+    device.destroyDescriptorPool(descriptorPool);
     cleanupSwapchain();
 
     device.destroy(def_renderPass);
