@@ -13,6 +13,8 @@ NSP_COMPONENTS_BEGIN
 
 class Camera : virtual public PackableComponentT<Camera> {
     dbl fov = 60;
+    dbl near_plane = 0.01;
+    dbl far_plane = 1000;
 
   public:
     Camera();

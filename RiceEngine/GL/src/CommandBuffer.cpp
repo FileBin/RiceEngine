@@ -52,7 +52,6 @@ CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass)
 
 void CommandBuffer::clear() {
     commands.clear();
-    api_data->cleanupDescriptorSet(get_api_data());
     auto n = api_data->bufCount();
     for (uint i = 0; i < n; ++i)
         api_data->reset(i);

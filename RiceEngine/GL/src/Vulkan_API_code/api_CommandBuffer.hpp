@@ -19,18 +19,11 @@ struct DescriptorSetCreator;
 
 struct CommandBuffer_API_data {
     vec<vk::CommandBuffer> cmd;
-    vk::DescriptorSet descriptorSet;
-    vk::DescriptorPool descriptorPool;
     bool begin_pass;
 
     uint bufCount();
 
     void build(GraphicsManager_API_data &api_data);
-
-    void bindDescriptosSets(GraphicsManager_API_data &api_data,
-                            DescriptorSetCreator &creator, uint i);
-    void createDescriptorSet(GraphicsManager_API_data &api_data,
-                             DescriptorSetCreator &creator);
 
     void begin(GraphicsManager_API_data &api_data, vk::Extent2D window, uint i);
     void end(uint i);
@@ -39,7 +32,6 @@ struct CommandBuffer_API_data {
     void doCommand(ptr<CommandBuffer::Command> command, uint i,
                    GraphicsManager_API_data &api_data,
                    DescriptorSetCreator &creator);
-    void cleanupDescriptorSet(GraphicsManager_API_data &api_data);
     void cleanup(GraphicsManager_API_data &api_data);
 };
 

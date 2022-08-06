@@ -5,6 +5,7 @@
  *      Author: FileBinsLapTop
  */
 
+#include "Rice/Util/Interfaces.hpp"
 #include "stdafx.hpp"
 
 NSP_GL_BEGIN
@@ -51,6 +52,8 @@ class CommandBuffer : public GraphicsComponentBase {
             virtual ~Arg(){};
 
         } * arg_chain;
+
+        ICleanable *additional_data = nullptr;
 
         struct ArgIterator {
             Arg *current;
@@ -119,6 +122,10 @@ class CommandBuffer : public GraphicsComponentBase {
         ~Command() {
             if (arg_chain)
                 delete arg_chain;
+            if (additional_data) {
+                additional_data->cleanup();
+                delete additional_data;
+            }
         }
     };
 

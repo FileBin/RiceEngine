@@ -61,10 +61,7 @@ class QuadTest : public ICleanable {
         test_shader->build();
 
         uniformBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(VertConstData));
-        uniformBuffer->setShader(test_shader);
-        uniformBuffer->setBinding(0, sizeof(VertConstData));
-        uniformBuffer->build();
-        uniformBuffer->updateDataAll<VertConstData>(const_data);
+        uniformBuffer->updateData<VertConstData>(const_data);
 
         VertexListT<Vertex> vertices({
             {Vector3f(-1, -1, 0), Vector3f(0, 1, 0)},
@@ -73,7 +70,7 @@ class QuadTest : public ICleanable {
             {Vector3f(1, -1, 0), Vector3f(0, 1, 1)},
         });
 
-        vec<index_t> indexes({0, 1, 2, 2, 0, 3});
+        vec<index_t> indexes({0, 1, 2, 3, 0, 2, 2, 1, 0, 2, 0, 3});
 
         vertexBuffer = new_ptr<VertexBuffer>(g_mgr, vertices);
         indexBuffer = new_ptr<IndexBuffer>(g_mgr, indexes);
@@ -85,7 +82,7 @@ class QuadTest : public ICleanable {
         cmd->bindIndexBuffer(indexBuffer);
 
         // cmd->pushConstants<VertConstData>(const_data, test_shader);
-        cmd->bindUniformBuffer(uniformBuffer);
+        cmd->bindUniformBuffer(uniformBuffer, 0);
         cmd->drawIndexed(indexBuffer);
         cmd->buildAll();
 

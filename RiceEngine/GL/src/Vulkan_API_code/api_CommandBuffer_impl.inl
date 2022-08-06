@@ -11,6 +11,7 @@
 #include "Rice/GL/IndexBuffer.hpp"
 #include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexBuffer.hpp"
+#include "Rice/Util/Interfaces.hpp"
 #include "api_Buffer.hpp"
 #include "api_CommandBuffer.hpp"
 #include "api_GraphicsManager.hpp"
@@ -22,6 +23,18 @@
 #include <vulkan/vulkan_structs.hpp>
 
 NSP_GL_BEGIN
+
+struct DrawAdditionData : public ICleanable {
+    vk::DescriptorSet descriptorSet;
+    vk::DescriptorPool descriptorPool;
+    GraphicsManager_API_data &api_data;
+    DrawAdditionData(GraphicsManager_API_data &api_data) : api_data(api_data) {}
+
+    void cleanup() override;
+    void createDescriptorSet(DescriptorSetCreator &creator);
+    void bindDescriptosSets(DescriptorSetCreator &creator,
+                            vk::CommandBuffer cmd);
+};
 
 struct DescriptorSetCreator {
     uint maxCount = 0;
@@ -133,7 +146,15 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
         auto instCount = *(uint *)(it++).current->getData();
         auto vert_begin = *(uint *)(it++).current->getData();
         auto inst_begin = *(uint *)(it++).current->getData();
-        bindDescriptosSets(api_data, creator, i);
+        
+        if (!command->additional_data) {
+            auto draw_data = new DrawAdditionData(api_data);
+            command->additional_data = static_cast<ICleanable *>(draw_data);
+        }
+        auto draw_data =
+            dynamic_cast<DrawAdditionData *>(command->additional_data);
+        draw_data->bindDescriptosSets(creator, cmd[i]);
+
         cmd[i].draw(count, instCount, vert_begin, inst_begin);
     } break;
 
@@ -145,7 +166,15 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
         auto index_offset = 0;
         auto vert_begin = 0;
         auto inst_begin = 0;
-        bindDescriptosSets(api_data, creator, i);
+
+        if (!command->additional_data) {
+            auto draw_data = new DrawAdditionData(api_data);
+            command->additional_data = static_cast<ICleanable *>(draw_data);
+        }
+        auto draw_data =
+            dynamic_cast<DrawAdditionData *>(command->additional_data);
+        draw_data->bindDescriptosSets(creator, cmd[i]);
+
         cmd[i].drawIndexed(count, instCount, index_offset, vert_begin,
                            inst_begin);
     } break;
@@ -223,21 +252,19 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
 }
 
 // NEEDIMPROVE
-inline void CommandBuffer_API_data::bindDescriptosSets(
-    GraphicsManager_API_data &api_data, DescriptorSetCreator &creator, uint i) {
+inline void DrawAdditionData::bindDescriptosSets(DescriptorSetCreator &creator,
+                                                 vk::CommandBuffer cmd) {
     if (!creator.writes.empty()) {
         if (!descriptorSet)
-            createDescriptorSet(api_data, creator);
+            createDescriptorSet(creator);
     }
     if (descriptorSet)
-        cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                  creator.layout, 0, 1, &descriptorSet, 0,
-                                  nullptr);
+        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, creator.layout,
+                               0, 1, &descriptorSet, 0, nullptr);
 }
 
 inline void
-CommandBuffer_API_data::createDescriptorSet(GraphicsManager_API_data &api_data,
-                                            DescriptorSetCreator &creator) {
+DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
     using namespace vk;
     uint maxCount = creator.maxCount;
     vec<DescriptorPoolSize> sizes = {
@@ -272,8 +299,7 @@ CommandBuffer_API_data::createDescriptorSet(GraphicsManager_API_data &api_data,
                                          creator.writes.data(), 0, nullptr);
 }
 
-inline void CommandBuffer_API_data::cleanupDescriptorSet(
-    GraphicsManager_API_data &api_data) {
+inline void DrawAdditionData::cleanup() {
     if (descriptorPool) {
         api_data.device.destroyDescriptorPool(descriptorPool);
         descriptorPool = nullptr;
@@ -292,7 +318,6 @@ inline uint CommandBuffer_API_data::bufCount() { return cmd.size(); }
 
 inline void
 CommandBuffer_API_data::cleanup(GraphicsManager_API_data &api_data) {
-    cleanupDescriptorSet(api_data);
     api_data.device.free(api_data.commandPool, cmd);
 }
 

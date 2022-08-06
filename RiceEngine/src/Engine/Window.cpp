@@ -1,6 +1,8 @@
 ﻿#include "Rice/Engine/InputManager.hpp"
 #include "Rice/Math/Vectors/Vector2i.hpp"
+#include "SDL2/SDL_hints.h"
 #include "SDL2/SDL_mouse.h"
+#include "SDL2/SDL_video.h"
 #include <Rice/Engine/Log.hpp>
 #include <Rice/Engine/Window.hpp>
 
@@ -42,7 +44,10 @@ void Window::setCursorPosition(Vector2i pos) {
 }
 
 void Window::grabMouse(bool grab) {
-    SDL_SetRelativeMouseMode(grab ? SDL_TRUE : SDL_FALSE);
+    auto grabbed = grab ? SDL_TRUE : SDL_FALSE;
+    //use grab warping because grab by raw mouse data works strange
+    SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
+    SDL_SetRelativeMouseMode(grabbed);
 }
 
 Window::Window()

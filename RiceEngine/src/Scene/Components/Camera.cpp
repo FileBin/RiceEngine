@@ -9,15 +9,16 @@ Camera::Camera() {}
 
 ptr<Transform> Camera::getTransform() {
     auto transform = getObject()->getComponent<Transform>();
-    if(!transform) {
+    if (!transform) {
         THROW_EXCEPTION("Object has no Transform component!");
     }
     return transform;
 }
-//TODO add aspect ratio
-Matrix4x4f Camera::getProjectionMatrix() { 
-    return Matrix4x4::perspective(fov, getEngine()->getAspectRatio()); 
-    }
+// TODO add aspect ratio
+Matrix4x4f Camera::getProjectionMatrix() {
+    return Matrix4x4::perspective(fov, getEngine()->getAspectRatio(),
+                                  near_plane, far_plane);
+}
 
 Matrix4x4f Camera::getViewMatrix() {
     return getTransform()->getInvTransformationMatrix();

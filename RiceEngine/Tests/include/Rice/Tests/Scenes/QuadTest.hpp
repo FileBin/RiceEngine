@@ -26,7 +26,8 @@ class QuadTestScene : public virtual Scene {
 
         auto cam_obj = createEnabled("Camera");
         auto cam_transform = new_ptr<Components::Transform>();
-        cam_transform->setPosition({0, 0, -5});
+        cam_transform->setPosition({0, 0, 5});
+        cam_transform->setRotation(Quaternion::fromEulerAngles({0, 180, 0}));
         auto cam_comp = new_ptr<Components::Camera>();
         cam_obj->addComponent(cam_transform);
         cam_obj->addComponent(cam_comp);
@@ -53,7 +54,7 @@ class QuadTestScene : public virtual Scene {
         cube_render->setModel(cube_model);
 
         auto cube_material = en->getOrCreateMaterial(
-            "cube_material", [](ptr<Engine> en) -> ptr<Graphics::Shader> {
+            "cube_material", [](ptr<Engine> en) -> ptr<Graphics::Material> {
                 auto shader = en->getOrCreateShader(
                     "solid", [](ptr<Graphics::Shader> shader) -> void {
                         shader->loadShader("shaders/solid.vert.spv",
@@ -64,7 +65,8 @@ class QuadTestScene : public virtual Scene {
                         shader->setVertexStrideAndLayout<Graphics::Vertex>();
                         shader->build();
                     });
-                return shader;
+                auto material = new_ptr<Graphics::Material>(en->getGraphicsManager(), shader);
+                return material;
             });
 
         cube_render->setMaterial(cube_material, 0);
