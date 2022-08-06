@@ -33,6 +33,7 @@ NSP_GL_BEGIN
 class Buffer : public GraphicsComponentBase {
 protected:
 	friend struct CommandBuffer_API_data;
+    friend struct DescriptorSetCreator;
 	uptr<Buffer_API_Data> api_data;
 	Buffer(ptr<GraphicsManager> g_mgr);
     ~Buffer() override;

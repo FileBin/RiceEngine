@@ -40,6 +40,7 @@ class CommandBuffer : public GraphicsComponentBase {
             Draw,
             DrawIndexed,
             PushConstants,
+            BindUniformBuffer,
         } cmd;
 
         struct Arg {
@@ -143,6 +144,7 @@ class CommandBuffer : public GraphicsComponentBase {
     void bindVertexBuffer(ptr<Buffer> buffer);
     void bindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
     void bindIndexBuffer(ptr<IndexBuffer> indexBuffer);
+    void bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding);
 
     template <typename T>
     void pushConstants(T data, ptr<Shader> shader,

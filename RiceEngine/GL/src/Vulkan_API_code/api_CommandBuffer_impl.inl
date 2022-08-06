@@ -7,16 +7,50 @@
 
 #pragma once
 
+#include "Rice/GL/CommandBuffer.hpp"
 #include "Rice/GL/IndexBuffer.hpp"
+#include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexBuffer.hpp"
 #include "api_Buffer.hpp"
 #include "api_CommandBuffer.hpp"
+#include "api_GraphicsManager.hpp"
 #include "api_Shader.hpp"
 #include "api_UniformBuffer.hpp"
 #include <array>
+#include <cstdint>
+#include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 NSP_GL_BEGIN
+
+struct DescriptorSetCreator {
+    uint maxCount = 0;
+    vk::PipelineLayout layout;
+    vk::DescriptorSetLayout descriptorSetLayout;
+    vec<vk::WriteDescriptorSet> writes;
+    vec<vk::DescriptorBufferInfo> bufferInfos;
+
+    void addWrite(ptr<UniformBuffer> buffer, uint binding) {
+        using namespace vk;
+        auto &api_data = buffer->api_data;
+
+        DescriptorBufferInfo info;
+        info.buffer = api_data->buffer;
+        info.offset = 0;
+        info.range = api_data->buffer_size;
+
+        bufferInfos.push_back(info);
+
+        WriteDescriptorSet write;
+        write.descriptorType = DescriptorType::eUniformBuffer;
+        write.dstArrayElement = 0;
+        write.dstBinding = binding;
+        write.descriptorCount = 1;
+
+        writes.push_back(write);
+        maxCount++;
+    }
+};
 
 inline void CommandBuffer_API_data::build(GraphicsManager_API_data &api_data) {
     // allocate the default command buffer that we will use for rendering
@@ -85,7 +119,9 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
 }
 
 inline void
-CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
+CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
+                                  GraphicsManager_API_data &api_data,
+                                  DescriptorSetCreator &creator) {
     using namespace vk;
 
     uint n = cmd.size();
@@ -97,6 +133,7 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
         auto instCount = *(uint *)(it++).current->getData();
         auto vert_begin = *(uint *)(it++).current->getData();
         auto inst_begin = *(uint *)(it++).current->getData();
+        bindDescriptosSets(api_data, creator, i);
         cmd[i].draw(count, instCount, vert_begin, inst_begin);
     } break;
 
@@ -108,18 +145,18 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
         auto index_offset = 0;
         auto vert_begin = 0;
         auto inst_begin = 0;
+        bindDescriptosSets(api_data, creator, i);
         cmd[i].drawIndexed(count, instCount, index_offset, vert_begin,
                            inst_begin);
     } break;
 
     case CommandBuffer::Command::SetShader: {
-        auto& sh_api_data =
+        auto &sh_api_data =
             (*(ptr<Shader> *)command->arg_chain->getData())->api_data;
         cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics,
                             sh_api_data->pipeline);
-        cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                  sh_api_data->layout, 0, 1,
-                                  &sh_api_data->descriptorSet, 0, nullptr);
+        creator.layout = sh_api_data->layout;
+        creator.descriptorSetLayout = sh_api_data->descriptorSetLayout;
     } break;
 
     case CommandBuffer::Command::BindVertexBuffer: {
@@ -172,10 +209,67 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i) {
         cmd[i].pushConstants(shader->api_data->layout, flags, 0, nData, pData);
     } break;
 
+    case CommandBuffer::Command::BindUniformBuffer: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto ubo = *(ptr<UniformBuffer> *)(it++).current->getData();
+        auto binding = *(uint *)(it++).current->getData();
+        creator.addWrite(ubo, binding);
+    } break;
+
     default:
         THROW_EXCEPTION("Unknown command occured!");
         break;
     }
+}
+
+//NEEDIMPROVE 
+inline void CommandBuffer_API_data::bindDescriptosSets(
+    GraphicsManager_API_data &api_data, DescriptorSetCreator &creator, uint i) {
+    if (!creator.writes.empty()) {
+        if (!descriptorSet)
+            createDescriptorSet(api_data, creator);
+    }
+    if (descriptorSet)
+        cmd[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                  creator.layout, 0, 1, &descriptorSet, 0,
+                                  nullptr);
+}
+
+inline void
+CommandBuffer_API_data::createDescriptorSet(GraphicsManager_API_data &api_data,
+                                            DescriptorSetCreator &creator) {
+    using namespace vk;
+    uint maxCount = creator.maxCount;
+    vec<DescriptorPoolSize> sizes = {
+        {DescriptorType::eUniformBuffer, maxCount}};
+
+    DescriptorPoolCreateInfo pool_info = {};
+    pool_info.maxSets = maxCount;
+    pool_info.poolSizeCount = (uint32_t)sizes.size();
+    pool_info.pPoolSizes = sizes.data();
+
+    auto res = api_data.device.createDescriptorPool(&pool_info, nullptr,
+                                                    &descriptorPool);
+    THROW_VK_EX_IF_BAD(res);
+
+    DescriptorSetAllocateInfo allocInfo = {};
+    // using the pool we just set
+    allocInfo.descriptorPool = descriptorPool;
+    // only 1 descriptor
+    allocInfo.descriptorSetCount = 1;
+    // using the global data layout
+    allocInfo.pSetLayouts = &creator.descriptorSetLayout;
+
+    res = api_data.device.allocateDescriptorSets(&allocInfo, &descriptorSet);
+    THROW_VK_EX_IF_BAD(res);
+    auto n = creator.writes.size();
+    for (uint i = 0; i < n; ++i) {
+        auto& write = creator.writes[i];
+        write.dstSet = descriptorSet;
+        write.pBufferInfo = &creator.bufferInfos[i];
+    }
+    api_data.device.updateDescriptorSets(creator.writes.size(),
+                                         creator.writes.data(), 0, nullptr);
 }
 
 inline void CommandBuffer_API_data::end(uint i) {

@@ -21,8 +21,7 @@ struct Shader_API_Data {
 	vk::Pipeline pipeline;
 	vk::PipelineLayout layout;
 	vk::DescriptorSetLayout descriptorSetLayout;
-    vk::DescriptorSet descriptorSet;
-    vk::DescriptorPool descriptorPool;
+
 	vec<vk::DescriptorSetLayoutBinding> bindings;
 
     void buildDescriptorSetLayout(GraphicsManager_API_data &api_data);

@@ -12,19 +12,6 @@ void Shader_API_Data::buildDescriptorSetLayout(
     GraphicsManager_API_data &api_data) {
     using namespace vk;
 
-    constexpr auto maxCount = 0x10;
-
-    vec<DescriptorPoolSize> sizes = {
-        {DescriptorType::eUniformBuffer, maxCount}};
-
-    DescriptorPoolCreateInfo pool_info = {};
-    pool_info.maxSets = maxCount;
-    pool_info.poolSizeCount = (uint32_t)sizes.size();
-    pool_info.pPoolSizes = sizes.data();
-
-    auto res = api_data.device.createDescriptorPool(&pool_info, nullptr, &descriptorPool);
-    THROW_VK_EX_IF_BAD(res);
-
     if (bindings.size() == 0)
         THROW_EXCEPTION(
             "Cannot build descriptor set layout! Bindings are not set!");
@@ -32,17 +19,6 @@ void Shader_API_Data::buildDescriptorSetLayout(
     layoutInfo.bindingCount = bindings.size();
     layoutInfo.pBindings = bindings.data();
     descriptorSetLayout = api_data.device.createDescriptorSetLayout(layoutInfo);
-
-    DescriptorSetAllocateInfo allocInfo = {};
-    // using the pool we just set
-    allocInfo.descriptorPool = descriptorPool;
-    // only 1 descriptor
-    allocInfo.descriptorSetCount = 1;
-    // using the global data layout
-    allocInfo.pSetLayouts = &descriptorSetLayout;
-
-    res = api_data.device.allocateDescriptorSets(&allocInfo, &descriptorSet);
-    THROW_VK_EX_IF_BAD(res);
 }
 
 void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,

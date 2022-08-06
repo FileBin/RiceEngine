@@ -21,7 +21,6 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     transform = t;
 
     constBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(ModelData));
-    constBuffer->setShader(material->getShader(), 0);
     constBuffer->updateData<ModelData>({});
     vertexBuffer = new_ptr<VertexBuffer>(g_mgr, mesh->vertexBuffer);
     indexBuffer = new_ptr<IndexBuffer>(g_mgr, mesh->indexBuffer);
@@ -33,13 +32,10 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     cmd->setActiveShader(material->getShader());
     cmd->bindVertexBuffer(vertexBuffer);
     cmd->bindIndexBuffer(indexBuffer);
-
-    vec<ptr<UniformBuffer>> uniform_buffers = {constBuffer};
+    cmd->bindUniformBuffer(constBuffer, 0);
     if(ub) {
-        uniform_buffers.push_back(ub);
+        cmd->bindUniformBuffer(ub, 1);
     }
-
-    //cmd->bindUniformBuffers(uniform_buffers);
     cmd->drawIndexed(indexBuffer);
     cmd->buildAll();
 

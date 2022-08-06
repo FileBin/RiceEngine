@@ -27,8 +27,6 @@ public:
 	UniformBuffer(ptr<GraphicsManager> g_mgr, uint size);
 	void reset(uint size);
 
-	void setShader(ptr<Shader> shader, uint binding);
-
 	template<typename T>
 	void updateData(const T& data) {
 		Buffer::setData((void*)&data, sizeof(T));

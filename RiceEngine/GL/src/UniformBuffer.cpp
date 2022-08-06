@@ -20,25 +20,6 @@ NSP_GL_BEGIN
 UniformBuffer::UniformBuffer(ptr<GraphicsManager> g_mgr, uint n)
     : Buffer(g_mgr, BufferUsage::Uniform, n) {}
 
-void UniformBuffer::setShader(ptr<Shader> sh, uint binding) {
-    shader = sh;
-    using namespace vk;
-
-    DescriptorBufferInfo info;
-    info.buffer = api_data->buffer;
-    info.offset = 0;
-    info.range = api_data->buffer_size;
-
-    auto write = WriteDescriptorSet()
-                     .setDescriptorType(DescriptorType::eUniformBuffer)
-                     .setDescriptorCount(1)
-                     .setDstSet(sh->api_data->descriptorSet)
-                     .setDstBinding(binding)
-                     .setPBufferInfo(&info);
-
-    get_api_data().device.updateDescriptorSets(1, &write, 0, nullptr);
-}
-
 void UniformBuffer::cleanup() {
     if (isAllocated())
         api_data->free();

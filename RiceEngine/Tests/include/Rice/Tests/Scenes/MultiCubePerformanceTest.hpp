@@ -42,13 +42,13 @@ class MultiCubePerformanceTestScene : public virtual Scene {
 
         setActiveCamera(cam_comp);
         constexpr uint cx = 10;
-        constexpr uint cy = 10;
+        constexpr uint cy = 1;
         constexpr uint cz = 10;
         constexpr uint count = cx * cy * cz;
         for (uint i = 0; i < count; ++i) {
             dbl x = i % cx;
             dbl y = (i / cx) % cy;
-            dbl z = (dbl)i / (cx * cy);
+            dbl z = floor(i / (cx * cy));
             Vector3 pos{x, y, z};
             pos *= 2.;
             pos -= Vector3{cx, cy, cz} * .5;

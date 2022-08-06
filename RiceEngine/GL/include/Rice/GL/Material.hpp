@@ -24,14 +24,16 @@ class Material {
     Material(ptr<GraphicsManager> manager, ptr<Shader> shader);
 
     template <typename T> void initUniformBuffer(const T &init_data) {
-        uniform_buffer = new_ptr<UniformBuffer>(graphics_manager, sizeof(T));
-        uniform_buffer->setShader(shader, 1);
+        initUniformBuffer(sizeof(T));
         uniform_buffer->updateData<T>(init_data);
     }
 
     template <typename T> void initUniformBuffer() {
-        uniform_buffer = new_ptr<UniformBuffer>(graphics_manager, sizeof(T));
-        uniform_buffer->setShader(shader, 1);
+        initUniformBuffer(sizeof(T));
+    }
+
+    void initUniformBuffer(size_t size) {
+        uniform_buffer = new_ptr<UniformBuffer>(graphics_manager, size);
     }
 
     ~Material() {}
