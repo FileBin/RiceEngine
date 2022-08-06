@@ -8,9 +8,10 @@ NSP_ENGINE_BEGIN
 
 SceneRender::SceneRender(ptr<Scene> scene, ptr<Engine> engine)
     : scene(scene), engine(engine) {
-        begin_cmd = new_ptr<Graphics::CommandBuffer>(engine->getGraphicsManager(), true);
-        begin_cmd->buildAll();
-    }
+    begin_cmd =
+        new_ptr<Graphics::CommandBuffer>(engine->getGraphicsManager(), true);
+    begin_cmd->buildAll();
+}
 
 void SceneRender::registerMesh(ptr<Graphics::RenderingMesh> mesh) {
     mesh->Register(mesh_collection.registerPtr(mesh));
@@ -21,8 +22,9 @@ void SceneRender::unregisterMesh(ptr<Graphics::RenderingMesh> mesh) {
 }
 
 void SceneRender::draw(ptr<Components::Camera> camera) {
-    uint count = update(camera);
     auto g_mgr = engine->getGraphicsManager();
+    g_mgr->sync();
+    uint count = update(camera);
     g_mgr->executeCmds(getCmds(count));
     // TODO add transparent queue
 }
@@ -33,8 +35,7 @@ uint SceneRender::update(ptr<Components::Camera> camera) {
     for (auto ptr : coll) {
         if (ptr) {
             auto proj = camera->getProjectionMatrix();
-            ptr->updateConstBuffer(camera->getViewMatrix(),
-                                   proj);
+            ptr->updateConstBuffer(camera->getViewMatrix(), proj);
             ptr->updateCmdBuffer();
             count++;
         }
@@ -55,8 +56,6 @@ vec<ptr<Graphics::CommandBuffer>> SceneRender::getCmds(uint count) {
     return output;
 }
 
-void SceneRender::cleanup() {
-    mesh_collection.cleanup();
-}
+void SceneRender::cleanup() { mesh_collection.cleanup(); }
 
 NSP_ENGINE_END
