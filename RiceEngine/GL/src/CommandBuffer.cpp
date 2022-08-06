@@ -31,7 +31,8 @@ void _build(uint i, CommandBuffer_API_data *api_data,
 }
 
 CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass)
-    : GraphicsComponentBase(g_mgr), api_data(new CommandBuffer_API_data) {
+    : GraphicsComponentBase(g_mgr, false),
+      api_data(new CommandBuffer_API_data) {
     api_data->build(get_api_data());
 
     api_data->begin_pass = begin_pass;
@@ -39,18 +40,19 @@ CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass)
     uint n = api_data->bufCount();
     need_recreate.resize(n);
 
-    g_mgr->resizeCommandBuffers->subscribe(
-        resizeReg, [this](Vector2i size) { // @suppress("Invalid arguments")
-            uint n = api_data->bufCount();
-            need_recreate.resize(n);
-            for (uint i = 0; i < n; ++i)
-                _build(i, api_data.get(), commands, get_api_data(),
-                       vk::Extent2D(size.x, size.y));
-        });
+    g_mgr->resizeCommandBuffers->subscribe(resizeReg, [this](Vector2i size) {
+        uint n = api_data->bufCount();
+        need_recreate.resize(n);
+        for (uint i = 0; i < n; ++i)
+            _build(i, api_data.get(), commands, get_api_data(),
+                   vk::Extent2D(size.x, size.y));
+    });
+    g_mgr->destroyCommandBuffers->subscribe(deleteReg, [this]() { cleanup(); });
 }
 
 void CommandBuffer::clear() {
     commands.clear();
+    api_data->cleanupDescriptorSet(get_api_data());
     auto n = api_data->bufCount();
     for (uint i = 0; i < n; ++i)
         api_data->reset(i);
@@ -97,9 +99,11 @@ void CommandBuffer::bindIndexBuffer(ptr<IndexBuffer> buffer) {
     commands.push_back(new_ptr<Command>(Command::BindIndexBuffer, buffer));
 }
 
-void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding) {
+void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> uniformBuffer,
+                                      uint binding) {
     needRecreate();
-    commands.push_back(new_ptr<Command>(Command::BindUniformBuffer, uniformBuffer, binding));
+    commands.push_back(
+        new_ptr<Command>(Command::BindUniformBuffer, uniformBuffer, binding));
 }
 
 void CommandBuffer::update() {

@@ -33,6 +33,8 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     void init(ptr<Window> window);
     void update();
 
+    void sync();
+
     void executeCmd(ptr<CommandBuffer> cmd);
     void executeCmds(vec<ptr<CommandBuffer>> cmds);
     void cleanup() override;
@@ -42,6 +44,7 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
                      resizeRenderPasses = ResizeEvent::create(),
                      resizeCommandBuffers = ResizeEvent::create(),
                      resizeGraphicsComponents = ResizeEvent::create();
+    ptr<DestroyEvent> destroyCommandBuffers = DestroyEvent::create();
     ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
 
   private:

@@ -12,10 +12,17 @@
 
 NSP_GL_BEGIN
 
-GraphicsManager_API_data& GraphicsComponentBase::get_api_data() { return *graphics_mgr->api_data; }
+GraphicsManager_API_data &GraphicsComponentBase::get_api_data() {
+    return *graphics_mgr->api_data;
+}
 
-GraphicsComponentBase::GraphicsComponentBase(ptr<GraphicsManager> g_mgr) : graphics_mgr(g_mgr) {
-	graphics_mgr->destroyEvent->subscribe(deleteReg, [this](){ cleanup(); }); // @suppress("Invalid arguments")
+GraphicsComponentBase::GraphicsComponentBase(ptr<GraphicsManager> g_mgr,
+                                             bool subscribe)
+    : graphics_mgr(g_mgr) {
+    if (subscribe)
+        graphics_mgr->destroyEvent->subscribe(deleteReg, [this]() {
+            cleanup();
+        }); // @suppress("Invalid arguments")
 }
 
 NSP_GL_END

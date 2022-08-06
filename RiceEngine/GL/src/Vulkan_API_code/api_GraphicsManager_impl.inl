@@ -616,6 +616,7 @@ void GraphicsManager_API_data::cleanup() {
     device.waitIdle();
 
     if (graphicsManager) {
+        graphicsManager->destroyCommandBuffers->invoke();
         graphicsManager->destroyEvent->invoke();
     }
     device.destroyDescriptorPool(descriptorPool);

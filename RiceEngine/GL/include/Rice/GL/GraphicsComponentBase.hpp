@@ -25,7 +25,7 @@ protected:
 
 	GraphicsManager_API_data& get_api_data();
 public:
-	GraphicsComponentBase(ptr<GraphicsManager> g_mgr);
+	GraphicsComponentBase(ptr<GraphicsManager> g_mgr, bool subscribe = true);
 };
 
 NSP_GL_END

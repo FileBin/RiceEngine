@@ -188,6 +188,8 @@ void Shader_API_Data::cleanup(GraphicsManager_API_data &api_data) {
 
     if (descriptorSetLayout)
         api_data.device.destroy(descriptorSetLayout);
+
+    cleanupPipeline(api_data);
 }
 
 NSP_GL_END

@@ -37,6 +37,10 @@ void GraphicsManager::update() {
     }
 }
 
+void GraphicsManager::sync() {
+    api_data->sync();
+}
+
 void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
     api_data->executeCmd({cmd->api_data->cmd[api_data->swapchainImageIndex]});
 }

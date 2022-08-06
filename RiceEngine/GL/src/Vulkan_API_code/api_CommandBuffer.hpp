@@ -39,7 +39,7 @@ struct CommandBuffer_API_data {
     void doCommand(ptr<CommandBuffer::Command> command, uint i,
                    GraphicsManager_API_data &api_data,
                    DescriptorSetCreator &creator);
-
+    void cleanupDescriptorSet(GraphicsManager_API_data &api_data);
     void cleanup(GraphicsManager_API_data &api_data);
 };
 

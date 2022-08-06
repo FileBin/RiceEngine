@@ -222,7 +222,7 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
     }
 }
 
-//NEEDIMPROVE 
+// NEEDIMPROVE
 inline void CommandBuffer_API_data::bindDescriptosSets(
     GraphicsManager_API_data &api_data, DescriptorSetCreator &creator, uint i) {
     if (!creator.writes.empty()) {
@@ -264,12 +264,21 @@ CommandBuffer_API_data::createDescriptorSet(GraphicsManager_API_data &api_data,
     THROW_VK_EX_IF_BAD(res);
     auto n = creator.writes.size();
     for (uint i = 0; i < n; ++i) {
-        auto& write = creator.writes[i];
+        auto &write = creator.writes[i];
         write.dstSet = descriptorSet;
         write.pBufferInfo = &creator.bufferInfos[i];
     }
     api_data.device.updateDescriptorSets(creator.writes.size(),
                                          creator.writes.data(), 0, nullptr);
+}
+
+inline void CommandBuffer_API_data::cleanupDescriptorSet(
+    GraphicsManager_API_data &api_data) {
+    if (descriptorPool) {
+        api_data.device.destroyDescriptorPool(descriptorPool);
+        descriptorPool = nullptr;
+        descriptorSet = nullptr;
+    }
 }
 
 inline void CommandBuffer_API_data::end(uint i) {
@@ -283,6 +292,7 @@ inline uint CommandBuffer_API_data::bufCount() { return cmd.size(); }
 
 inline void
 CommandBuffer_API_data::cleanup(GraphicsManager_API_data &api_data) {
+    cleanupDescriptorSet(api_data);
     api_data.device.free(api_data.commandPool, cmd);
 }
 
