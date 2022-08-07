@@ -45,7 +45,7 @@ void Window::setCursorPosition(Vector2i pos) {
 
 void Window::grabMouse(bool grab) {
     auto grabbed = grab ? SDL_TRUE : SDL_FALSE;
-    //use grab warping because grab by raw mouse data works strange
+    // use grab warping because grab by raw mouse data works strange
     SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
     SDL_SetRelativeMouseMode(grabbed);
 }
@@ -65,8 +65,9 @@ ptr<Window> Window::create(DescWindow desc) {
     }
 
     window->handle = WindowHandle{
-        SDL_CreateWindow("VulkanTest", desc.posx, desc.posy, desc.width,
-                         desc.height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN),
+        SDL_CreateWindow(desc.caption.toUTF8String().c_str(), desc.posx,
+                         desc.posy, desc.width, desc.height,
+                         SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN),
         SDL_DestroyWindow};
 
     window->created = true;
