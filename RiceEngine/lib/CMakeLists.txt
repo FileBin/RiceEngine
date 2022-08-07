@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.19)
+
+set(LIB_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
+set(LIB_BIN_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+if(WIN32)
+    set(LIB_BIN_PATH ${LIB_BIN_PATH}/win64)
+endif(WIN32)
+if(UNIX)
+    set(LIB_BIN_PATH ${LIB_BIN_PATH}/linux64)
+endif(UNIX)
+
+set(ANY_LIB_BIN_PATH ${LIB_BIN_PATH}/any CACHE INTERNAL "")
+
+message("lib any path: ${ANY_LIB_BIN_PATH}")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -D UNICODE ${LINKER_FLAGS}")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/clang")
+  	
+  	
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -D UNICODE ${LINKER_FLAGS}")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/gnu")
+  	
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/i8")
+  	
+  	
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	add_compile_options(/W4 /WX-)
+  	set(LIB_BIN_PATH "${LIB_BIN_PATH}/msvc")
+endif()
+
+set(LIB_BIN_PATH ${LIB_BIN_PATH} CACHE INTERNAL "")
+
+message("lib compiler path: ${LIB_BIN_PATH}")
+
+if(WIN32)
+    file(GLOB_RECURSE RICE_DLLs_x64 "${CMAKE_SOURCE_DIR}/lib/*.dll")
+endif(WIN32)

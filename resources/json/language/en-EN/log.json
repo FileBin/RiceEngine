@@ -1,6 +1,0 @@
-{
-    "log.begin" : "Log Created",
-    "log.end" : "Log End",
-    "log.already_created" : "Log is already created!",
-    "log.creation_error" : "Log creation error!"
-}

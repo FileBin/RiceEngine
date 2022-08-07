@@ -1,0 +1,11 @@
+#define APPNAME "Rice"
+
+//OPTIONS
+// API_VULKAN
+// TODO GL_API_OPENGL
+// TODO GL_API_DIRECTX
+#define GL_API_VULKAN
+
+#ifndef NDEBUG
+#define DEBUG_MODE
+#endif

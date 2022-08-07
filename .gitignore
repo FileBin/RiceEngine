@@ -1,4 +1,11 @@
-﻿.vs/
+﻿.cache/
+.vs/
 obj/
-bin/
-UniPlatformBuild/out/
+/bin/
+build/
+!build/.empty
+CMakeSource/CMakeCache.txt
+CMakeSource/CMakeFiles
+CMakeSource/Makefile
+CMakeSource/cmake_install.cmake
+CMakeSource/*.a
