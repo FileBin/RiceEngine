@@ -37,5 +37,15 @@ set(LIB_BIN_PATH ${LIB_BIN_PATH} CACHE INTERNAL "")
 message("lib compiler path: ${LIB_BIN_PATH}")
 
 if(WIN32)
-    file(GLOB_RECURSE RICE_DLLs_x64 "${CMAKE_SOURCE_DIR}/lib/*.dll")
+    file(GLOB_RECURSE RICE_DLLs "${CMAKE_SOURCE_DIR}/lib/*.dll")
 endif(WIN32)
+
+if(INSTALL_DEPENDICES)
+    if(WIN32)
+        install(FILES ${RICE_DLLs} DESTINATION ${CMAKE_INSTALL_PREFIX}/dll)
+    endif(WIN32)
+    install(DIRECTORY ${ANY_LIB_BIN_PATH}/include DESTINATION lib)
+    install(DIRECTORY ${LIB_BIN_PATH}/include DESTINATION lib)
+    install(DIRECTORY ${LIB_INCLUDE_PATH} DESTINATION .)
+
+endif(INSTALL_DEPENDICES)

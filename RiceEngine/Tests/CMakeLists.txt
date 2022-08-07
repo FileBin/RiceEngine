@@ -45,3 +45,4 @@ if(WIN32)
             ${RICE_DLLs_x64}                        # <--this is in-file
             ${CMAKE_BINARY_DIR})                    # <--this is out-file path
 endif(WIN32)
+
