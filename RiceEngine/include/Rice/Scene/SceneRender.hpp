@@ -1,3 +1,4 @@
+#include "Rice/GL/Material.hpp"
 #include "Rice/stdafx.hpp"
 
 NSP_ENGINE_BEGIN
@@ -11,8 +12,8 @@ NSP_COMPONENTS_END
 #pragma once
 
 #include "ClientScene.hpp"
-#include "Rice/GL/RenderingMesh.hpp"
 #include "Rice/Engine/ClientEngine.hpp"
+#include "Rice/GL/RenderingMesh.hpp"
 
 NSP_GL_BEGIN
 class RenderingMesh;
@@ -40,12 +41,17 @@ class SceneRender : public enable_ptr<SceneRender> {
     void draw(ptr<Components::Camera> camera);
     void cleanup();
 
+    ptr<Graphics::Shader> getShader(String name);
+
+    ptr<Graphics::Material> getMaterial(String name);
+
     ptr<Graphics::Shader> getOrCreateShader(
         String name, std::function<void(ptr<Graphics::Shader>)> shader_creator);
-    ptr<Graphics::Material> getOrCreateMaterial(
-        String name, std::function<ptr<Graphics::Material>(ptr<SceneRender>)>
-                         material_factory);
-                         
+    ptr<Graphics::Material>
+    getOrCreateMaterial(String name,
+                        std::function<ptr<Graphics::Material>(ptr<SceneRender>)>
+                            material_factory);
+
     ptr<Graphics::GraphicsManager> getGraphicsManager();
 
     ptr<ClientEngine> getEngine();

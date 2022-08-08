@@ -1,11 +1,9 @@
 #include "pch.h"
 
 #include "Rice/Engine/ClientEngine.hpp"
-#include "Rice/Engine/InputManager.hpp"
 #include "Rice/GL/CommandBuffer.hpp"
-#include "Rice/Math/Vectors/Vector2.hpp"
+#include "Rice/GL/Shader.hpp"
 #include "Rice/Scene/ClientScene.hpp"
-#include "Rice/Scene/Components/Camera.hpp"
 #include <Rice/GL/RenderingMesh.hpp>
 #include <Rice/Scene/SceneRender.hpp>
 
@@ -63,28 +61,47 @@ vec<ptr<Graphics::CommandBuffer>> SceneRender::getCmds(uint count) {
 
 void SceneRender::cleanup() { mesh_collection.cleanup(); }
 
+ptr<Graphics::Shader> SceneRender::getShader(String name) {
+    try {
+        return shaders.at(name);
+    } catch (const std::out_of_range &e) {
+        THROW_EXCEPTION(
+            fmt::format("Shader {} not found!", name.toUTF8String()).c_str());
+    }
+}
+
+ptr<Graphics::Material> SceneRender::getMaterial(String name) {
+    try {
+        return materials.at(name);
+    } catch (const std::out_of_range &e) {
+        THROW_EXCEPTION(
+            fmt::format("Material {} not found!", name.toUTF8String()).c_str());
+    }
+}
+
 ptr<Graphics::Shader> SceneRender::getOrCreateShader(
     String name, std::function<void(ptr<Graphics::Shader>)> shader_creator) {
-    auto it = shaders.find(name); // try to find shader in map
-    if (it == shaders.end()) {
+    try {
+        return shaders.at(name);
+    } catch (const std::out_of_range &e) {
         ptr<Graphics::Shader> shader{
             new Graphics::Shader(getGraphicsManager())}; // create shader
         shader_creator(shader); // call creator function to setup shader
         shaders[name] = shader; // add to map
         return shader;
     }
-    return it->second;
 }
 
 ptr<Graphics::Material> SceneRender::getOrCreateMaterial(
     String name,
     std::function<ptr<Graphics::Material>(ptr<SceneRender>)> material_factory) {
-    auto it = materials.find(name); // try to find material in map
-    if (it == materials.end()) {
-        return materials[name] =
-                   material_factory(shared_from_this()); // add to map
+    try {
+        return materials.at(name);
+    } catch (const std::out_of_range &e) {
+        ptr<Graphics::Material> material{material_factory(shared_from_this())};
+        materials[name] = material;
+        return material;
     }
-    return it->second;
 }
 
 ptr<ClientEngine> SceneRender::getEngine() {

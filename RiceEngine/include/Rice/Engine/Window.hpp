@@ -1,9 +1,4 @@
 ﻿#include "../stdafx.hpp"
-#include "Rice/Math/Vectors/Vector2i.hpp"
-#include "Rice/defines.h"
-#include <shared_mutex>
-#include <stop_token>
-#include <thread>
 
 typedef struct SDL_Window SDL_Window;
 typedef union SDL_Event SDL_Event;
