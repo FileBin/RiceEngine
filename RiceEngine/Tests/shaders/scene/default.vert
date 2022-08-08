@@ -6,6 +6,7 @@
 
 layout (location = 0) in vec3 inPosition;
 layout (location = 1) in vec3 inNormal;
+layout (location = 2) in vec2 inTexCoord;
 
 layout (location = 0) out FragShaderInput fragOutput;
 
@@ -28,7 +29,7 @@ void main() {
     const vec4 light_dir = vec4(2, -4, 3, 0);
 
     fragOutput.light_dir = normalize(light_dir) * constants.world_view;
-
+    fragOutput.texcoord.xy = inTexCoord;
 
     pos = pos * constants.projection;
     //flip y axis because opengl has y as down, but vulkan has y as up

@@ -1,4 +1,4 @@
-#include "Rice/Engine/Core.hpp"
+#include "Rice/Engine.hpp"
 #include "Rice/Engine/DefaultCoreLoader.hpp"
 #include "Rice/Tests/Scenes/MultiCubePerformanceTest.hpp"
 

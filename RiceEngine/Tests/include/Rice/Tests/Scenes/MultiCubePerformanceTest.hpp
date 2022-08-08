@@ -1,18 +1,18 @@
-#include "Rice/Engine/Engine.hpp"
+#undef RICE_SOURCE
+
+#include "Rice/Engine.hpp"
+#include "Rice/Engine/ClientEngine.hpp"
 #include "Rice/GL/Material.hpp"
 #include "Rice/GL/Mesh.hpp"
 #include "Rice/GL/Model.hpp"
 #include "Rice/GL/Shader.hpp"
-#include "Rice/Math/Math.hpp"
-#include "Rice/Math/Vectors/Vector3f.hpp"
+#include "Rice/Scene/ClientScene.hpp"
 #include "Rice/Scene/Components/Camera.hpp"
 #include "Rice/Scene/Components/ModelRender.hpp"
 #include "Rice/Scene/Components/Transform.hpp"
 #include "Rice/Scene/Scene.hpp"
 #include "Rice/Tests/Scripts/CameraMover.hpp"
 #include "Rice/defines.h"
-#include "Rice/stdafx.hpp"
-#include "fmt/xchar.h"
 
 #pragma once
 
@@ -28,7 +28,8 @@ class MultiCubePerformanceTestScene : public virtual Scene {
     }
 
     void init() override {
-        auto en = getEngine();
+        auto en = getClientEngine();
+        auto ren = getSceneRender();
 
         auto cam_obj = createEnabled("Camera");
         auto cam_transform = new_ptr<Components::Transform>();
@@ -71,11 +72,11 @@ class MultiCubePerformanceTestScene : public virtual Scene {
             cube_model->setSubMesh(cube_mesh, 0);
             cube_render->setModel(cube_model);
 
-            auto cube_material = en->getOrCreateMaterial(
+            auto cube_material = ren->getOrCreateMaterial(
                 fmt::format("cube_material ({})", i),
-                [i](ptr<EngineClient> en) -> ptr<Graphics::Material> {
-                    auto shader = en->getOrCreateShader(
-                        fmt::format("solid ({})", i), [](ptr<Graphics::Shader> shader) -> void {
+                [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
+                    auto shader = ren->getOrCreateShader(
+                        "solid", [](ptr<Graphics::Shader> shader) -> void {
                             shader->loadShader("shaders/default.vert.spv",
                                                Graphics::Shader::Vertex);
                             shader->loadShader("shaders/diffuse.frag.spv",
@@ -89,7 +90,7 @@ class MultiCubePerformanceTestScene : public virtual Scene {
                             shader->build();
                         });
                     auto material = new_ptr<Graphics::Material>(
-                        en->getGraphicsManager(), shader);
+                        ren->getGraphicsManager(), shader);
                     Vector4f color;
                     color.x = Math::random();
                     color.y = Math::random();

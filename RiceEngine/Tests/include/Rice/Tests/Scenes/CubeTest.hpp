@@ -1,3 +1,5 @@
+#undef RICE_SOURCE
+
 #include "Rice/Engine.hpp"
 #include "Rice/Engine/ClientEngine.hpp"
 #include "Rice/GL/Material.hpp"
@@ -11,8 +13,6 @@
 #include "Rice/Scene/Scene.hpp"
 #include "Rice/Tests/Scripts/CameraMover.hpp"
 #include "Rice/defines.h"
-#include "Rice/stdafx.hpp"
-#include "fmt/xchar.h"
 
 #pragma once
 

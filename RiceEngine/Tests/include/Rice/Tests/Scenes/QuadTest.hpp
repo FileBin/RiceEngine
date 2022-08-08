@@ -1,4 +1,6 @@
-#include "Rice/Engine/Engine.hpp"
+#undef RICE_SOURCE
+
+#include "Rice/Engine.hpp"
 #include "Rice/GL/Mesh.hpp"
 #include "Rice/GL/Model.hpp"
 #include "Rice/GL/Shader.hpp"
@@ -7,7 +9,6 @@
 #include "Rice/Scene/Components/Transform.hpp"
 #include "Rice/Scene/Scene.hpp"
 #include "Rice/defines.h"
-#include "Rice/stdafx.hpp"
 
 #pragma once
 
@@ -22,7 +23,8 @@ class QuadTestScene : public virtual Scene {
     }
 
     void init() override {
-        auto en = getEngine();
+        auto en = getClientEngine();
+        auto ren = getSceneRender();
 
         auto cam_obj = createEnabled("Camera");
         auto cam_transform = new_ptr<Components::Transform>();
@@ -53,9 +55,9 @@ class QuadTestScene : public virtual Scene {
         cube_model->setSubMesh(cube_mesh, 0);
         cube_render->setModel(cube_model);
 
-        auto cube_material = en->getOrCreateMaterial(
-            "cube_material", [](ptr<EngineClient> en) -> ptr<Graphics::Material> {
-                auto shader = en->getOrCreateShader(
+        auto cube_material = ren->getOrCreateMaterial(
+            "cube_material", [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
+                auto shader = ren->getOrCreateShader(
                     "solid", [](ptr<Graphics::Shader> shader) -> void {
                         shader->loadShader("shaders/solid.vert.spv",
                                            Graphics::Shader::Vertex);
@@ -65,7 +67,7 @@ class QuadTestScene : public virtual Scene {
                         shader->setVertexStrideAndLayout<Graphics::Vertex>();
                         shader->build();
                     });
-                auto material = new_ptr<Graphics::Material>(en->getGraphicsManager(), shader);
+                auto material = new_ptr<Graphics::Material>(ren->getGraphicsManager(), shader);
                 return material;
             });
 

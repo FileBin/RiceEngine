@@ -1,4 +1,3 @@
-#undef RICE_SOURCE
 #include "Rice/Engine.hpp"
 #include "Rice/Engine/DefaultCoreLoader.hpp"
 
