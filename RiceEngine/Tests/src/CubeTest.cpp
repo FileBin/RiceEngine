@@ -1,10 +1,12 @@
-#include "Rice/Engine/Core.hpp"
+#undef RICE_SOURCE
+#include "Rice/Engine.hpp"
 #include "Rice/Engine/DefaultCoreLoader.hpp"
+
 #include "Rice/Tests/Scenes/CubeTest.hpp"
 
 int main() {
     using namespace Rice;
     using namespace Rice::Tests;
-    Core::runNew(new_ptr<DefaultCoreLoader>("CoreTest", CubeTestScene::create()));
+    ClientCore::runNew(new_ptr<DefaultCoreLoader>("CubeTest", CubeTestScene::create()));
 	return 0;
 }

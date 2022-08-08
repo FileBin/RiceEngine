@@ -5,11 +5,12 @@
 #include "Rice/Util/ByteStream.hpp"
 #include "Rice/Util/String.hpp"
 #include "Rice/defines.h"
+#include <memory>
 
 NSP_ENGINE_BEGIN
 
-Object::Object(ptr<Scene> scene, String name, UUID uuid)
-    : scene(scene), name(name), selfUUID(uuid) {}
+Object::Object(String name)
+    : name(name) {}
 
 void Object::init(ptr<Object> parent) {
     this->parent = parent;
@@ -82,7 +83,8 @@ void Object::onDisable() { events.stateChanged->invoke(false); }
 bool Object::isEnabled() { return updateRegistration.isRegistered(); }
 
 ptr<Object> Object::createEmpty(String name) {
-    ptr<Object> obj{new Object(getScene(), name, getScene()->getNextUUID())};
+    ptr<Object> obj{new Object(name) };
+    getScene()->Register(obj);
     obj->init(shared_from_this());
     children.push_back(obj);
     return obj;
@@ -94,13 +96,6 @@ ptr<Object> Object::createEnabled(String name) {
     return o;
 }
 
-ptr<Scene> Object::getScene() {
-    auto scene_lock = scene.lock();
-    if (!scene_lock)
-        THROW_NULL_PTR_EXCEPTION(scene_lock.get());
-    return scene_lock;
-}
-
 ptr<Object> Object::getParent() {
     auto parent_lock = parent.lock();
     if (!parent_lock)
@@ -110,6 +105,7 @@ ptr<Object> Object::getParent() {
 
 void Object::addComponent(ptr<Components::PackableComponent> component) {
     components.registerPtr(component);
+    getScene()->Register(component);
     component->init(shared_from_this());
     component->enable();
 }
@@ -119,16 +115,16 @@ ObjectData Object::pack() {
 
     ObjectData data;
     data.enabled = isEnabled();
-    data.selfUUID = selfUUID;
+    data.selfUUID = getUUID();
     if (parent_lock)
-        data.parentUUID = parent_lock->selfUUID;
+        data.parentUUID = parent_lock->getUUID();
     else
         data.parentUUID = 0;
 
     uint n = children.size();
     data.childrenUUID.resize(n);
     for (uint i = 0; i < n; i++) {
-        data.childrenUUID[i] = children[i]->selfUUID;
+        data.childrenUUID[i] = children[i]->getUUID();
     }
 
     auto components_vec = components.getCollection();
@@ -145,9 +141,9 @@ ObjectData Object::pack() {
 }
 
 ptr<Object>
-ObjectData::unpack(ptr<Scene> scene,
+ObjectData::unpack(ptr<SceneBase> scene,
                    std::function<ObjectData(UUID)> getRelativesData) {
-    auto parent = scene->getObject(parentUUID);
+    auto parent = std::dynamic_pointer_cast<Object>(scene->getRegistered(parentUUID));
 
     if (!parent) {
         parent = getRelativesData(parentUUID).unpack(scene, getRelativesData);
@@ -161,7 +157,7 @@ ObjectData::unpack(ptr<Scene> scene,
 ptr<Object>
 ObjectData::unpack(ptr<Object> parent,
                    std::function<ObjectData(UUID)> getRelativesData) {
-    ptr<Object> inst{new Object(parent->getScene(), name, selfUUID)};
+    ptr<Object> inst{new Object(name)};
     inst->init(parent);
 
     if (enabled)

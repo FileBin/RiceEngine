@@ -1,5 +1,4 @@
-#include "../stdafx.hpp"
-#include "Rice/Util/Event.hpp"
+#include "Rice/stdafx.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -11,24 +10,22 @@ NSP_ENGINE_END
 
 #pragma once
 
-#include "Component.hpp"
+#include <Rice/Engine/Log.hpp>
+
+#include "SceneBase.hpp"
 #include "Rice/Scene/PackableComponent.hpp"
-#include "Rice/Util/RegisterCollection.hpp"
-#include "Scene.hpp"
 
 NSP_ENGINE_BEGIN
 
-class Object : public enable_ptr<Object>, public IPackable<ObjectData> {
-    friend class Scene;
+class Object : public SceneObjectBase,
+               public enable_ptr<Object>,
+               public IPackable<ObjectData> {
+    friend class SceneBase;
     friend class Components::Component;
 
   private:
-    UUID selfUUID;
-
     wptr<Object> parent;
     vec<ptr<Object>> children;
-
-    wptr<Scene> scene;
     String name;
     RegisterCollection<Components::PackableComponent> components;
 
@@ -39,7 +36,7 @@ class Object : public enable_ptr<Object>, public IPackable<ObjectData> {
 
     friend struct ObjectData;
 
-    Object(ptr<Scene> scene, String name, UUID uuid);
+    Object(String name);
 
     void init(ptr<Object> parent);
     void update();
@@ -56,11 +53,8 @@ class Object : public enable_ptr<Object>, public IPackable<ObjectData> {
         ptr<Event<bool>> stateChanged = Event<bool>::create();
         ptr<Event<>> update = Event<>::create();
     } events;
-    ptr<Scene> getScene();
     ptr<Object> createEmpty(String name);
     ptr<Object> createEnabled(String name);
-
-    UUID getUUID() { return selfUUID; }
 
     void addComponent(ptr<Components::PackableComponent> component);
 
@@ -115,7 +109,7 @@ struct ObjectData : public IPackable<data_t> {
 
     static ObjectData unpack(data_t);
 
-    ptr<Object> unpack(ptr<Scene> scene,
+    ptr<Object> unpack(ptr<SceneBase> scene,
                        std::function<ObjectData(UUID)> getRelativesData);
 
   private:

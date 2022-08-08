@@ -14,8 +14,8 @@ NSP_NET_END
 
 #pragma once
 
-#include "Rice/Engine/Engine.hpp"
-#include "Rice/Scene/Scene.hpp"
+#include "Rice/Engine/EngineBase.hpp"
+#include "Rice/Scene/SceneBase.hpp"
 #include "IServer.hpp"
 #include "NetProtocol.hpp"
 
@@ -28,7 +28,7 @@ class VirtualClient {
         String msg;
     };
   private:
-    ptr<Scene> scene;
+    ptr<SceneBase> scene;
     ptr<IServer> server;
     PlayerData player_data;
     ClientInfo info;

@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "Rice/Scene/Object.hpp"
 #include "Rice/Util/Exceptions/Exception.hpp"
 #include <Rice/Scene/Components/Camera.hpp>
@@ -16,7 +16,7 @@ ptr<Transform> Camera::getTransform() {
 }
 // TODO add aspect ratio
 Matrix4x4f Camera::getProjectionMatrix() {
-    return Matrix4x4::perspective(fov, getEngine()->getAspectRatio(),
+    return Matrix4x4::perspective(fov, getClientEngine()->getAspectRatio(),
                                   near_plane, far_plane);
 }
 

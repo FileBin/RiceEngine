@@ -1,3 +1,4 @@
+#include "Rice/Scene/Object.hpp"
 #include "pch.h"
 
 #include "Rice/Networking/VirtualClient.hpp"
@@ -6,6 +7,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <stop_token>
 #include <string>
@@ -32,19 +34,19 @@ VirtualClient::JoinResult VirtualClient::join(ptr<IServer> serv) {
     if (!response.is(Response::SEND_UUID))
         THROW_EXCEPTION("Server response is not valid");
 
-    auto servUUID = response.getUUID();
+    auto servUUID = response.asUUID();
 
     // try get key from local storage
     bool has_key = tryGetKey(*servUUID, key);
 
     response = serv->response(Request::joinRequest(info, key));
     if (response.is(Response::JOIN_REFUSE))
-        return {false, response.getRefuseData()->msg};
+        return {false, response.asRefuse()->msg};
 
     if (!response.is(Response::JOIN_ACCEPT))
         THROW_EXCEPTION("Server response is not valid");
 
-    auto acceptData = response.getAcceptData();
+    auto acceptData = response.asAccept();
     player_data = acceptData->initial_data;
     if (!has_key) {
         //if connected first time add key to local storage
@@ -96,7 +98,7 @@ void VirtualClient::clientThreadFn(std::stop_token stoken) {
         if (!resp.is(Response::SEND_SCENE_STATE)) {
             THROW_EXCEPTION("Server response is not valid");
         }
-        auto scene_state = resp.getSceneState();
+        auto scene_state = resp.asSceneState();
         auto &objects = scene_state->objects_state;
 
         uint n = objects.size();
@@ -107,14 +109,14 @@ void VirtualClient::clientThreadFn(std::stop_token stoken) {
 
         for (uint i = 0; i < n; i++) {
             auto &obj = objects[i];
-            auto scene_obj = scene->getObject(obj.objectUUID);
+            auto scene_obj = std::dynamic_pointer_cast<Object>(scene->getRegistered(obj.objectUUID));
             if (!scene_obj) {
                 // push it into the scene
 
                 auto get_obj_func = [this](UUID uuid) {
                     auto obj_resp =
                         server->response(Request::getObject(key, info, uuid));
-                    return obj_resp.getObject()->object_data;
+                    return obj_resp.asObjectData()->object_data;
                 };
 
                 get_obj_func(obj.objectUUID).unpack(scene, get_obj_func);

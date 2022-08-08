@@ -30,7 +30,7 @@ set(RICE_INCLUDE_PATH
 CACHE INTERNAL "")
 
 include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_dependencies(${PROJECT_NAME} ${RICE_GL_NAME})
 add_dependencies(${PROJECT_NAME} ${RICE_MATH_NAME})

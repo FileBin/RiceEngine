@@ -1,8 +1,7 @@
-#include "../stdafx.hpp"
-
-#include "Core.hpp"
-#include "Rice/Scene/Scene.hpp"
-#include "Rice/namespaces.h"
+#pragma once
+#undef RICE_SOURCE
+#include "Rice/Engine.hpp"
+#include "Rice/Engine/Core.hpp"
 
 NSP_ENGINE_BEGIN
 

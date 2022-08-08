@@ -1,33 +1,48 @@
-﻿#include "Rice/defines.h"
-#include <Rice/Engine/Core.hpp>
+﻿#include "pch.h"
+#include "Rice/Engine/ClientEngine.hpp"
+#include "Rice/Scene/ClientScene.hpp"
+#include <Rice/Engine/ClientCore.hpp>
 
 using namespace std::chrono;
 using namespace std::this_thread;
 
+ptr<Rice::ClientScene> castScene(ptr<Rice::SceneBase> scene) {
+    auto s = std::dynamic_pointer_cast<Rice::ClientScene>(scene);
+    if (!s) {
+        THROW_EXCEPTION("ClientCore::loadScene: scene is not ClientScene");
+    }
+    return s;
+}
+
 NSP_ENGINE_BEGIN
+
+ptr<ClientEngine> ClientCore::getClientEngine() {
+    return std::dynamic_pointer_cast<ClientEngine>(engine);
+}
 
 // runs new instance of Core via core loader
 // interface defined by user or default implementation
-void Core::runNew(ptr<Loader> core_loader) {
-    auto core = ptr<Core>(new Core(core_loader));
+void ClientCore::runNew(ptr<ClientCore::Loader> core_loader) {
+    auto core = ptr<ClientCore>(new ClientCore(core_loader));
     core->init();
     core->run();
     core->close();
 }
 
-Core::Core(ptr<Loader> core_loader) : loader(core_loader) {}
+ClientCore::ClientCore(ptr<Loader> core_loader)
+    : CoreBase(), loader(core_loader) {}
 
-Core::~Core() {}
+ClientCore::~ClientCore() {}
 
 // scene loading function in parallel with the main thread
-void Core::loadScene(ptr<Scene> new_scene) {
+void ClientCore::loadScene(ptr<SceneBase> new_scene) {
     if (loadingScene)
         return;
-    loadingScene = new_scene;
+    loadingScene = castScene(new_scene);
 }
 
 // scene checking and loading function
-void Core::loadSceneImmediate() {
+void ClientCore::loadSceneImmediate() {
     if (!loadingScene)
         return;
     if (activeScene) {
@@ -36,14 +51,15 @@ void Core::loadSceneImmediate() {
     activeScene = loadingScene;
     loadingScene = nullptr;
     activeScene->setup(engine);
-    Core::runTask([this]() {
+    ClientCore::runTask([this]() {
         activeScene->load();
         // activeScene->PostInit();
     });
 }
 // init core
-bool Core::init() {
-    engine = Engine::create(shared_from_this());
+bool ClientCore::init() {
+    auto cli_engine = ClientEngine::create(shared_from_this());
+    engine = static_pointer_cast<EngineBase>(cli_engine);
 
     // TODO AL::Init();
     Log::init();
@@ -66,21 +82,21 @@ bool Core::init() {
     loader->initCore(initParams);
 
     if (initParams.loading_scene) {
-        loadingScreenScene = initParams.loading_scene;
+        loadingScreenScene = castScene(initParams.loading_scene);
         loadingScreenScene->setup(engine);
         loadingScreenScene->init();
     }
     // loadingScreenScene->PostInit();
 
     is_init = true;
-    loader->postInitCore(engine);
+    loader->postInitCore(cli_engine);
     return true;
 }
 
 // run the core loop
-void Core::run() {
+void ClientCore::run() {
     if (is_init) {
-        auto fixedDeltaTime = 1000. / fps; // calculate fixed delta time
+        auto fixedDeltaTime = 1000. / update_rate; // calculate fixed delta time
         num interval =
             (num)fixedDeltaTime - 1; // calculate the interval between frames
         auto deltaTime = fixedDeltaTime; // calculate the delta time
@@ -116,8 +132,8 @@ void Core::run() {
 }
 
 // close the window and clean up everything
-void Core::close() {
-    loader->onClose(engine);
+void ClientCore::close() {
+    loader->onClose(getClientEngine());
     is_init = false;
     if (loadingScreenScene)
         loadingScreenScene->close();
@@ -126,7 +142,7 @@ void Core::close() {
     Log::close();
 }
 
-bool Core::runFrame() {
+bool ClientCore::runFrame() {
     if (wnd->isExit())
         return false;
 

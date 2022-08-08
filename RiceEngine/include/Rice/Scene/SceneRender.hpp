@@ -1,7 +1,4 @@
-#include "../stdafx.hpp"
-#include "Rice/GL/CommandBuffer.hpp"
-#include "Rice/GL/GraphicsManager.hpp"
-#include <cstddef>
+#include "Rice/stdafx.hpp"
 
 NSP_ENGINE_BEGIN
 class SceneRender;
@@ -13,8 +10,9 @@ NSP_COMPONENTS_END
 
 #pragma once
 
-#include "Scene.hpp"
-#include "../Engine/Engine.hpp"
+#include "ClientScene.hpp"
+#include "Rice/GL/RenderingMesh.hpp"
+#include "Rice/Engine/ClientEngine.hpp"
 
 NSP_GL_BEGIN
 class RenderingMesh;
@@ -22,22 +20,36 @@ NSP_GL_END
 
 NSP_ENGINE_BEGIN
 
-class SceneRender {
-private:
-    wptr<Scene> scene;
-    ptr<Engine> engine;
+class SceneRender : public enable_ptr<SceneRender> {
+  private:
+    map<String, ptr<Graphics::Shader>> shaders;
+    map<String, ptr<Graphics::Material>> materials;
+
+    wptr<ClientScene> scene;
+    wptr<ClientEngine> engine;
     Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
     ptr<Graphics::CommandBuffer> begin_cmd;
 
     uint update(ptr<Components::Camera> camera);
     vec<ptr<Graphics::CommandBuffer>> getCmds(uint count);
 
-public:
-    SceneRender(ptr<Scene> scene, ptr<Engine> engine);
+  public:
+    SceneRender(ptr<ClientScene> scene, ptr<ClientEngine> engine);
     void registerMesh(ptr<Graphics::RenderingMesh> mesh);
     void unregisterMesh(ptr<Graphics::RenderingMesh> mesh);
     void draw(ptr<Components::Camera> camera);
     void cleanup();
+
+    ptr<Graphics::Shader> getOrCreateShader(
+        String name, std::function<void(ptr<Graphics::Shader>)> shader_creator);
+    ptr<Graphics::Material> getOrCreateMaterial(
+        String name, std::function<ptr<Graphics::Material>(ptr<SceneRender>)>
+                         material_factory);
+                         
+    ptr<Graphics::GraphicsManager> getGraphicsManager();
+
+    ptr<ClientEngine> getEngine();
+    ptr<ClientScene> getScene();
 };
 
 NSP_ENGINE_END

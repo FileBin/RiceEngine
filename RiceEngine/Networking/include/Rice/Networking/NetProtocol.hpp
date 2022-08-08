@@ -9,9 +9,9 @@ NSP_NET_END
 
 #pragma once
 
-#include "Rice/Engine/Engine.hpp"
-#include "Rice/Scene/Scene.hpp"
-
+#include "Rice/Engine/EngineBase.hpp"
+#include "Rice/Scene/SceneBase.hpp"
+#include "Rice/Scene/Object.hpp"
 NSP_NET_BEGIN
 
 #undef GetObject
@@ -159,7 +159,7 @@ class Response {
         PlayerData initial_data;
     };
 
-    ptr<JoinAccept> getAcceptData() {
+    ptr<JoinAccept> asAccept() {
         if (type == JOIN_ACCEPT)
             return ptr<JoinAccept>(data_copyT<JoinAccept>());
         return nullptr;
@@ -169,7 +169,7 @@ class Response {
         String msg;
     };
 
-    ptr<JoinRefuse> getRefuseData() {
+    ptr<JoinRefuse> asRefuse() {
         if (type == JOIN_REFUSE)
             return ptr<JoinRefuse>(data_copyT<JoinRefuse>());
         return nullptr;
@@ -179,7 +179,7 @@ class Response {
         ObjectData object_data;
     };
 
-    ptr<SendObject> getObject() {
+    ptr<SendObject> asObjectData() {
         if (type == SEND_OBJECT)
             return ptr<SendObject>(data_copyT<SendObject>());
         return nullptr;
@@ -190,13 +190,13 @@ class Response {
         vec<ObjectSendData> objects_state;
     };
 
-    ptr<SendSceneState> getSceneState() {
+    ptr<SendSceneState> asSceneState() {
         if (type == SEND_SCENE_STATE)
             return ptr<SendSceneState>(data_copyT<SendSceneState>());
         return nullptr;
     }
 
-    ptr<UUID> getUUID() {
+    ptr<UUID> asUUID() {
         if (type == SEND_UUID)
             return ptr<UUID>(data_copyT<UUID>());
         return nullptr;

@@ -1,6 +1,5 @@
-#include "Rice/defines.h"
-#include <Rice/Engine/Engine.hpp>
-#include <Rice/Scene/Components/ModelRender.hpp>
+#include "pch.h"
+
 using namespace Rice::Graphics;
 
 NSP_COMPONENTS_BEGIN
@@ -10,7 +9,7 @@ ModelRender::ModelRender(ptr<Model> model) { this->model = model; }
 ModelRender::ModelRender() {}
 
 void ModelRender::onEnable() {
-    auto g_mgr = getEngine()->getGraphicsManager();
+    auto g_mgr = getClientEngine()->getGraphicsManager();
 
     auto transform = getObject()->getComponent<Transform>();
     if(!transform) {

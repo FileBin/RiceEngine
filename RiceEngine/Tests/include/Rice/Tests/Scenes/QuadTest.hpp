@@ -54,7 +54,7 @@ class QuadTestScene : public virtual Scene {
         cube_render->setModel(cube_model);
 
         auto cube_material = en->getOrCreateMaterial(
-            "cube_material", [](ptr<Engine> en) -> ptr<Graphics::Material> {
+            "cube_material", [](ptr<EngineClient> en) -> ptr<Graphics::Material> {
                 auto shader = en->getOrCreateShader(
                     "solid", [](ptr<Graphics::Shader> shader) -> void {
                         shader->loadShader("shaders/solid.vert.spv",

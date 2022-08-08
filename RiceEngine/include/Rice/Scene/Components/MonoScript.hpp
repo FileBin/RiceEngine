@@ -8,9 +8,9 @@ NSP_COMPONENTS_END
 #pragma once
 #include "Rice/Scene/PackableComponentT.hpp"
 
-#include "Rice/Scene/Scene.hpp"
+#include "Rice/Scene/SceneBase.hpp"
 #include "Rice/Scene/SceneRender.hpp"
-#include "Rice/Engine/Engine.hpp"
+#include "Rice/Engine/EngineBase.hpp"
 
 NSP_COMPONENTS_BEGIN
     template<typename T>

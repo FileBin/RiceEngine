@@ -9,8 +9,8 @@ NSP_NET_END
 
 #pragma once
 
-#include "Rice/Engine/Engine.hpp"
-#include "Rice/Scene/Scene.hpp"
+#include "Rice/Engine/EngineBase.hpp"
+#include "Rice/Scene/SceneBase.hpp"
 #include "NetProtocol.hpp"
 #include "IServer.hpp"
 
@@ -22,18 +22,18 @@ class VirtualServer : public IServer {
       private:
         friend class VirtualServer;
         ptr<VirtualServer> server;
-        ptr<Scene> scene;
+        ptr<SceneBase> scene;
 
       protected:
         ptr<VirtualServer> getServer();
-        ptr<Scene> getScene();
+        ptr<SceneBase> getScene();
         virtual Response onJoin(ClientInfo client, Request request);
         virtual void onLeave(ClientInfo cleint);
     };
 
     VirtualServer(ptr<IManager> manager);
 
-    void setScene(ptr<Scene> scene);
+    void setScene(ptr<SceneBase> scene);
 
     Response response(Request request) override;
 
@@ -41,7 +41,7 @@ class VirtualServer : public IServer {
     std::jthread server_thread;
 
     ptr<IManager> manager;
-    ptr<Scene> scene;
+    ptr<SceneBase> scene;
     Util::RegisterCollection<ClientInfo> clients;
 };
 

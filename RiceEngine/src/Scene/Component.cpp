@@ -1,7 +1,7 @@
-#include "Rice/Scene/Component.hpp"
-#include "Rice/Scene/Scene.hpp"
-#include "Rice/Util/Exceptions.hpp"
-#include "Rice/defines.h"
+#include "pch.h"
+
+#include <Rice/Scene/Component.hpp>
+#include <Rice/Scene/Object.hpp>
 
 NSP_COMPONENTS_BEGIN
 
@@ -65,14 +65,6 @@ void Component::disable() {
 bool Component::isEnabled() { return updateRegistration.isRegistered(); }
 
 bool Component::isSceneLoaded() { return getScene()->isLoaded(); }
-
-ptr<Scene> Component::getScene() { return getObject()->getScene(); }
-
-ptr<Engine> Component::getEngine() { return getScene()->getEngine(); }
-
-ptr<SceneRender> Component::getSceneRender() {
-    return getScene()->getSceneRender();
-}
 
 ptr<Object> Component::getObject() {
     auto lock = object.lock();

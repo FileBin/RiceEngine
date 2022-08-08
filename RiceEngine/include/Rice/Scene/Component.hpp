@@ -1,4 +1,5 @@
 #include "../stdafx.hpp"
+#include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/Util/Event.hpp"
 
 NSP_COMPONENTS_BEGIN
@@ -10,15 +11,12 @@ NSP_COMPONENTS_END
 #pragma once
 
 NSP_ENGINE_BEGIN
-class Scene;
-class SceneRender;
 class Object;
-class Engine;
 NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN
 
-class Component : public enable_ptr<Component>, public IPackable<data_t> {
+class Component : public SceneObjectBase, public enable_ptr<Component>, public IPackable<data_t> {
     friend class Rice::Object;
 
   private:
@@ -37,10 +35,6 @@ class Component : public enable_ptr<Component>, public IPackable<data_t> {
   protected:
     bool isSceneLoaded();
 
-    ptr<Engine> getEngine();
-    ptr<Scene> getScene();
-    ptr<SceneRender> getSceneRender();
-
     virtual void onEnable();
     virtual void onDisable();
     virtual void onUpdate();
@@ -56,7 +50,7 @@ class Component : public enable_ptr<Component>, public IPackable<data_t> {
 
     bool isEnabled();
 
-    virtual ~Component();
+    ~Component() override;
 };
 
 NSP_COMPONENTS_END

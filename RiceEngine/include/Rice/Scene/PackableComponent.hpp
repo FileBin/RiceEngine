@@ -6,7 +6,7 @@
 
 NSP_ENGINE_BEGIN
 class Object;
-class Engine;
+class EngineClient;
 NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN

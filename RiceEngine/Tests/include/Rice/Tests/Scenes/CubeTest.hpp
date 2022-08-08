@@ -1,8 +1,10 @@
-#include "Rice/Engine/Engine.hpp"
+#include "Rice/Engine.hpp"
+#include "Rice/Engine/ClientEngine.hpp"
 #include "Rice/GL/Material.hpp"
 #include "Rice/GL/Mesh.hpp"
 #include "Rice/GL/Model.hpp"
 #include "Rice/GL/Shader.hpp"
+#include "Rice/Scene/ClientScene.hpp"
 #include "Rice/Scene/Components/Camera.hpp"
 #include "Rice/Scene/Components/ModelRender.hpp"
 #include "Rice/Scene/Components/Transform.hpp"
@@ -25,7 +27,8 @@ class CubeTestScene : public virtual Scene {
     }
 
     void init() override {
-        auto en = getEngine();
+        auto en = getClientEngine();
+        auto ren = getSceneRender();
 
         auto cam_obj = createEnabled("Camera");
         auto cam_transform = new_ptr<Components::Transform>();
@@ -60,10 +63,10 @@ class CubeTestScene : public virtual Scene {
             cube_model->setSubMesh(cube_mesh, 0);
             cube_render->setModel(cube_model);
 
-            auto cube_material = en->getOrCreateMaterial(
+            auto cube_material = ren->getOrCreateMaterial(
                 "cube_material", 
-                [](ptr<Engine> en) -> ptr<Graphics::Material> {
-                    auto shader = en->getOrCreateShader(
+                [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
+                    auto shader = ren->getOrCreateShader(
                         "solid", [](ptr<Graphics::Shader> shader) -> void {
                             shader->loadShader("shaders/default.vert.spv",
                                                Graphics::Shader::Vertex);
@@ -78,7 +81,7 @@ class CubeTestScene : public virtual Scene {
                             shader->build();
                         });
                     auto material = new_ptr<Graphics::Material>(
-                        en->getGraphicsManager(), shader);
+                        ren->getGraphicsManager(), shader);
 
                     material->initUniformBuffer<Vector4f>({0, 1, 0, 1});
 

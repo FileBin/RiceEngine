@@ -73,7 +73,7 @@ class MultiCubePerformanceTestScene : public virtual Scene {
 
             auto cube_material = en->getOrCreateMaterial(
                 fmt::format("cube_material ({})", i),
-                [i](ptr<Engine> en) -> ptr<Graphics::Material> {
+                [i](ptr<EngineClient> en) -> ptr<Graphics::Material> {
                     auto shader = en->getOrCreateShader(
                         fmt::format("solid ({})", i), [](ptr<Graphics::Shader> shader) -> void {
                             shader->loadShader("shaders/default.vert.spv",

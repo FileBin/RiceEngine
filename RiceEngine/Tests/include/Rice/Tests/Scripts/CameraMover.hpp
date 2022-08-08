@@ -17,9 +17,9 @@ class CameraMover : public virtual Components::MonoScript<CameraMover> {
     }
 
     void onUpdate() override {
-        auto scene = getScene();
+        auto scene = getClientScene();
         auto ren = getSceneRender();
-        auto en = getEngine();
+        auto en = getClientEngine();
         auto cam = scene->getActiveCamera();
         auto input = en->getInputManager();
 
