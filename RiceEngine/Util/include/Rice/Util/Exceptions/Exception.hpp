@@ -7,6 +7,8 @@
 
 #define THROW_EXCEPTION(wtf) throw NSP_UTIL::Exception(wtf, __LINE__, __FILE__)
 
+struct String;
+
 NSP_UTIL_BEGIN
 
 struct exception_data;

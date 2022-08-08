@@ -1,15 +1,16 @@
 #pragma once
 
-#include <BetterCpp/Exceptions/Exception.hpp>
+#include "Exception.hpp"
+#include "Rice/Util/namespaces.h"
 
-#define THROW_UNKNOWN_FORMAT_EXCEPTION throw ::Rice::UnknownFormatException(__LINE__, __FILE__)
+#define THROW_UNKNOWN_FORMAT_EXCEPTION throw NSP_UTIL::UnknownFormatException(__LINE__, __FILE__)
 
-NSP_ENGINE_BEGIN
+NSP_UTIL_BEGIN
 
 class UnknownFormatException : public Exception {
 public:
 	UnknownFormatException(int line_, const char* file_) : Exception("Format is Unknown", line_, file_) {}
 };
 
-NSP_ENGINE_END
+NSP_UTIL_END
 

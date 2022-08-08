@@ -1,10 +1,11 @@
 #pragma once
 
-#include <BetterCpp/Exceptions/Exception.hpp>
+#include "Exception.hpp"
+#include "Rice/Util/namespaces.h"
 
-#define THROW_INVALID_ARG_EXCEPTION(arg) throw ::Rice::InvalidArgException(arg, __LINE__, __FILE__)
+#define THROW_INVALID_ARG_EXCEPTION(arg) throw NSP_UTIL::InvalidArgException(arg, __LINE__, __FILE__)
 
-NSP_ENGINE_BEGIN
+NSP_UTIL_BEGIN
 
 class InvalidArgException : public Exception {
 public:
@@ -13,8 +14,8 @@ public:
 		info.append("Argument Name: ");
 		info.append(arg);
 		info.append("\n");
-		SetInfo(info.c_str());
+		setInfo(info.c_str());
 	}
 };
 
-NSP_ENGINE_END
+NSP_UTIL_END
