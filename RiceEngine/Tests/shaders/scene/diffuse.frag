@@ -6,6 +6,7 @@
 
 layout(binding = 1) uniform fragmentUniforms {
     vec4 color;
+    vec4 egst;
 } ubo;
 
 //output write
@@ -18,8 +19,8 @@ void main()
 
     //return LoadShadowMap(fragInput.pos.xy);
     //TODO move thi into uniform buffer
-    vec4 color = ubo.color; //vec4(0.95, 0.07, 0.02, 1.0);
-    vec4 egst = vec4(0.3, 0.5, 0.6, 0.0);
+    vec4 color = ubo.color;
+    vec4 egst = ubo.egst;
 
 	float emission = egst.x;
     float glossines = egst.y;
