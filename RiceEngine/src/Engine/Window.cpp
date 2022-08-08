@@ -127,10 +127,10 @@ void Window::handleEvent(SDL_Event &e) {
         handleWindowEvent(e.window);
         break;
     case SDL_KEYDOWN:
-        inputmgr->eventKey((KeyCode)e.key.keysym.sym, true);
+        inputmgr->eventKey((KeyCode)e.key.keysym.scancode, true);
         break;
     case SDL_KEYUP:
-        inputmgr->eventKey((KeyCode)e.key.keysym.sym, false);
+        inputmgr->eventKey((KeyCode)e.key.keysym.scancode, false);
         break;
     case SDL_MOUSEWHEEL:
         inputmgr->eventMouseWheel(e.wheel.y);

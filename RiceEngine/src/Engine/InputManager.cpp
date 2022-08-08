@@ -5,9 +5,6 @@
 #include "Rice/Math/Vectors/Vector2i.hpp"
 #include <Rice/Engine/InputManager.hpp>
 #include <Rice/Math/Math.hpp>
-#include <cstddef>
-#include <mutex>
-#include <shared_mutex>
 
 NSP_ENGINE_BEGIN
 
