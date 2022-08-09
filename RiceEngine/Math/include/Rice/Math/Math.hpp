@@ -4,53 +4,53 @@
 #include "Vectors.hpp"
 #include "Matrixes.hpp"
 
-#include <cstdlib>
-#include <math.h>
-#include <cmath>
-
 NSP_ENGINE_BEGIN
 
-class Math {
+template<typename T>
+class MathT;
+
+template<typename T>
+class MathT {
 public:
-	static double abs(double x) {
+	static double abs(T x) {
 		return std::abs(x);
 	}
 
-	static Vector3 getNorm(std::function<double(Vector3)> func, Vector3 pos,
+	static Vector3 getNorm(std::function<T(Vector3)> func, Vector3 pos,
 			dbl eps = .00001);
 
-	static double asin(double x) {
+	static T asin(T x) {
 		return toDegrees(std::asin(x));
 	}
-	static double acos(double x) {
+	static T acos(T x) {
 		return toDegrees(std::acos(x));
 	}
-	static double atan(double x) {
+	static T atan(T x) {
 		return toDegrees(std::atan(x));
 	}
 
-	static double atan(double y, double x) {
+	static T atan(T y, T x) {
 		return toDegrees(std::atan2(y, x));
 	}
 
-	static double sin(double x) {
+	static T sin(T x) {
 		return std::sin(toRadians(x));
 	}
-	static double cos(double x) {
+	static T cos(T x) {
 		return std::cos(toRadians(x));
 	}
-	static double tan(double x) {
+	static T tan(T x) {
 		return std::tan(toRadians(x));
 	}
 
-	static double toRadians(double x) {
+	static T toRadians(T x) {
 		return x / 180. * PI;
 	}
-	static double toDegrees(double x) {
+	static T toDegrees(T x) {
 		return x * 180. / PI;
 	}
 
-	static dbl random(double _min = 0., double _max = 1.) {
+	static T random(T _min = 0., T _max = 1.) {
 		return ((dbl) rand() / RAND_MAX) * (_max - _min) + _min;
 	}
 
@@ -82,32 +82,30 @@ public:
 		return x;
 	}
 
-	template<typename T>
 	static T max(T a, T b) {
 		return a > b ? a : b;
 	}
 
-	template<typename T>
 	static T min(T a, T b) {
 		return a < b ? a : b;
 	}
 
-	template<typename T>
 	static T clamp(T v, T a, T b) {
 		return min(max(v, a), b);
 	}
 
-	template<typename T>
 	static T clamp01(T v) {
-		return clamp<T>(v, 0, 1);
+		return clamp(v, 0, 1);
 	}
 
-	template<typename T>
 	static T lerp(T a, T b, T t) {
 		return a * (1 - t) + b * t;
 	}
 
 	constexpr static double PI = 3.14159265359;
 };
+
+typedef MathT<dbl> Math;
+typedef MathT<float> Mathf;
 
 NSP_ENGINE_END

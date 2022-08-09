@@ -3,6 +3,7 @@
 #include "Exception.hpp"
 
 #define THROW_NULL_PTR_EXCEPTION(pointer) throw NSP_UTIL::NullPtrException(pointer, __LINE__, __FILE__)
+#define THROW_IF_NULL(pointer) if(!pointer) throw NSP_UTIL::NullPtrException(pointer, __LINE__, __FILE__)
 
 NSP_UTIL_BEGIN
 

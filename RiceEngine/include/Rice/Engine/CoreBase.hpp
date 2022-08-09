@@ -6,7 +6,7 @@ class SceneBase;
 NSP_ENGINE_END
 
 #pragma once
-#include "Log.hpp" 
+#include "Log.hpp"
 
 #include "EngineBase.hpp"
 
@@ -14,10 +14,10 @@ NSP_ENGINE_BEGIN
 
 class CoreBase {
   private:
-    template <typename RetT, typename... ArgsT>
-    static RetT
-    executeFuncAndHandleExceptions(std::function<RetT(ArgsT...)> &fn,
-                                   ArgsT... args) {
+    template <typename RetT, typename Signature, typename... ArgsT>
+    static RetT executeFuncAndHandleExceptions(std::function<Signature> &fn,
+                                               ArgsT... args) {
+#ifdef NDEBUG
         try {
             return fn(args...);
         } catch (Util::Exception &e) {
@@ -37,16 +37,20 @@ class CoreBase {
             Log::close();
             throw e;
         }
+#else
+        return fn(args...);
+#endif
     }
 
   public:
-
-    template <class... ArgsT>
-    static ptr<std::thread> runThread(std::function<void(ArgsT...)> func,
-                                      ArgsT&&... args) {
-        return ptr<std::thread>(new std::thread(
-            [](std::function<void(ArgsT...)> _Fx, ArgsT&&... _Ax) {
-                executeFuncAndHandleExceptions<void, ArgsT...>(_Fx, _Ax...);
+    template <typename Signature, typename... ArgsT>
+    static ptr<std::jthread> runThread(std::function<Signature> func,
+                                       ArgsT... args) {
+        return ptr<std::jthread>(new std::jthread(
+            [](std::stop_token _St, std::function<Signature> _Fx,
+               ArgsT... _Ax) {
+                executeFuncAndHandleExceptions<void, Signature>(_Fx, _Ax...,
+                                                                _St);
             },
             func, args...));
     }

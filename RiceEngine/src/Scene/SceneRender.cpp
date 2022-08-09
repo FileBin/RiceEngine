@@ -64,7 +64,7 @@ void SceneRender::cleanup() { mesh_collection.cleanup(); }
 ptr<Graphics::Shader> SceneRender::getShader(String name) {
     try {
         return shaders.at(name);
-    } catch (const std::out_of_range &e) {
+    } catch (std::out_of_range) {
         THROW_EXCEPTION(
             fmt::format("Shader {} not found!", name.toUTF8String()).c_str());
     }
@@ -73,7 +73,7 @@ ptr<Graphics::Shader> SceneRender::getShader(String name) {
 ptr<Graphics::Material> SceneRender::getMaterial(String name) {
     try {
         return materials.at(name);
-    } catch (const std::out_of_range &e) {
+    } catch (std::out_of_range) {
         THROW_EXCEPTION(
             fmt::format("Material {} not found!", name.toUTF8String()).c_str());
     }
@@ -81,27 +81,22 @@ ptr<Graphics::Material> SceneRender::getMaterial(String name) {
 
 ptr<Graphics::Shader> SceneRender::getOrCreateShader(
     String name, std::function<void(ptr<Graphics::Shader>)> shader_creator) {
-    try {
-        return shaders.at(name);
-    } catch (const std::out_of_range &e) {
-        ptr<Graphics::Shader> shader{
-            new Graphics::Shader(getGraphicsManager())}; // create shader
-        shader_creator(shader); // call creator function to setup shader
-        shaders[name] = shader; // add to map
-        return shader;
+    auto &sh = shaders[name];
+    if (!sh) {
+        sh.reset(new Graphics::Shader(getGraphicsManager())); // create shader
+        shader_creator(sh); // call creator function to setup shader
     }
+    return sh;
 }
 
 ptr<Graphics::Material> SceneRender::getOrCreateMaterial(
     String name,
     std::function<ptr<Graphics::Material>(ptr<SceneRender>)> material_factory) {
-    try {
-        return materials.at(name);
-    } catch (const std::out_of_range &e) {
-        ptr<Graphics::Material> material{material_factory(shared_from_this())};
-        materials[name] = material;
-        return material;
+    auto &m = materials[name];
+    if (!m) {
+        m = material_factory(shared_from_this());
     }
+    return m;
 }
 
 ptr<ClientEngine> SceneRender::getEngine() {

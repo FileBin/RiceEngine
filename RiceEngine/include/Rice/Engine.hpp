@@ -1,9 +1,11 @@
+
 #include "Rice/Scene/Component.hpp"
 #include "Rice/Scene/Object.hpp"
 #include "Rice/Scene/SceneBase.hpp"
 #ifndef RICE_SOURCE
-#include "Rice/Scene/Scene.hpp"
 #include "Rice/Engine/Core.hpp"
+#include "Rice/Scene/Components/all.h"
+#include "Rice/Scene/Scene.hpp"
 #include "Rice/namespaces.h"
 #ifdef RICE_SERVER
 #include "Rice/Engine/ServerEngine.hpp"
