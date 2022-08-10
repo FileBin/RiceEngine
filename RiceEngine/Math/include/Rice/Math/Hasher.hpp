@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../stdafx.hpp"
+#include "Rice/stdafx.hpp"
 
 #pragma region Vector3_all
 #pragma region Vector3

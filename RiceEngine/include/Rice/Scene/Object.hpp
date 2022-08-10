@@ -1,3 +1,4 @@
+#include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/stdafx.hpp"
 
 NSP_ENGINE_BEGIN
@@ -13,7 +14,7 @@ NSP_ENGINE_END
 #include <Rice/Engine/Log.hpp>
 
 #include "SceneBase.hpp"
-#include "Rice/Scene/PackableComponent.hpp"
+#include <Rice/Scene/PackableComponent.hpp>
 
 NSP_ENGINE_BEGIN
 
@@ -29,43 +30,28 @@ class Object : public SceneObjectBase,
     String name;
     RegisterCollection<Components::PackableComponent> components;
 
-    EventRegistration stateChangedRegistration;
-    EventRegistration updateRegistration;
-    EventRegistration enableRegistration;
-    EventRegistration disableRegistration;
-
     friend struct ObjectData;
 
     Object(String name);
 
     void init(ptr<Object> parent);
-    void update();
-
-    void onEnable();
-    void onDisable();
-
-    bool canUpdate();
 
     ptr<Object> getParent();
 
+    void onEnable() override;
+    void onDisable() override;
+    void onUpdate() override;
+    void onPreUpdate() override;
+
+    ptr<SceneObjectBase> getBaseParent() override;
+
   public:
-    struct Events {
-        ptr<Event<bool>> stateChanged = Event<bool>::create();
-        ptr<Event<>> update = Event<>::create();
-    } events;
     ptr<Object> createEmpty(String name);
     ptr<Object> createEnabled(String name);
 
     void addComponent(ptr<Components::PackableComponent> component);
 
   public:
-    void enable();
-    void disable();
-
-    bool isEnabled();
-
-    void forceEnable();
-    void forceDisable();
     ObjectData pack() override;
 
     template <typename T> vec<ptr<T>> getComponents() {

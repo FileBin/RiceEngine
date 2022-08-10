@@ -1,3 +1,4 @@
+#include "Rice/Scene/SceneObjectBase.hpp"
 #include "pch.h"
 
 #include <Rice/Scene/ClientScene.hpp>
@@ -8,6 +9,59 @@ NSP_ENGINE_BEGIN
 SceneObjectBase::SceneObjectBase() {}
 
 SceneObjectBase::~SceneObjectBase() {}
+
+void SceneObjectBase::enable() { flags |= Flags::NEED_ENABLE; }
+
+void SceneObjectBase::disable() { flags |= Flags::NEED_DISABLE; }
+
+void SceneObjectBase::update() {
+    if (!isEnabled())
+        return;
+    onUpdate();
+}
+
+void SceneObjectBase::forceEnable() {
+    if (isEnabled() || !canEnable())
+        return;
+    flags |= Flags::ENABLED;
+    onEnable();
+}
+
+void SceneObjectBase::forceDisable() {
+    if (!isEnabled())
+        return;
+    flags &= ~Flags::ENABLED;
+    onDisable();
+}
+
+void SceneObjectBase::preUpdate() {
+    auto en = flags & Flags::NEED_ENABLE ? true : false;
+    auto dis = flags & Flags::NEED_DISABLE ? true : false;
+
+    en &= canEnable();
+
+    if (en ^ dis) {
+        if (en) {
+            forceEnable();
+        } else if (dis) {
+            forceDisable();
+        }
+    }
+    flags &= ~(Flags::NEED_ENABLE | Flags::NEED_DISABLE);
+
+    onPreUpdate();
+}
+
+bool SceneObjectBase::canEnable() {
+    auto p = getBaseParent();
+    if(!p)
+        return true;
+    if (!p->isEnabled())
+        return false;
+    return p->canEnable();
+}
+
+bool SceneObjectBase::isEnabled() { return flags & Flags::ENABLED; }
 
 ptr<SceneBase> SceneObjectBase::getScene() {
     auto s = scene.lock();

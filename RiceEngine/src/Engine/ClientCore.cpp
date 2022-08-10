@@ -1,6 +1,6 @@
-﻿#include "pch.h"
-#include "Rice/Engine/ClientEngine.hpp"
+﻿#include "Rice/Engine/ClientEngine.hpp"
 #include "Rice/Scene/ClientScene.hpp"
+#include "pch.h"
 #include <Rice/Engine/ClientCore.hpp>
 
 using namespace std::chrono;
@@ -32,7 +32,18 @@ void ClientCore::runNew(ptr<ClientCore::Loader> core_loader) {
 ClientCore::ClientCore(ptr<Loader> core_loader)
     : CoreBase(), loader(core_loader) {}
 
-ClientCore::~ClientCore() {}
+ClientCore::~ClientCore() {
+    if (activeScene) {
+        activeScene->close();
+    }
+    if (loadingScene) {
+        if (loadingScene->isLoaded())
+            loadingScene->close();
+    }
+    if (loadingScreenScene) {
+        loadingScreenScene->close();
+    }
+}
 
 // scene loading function in parallel with the main thread
 void ClientCore::loadScene(ptr<SceneBase> new_scene) {
@@ -135,6 +146,10 @@ void ClientCore::run() {
 void ClientCore::close() {
     loader->onClose(getClientEngine());
     is_init = false;
+    if (activeScene)
+        activeScene->close();
+    if (loadingScene && loadingScene->isLoaded())
+        loadingScene->close();
     if (loadingScreenScene)
         loadingScreenScene->close();
     graphics_manager->cleanup();

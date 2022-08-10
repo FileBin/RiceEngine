@@ -1,5 +1,5 @@
 #include "Rice/Engine/EngineBase.hpp"
-#include "pch.h"
+#include "Rice/Scene/Object.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -21,21 +21,20 @@ void SceneBase::setup(ptr<EngineBase> en) {
 
 void SceneBase::load() {
     init();
-    events.update->subscribe(root->updateRegistration,
-                             [this]() { root->update(); });
+    root->flags |= Object::Flags::ENABLED;
     loaded = true;
 }
 
 void SceneBase::update() {
-    events.processEvents->invoke();
-    events.update->invoke();
+    root->preUpdate();
+    root->update();
 }
 
-void SceneBase::close() {
-    events.close->invoke();
-}
+void SceneBase::close() { root->forceDisable(); }
 
-ptr<Object> SceneBase::createEmpty(String name) { return root->createEmpty(name); }
+ptr<Object> SceneBase::createEmpty(String name) {
+    return root->createEmpty(name);
+}
 ptr<Object> SceneBase::createEnabled(String name) {
     return root->createEnabled(name);
 }
@@ -43,7 +42,7 @@ ptr<Object> SceneBase::createEnabled(String name) {
 ptr<SceneObjectBase> SceneBase::getRegistered(UUID uuid) {
     try {
         return all_objects.at(uuid.getVal());
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range &e) {
         THROW_INDEX_OUT_OF_RANGE_EXCEPTION;
     }
 }

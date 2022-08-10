@@ -1,4 +1,5 @@
 ﻿#include "stdafx.hpp"
+#include <shared_mutex>
 
 NSP_GL_BEGIN
 
@@ -13,7 +14,7 @@ NSP_GL_END
 NSP_GL_BEGIN
 
 class Model {
-public:
+  public:
     bool checkVisiblity(ModelData WVPm, size_t meshIdx);
     uint getSubMeshesCount();
     void setSubMeshesCount(uint count);
@@ -21,12 +22,9 @@ public:
     ptr<Mesh> getSubMesh(uint idx);
 
     bool isEmpty();
-	bool show = true;
 
-	~Model();
-private:
+  private:
     vec<ptr<Mesh>> subMeshes = {};
 };
-
 
 NSP_GL_END

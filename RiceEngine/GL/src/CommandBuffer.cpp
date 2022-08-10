@@ -130,8 +130,9 @@ void CommandBuffer::buildAll() {
 void CommandBuffer::cleanup() {
     if (!api_data)
         return;
-    clear();
     GraphicsManager_API_data *data = &get_api_data();
+    data->sync();
+    clear();
     api_data->cleanup(*data);
     delete api_data.release();
 }

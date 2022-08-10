@@ -4,9 +4,9 @@
 
 #include "default.glsl"
 
-layout(binding = 1) uniform fragmentUniforms {
-    vec4 color;
+layout(std140, binding = 1) uniform fragmentUniforms {
     vec4 egst;
+    vec4 color;
 } ubo;
 
 //output write

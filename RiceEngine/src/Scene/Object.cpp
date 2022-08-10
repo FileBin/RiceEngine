@@ -1,7 +1,7 @@
 #include "Rice/Scene/Object.hpp"
 #include "Rice/Scene/Component.hpp"
 #include "Rice/Scene/PackableComponent.hpp"
-#include "Rice/Scene/Scene.hpp"
+#include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/Util/ByteStream.hpp"
 #include "Rice/Util/String.hpp"
 #include "Rice/defines.h"
@@ -9,81 +9,53 @@
 
 NSP_ENGINE_BEGIN
 
-Object::Object(String name)
-    : name(name) {}
+Object::Object(String name) : name(name) {}
 
-void Object::init(ptr<Object> parent) {
-    this->parent = parent;
-    // subscribe to parent state changed event to update object enabled state
-    parent->events.stateChanged->subscribe(
-        stateChangedRegistration, [this](bool state) {
-            if (updateRegistration.isRegistered()) {
-                if (state) {
-                    onEnable();
-                } else {
-                    onDisable();
-                }
-            }
-        });
+void Object::init(ptr<Object> parent) { this->parent = parent; }
+
+void Object::onEnable() {
+    auto coll = components.getCollection();
+    for (auto c : coll) {
+        c->forceEnable();
+    }
+    for (auto o : children) {
+        o->forceEnable();
+    }
 }
 
-void Object::enable() {
-    // if component is already enabled, return
-    if (enableRegistration.isRegistered() || isEnabled())
-        return;
-    // subscribe to scene process event to update object state
-    getScene()->events.processEvents->subscribe(enableRegistration, [this]() {
-        forceEnable();
-        enableRegistration.cleanup(); // call only once
-    });
+void Object::onDisable() {
+    auto coll = components.getCollection();
+    for (auto c : coll) {
+        c->forceDisable();
+    }
+    for (auto o : children) {
+        o->forceDisable();
+    }
 }
 
-void Object::disable() {
-    // if component is already disabled, return
-    if (disableRegistration.isRegistered() || !isEnabled())
-        return;
-    // subscribe to scene process event to update component state
-    getScene()->events.processEvents->subscribe(disableRegistration, [this]() {
-        forceDisable();
-        disableRegistration.cleanup(); // call only once
-    });
-}
-
-void Object::forceEnable() {
-    if (canUpdate())
-        onEnable();
-    // subscribe to parent update event to update object
-    if (!updateRegistration.isRegistered())
-        getParent()->events.update->subscribe(updateRegistration,
-                                              [this]() { update(); });
-}
-
-void Object::forceDisable() {
-    onDisable();
-    // unsubscribe from object update event
-    updateRegistration.cleanup();
-}
-
-bool Object::canUpdate() {
-    auto p = getParent();
-    if (p)
-        return p->isEnabled();
-    return isEnabled();
+void Object::onPreUpdate() {
+    auto coll = components.getCollection();
+    for (auto c : coll) {
+        c->preUpdate();
+    }
+    for (auto o : children) {
+        o->preUpdate();
+    }
 }
 
 // update all components and child objects
-void Object::update() { events.update->invoke(); }
-
-// notify all components and child objects that object is enabled
-void Object::onEnable() { events.stateChanged->invoke(true); }
-
-// notify all components and child objects that object is disabled
-void Object::onDisable() { events.stateChanged->invoke(false); }
-
-bool Object::isEnabled() { return updateRegistration.isRegistered(); }
+void Object::onUpdate() {
+    auto coll = components.getCollection();
+    for (auto c : coll) {
+        c->update();
+    }
+    for (auto o : children) {
+        o->update();
+    }
+}
 
 ptr<Object> Object::createEmpty(String name) {
-    ptr<Object> obj{new Object(name) };
+    ptr<Object> obj{new Object(name)};
     getScene()->Register(obj);
     obj->init(shared_from_this());
     children.push_back(obj);
@@ -101,6 +73,10 @@ ptr<Object> Object::getParent() {
     if (!parent_lock)
         THROW_NULL_PTR_EXCEPTION(parent_lock.get());
     return parent_lock;
+}
+
+ptr<SceneObjectBase> Object::getBaseParent() {
+    return std::static_pointer_cast<SceneObjectBase>(parent.lock());
 }
 
 void Object::addComponent(ptr<Components::PackableComponent> component) {
@@ -143,7 +119,8 @@ ObjectData Object::pack() {
 ptr<Object>
 ObjectData::unpack(ptr<SceneBase> scene,
                    std::function<ObjectData(UUID)> getRelativesData) {
-    auto parent = std::dynamic_pointer_cast<Object>(scene->getRegistered(parentUUID));
+    auto parent =
+        std::dynamic_pointer_cast<Object>(scene->getRegistered(parentUUID));
 
     if (!parent) {
         parent = getRelativesData(parentUUID).unpack(scene, getRelativesData);

@@ -5,8 +5,13 @@
 #include "pch.h"
 
 #include <Rice/GL/Model.hpp>
+#include <mutex>
+#include <shared_mutex>
 
 NSP_GL_BEGIN
+
+using ReadLock = std::shared_lock<std::shared_mutex>;
+using WriteLock = std::unique_lock<std::shared_mutex>;
 
 const Mesh Mesh::quad = {
     {{{{-.5f, -.5f, 0}, {0, 0, 1}},
@@ -22,12 +27,12 @@ Mesh Mesh::cube() {
     auto one_third = quad;
     quad.rotate(Quaternion::fromEulerAngles({0, 180, 0}));
     one_third.combine(quad);
-    //Z axis
+    // Z axis
     Mesh cube = one_third;
-    //X axis
+    // X axis
     one_third.rotate(Quaternion::fromEulerAngles({0, 90, 0}));
     cube.combine(one_third);
-    //Y axis
+    // Y axis
     one_third.rotate(Quaternion::fromEulerAngles({0, 0, 90}));
     cube.combine(one_third);
     return cube;
@@ -176,13 +181,17 @@ bool Model::checkVisiblity(ModelData matrix, size_t idx) {
     return subMeshes[idx]->checkVisiblity(matrix);
 }
 
-uint Model::getSubMeshesCount() { return subMeshes.size(); }
+uint Model::getSubMeshesCount() {
+    return subMeshes.size();
+}
 
-ptr<Mesh> Model::getSubMesh(uint idx) { return subMeshes[idx]; }
+ptr<Mesh> Model::getSubMesh(uint idx) {
+    return subMeshes[idx];
+}
 
-Model::~Model() { subMeshes.clear(); }
-
-void Model::setSubMeshesCount(uint count) { subMeshes.resize(count); }
+void Model::setSubMeshesCount(uint count) {
+    subMeshes.resize(count, {});
+}
 
 void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) {
     subMeshes[idx] = subMesh;

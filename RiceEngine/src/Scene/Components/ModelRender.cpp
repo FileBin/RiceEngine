@@ -12,16 +12,19 @@ void ModelRender::onEnable() {
     auto g_mgr = getClientEngine()->getGraphicsManager();
 
     auto transform = getObject()->getComponent<Transform>();
-    if(!transform) {
+    if (!transform) {
         THROW_EXCEPTION("Object has no Transform component!");
     }
-
     uint n = model->getSubMeshesCount();
     for (uint i = 0; i < n; i++) {
-        auto rm = new_ptr<Graphics::RenderingMesh>(g_mgr, model->getSubMesh(i),
-                                                   materials[i], transform);
-        rendering_meshes.push_back(rm);
-        getSceneRender()->registerMesh(rm);
+        auto mat = materials[i];
+        auto mesh = model->getSubMesh(i);
+        if (mat && !mesh->isEmpty()) {
+            auto rm = new_ptr<Graphics::RenderingMesh>(
+                g_mgr, mesh, mat, transform);
+            rendering_meshes.push_back(rm);
+            getSceneRender()->registerMesh(rm);
+        }
     }
 }
 
@@ -34,8 +37,9 @@ void ModelRender::onDisable() {
 
 void ModelRender::setModel(ptr<Model> model) {
     this->model = model;
-    //TODO set flag to update and mutex to protect from multiple threads
-    if(isEnabled()) return;
+    // TODO set flag to update and mutex to protect from multiple threads
+    if (isEnabled())
+        return;
     updateRenderData();
 }
 
