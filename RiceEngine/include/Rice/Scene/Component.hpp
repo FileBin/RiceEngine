@@ -36,6 +36,7 @@ class Component : public SceneObjectBase,
     void onDisable() override;
     void onUpdate() override;
     void onPreUpdate() override;
+    void onDestroy() override;
 
     ptr<SceneObjectBase> getBaseParent() override;
 

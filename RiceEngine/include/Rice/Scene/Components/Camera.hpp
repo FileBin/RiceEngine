@@ -20,8 +20,8 @@ class Camera : virtual public PackableComponentT<Camera> {
     Camera();
 
     ptr<Transform> getTransform();
-    Matrix4x4f getViewMatrix();
-    Matrix4x4f getProjectionMatrix();
+    Matrix4x4 getViewMatrix();
+    Matrix4x4 getProjectionMatrix();
 };
 
 NSP_COMPONENTS_END

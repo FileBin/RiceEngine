@@ -25,7 +25,9 @@ class SceneObjectBase {
         constexpr static flags_t NEED_ENABLE = 0x1;
         constexpr static flags_t NEED_DISABLE = 0x2;
         constexpr static flags_t NEED_DESTROY = 0x8000;
-        constexpr static flags_t ENABLED = 0x10000;
+        constexpr static flags_t ACTIVE = 0x10000;
+        constexpr static flags_t ENABLING = 0x20000;
+        constexpr static flags_t DESTROYED = 0x40000;
     };
     flags_t flags = 0;
 
@@ -43,18 +45,23 @@ class SceneObjectBase {
     virtual void onDisable() = 0;
     virtual void onUpdate() = 0;
     virtual void onPreUpdate() = 0;
+    virtual void onDestroy() = 0;
 
     bool canEnable();
     virtual ptr<SceneObjectBase> getBaseParent() = 0;
 
   public:
+    bool isActive();
     bool isEnabled();
 
     void forceEnable();
     void forceDisable();
+    void forceDestroy();
 
     void enable();
     void disable();
+
+    void destroy();
 
     ptr<SceneBase> getScene();
     ptr<ClientScene> getClientScene();

@@ -14,39 +14,63 @@ void SceneObjectBase::enable() { flags |= Flags::NEED_ENABLE; }
 
 void SceneObjectBase::disable() { flags |= Flags::NEED_DISABLE; }
 
+void SceneObjectBase::destroy() { flags |= Flags::NEED_DESTROY; }
+
 void SceneObjectBase::update() {
-    if (!isEnabled())
+    if (flags & Flags::DESTROYED)
+        return;
+    if (!isActive())
         return;
     onUpdate();
 }
 
 void SceneObjectBase::forceEnable() {
-    if (isEnabled() || !canEnable())
+    if (flags & Flags::DESTROYED)
         return;
-    flags |= Flags::ENABLED;
+    if (isActive() || !canEnable())
+        return;
+    flags |= Flags::ENABLING;
     onEnable();
+    flags &= ~Flags::ENABLING;
+    flags |= Flags::ACTIVE;
 }
 
 void SceneObjectBase::forceDisable() {
-    if (!isEnabled())
+    if (flags & Flags::DESTROYED)
         return;
-    flags &= ~Flags::ENABLED;
+    if (!isActive())
+        return;
     onDisable();
+    flags &= ~Flags::ACTIVE;
+}
+
+void SceneObjectBase::forceDestroy() {
+    if (flags & Flags::DESTROYED)
+        return;
+    onDestroy();
+    flags = Flags::DESTROYED;
 }
 
 void SceneObjectBase::preUpdate() {
+    if (flags & Flags::DESTROYED)
+        return;
     auto en = flags & Flags::NEED_ENABLE ? true : false;
     auto dis = flags & Flags::NEED_DISABLE ? true : false;
+    auto des = flags & Flags::NEED_DESTROY ? true : false;
+
+    if (des) {
+        forceDestroy();
+        return;
+    }
 
     en &= canEnable();
 
-    if (en ^ dis) {
-        if (en) {
-            forceEnable();
-        } else if (dis) {
-            forceDisable();
-        }
+    if (dis) {
+        forceDisable();
+    } else if (en) {
+        forceEnable();
     }
+
     flags &= ~(Flags::NEED_ENABLE | Flags::NEED_DISABLE);
 
     onPreUpdate();
@@ -54,14 +78,17 @@ void SceneObjectBase::preUpdate() {
 
 bool SceneObjectBase::canEnable() {
     auto p = getBaseParent();
-    if(!p)
+    if (!p)
         return true;
-    if (!p->isEnabled())
-        return false;
-    return p->canEnable();
+    if (p->flags & Flags::ENABLING || p->flags & Flags::ACTIVE)
+        return p->canEnable();
+    return false;
 }
 
-bool SceneObjectBase::isEnabled() { return flags & Flags::ENABLED; }
+bool SceneObjectBase::isActive() { return flags & Flags::ACTIVE; }
+bool SceneObjectBase::isEnabled() {
+    return (flags & Flags::NEED_ENABLE) || (flags & Flags::ACTIVE);
+}
 
 ptr<SceneBase> SceneObjectBase::getScene() {
     auto s = scene.lock();
@@ -83,7 +110,7 @@ ptr<ClientScene> SceneObjectBase::getClientScene() {
     auto cli_scene = std::dynamic_pointer_cast<ClientScene>(getScene());
     if (!cli_scene) {
         THROW_EXCEPTION("Scene is not a ClientScene! Maybe you use server "
-                        "config? \n Try to use #ifndef SERVER_CONFIG");
+                        "config? \n Try to use #ifndef SERVER");
     }
     return cli_scene;
 }
@@ -92,9 +119,8 @@ ptr<ClientEngine> SceneObjectBase::getClientEngine() {
     auto cli_engine = std::dynamic_pointer_cast<ClientEngine>(getEngine());
     if (!cli_engine) {
         THROW_EXCEPTION("Engine is not a ClientEngine! Maybe you use server "
-                        "config? \n Try to use #ifndef SERVER_CONFIG");
+                        "config? \n Try to use #ifndef SERVER");
     }
     return cli_engine;
 }
-
 NSP_ENGINE_END

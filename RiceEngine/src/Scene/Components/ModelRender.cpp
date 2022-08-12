@@ -37,9 +37,6 @@ void ModelRender::onDisable() {
 
 void ModelRender::setModel(ptr<Model> model) {
     this->model = model;
-    // TODO set flag to update and mutex to protect from multiple threads
-    if (isEnabled())
-        return;
     updateRenderData();
 }
 

@@ -48,7 +48,7 @@ class RenderingMesh : public IRegistrable {
     }
 
     void updateCmdBuffer();
-    void updateConstBuffer(Matrix4x4f view, Matrix4x4f projection);
+    void updateConstBuffer(Matrix4x4 view, Matrix4x4 projection);
 
     bool isTransparent() {
         return material->renderType == RenderType::Transparent;

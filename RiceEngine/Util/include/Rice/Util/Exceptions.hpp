@@ -8,3 +8,4 @@
 #include "Exceptions/NullPtrException.hpp"
 #include "Exceptions/OpenALException.hpp"
 #include "Exceptions/UnknownFormatException.hpp"
+#include "Exceptions/ThreadInterruptException.hpp"

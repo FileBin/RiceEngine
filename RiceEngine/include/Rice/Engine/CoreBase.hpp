@@ -49,6 +49,7 @@ class CoreBase {
         return ptr<std::jthread>(new std::jthread(
             [](std::stop_token _St, std::function<Signature> _Fx,
                ArgsT... _Ax) {
+                setCurrentThreadPriority(ThreadPriority::Low);
                 executeFuncAndHandleExceptions<void, Signature>(_Fx, _Ax...,
                                                                 _St);
             },

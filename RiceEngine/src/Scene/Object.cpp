@@ -3,9 +3,11 @@
 #include "Rice/Scene/PackableComponent.hpp"
 #include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/Util/ByteStream.hpp"
+#include "Rice/Util/Exceptions/ThreadInterruptException.hpp"
 #include "Rice/Util/String.hpp"
 #include "Rice/defines.h"
 #include <memory>
+#include <mutex>
 
 NSP_ENGINE_BEGIN
 
@@ -14,8 +16,8 @@ Object::Object(String name) : name(name) {}
 void Object::init(ptr<Object> parent) { this->parent = parent; }
 
 void Object::onEnable() {
-    auto coll = components.getCollection();
-    for (auto c : coll) {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    for (auto c : components) {
         c->forceEnable();
     }
     for (auto o : children) {
@@ -24,8 +26,8 @@ void Object::onEnable() {
 }
 
 void Object::onDisable() {
-    auto coll = components.getCollection();
-    for (auto c : coll) {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    for (auto c : components) {
         c->forceDisable();
     }
     for (auto o : children) {
@@ -34,19 +36,36 @@ void Object::onDisable() {
 }
 
 void Object::onPreUpdate() {
-    auto coll = components.getCollection();
-    for (auto c : coll) {
-        c->preUpdate();
+    vec<vec<ptr<Components::PackableComponent>>::iterator> toRemoveComponents;
+    vec<vec<ptr<Object>>::iterator> toRemoveObjects;
+    std::shared_lock<std::shared_mutex> lock(mutex);
+
+    for (auto it = components.begin(); it != components.end(); ++it) {
+        if ((*it)->flags & Flags::DESTROYED) {
+            toRemoveComponents.push_back(it);
+            continue;
+        }
+        (*it)->preUpdate();
     }
-    for (auto o : children) {
-        o->preUpdate();
+    for (auto it = children.begin(); it != children.end(); ++it) {
+        if ((*it)->flags & Flags::DESTROYED) {
+            toRemoveObjects.push_back(it);
+            continue;
+        }
+        (*it)->preUpdate();
+    }
+    for (auto it : toRemoveObjects) {
+        children.erase(it);
+    }
+    for (auto it : toRemoveComponents) {
+        components.erase(it);
     }
 }
 
 // update all components and child objects
 void Object::onUpdate() {
-    auto coll = components.getCollection();
-    for (auto c : coll) {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    for (auto c : components) {
         c->update();
     }
     for (auto o : children) {
@@ -54,7 +73,44 @@ void Object::onUpdate() {
     }
 }
 
+void Object::onDestroy() {
+    forceDisable();
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    for (auto o : children) {
+        o->forceDestroy();
+    }
+    for (auto c : components) {
+        c->forceDestroy();
+    }
+    getScene()->Unregister(shared_from_this());
+}
+
+bool Object::removeChild(UUID uuid) {
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    for (auto it = children.begin(); it != children.end(); ++it) {
+        if ((*it)->getUUID() == uuid) {
+            children.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Object::removeComponent(UUID uuid) {
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    for (auto it = components.begin(); it != components.end(); ++it) {
+        if ((*it)->getUUID() == uuid) {
+            components.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
 ptr<Object> Object::createEmpty(String name) {
+    if (!getScene()->isLoaded())
+        THROW_THREAD_ITERRUPT_EXCEPTION;
+    std::unique_lock<std::shared_mutex> lock(mutex);
     ptr<Object> obj{new Object(name)};
     getScene()->Register(obj);
     obj->init(shared_from_this());
@@ -80,7 +136,7 @@ ptr<SceneObjectBase> Object::getBaseParent() {
 }
 
 void Object::addComponent(ptr<Components::PackableComponent> component) {
-    components.registerPtr(component);
+    components.push_back(component);
     getScene()->Register(component);
     component->init(shared_from_this());
     component->enable();
@@ -90,7 +146,7 @@ ObjectData Object::pack() {
     auto parent_lock = parent.lock();
 
     ObjectData data;
-    data.enabled = isEnabled();
+    data.enabled = isActive();
     data.selfUUID = getUUID();
     if (parent_lock)
         data.parentUUID = parent_lock->getUUID();
@@ -103,7 +159,7 @@ ObjectData Object::pack() {
         data.childrenUUID[i] = children[i]->getUUID();
     }
 
-    auto components_vec = components.getCollection();
+    auto components_vec = components;
 
     n = components_vec.size();
 

@@ -23,6 +23,7 @@ ptr<ClientEngine> ClientCore::getClientEngine() {
 // runs new instance of Core via core loader
 // interface defined by user or default implementation
 void ClientCore::runNew(ptr<ClientCore::Loader> core_loader) {
+    setCurrentThreadPriority(ThreadPriority::TimeCritical);
     auto core = ptr<ClientCore>(new ClientCore(core_loader));
     core->init();
     core->run();

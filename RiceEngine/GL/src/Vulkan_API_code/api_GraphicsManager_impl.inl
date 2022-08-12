@@ -18,6 +18,7 @@
 #include <Rice/Math/Math.hpp>
 
 #include <Rice/Engine/Window.hpp>
+#include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -182,7 +183,7 @@ void GraphicsManager_API_data::init_swapchain() {
                 .set_old_swapchain((VkSwapchainKHR)old_swapchain)
                 .build()
                 .value();
-        
+
         if (old_swapchain)
             device.destroy(old_swapchain);
 
@@ -201,10 +202,10 @@ void GraphicsManager_API_data::init_commands() {
     // create a command pool for commands submitted to the graphics queue.
     // we also want the pool to allow for resetting of individual command
     // buffers
-    vk::CommandPoolCreateInfo commandPoolInfo =
-        VulkanHelper::command_pool_create_info(
-            graphicsQueueFamily,
-            vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+    auto commandPoolInfo =
+        vk::CommandPoolCreateInfo()
+            .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
+            .setQueueFamilyIndex(graphicsQueueFamily);
 
     commandPool = device.createCommandPool(commandPoolInfo);
 
@@ -213,7 +214,7 @@ void GraphicsManager_API_data::init_commands() {
 
 void GraphicsManager_API_data::init_descriptor_pool() {
     auto n = swapchainImages.size();
-vk::DescriptorPoolSize poolSize{};
+    vk::DescriptorPoolSize poolSize{};
     poolSize.type = vk::DescriptorType::eUniformBuffer;
     poolSize.descriptorCount = n;
 
@@ -514,9 +515,9 @@ void GraphicsManager_API_data::sync() {
     auto graphicsManager = g_mgr.lock();
     if (!graphicsManager)
         THROW_NULL_PTR_EXCEPTION(graphicsManager.get());
-    // wait until the GPU has finished rendering the last frame. Timeout of 0.1
+    // wait until the GPU has finished rendering the last frame. Timeout of 0.5
     // second (fast)
-    auto res = device.waitForFences({renderFence}, true, 0.1 VK_SEC);
+    auto res = device.waitForFences({renderFence}, true, 0.5 VK_SEC);
     if (res == vk::Result::eTimeout &&
         !graphicsManager->window->isMinimized()) {
         // wait until the GPU has finished rendering the last frame. Timeout of
@@ -535,9 +536,7 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
 
     // request image from the swapchain, 1 second timeout
     auto res = device.acquireNextImageKHR(
-        swapchain, 1000000000, // @suppress("Ambiguous problem")
-        presentSemaphore, nullptr,
-        &swapchainImageIndex); // @suppress("Ambiguous problem")
+        swapchain, 1000000000, presentSemaphore, nullptr, &swapchainImageIndex);
     if (res == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
         return;
@@ -568,13 +567,13 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
 
     // submit command buffer to the queue and execute it.
     //  _renderFence will now block until the graphic commands finish execution
-    auto result = vkQueueSubmit((VkQueue)graphicsQueue, 1,
-                                (VkSubmitInfo *)&submit, (VkFence)renderFence);
+    auto result = graphicsQueue.submit(1, &submit, renderFence);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    if (result == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
         return;
-    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    } else if (result != vk::Result::eSuccess &&
+               result != vk::Result::eSuboptimalKHR) {
         THROW_VK_EX(result);
     }
     // this will put the image we just rendered into the visible window.
@@ -592,17 +591,18 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
     presentInfo.waitSemaphoreCount = 1;
 
     presentInfo.pImageIndices = &swapchainImageIndex;
-    result = vkQueuePresentKHR((VkQueue)graphicsQueue,
-                               (VkPresentInfoKHR *)&presentInfo);
+    result = (vk::Result)vkQueuePresentKHR((VkQueue)graphicsQueue,
+                               (const VkPresentInfoKHR *)&presentInfo);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    if (result == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
         return;
-    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    } else if (result != vk::Result::eSuccess &&
+               result != vk::Result::eSuboptimalKHR) {
         THROW_VK_EX(result);
     }
 
-    if (result == VK_SUBOPTIMAL_KHR)
+    if (result == vk::Result::eSuboptimalKHR)
         resizing = true;
 }
 

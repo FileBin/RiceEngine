@@ -1,5 +1,7 @@
 #include "Rice/Engine/EngineBase.hpp"
 #include "Rice/Scene/Object.hpp"
+#include "Rice/Scene/SceneObjectBase.hpp"
+#include "Rice/Util/Util.hpp"
 
 NSP_ENGINE_BEGIN
 
@@ -12,6 +14,10 @@ void SceneBase::Register(ptr<SceneObjectBase> object) {
     all_objects[key.getVal()] = object;
 }
 
+void SceneBase::Unregister(ptr<SceneObjectBase> object) {
+    all_objects.erase(object->uuid.getVal());
+}
+
 void SceneBase::setup(ptr<EngineBase> en) {
     engine = en;
     root = ptr<Object>(new Object("root"));
@@ -20,9 +26,9 @@ void SceneBase::setup(ptr<EngineBase> en) {
 }
 
 void SceneBase::load() {
-    init();
-    root->flags |= Object::Flags::ENABLED;
     loaded = true;
+    init();
+    root->flags |= Object::Flags::ACTIVE;
 }
 
 void SceneBase::update() {
@@ -30,7 +36,10 @@ void SceneBase::update() {
     root->update();
 }
 
-void SceneBase::close() { root->forceDisable(); }
+void SceneBase::close() {
+    loaded = false;
+    root->forceDisable();
+}
 
 ptr<Object> SceneBase::createEmpty(String name) {
     return root->createEmpty(name);

@@ -54,6 +54,7 @@ Buffer_API_Data& Buffer_API_Data::allocate(GraphicsManager_API_data& api_data, s
 }
 
 Buffer_API_Data& Buffer_API_Data::setData(void* pData, size_t nData, size_t offset) {
+    
 	void* mappedData;
 	mappedData = device.mapMemory(memory, offset, nData);
 	    memcpy(mappedData, pData, nData);

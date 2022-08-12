@@ -47,7 +47,7 @@ void RenderingMesh::updateCmdBuffer() {
     cmdBuffer->update();
 }
 
-void RenderingMesh::updateConstBuffer(Matrix4x4f view, Matrix4x4f proj) {
+void RenderingMesh::updateConstBuffer(Matrix4x4 view, Matrix4x4 proj) {
     ModelData data;
     auto world = transform->getTransformationMatrix();
     data.world = world;

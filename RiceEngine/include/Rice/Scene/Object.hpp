@@ -1,5 +1,6 @@
 #include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/stdafx.hpp"
+#include <shared_mutex>
 
 NSP_ENGINE_BEGIN
 
@@ -25,10 +26,11 @@ class Object : public SceneObjectBase,
     friend class Components::Component;
 
   private:
+    std::shared_mutex mutex;
     wptr<Object> parent;
     vec<ptr<Object>> children;
     String name;
-    RegisterCollection<Components::PackableComponent> components;
+    vec<ptr<Components::PackableComponent>> components;
 
     friend struct ObjectData;
 
@@ -42,9 +44,11 @@ class Object : public SceneObjectBase,
     void onDisable() override;
     void onUpdate() override;
     void onPreUpdate() override;
+    void onDestroy() override;
 
     ptr<SceneObjectBase> getBaseParent() override;
-
+    bool removeChild(UUID uuid);
+    bool removeComponent(UUID uuid);
   public:
     ptr<Object> createEmpty(String name);
     ptr<Object> createEnabled(String name);
@@ -56,7 +60,7 @@ class Object : public SceneObjectBase,
 
     template <typename T> vec<ptr<T>> getComponents() {
         vec<ptr<T>> vec = {};
-        for (auto c : components.getCollection()) {
+        for (auto c : components) {
             auto o = std::dynamic_pointer_cast<T>(c);
             if (o) {
                 vec.push_back(o);
@@ -66,8 +70,7 @@ class Object : public SceneObjectBase,
     }
 
     template <typename T> ptr<T> getComponent() {
-        auto coll = components.getCollection();
-        for (auto c : coll) {
+        for (auto c : components) {
             auto o = std::dynamic_pointer_cast<T>(c);
             if (o) {
                 return o;
@@ -75,8 +78,6 @@ class Object : public SceneObjectBase,
         }
         return nullptr;
     }
-
-    ptr<Components::Component> getComponent(uint comp_id);
 };
 
 struct ObjectData : public IPackable<data_t> {

@@ -1,5 +1,3 @@
-#include "Rice/Scene/SceneObjectBase.hpp"
-#include "Rice/defines.h"
 #include "pch.h"
 
 #include <Rice/Scene/Component.hpp>
@@ -11,6 +9,10 @@ void Component::onPreUpdate() {}
 void Component::onEnable() {}
 void Component::onDisable() {}
 void Component::onUpdate() {}
+void Component::onDestroy() {
+    forceDisable();
+    getScene()->Unregister(shared_from_this());
+}
 
 void Component::init(ptr<Object> object) { this->object = object; }
 

@@ -55,6 +55,7 @@ class SceneBase : public enable_ptr<SceneBase> {
     UUID getNextUUID();
 
     void Register(ptr<SceneObjectBase> object);
+    void Unregister(ptr<SceneObjectBase> object);
 
     umap<uint64_t, ptr<SceneObjectBase>> all_objects;
     ptr<Object> root;

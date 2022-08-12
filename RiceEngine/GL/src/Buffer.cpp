@@ -45,10 +45,12 @@ void Buffer::allocate(size_t size, BufferUsage usage) {
 }
 
 void Buffer::setData(void *pData, size_t nData, size_t offset) {
+    graphics_mgr->sync();
     api_data->setData(pData, nData, offset);
 }
 
 void Buffer::getData(void *pData, size_t nData, size_t offset) {
+    graphics_mgr->sync();
     api_data->getData(pData, nData, offset);
 }
 
