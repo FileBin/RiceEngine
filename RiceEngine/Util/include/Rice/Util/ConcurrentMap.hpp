@@ -75,6 +75,9 @@ class ConcurrentMap {
             }
             l.mutex.unlock_shared();
             write_lock lock(l.mutex);
+            if (l.list.empty()) {
+                continue;
+            }
             item = std::move(l.list.front());
             l.list.pop_front();
             return true;
