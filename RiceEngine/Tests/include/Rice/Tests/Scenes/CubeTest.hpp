@@ -1,3 +1,4 @@
+#include <tuple>
 #undef RICE_SOURCE
 
 #include "Rice/Engine.hpp"
@@ -82,8 +83,9 @@ class CubeTestScene : public virtual Scene {
                         });
                     auto material = new_ptr<Graphics::Material>(
                         ren->getGraphicsManager(), shader);
-
-                    material->initUniformBuffer<Vector4f>({0, 1, 0, 1});
+                    Vector4f egst = {0, 64, 1, 0};
+                    Vector4f color = {1, 1, 0, 1};
+                    material->initUniformBuffer(std::make_tuple(color, egst));
 
                     return material;
                 });

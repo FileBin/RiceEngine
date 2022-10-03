@@ -12,11 +12,11 @@ NSP_GL_BEGIN
 class Buffer;
 
 enum class BufferUsage {
-	Vertex, Index, Uniform
+	Vertex, Index, Uniform, Staging
 };
 
 enum class IndexBufferType {
-	Uint16, UInt32
+	UInt16, UInt32
 };
 
 struct Buffer_API_Data;
@@ -46,7 +46,9 @@ public:
 protected:
 	void build_api();
 	void allocate(size_t size, BufferUsage usage);
+    [[deprecated("setData is deprecated. Use StagingBuffer instead")]]
 	void setData(void* pSrc, size_t nData, size_t offset = 0);
+    [[deprecated("getData is deprecated. Use StagingBuffer instead")]]
 	void getData(void* pDst, size_t nData, size_t offset = 0);
 };
 

@@ -49,25 +49,31 @@ class QuadTestScene : public virtual Scene {
         auto cube_model = new_ptr<Graphics::Model>();
 
         auto cube_mesh = Graphics::Mesh::quad.clone();
-        //cube_mesh->rotate(Quaternion::fromEulerAngles({0, 180, 0}));
+        // cube_mesh->rotate(Quaternion::fromEulerAngles({0, 180, 0}));
 
         cube_model->setSubMeshesCount(1);
         cube_model->setSubMesh(cube_mesh, 0);
         cube_render->setModel(cube_model);
 
         auto cube_material = ren->getOrCreateMaterial(
-            "cube_material", [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
+            "cube_material",
+            [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
                 auto shader = ren->getOrCreateShader(
                     "solid", [](ptr<Graphics::Shader> shader) -> void {
-                        shader->loadShader("shaders/solid.vert.spv",
+                        shader->loadShader("shaders/default.vert.spv",
                                            Graphics::Shader::Vertex);
                         shader->loadShader("shaders/solid.frag.spv",
                                            Graphics::Shader::Fragment);
                         shader->addUniformBuffer(0, Graphics::Shader::Vertex);
+                        shader->addUniformBuffer(1, Graphics::Shader::Fragment);
                         shader->setVertexStrideAndLayout<Graphics::Vertex>();
                         shader->build();
                     });
-                auto material = new_ptr<Graphics::Material>(ren->getGraphicsManager(), shader);
+                auto material = new_ptr<Graphics::Material>(
+                    ren->getGraphicsManager(), shader);
+
+                Vector4f color = {0.5, 0.1, 0.7, 1};
+                material->initUniformBuffer(std::make_tuple(color));
                 return material;
             });
 

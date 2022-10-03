@@ -1,5 +1,8 @@
-﻿#include "Rice/defines.h"
+﻿#include "Rice/Util/Event.hpp"
+#include "Rice/defines.h"
 #include "stdafx.hpp"
+#include <functional>
+#include <thread>
 NSP_GL_BEGIN
 class GraphicsManager;
 
@@ -46,6 +49,10 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
                      resizeGraphicsComponents = ResizeEvent::create();
     ptr<DestroyEvent> destroyCommandBuffers = DestroyEvent::create();
     ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
+    ptr<DestroyEvent> destroyOneTimeBuffers = DestroyEvent::create();
+
+    void registerOneTimeBufferFunc(EventRegistration &reg,
+                                   std::function<void()> f);
 
   private:
     Util::EventRegistration resizeReg;
@@ -53,6 +60,12 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     uptr<GraphicsManager_API_data> api_data;
 
     ptr<Window> window;
+
+    std::mutex oneTimeBufferMutex;
+    uptr<std::jthread> updateThread;
+    void startUpdateThread();
+    static void updateThreadFunc(ptr<GraphicsManager> self,
+                                 std::stop_token token);
 
     bool is_drawing = false;
     bool is_initialized = false;

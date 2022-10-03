@@ -96,6 +96,8 @@ template <typename... args_t> class Event : virtual public EventBase {
         }
         //}
     }
+
+    void clear() { handlers.cleanup(); }
 };
 
 NSP_UTIL_END

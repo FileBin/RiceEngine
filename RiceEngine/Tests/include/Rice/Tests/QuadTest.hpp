@@ -5,6 +5,8 @@
  *      Author: filebin
  */
 
+#include "Rice/stdafx.hpp"
+
 #include "Rice/Engine/Log.hpp"
 #include "Rice/Engine/Window.hpp"
 #include "Rice/GL/CommandBuffer.hpp"
@@ -13,9 +15,6 @@
 #include "Rice/GL/Shader.hpp"
 #include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexBuffer.hpp"
-#include "Rice/Math/Math.hpp"
-#include "Rice/defines.h"
-#include "Rice/stdafx.hpp"
 
 struct VertConstData {
     Matrix4x4f renderMatrix;
@@ -27,10 +26,13 @@ class QuadTest : public ICleanable {
 
   public:
     static void runTest() {
+        //test instance
         QuadTest program;
         try {
+            //run test
             program.entrypoint();
         } catch (Util::Exception &e) {
+            //catch exception
             Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}",
                      e.msg(), e.file(), e.line(), e.info());
         }
@@ -41,28 +43,43 @@ class QuadTest : public ICleanable {
   private:
     void entrypoint() {
         using namespace Graphics;
+
+        // log initialization
         Log::init();
 
+        // graphics manager initialization
         g_mgr = GraphicsManager::create();
 
+        // constant frame data initialization
         const_data.renderMatrix = Matrix4x4::scale({.5, .5, .5}) *
                                   Matrix4x4::translation({0, 0, -.5});
 
+        // window creation
         win = Window::create({"QuadTest"});
-        // if(in_stack)
-        // g_mgr_ref.setDestoyer(PtrDestroyerType::DontDelete);
+
+        // window initialization
         g_mgr->init(win);
+
+        // shader creation
         test_shader = new_ptr<Shader>(g_mgr);
 
+        // loading vertex shader
         test_shader->loadShader("shaders/quad_test.vert.spv", Shader::Vertex);
+        // loading fragment shader
         test_shader->loadShader("shaders/quad_test.frag.spv", Shader::Fragment);
+        // adding uniform buffer binding to shader
         test_shader->addUniformBuffer(0, Shader::Vertex);
+        // setup shader layout
         test_shader->setVertexStrideAndLayout<Vertex>();
+        // build shader
         test_shader->build();
 
+        // uniform buffer creation
         uniformBuffer = new_ptr<UniformBuffer>(g_mgr, sizeof(VertConstData));
+        // uniform buffer initialization with const buffer data
         uniformBuffer->updateData<VertConstData>(const_data);
 
+        // cube vertices array
         VertexListT<Vertex> vertices({
             {Vector3f(-1, -1, 0), Vector3f(0, 1, 0)},
             {Vector3f(-1, 1, 0), Vector3f(1, 0, 0)},
@@ -70,6 +87,7 @@ class QuadTest : public ICleanable {
             {Vector3f(1, -1, 0), Vector3f(0, 1, 1)},
         });
 
+        // cube index 
         vec<index_t> indexes({0, 1, 2, 3, 0, 2, 2, 1, 0, 2, 0, 3});
 
         vertexBuffer = new_ptr<VertexBuffer>(g_mgr, vertices);
@@ -92,14 +110,15 @@ class QuadTest : public ICleanable {
 
     void loop() {
         using namespace Graphics;
+        using namespace std::chrono;
 
         g_mgr->update();
 
-        static auto startTime = std::chrono::high_resolution_clock::now();
+        static auto startTime = high_resolution_clock::now();
 
-        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto currentTime = high_resolution_clock::now();
         double time =
-            std::chrono::duration<double, std::chrono::seconds::period>(
+            duration<double, seconds::period>(
                 currentTime - startTime)
                 .count();
 

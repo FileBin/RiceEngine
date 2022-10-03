@@ -45,6 +45,25 @@
       "",
       "NSP_${2:namespace}_END"
     ],
-    "description": "Log output to console"
+    "description": "Header template"
+  },
+  "source-template": {
+    "prefix": "cpp",
+    "body": [
+      "/*",
+      " * file: $TM_FILENAME",
+      " * author: ${1:name}",
+      " * date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+      " */",
+      "",
+      "#include \"pch.h\"",
+      "",
+      "#include <${3:header}.hpp>",
+      "",
+      "NSP_${2:namespace}_BEGIN",
+      "",
+      "NSP_${2:namespace}_END"
+    ],
+    "description": "Source template"
   }
 }

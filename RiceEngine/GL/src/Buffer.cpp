@@ -41,7 +41,7 @@ void Buffer::build_api() {
 }
 
 void Buffer::allocate(size_t size, BufferUsage usage) {
-    api_data->allocate(get_api_data() ,size, usage);
+    api_data->allocate(get_api_data(), size, usage);
 }
 
 void Buffer::setData(void *pData, size_t nData, size_t offset) {

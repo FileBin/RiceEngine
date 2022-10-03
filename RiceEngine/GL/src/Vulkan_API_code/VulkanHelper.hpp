@@ -15,7 +15,7 @@
 #pragma once
 NSP_GL_BEGIN
 
-#define VK_SEC * 1000000000
+#define VK_SEC * 1000000000ull
 
 #define TO_VK_BOOL(b) ((b) ? VK_TRUE : VK_FALSE)
 

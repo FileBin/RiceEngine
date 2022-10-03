@@ -1,3 +1,5 @@
+#include "Rice/Math/Vectors/Vector4f.hpp"
+#include <tuple>
 #undef RICE_SOURCE
 
 #include "Rice/Engine.hpp"
@@ -91,12 +93,17 @@ class MultiCubePerformanceTestScene : public virtual Scene {
                         });
                     auto material = new_ptr<Graphics::Material>(
                         ren->getGraphicsManager(), shader);
+                    Vector4f egst;
                     Vector4f color;
+                    egst.x = Math::random();
+                    egst.y = Math::random();
+                    egst.z = Math::random();
+                    egst.w = 1.f;
                     color.x = Math::random();
                     color.y = Math::random();
                     color.z = Math::random();
                     color.w = 1.f;
-                    material->initUniformBuffer<Vector4f>(color);
+                    material->initUniformBuffer(std::make_tuple(color, egst));
 
                     return material;
                 });

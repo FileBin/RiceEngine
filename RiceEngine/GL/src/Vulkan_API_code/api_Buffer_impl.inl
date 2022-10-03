@@ -32,6 +32,9 @@ Buffer_API_Data& Buffer_API_Data::allocate(GraphicsManager_API_data& api_data, s
 		case BufferUsage::Uniform:
 			bufferInfo.usage = BufferUsageFlagBits::eUniformBuffer;
 			break;
+        case BufferUsage::Staging:
+            bufferInfo.usage = BufferUsageFlagBits::eTransferSrc;
+            break;
 		}
 
 		bufferInfo.sharingMode = SharingMode::eExclusive;
@@ -43,7 +46,7 @@ Buffer_API_Data& Buffer_API_Data::allocate(GraphicsManager_API_data& api_data, s
 		MemoryAllocateInfo allocInfo;
 		allocInfo.allocationSize = memReq.size;
 		allocInfo.memoryTypeIndex = api_data.findMemoryType(memReq.memoryTypeBits,
-				MemoryPropertyFlagBits::eHostVisible | MemoryPropertyFlagBits::eHostCoherent);
+				MemoryPropertyFlagBits::eDeviceLocal);
 
 		memory = device.allocateMemory(allocInfo);
 		device.bindBufferMemory(buffer, memory, 0);
