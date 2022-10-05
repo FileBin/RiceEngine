@@ -19,7 +19,7 @@ include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_dependencies(${PROJECT_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
 
-add_subdirectory("tests")
+# add_subdirectory("tests")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)

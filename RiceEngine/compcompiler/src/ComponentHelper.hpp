@@ -1,3 +1,5 @@
+#include "SerializableComponent.hpp"
+
 #define PPCAT_NX(A, B) A##B
 #define PPCAT(A, B) PPCAT_NX(A, B)
 
@@ -22,8 +24,8 @@
 #define __REG_methods                                                          \
   public:                                                                      \
     class PPCAT(COMPONENT_NAME, _methods)                                      \
-        : virtual public ::Rice::Components::Component, public Public,         \
-          private Private
+        : virtual public ::Rice::Components::SerializableComponent<Public,     \
+                                                                   Private>
 
 #define COMPONENT_BEGIN COMPONENT_NSP_BEGIN class MOC__ {
 

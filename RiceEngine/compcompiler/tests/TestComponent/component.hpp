@@ -6,7 +6,7 @@
 #define COMPONENT_NAME Camera
 #define COMPONENT_NSP MyComponents
 
-#include "ComponentHelper.h"
+#include "ComponentHelper.hpp"
 
 COMPONENT_BEGIN
 
