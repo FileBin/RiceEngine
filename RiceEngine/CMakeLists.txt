@@ -72,6 +72,7 @@ set(RICE_LIBS
 CACHE INTERNAL "")
 
 add_subdirectory("Tests")
+add_subdirectory("compcompiler")
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)

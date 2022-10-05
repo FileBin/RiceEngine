@@ -1,0 +1,30 @@
+/*
+ * file: component.hpp
+ * author: filebin
+ * date: 2022-10-05 10:33:06
+ */
+#define COMPONENT_NAME Camera
+#define COMPONENT_NSP MyComponents
+
+#include "ComponentHelper.h"
+
+COMPONENT_BEGIN
+
+REGION(private_fields) { // private serialized fields
+    dbl fov;
+    dbl near_plane;
+    dbl far_plane;
+};
+
+REGION(public_fields){};
+
+REGION(methods) {
+  public: // write public component methods as you like
+    dbl getFov();
+    void setFov(dbl fov);
+
+  protected: // write protected component methods as you like
+  private:   // write private component methods as you like
+};
+
+COMPONENT_END
