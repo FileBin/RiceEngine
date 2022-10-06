@@ -19,8 +19,8 @@ class SerializableComponent : public virtual Component,
                               public PublicT,
                               protected PrivateT {
   public:
-    SerializableComponent();
-    ~SerializableComponent();
+    SerializableComponent() = default;
+    ~SerializableComponent() {}
 
   protected:
     PrivateT *getPrivate() { return static_cast<PrivateT *>(this); }

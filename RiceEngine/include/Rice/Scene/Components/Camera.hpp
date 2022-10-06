@@ -5,13 +5,11 @@ class Camera;
 NSP_COMPONENTS_END
 
 #pragma once
-
-#include "../PackableComponent.hpp"
 #include "Transform.hpp"
 
 NSP_COMPONENTS_BEGIN
 
-class Camera : virtual public PackableComponentT<Camera> {
+class Camera : public virtual Components::Component {
     dbl fov = 60;
     dbl near_plane = 0.01;
     dbl far_plane = 1000;

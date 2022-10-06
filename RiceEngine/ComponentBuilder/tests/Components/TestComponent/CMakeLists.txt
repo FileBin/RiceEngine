@@ -14,4 +14,18 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/co
 include_directories(${PROJECT_NAME} ${RICE_COMPONENT_BUILDER_INCLUDES})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+target_link_directories(${PROJECT_NAME} PRIVATE
+${ANY_LIB_BIN_PATH}
+${LIB_BIN_PATH}
+${PROJECT_BINARY_DIR}
+${DXSDK_LIB_PATH}/x64
+${VULKAN_LIB_PATH}
+)
+
+target_link_libraries(${PROJECT_NAME} ${RICE_LIBS})
+
+
+
 

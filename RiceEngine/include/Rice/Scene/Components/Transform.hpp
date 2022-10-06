@@ -1,4 +1,5 @@
 #include "../../stdafx.hpp"
+#include "Rice/Scene/Component.hpp"
 #include <shared_mutex>
 
 NSP_COMPONENTS_BEGIN
@@ -9,7 +10,7 @@ NSP_COMPONENTS_END
 
 NSP_COMPONENTS_BEGIN
 
-class Transform : virtual public PackableComponentT<Transform> {
+class Transform : public virtual Components::Component {
 
   private:
     std::shared_mutex mut;

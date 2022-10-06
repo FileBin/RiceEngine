@@ -4,6 +4,8 @@ project("Rice")
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_subdirectory("lib")
 
 set(RICE_NAME ${PROJECT_NAME} CACHE INTERNAL "")

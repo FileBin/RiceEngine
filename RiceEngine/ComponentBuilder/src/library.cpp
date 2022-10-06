@@ -8,7 +8,6 @@
 #include <string>
 
 #include "ComponentSerializer.hpp"
-#include "serialization_helper.hpp"
 
 extern "C" {
 

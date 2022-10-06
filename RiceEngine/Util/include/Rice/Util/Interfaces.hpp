@@ -1,7 +1,5 @@
 #include "stdafx.hpp"
 
-#include "ByteStream.hpp"
-
 #pragma once
 
 NSP_ENGINE_BEGIN

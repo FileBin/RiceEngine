@@ -1,11 +1,12 @@
 ﻿#include "stdafx.hpp"
 
+#include "String.hpp"
+
 #include "ByteStream.hpp"
 #include "Event.hpp"
 #include "Exceptions.hpp"
 #include "Interfaces.hpp"
 #include "Rect.hpp"
-#include "String.hpp"
 
 #include "ConcurrentArray.hpp"
 #include "ConcurrentMap.hpp"
