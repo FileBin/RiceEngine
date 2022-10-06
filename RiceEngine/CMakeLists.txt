@@ -19,7 +19,7 @@ file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 
 add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
 
 set(RICE_INCLUDE_PATH 
     ${RICE_INCLUDE_PATH};
@@ -72,7 +72,7 @@ set(RICE_LIBS
 CACHE INTERNAL "")
 
 add_subdirectory("Tests")
-add_subdirectory("compcompiler")
+add_subdirectory("ComponentBuilder")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)

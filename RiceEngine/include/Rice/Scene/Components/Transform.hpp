@@ -7,12 +7,9 @@ NSP_COMPONENTS_END
 
 #pragma once
 
-#include "../PackableComponentT.hpp"
-
 NSP_COMPONENTS_BEGIN
 
-class Transform
-    : virtual public PackableComponentT<Transform> {
+class Transform : virtual public PackableComponentT<Transform> {
 
   private:
     std::shared_mutex mut;

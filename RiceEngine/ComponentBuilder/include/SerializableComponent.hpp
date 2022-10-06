@@ -3,14 +3,14 @@
  * author: filebin
  * date: 2022-10-06 00:52:29
  */
+#pragma once
 
 #include "Rice/Scene/Component.hpp"
+#include "serialization_helper.hpp"
 
 NSP_COMPONENTS_BEGIN
 template <typename PublicT, typename PrivateT> class SerializableComponent;
 NSP_COMPONENTS_END
-
-#pragma once
 
 NSP_COMPONENTS_BEGIN
 
@@ -22,7 +22,10 @@ class SerializableComponent : public virtual Component,
     SerializableComponent();
     ~SerializableComponent();
 
-  private:
+  protected:
+    PrivateT *getPrivate() { return static_cast<PrivateT *>(this); }
+    PublicT *getPublic() { return static_cast<PublicT *>(this); }
+    template <typename T> friend struct ::serializator;
 };
 
 NSP_COMPONENTS_END

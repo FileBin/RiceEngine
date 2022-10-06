@@ -3,8 +3,9 @@
  * author: filebin
  * date: 2022-10-05 10:33:06
  */
-#define COMPONENT_NAME Camera
-#define COMPONENT_NSP MyComponents
+#include "config.h"
+
+#pragma once
 
 #include "ComponentHelper.hpp"
 
@@ -16,7 +17,7 @@ REGION(private_fields) { // private serialized fields
     dbl far_plane;
 };
 
-REGION(public_fields){};
+REGION(public_fields){}; // public serialized fields
 
 REGION(methods) {
   public: // write public component methods as you like

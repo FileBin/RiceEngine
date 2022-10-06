@@ -15,19 +15,21 @@
 
 #define REGION(v) __REG_##v
 #define __REG_public_fields                                                    \
-  private:                                                                     \
+  public:                                                                      \
     struct Public
 #define __REG_private_fields                                                   \
-  private:                                                                     \
+  public:                                                                      \
     struct Private
 
 #define __REG_methods                                                          \
   public:                                                                      \
     class PPCAT(COMPONENT_NAME, _methods)                                      \
-        : virtual public ::Rice::Components::SerializableComponent<Public,     \
-                                                                   Private>
+        : public virtual Rice::Components::SerializableComponent<Public,       \
+                                                                 Private>
 
-#define COMPONENT_BEGIN COMPONENT_NSP_BEGIN class MOC__ {
+#define COMPONENT_BEGIN                                                        \
+    COMPONENT_NSP_BEGIN class MOC__ {                                          \
+        template <typename T> friend struct serializator;
 
 #define COMPONENT_END                                                          \
     }                                                                          \

@@ -1,6 +1,4 @@
-#include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/stdafx.hpp"
-#include <shared_mutex>
 
 NSP_ENGINE_BEGIN
 
@@ -12,16 +10,15 @@ NSP_ENGINE_END
 
 #pragma once
 
+#include "Rice/Scene/Component.hpp"
+#include "Rice/Scene/SceneObjectBase.hpp"
 #include <Rice/Engine/Log.hpp>
 
 #include "SceneBase.hpp"
-#include <Rice/Scene/PackableComponent.hpp>
 
 NSP_ENGINE_BEGIN
 
-class Object : public SceneObjectBase,
-               public enable_ptr<Object>,
-               public IPackable<ObjectData> {
+class Object : public SceneObjectBase, public enable_ptr<Object> {
     friend class SceneBase;
     friend class Components::Component;
 
@@ -30,7 +27,7 @@ class Object : public SceneObjectBase,
     wptr<Object> parent;
     vec<ptr<Object>> children;
     String name;
-    vec<ptr<Components::PackableComponent>> components;
+    vec<ptr<Components::Component>> components;
 
     friend struct ObjectData;
 
@@ -49,15 +46,14 @@ class Object : public SceneObjectBase,
     ptr<SceneObjectBase> getBaseParent() override;
     bool removeChild(UUID uuid);
     bool removeComponent(UUID uuid);
+
   public:
     ptr<Object> createEmpty(String name);
     ptr<Object> createEnabled(String name);
 
-    void addComponent(ptr<Components::PackableComponent> component);
+    void addComponent(ptr<Components::Component> component);
 
   public:
-    ObjectData pack() override;
-
     template <typename T> vec<ptr<T>> getComponents() {
         vec<ptr<T>> vec = {};
         for (auto c : components) {
@@ -78,30 +74,6 @@ class Object : public SceneObjectBase,
         }
         return nullptr;
     }
-};
-
-struct ObjectData : public IPackable<data_t> {
-    bool enabled;
-    String name;
-    UUID parentUUID, selfUUID;
-    vec<UUID> childrenUUID;
-
-    data_t componentsData;
-
-    data_t pack() override {
-        // TODO make packing
-        Log::log(Log::Warning, "Packing not implemented");
-        return {};
-    }
-
-    static ObjectData unpack(data_t);
-
-    ptr<Object> unpack(ptr<SceneBase> scene,
-                       std::function<ObjectData(UUID)> getRelativesData);
-
-  private:
-    ptr<Object> unpack(ptr<Object> parent,
-                       std::function<ObjectData(UUID)> getRelativesData);
 };
 
 NSP_ENGINE_END
