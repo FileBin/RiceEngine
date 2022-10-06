@@ -17,7 +17,7 @@ void *createComponent() {
     return static_cast<Rice::Components::Component *>(c);
 }
 
-void destrioyComponent(void *p_component) {
+void destroyComponent(void *p_component) {
     component *c =
         dynamic_cast<component *>((Rice::Components::Component *)p_component);
     delete c;

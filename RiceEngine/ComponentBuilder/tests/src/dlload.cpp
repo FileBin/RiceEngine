@@ -20,7 +20,7 @@ int main() {
     component_create_func createComponent =
         (component_create_func)dlsym(lib_handle, "createComponent");
     component_destroy_func destroyComponent =
-        (component_destroy_func)dlsym(lib_handle, "destrioyComponent");
+        (component_destroy_func)dlsym(lib_handle, "destroyComponent");
 
     Rice::Components::Component *c =
         (Rice::Components::Component *)createComponent();
