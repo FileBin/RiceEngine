@@ -1,2 +1,2 @@
-#define COMPONENT_NAME Camera
+#define COMPONENT_NAME TestComponent
 #define COMPONENT_NSP MyComponents

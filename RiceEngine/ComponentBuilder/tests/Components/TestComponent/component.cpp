@@ -1,4 +1,4 @@
 #include "component.hpp"
 
-dbl MyComponents::Camera::getFov() { return fov; }
-void MyComponents::Camera::setFov(dbl newFov) { fov = newFov; }
+dbl MyComponents::TestComponent::getFov() { return fov; }
+void MyComponents::TestComponent::setFov(dbl newFov) { fov = newFov; }

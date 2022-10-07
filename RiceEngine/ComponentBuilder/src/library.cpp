@@ -21,8 +21,8 @@ void *createComponent() {
 void destroyComponent(void *p_component) {
     component *c =
         dynamic_cast<component *>((Rice::Components::Component *)p_component);
-    assert(c != nullptr);
-    delete c;
+    if (c)
+        delete c;
 }
 
 byte *serializeComponent(void *p_component) {
