@@ -24,8 +24,8 @@
 #define __REG_methods                                                          \
   public:                                                                      \
     class PPCAT(COMPONENT_NAME, _methods)                                      \
-        : public virtual Rice::Components::SerializableComponent<Public,       \
-                                                                 Private>
+        : public virtual Rice::Components::SerializableComponent<              \
+              PPCAT(COMPONENT_NAME, _methods), Public, Private>
 
 #define COMPONENT_BEGIN                                                        \
     COMPONENT_NSP_BEGIN class MOC__ {                                          \
