@@ -9,13 +9,11 @@ NSP_COMPONENTS_END
 
 #pragma once
 
-#include "../PackableComponent.hpp"
 #include "Rice/GL/RenderingMesh.hpp"
 
 NSP_COMPONENTS_BEGIN
 
-class ModelRender
-    : virtual public PackableComponentT<ModelRender> {
+class ModelRender : public virtual Components::Component {
   private:
     void onEnable() override;
     void onDisable() override;

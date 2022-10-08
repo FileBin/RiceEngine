@@ -15,7 +15,7 @@ foreach(FILE ${TESTS})
     #file search
 
     add_executable (${PROJECT_NAME} ${FILE} ${HEADERS})
-    target_precompile_headers(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h)
+    target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h)
 
     include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
     include_directories(${PROJECT_NAME} ${LIB_INCLUDE_PATH})

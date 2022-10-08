@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "bits/stdc++.h"
+#include <string>
 #ifndef NDEBUG
 #ifndef _DEBUG
 #define _DEBUG
@@ -30,13 +31,12 @@ template <typename T> using uptr = std::unique_ptr<T>;
 template <typename T> using enable_ptr = std::enable_shared_from_this<T>;
 typedef uint8_t byte;
 
-typedef vec<byte> data_t;
+typedef std::basic_string<byte> data_t;
 
 typedef int64_t num;
 typedef double dbl;
 typedef uint32_t index_t;
 
-template<typename T, typename... Args>
-inline ptr<T> new_ptr (Args&&... args) {
+template <typename T, typename... Args> inline ptr<T> new_ptr(Args &&...args) {
     return ptr<T>(new T(args...));
 }

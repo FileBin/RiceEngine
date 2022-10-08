@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.19)
 
 project("RiceMath")
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(RICE_MATH_NAME ${PROJECT_NAME} CACHE INTERNAL "")
 set(RICE_MATH_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
 
@@ -12,7 +14,7 @@ file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 
 add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
 
 include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../Util/include)

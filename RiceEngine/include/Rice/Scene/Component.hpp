@@ -16,9 +16,7 @@ NSP_ENGINE_END
 
 NSP_COMPONENTS_BEGIN
 
-class Component : public SceneObjectBase,
-                  public enable_ptr<Component>,
-                  public IPackable<data_t> {
+class Component : public SceneObjectBase, public enable_ptr<Component> {
     friend class Rice::Object;
 
   private:

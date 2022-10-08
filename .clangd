@@ -1,2 +1,4 @@
-CompileFlags: # Tweak the parse settings
-  Add: [ -I=./CMakeSource/src/GameMain/src, -I=./CMakeSource/src/RiceEngine/include, -I=../BetterCpp/CMakeSource/include, -I=./CMakeSource/lib/include]
+CompileFlags:
+ CompilationDatabase:
+    - ./build/Debug/
+    - ./build/Release/

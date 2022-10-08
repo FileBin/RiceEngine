@@ -10,20 +10,32 @@ NSP_NET_END
 #pragma once
 
 #include "Rice/Engine/EngineBase.hpp"
-#include "Rice/Scene/SceneBase.hpp"
 #include "Rice/Scene/Object.hpp"
+#include "Rice/Scene/SceneBase.hpp"
 NSP_NET_BEGIN
 
 #undef GetObject
 
 struct ConnectionKey {
-    byte hash[64] = { 0 }; // 512 bit secure hash
+    byte hash[64] = {0}; // 512 bit secure hash
 
     std::string toStdString() {
-        char buf[] = "00000000""00000000""00000000""00000000"
-                     "00000000""00000000""00000000""00000000"
-                     "00000000""00000000""00000000""00000000"
-                     "00000000""00000000""00000000""00000000";
+        char buf[] = "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000"
+                     "00000000";
         short buf_pos = 0x7f;
         for (uint i = 0; i < 64; i++) {
             byte b = hash[i];
@@ -38,7 +50,7 @@ struct ConnectionKey {
         short buf_pos = 0x7f;
         for (uint i = 0; i < 64; i++) {
             key.hash[i] = str[buf_pos--] - '0';
-            key.hash[i] += (str[buf_pos--] - '0')* 0x10;
+            key.hash[i] += (str[buf_pos--] - '0') * 0x10;
         }
         return key;
     }
@@ -176,7 +188,7 @@ class Response {
     }
 
     struct SendObject {
-        ObjectData object_data;
+        // ObjectData object_data;
     };
 
     ptr<SendObject> asObjectData() {

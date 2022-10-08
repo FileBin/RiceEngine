@@ -4,6 +4,8 @@ project("Rice")
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_subdirectory("lib")
 
 set(RICE_NAME ${PROJECT_NAME} CACHE INTERNAL "")
@@ -19,7 +21,7 @@ file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 
 add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
 
 set(RICE_INCLUDE_PATH 
     ${RICE_INCLUDE_PATH};
@@ -72,6 +74,8 @@ set(RICE_LIBS
 CACHE INTERNAL "")
 
 add_subdirectory("Tests")
+add_subdirectory("ComponentBuilder")
+add_subdirectory("MetaCompiler")
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)

@@ -49,7 +49,7 @@ VirtualClient::JoinResult VirtualClient::join(ptr<IServer> serv) {
     auto acceptData = response.asAccept();
     player_data = acceptData->initial_data;
     if (!has_key) {
-        //if connected first time add key to local storage
+        // if connected first time add key to local storage
         auto new_key = acceptData->key;
         Util::writeToJSON(config_path / config_file,
                           std::to_string(servUUID->getVal()),
@@ -63,7 +63,7 @@ VirtualClient::JoinResult VirtualClient::join(ptr<IServer> serv) {
 }
 
 void VirtualClient::leave() {
-    //TODO leave
+    // TODO leave
 }
 
 bool VirtualClient::tryGetKey(UUID servUUID, ConnectionKey &out_key) {
@@ -109,17 +109,20 @@ void VirtualClient::clientThreadFn(std::stop_token stoken) {
 
         for (uint i = 0; i < n; i++) {
             auto &obj = objects[i];
-            auto scene_obj = std::dynamic_pointer_cast<Object>(scene->getRegistered(obj.objectUUID));
+            auto scene_obj = std::dynamic_pointer_cast<Object>(
+                scene->getRegistered(obj.objectUUID));
             if (!scene_obj) {
                 // push it into the scene
+
+                // TODO get_obj_data
 
                 auto get_obj_func = [this](UUID uuid) {
                     auto obj_resp =
                         server->response(Request::getObject(key, info, uuid));
-                    return obj_resp.asObjectData()->object_data;
+                    // return obj_resp.asObjectData()->object_data;
                 };
 
-                get_obj_func(obj.objectUUID).unpack(scene, get_obj_func);
+                // get_obj_func(obj.objectUUID).unpack(scene, get_obj_func);
             }
 
             auto transform = scene_obj->getComponent<Components::Transform>();
