@@ -5,7 +5,7 @@
 
 NSP_TESTS_BEGIN
 
-class CameraMover : public virtual Components::MonoScript<CameraMover> {
+class CameraMover : public virtual Components::MonoScript {
     Vector3 speed = {0, 0, 0};
 
   public:

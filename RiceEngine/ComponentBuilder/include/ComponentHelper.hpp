@@ -21,6 +21,10 @@
   public:                                                                      \
     struct Private
 
+#define __REG_editor                                                           \
+  public:                                                                      \
+    struct Editor
+
 #define __REG_methods                                                          \
   public:                                                                      \
     class PPCAT(COMPONENT_NAME, _methods)                                      \
@@ -29,10 +33,16 @@
 
 #define COMPONENT_BEGIN                                                        \
     COMPONENT_NSP_BEGIN class MOC__ {                                          \
-        template <typename T> friend struct serializator;
+        template <typename T> friend struct serializator;                      \
+        friend struct Editor;
 
 #define COMPONENT_END                                                          \
     }                                                                          \
     ;                                                                          \
     typedef MOC__::PPCAT(COMPONENT_NAME, _methods) COMPONENT_NAME;             \
     COMPONENT_NSP_END
+
+#include "EditorHelper.hpp"
+#include "nameof/nameof.hpp"
+
+#define SHOW_IN_EDITOR(v) static constexpr auto NAMEOF(v) = &MOC__::v

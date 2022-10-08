@@ -31,6 +31,8 @@ ${DXSDK_LIB_PATH}/x64
 ${VULKAN_LIB_PATH}
 )
 
+add_compile_options(-ast-dump-xml)
+
 target_link_libraries(${PROJECT_NAME} ${RICE_LIBS})
 
 

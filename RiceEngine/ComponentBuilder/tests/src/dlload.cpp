@@ -13,6 +13,7 @@ typedef Rice::Components::Component *(*component_create_func)();
 typedef void (*component_destroy_func)(Rice::Components::Component *);
 typedef rapidjson::Value (*component_serialize_to_json_func)(
     void *, rapidjson::Document::AllocatorType);
+
 [[nodiscard]] void *load_lib(const char *path) {
     void *lib_handle = dlopen(path, RTLD_NOW);
     if (!lib_handle) {
