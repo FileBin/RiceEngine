@@ -113,10 +113,8 @@ void ClientCore::run() {
             (num)fixedDeltaTime - 1; // calculate the interval between frames
         auto deltaTime = fixedDeltaTime; // calculate the delta time
         auto begin_time = steady_clock::now();
-        time = 0;       // set the time to 0
-        auto b = false; // life cycle flag
-
-        time_point start = steady_clock::now(); // start time
+        time = 0;                 // set the time to 0
+        auto b = false;           // life cycle flag
         do {                      // loop until the window is not closed
             loadSceneImmediate(); // load scene if it is not loaded yet
             // loader->update();
@@ -125,7 +123,7 @@ void ClientCore::run() {
             // engine->postUpdate();
             sleep_until(begin_time); // limit framerate
             time = std::chrono::duration<dbl, std::chrono::seconds::period>(
-                       steady_clock::now() - start)
+                       steady_clock::now() - begin_time)
                        .count(); // calculate time since frame start
             deltaTime =
                 fixedDeltaTime + .000001 * (steady_clock::now() - begin_time)
