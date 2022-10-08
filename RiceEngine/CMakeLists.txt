@@ -75,6 +75,7 @@ CACHE INTERNAL "")
 
 add_subdirectory("Tests")
 add_subdirectory("ComponentBuilder")
+add_subdirectory("MetaCompiler")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)

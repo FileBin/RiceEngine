@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "../stdafx.hpp"
+
 #include "SDL2/SDL_mouse.h"
 #include "SDL2/SDL_scancode.h"
 
