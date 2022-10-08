@@ -14,6 +14,8 @@
 
   "clangd.arguments": ["-compile-commands-dir=${workspaceFolder}/build/Debug"],
 
+  "cmake.buildDirectory": "${workspaceFolder}/build/Debug",
+
   "files.associations": {
     "vector": "cpp",
     "thread": "cpp",
