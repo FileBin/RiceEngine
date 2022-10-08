@@ -13,7 +13,6 @@ struct Field;
 
 struct Type {
     enum Enum {
-        Class,
         Struct,
         BuiltIn,
     } type;
@@ -30,8 +29,7 @@ struct Field {
     std::string name;
 };
 
-inline Type::Type(Enum type, std::string name, std::vector<Field> vec)
-    : type(type), name(name) {
+inline Type::Type(Enum type, std::string name, std::vector<Field> vec) : type(type), name(name) {
     //.. vector stuff
 }
 
@@ -44,7 +42,7 @@ template <typename T> struct TypeOf;
 namespace Meta {
 template <> struct TypeOf<Name> {
     static Type type() {
-        Type type(Type::Class, "Name");
+        Type type(Type::Struct, "Name");
 
         std::unique_ptr<Field> field;
 
@@ -54,9 +52,38 @@ template <> struct TypeOf<Name> {
         field.reset(new Field{{Type::BuiltIn, "char"}, "ch"});
         type.fields.push_back(std::move(field));
 
-        field.reset(new Field{{Type::Class, "std::string"}, "str"});
+        field.reset(new Field{{Type::Struct, "std::string"}, "str"});
         type.fields.push_back(std::move(field));
 
+        return type;
+    }
+};
+} // namespace Meta
+
+namespace Meta {
+template <> struct TypeOf<Testsssss> {
+    static Type type() {
+        Type type(Type::Struct, "Testsssss");
+        std::unique_ptr<Field> fieldfield.reset(new Field{{Type::BuiltIn, "int"}, "i"});
+        type.fields.push_back(std::move(field));
+        field.reset(new Field{{Type::Struct, "std::basic_string<char>"}, "g"});
+        type.fields.push_back(std::move(field));
+        return type;
+    }
+};
+template <> struct TypeOf<SUS> {
+    static Type type() {
+        Type type(Type::Struct, "SUS");
+        std::unique_ptr<Field> fieldfield.reset(new Field{{Type::BuiltIn, "short"}, "kk"});
+        type.fields.push_back(std::move(field));
+        return type;
+    }
+};
+template <> struct TypeOf<SUS::mememe> {
+    static Type type() {
+        Type type(Type::Struct, "SUS::mememe");
+        std::unique_ptr<Field> fieldfield.reset(new Field{{Type::BuiltIn, "int"}, "inner_int"});
+        type.fields.push_back(std::move(field));
         return type;
     }
 };
