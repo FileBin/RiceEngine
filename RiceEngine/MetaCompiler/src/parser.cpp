@@ -1,7 +1,21 @@
 
 #include <cstdint>
+
 const std::set<std::string> builtins = {"unsigned", "long", "const", "static", "constexpr", "char", "wchar_t", "short", "int", "long", "double"};
 const std::set<std::string> ignored_names = {"__locale_struct"};
+
+std::string exec(const std::string &cmd) {
+    std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+    if (!pipe)
+        return "ERROR";
+    char buffer[128];
+    std::string result = "";
+    while (!feof(pipe.get())) {
+        if (fgets(buffer, 128, pipe.get()) != NULL)
+            result += buffer;
+    }
+    return result;
+}
 
 std::vector<std::string> split(const std::string &target, char c) {
     std::string temp;
@@ -96,16 +110,41 @@ std::string parseStruct(const nlohmann::json::value_type &item, const std::strin
     return "";
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     using json = nlohmann::json;
     using namespace std;
 
+    if (system("clang++ -v") == -1) {
+        cout << "No clang++ found, exiting\n";
+        exit(1);
+    }
+
+    string compileCommands;
+    string sourceFile;
+
+    string curr_arg;
+
+    bool print_to_console = false;
+    for (int i = 0; i < argc; i++) {
+        curr_arg = std::string(argv[i]);
+        if (curr_arg.starts_with("file=")) {
+            sourceFile = curr_arg.substr(5);
+        } else if (curr_arg.starts_with("commands_path=")) {
+            compileCommands = curr_arg.substr(15);
+        } else if (curr_arg == "-p") {
+            print_to_console = true;
+        } else {
+            cout << "Arg ignored: " << curr_arg;
+        }
+    }
+
+    const std::string ast = exec("clang++ -Xclang -ast-dump=json -fsyntax-only -fno-color-diagnostics -Wno-visibility '" + sourceFile + "'");
+
     auto start = chrono::steady_clock::now();
 
-    std::ifstream f("./res/ast.json");
-    json data = json::parse(f);
+    json data = json::parse(ast);
 
-    string built_component = "namespace Meta {";
+    string built_component = "#include \"ReflectionHelper.hpp\"\n #include \"" + sourceFile + "\" \nnamespace Meta {";
 
     for (const auto &[item_index, item] : data["inner"].items()) {
         built_component += parseStruct(item, "");
@@ -113,7 +152,11 @@ int main() {
 
     built_component += "}\n";
 
-    std::cout << built_component;
+    filesystem::path sourceFilePath = sourceFile;
+
+    ofstream myfile(sourceFilePath.stem().string() + "_meta.hpp");
+    myfile << built_component;
+    myfile.close();
 
     cout << "Built in: " << chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - start).count() << " sec";
 
