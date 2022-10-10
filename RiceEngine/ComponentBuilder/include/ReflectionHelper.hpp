@@ -1,5 +1,6 @@
-#include "Rice/defines.h"
 #include <algorithm>
+#include <bits/utility.h>
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -8,41 +9,60 @@
 #include <typeindex>
 #include <vector>
 
-namespace Meta {
-typedef std::map<unsigned long, void *> TypeMap;
-}
+#include "nameof/nameof.hpp"
 
-template <typename T> struct Member;
+namespace Meta {
+typedef size_t TypeHash;
+typedef std::map<TypeHash, void *> TypeMap;
 
 enum class Types {
     Struct,
     BuiltIn,
 };
 
-template <typename T, typename... MembersT> struct Type {
-    Types type;
-    std::string name;
-    std::tuple<MembersT T::*...> members;
+template <typename T, typename... MembersT> class Type;
 
+template <typename T> class Member {
   private:
-    Type() = default;
-    Type(const Type &) = default;
-    Type(Type &&) = default;
+    template <typename R, typename... MembersT> friend class Type;
+    T member_pointer;
 
-    Type(Types type, std::string name, MembersT T::*...members) : type(type), name(name), members(std::make_tuple(members...)) {}
-    friend void BuildTypes(Meta::TypeMap &map);
-    friend void BuildPrimitiveTypes(Meta::TypeMap &map);
+    Member(T pointer) : member_pointer(pointer) {}
+
+  public:
+    constexpr char *getName() { return NAMEOF_MEMBER(member_pointer); }
+    constexpr T getMemberPointer() { return member_pointer; }
 };
 
-template <typename T> struct Type<T> {
+template <typename T, typename... MembersT> class Type {
+  private:
     Types type;
-    std::string name;
+    typedef std::tuple<MembersT T::*...> tuple_t;
+    tuple_t members;
+    Type() = default;
+    Type(const Type &) = default;
+    Type(Type &&) = default;
+
+    Type(Types type, MembersT T::*...members) : type(type), members(std::make_tuple(members...)) {}
+    friend void BuildTypes(TypeMap &map);
+    friend void BuildPrimitiveTypes(TypeMap &map);
+
+  public:
+    constexpr char *getFullName() { return NAMEOF_TYPE(T); }
+    constexpr char *getShortName() { return NAMEOF_SHORT_TYPE(T); }
+    constexpr tuple_t &getMembers() { return members; }
+    constexpr size_t getMembersCount() { return std::tuple_size_v<tuple_t>; }
+    template <size_t i> constexpr auto getMemberAt() { return std::get<i>(Member(members())); }
+};
+
+template <typename T> class Type<T> {
+    Types type;
 
   private:
     Type() = default;
     Type(const Type &) = default;
     Type(Type &&) = default;
-    Type(Types type, std::string name) : type(type), name(name) {}
+    Type(Types type) : type(type) {}
 
     friend void BuildTypes(Meta::TypeMap &map);
     friend void BuildPrimitiveTypes(Meta::TypeMap &map);
@@ -59,8 +79,8 @@ struct TypeBuilder {
 static TypeBuilder builder = BuildTypes;
 } // namespace Meta
 
-inline void BuildPrimitiveTypes(Meta::TypeMap &map) {
-#define BUILTIN_GEN_TYPE(b) map.insert({typeid(b).hash_code(), (void *)new Type<b>{Types::BuiltIn, #b}})
+inline void BuildPrimitiveTypes(TypeMap &map) {
+#define BUILTIN_GEN_TYPE(b) map.insert({typeid(b).hash_code(), (void *)new Type<b>{Types::BuiltIn}})
     BUILTIN_GEN_TYPE(bool);
     BUILTIN_GEN_TYPE(char);
     BUILTIN_GEN_TYPE(unsigned char);
@@ -77,6 +97,8 @@ inline void BuildPrimitiveTypes(Meta::TypeMap &map) {
 #undef BUILTIN_GEN_TYPE
 }
 
+} // namespace Meta
+
 /* example
 
 struct Foo {
@@ -88,9 +110,8 @@ struct Bar {
     Foo foo;
     double dbl;
 };
-
-inline void BuildTypes(Meta::TypeMap &map) {
-    map.insert({typeid(Foo).hash_code(), (void *)new Type<Foo, int, char>{Types::Struct, "Foo", &Foo::i, &Foo::ch}});
-    map.insert({typeid(Bar).hash_code(), (void *)new Type<Bar, Foo, double>{Types::Struct, "Bar", &Bar::foo, &Bar::dbl}});
+inline void Meta::BuildTypes(TypeMap &map) {
+    map.insert({typeid(Foo).hash_code(), (void *)new Type<Foo, int, char>{Types::Struct, &Foo::i, &Foo::ch}});
+    map.insert({typeid(Bar).hash_code(), (void *)new Type<Bar, Foo, double>{Types::Struct, &Bar::foo, &Bar::dbl}});
 }
 */
