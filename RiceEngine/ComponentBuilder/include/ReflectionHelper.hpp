@@ -52,13 +52,11 @@ template <typename T, typename... MembersT> class Type {
     constexpr char *getShortName() { return NAMEOF_SHORT_TYPE(T); }
     constexpr tuple_t &getMembers() { return members; }
     constexpr size_t getMembersCount() { return std::tuple_size_v<tuple_t>; }
-    template <size_t i> constexpr auto getMemberAt() { return std::get<i>(Member(members())); }
+    template <size_t i> constexpr auto getMemberAt() { return Member(std::get<i>(members)); }
 };
 
 template <typename T> class Type<T> {
     Types type;
-
-  private:
     Type() = default;
     Type(const Type &) = default;
     Type(Type &&) = default;
@@ -66,6 +64,11 @@ template <typename T> class Type<T> {
 
     friend void BuildTypes(Meta::TypeMap &map);
     friend void BuildPrimitiveTypes(Meta::TypeMap &map);
+
+  public:
+    constexpr char *getFullName() { return NAMEOF_TYPE(T); }
+    constexpr char *getShortName() { return NAMEOF_SHORT_TYPE(T); }
+    constexpr size_t getMembersCount() { return 0; }
 };
 
 void BuildTypes(Meta::TypeMap &map);
