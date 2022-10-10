@@ -70,12 +70,17 @@ template <typename T> class Type<T> {
 
 void BuildTypes(Meta::TypeMap &map);
 
-struct TypeBuilder {
+class TypeBuilder {
+    friend const auto &type_of();
     TypeMap type_map;
+
+  public:
     TypeBuilder(void (*func)(TypeMap &map)) { func(type_map); }
 };
 
 static TypeBuilder builder = BuildTypes;
+
+template <typename T> const auto &type_of() { return builder.type_map.at(typeid(T).hash_code()); }
 
 inline void BuildPrimitiveTypes(TypeMap &map) {
 #define BUILTIN_GEN_TYPE(b) map.insert({typeid(b).hash_code(), (void *)new Type<b>{Types::BuiltIn}})
