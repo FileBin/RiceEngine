@@ -6,7 +6,8 @@
 #include <sstream>
 #include <string>
 
-const std::set<std::string> builtins = {"unsigned", "long", "const", "static", "constexpr", "char", "wchar_t", "short", "int", "long", "double"};
+const std::set<std::string> builtins = {"unsigned", "long",  "const", "static", "constexpr", "char",
+                                        "wchar_t",  "short", "int",   "long",   "double"};
 const std::set<std::string> ignored_names = {"__locale_struct"};
 
 std::vector<std::string> split(const std::string &target, char c) {
@@ -190,14 +191,13 @@ class Parser {
                 parseLine(is_struct_definition);
                 line_begin = ss.tellg();
                 if (is_struct_definition) {
-                    auto &last_struct = current_struct.back();
-                    std::cout << last_struct << "\n";
-                    current_location.vec.push_back(last_struct.name);
+                    // std::cout << last_struct << "\n";
+                    current_location.vec.push_back(current_struct.back().name);
                     ss.seekg(line_begin);
                     parse(level + 1);
                     current_location.vec.pop_back();
-                    if (last_struct.is_reflectable)
-                        all_structs.push_back(last_struct);
+                    if (current_struct.back().is_reflectable)
+                        all_structs.push_back(current_struct.back());
                     current_struct.pop_back();
                 }
             } else {
@@ -329,7 +329,9 @@ int main(int argc, char *argv[]) {
     }
 
     ofstream ast_file(headerFileName + "_ast");
-    stringstream ss(exec("clang++" + additional_params + " -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility '" + headerFile + "'"));
+    stringstream ss(exec("clang++" + additional_params +
+                         " -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility '" + headerFile +
+                         "'"));
     ast_file << ss.str();
     ast_file.close();
 
@@ -351,7 +353,8 @@ int main(int argc, char *argv[]) {
         cout << built_component;
     }
 
-    cout << "\nBuilt in: " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms\n";
+    cout << "\nBuilt in: " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count()
+         << " ms\n";
 
     return 0;
 }

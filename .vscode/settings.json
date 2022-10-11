@@ -3,6 +3,14 @@
 
   "editor.formatOnSave": true,
 
+  "cmake.debugConfig": {
+    "args": [
+      "source_file_path=/home/filebin/GitRepo/RiceEngine/dev/RiceEngine/ComponentBuilder/tests/Components/TestComponent/component.cpp",
+      "header_file_path=/home/filebin/GitRepo/RiceEngine/dev/RiceEngine/ComponentBuilder/tests/Components/TestComponent/component.hpp",
+      "compile_commands_path=/home/filebin/GitRepo/RiceEngine/dev/build/Debug/compile_commands.json"
+    ]
+  },
+
   "C_Cpp.formatting": "Disabled",
   "C_Cpp.intelliSenseEngine": "Disabled",
 

@@ -1,7 +1,6 @@
 #include "SerializableComponent.hpp"
 #include "component.hpp"
 #include "fmt/xchar.h"
-#include "rapidjson/document.h"
 //#include <boost/mp11.hpp>
 //#include <boost/mp11/algorithm.hpp>
 #include <boost/pfr/core.hpp>
@@ -48,53 +47,16 @@ template <> struct component_serializer<component> {
         component_moc::Public *pub = t->getPublic();
         size_t sum = 0;
         boost::pfr::for_each_field(*pri, [&data, &sum](auto &&field) {
-            size_t n =
-                serializer<typename normalize_type<decltype(field)>::type>()
-                    .from_bytes(data, field);
+            size_t n = serializer<typename normalize_type<decltype(field)>::type>().from_bytes(data, field);
             sum += n;
             data.erase(0, n);
         });
         boost::pfr::for_each_field(*pub, [&data, &sum](auto &&field) {
-            size_t n =
-                serializer<typename normalize_type<decltype(field)>::type>()
-                    .from_bytes(data, field);
+            size_t n = serializer<typename normalize_type<decltype(field)>::type>().from_bytes(data, field);
             sum += n;
             data.erase(0, n);
         });
         return sum;
-    }
-
-    rapidjson::Value to_json(const p_component &t,
-                             rapidjson::Document::AllocatorType &allocator) {
-        component_moc::Private *pri = t->getPrivate();
-        component_moc::Public *pub = t->getPublic();
-        rapidjson::Value val;
-        val.SetObject();
-        auto v = &component_moc::Private::fov;
-        size_t i = 0;
-        boost::pfr::for_each_field(*pri, [&](auto &&field) {
-#if NAMEOF_MEMBER_SUPPORTED
-            // TODO make json serializer
-            val.AddMember(rapidjson::Value(fmt::format("field{}", i++).c_str(),
-                                           allocator),
-                          rapidjson::Value(field), allocator);
-#else
-            static_assert(false, "NAMEOF_MEMBER is not supported in your "
-                                 "compiler please update to c++17!");
-#endif
-        });
-        boost::pfr::for_each_field(*pub, [&](auto &&field) {
-#if NAMEOF_MEMBER_SUPPORTED
-            // TODO make json serializer
-            val.AddMember(rapidjson::Value(fmt::format("field{}", i++).c_str(),
-                                           allocator),
-                          rapidjson::Value(field), allocator);
-#else
-            static_assert(false, "NAMEOF_MEMBER is not supported in your "
-                                 "compiler please update to c++17!");
-#endif
-        });
-        return val;
     }
 };
 

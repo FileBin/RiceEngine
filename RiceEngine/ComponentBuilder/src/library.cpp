@@ -8,7 +8,6 @@
 #include "component.hpp"
 
 #include "ComponentSerializer.hpp"
-#include "rapidjson/document.h"
 
 extern "C" {
 
@@ -19,15 +18,13 @@ void *createComponent() {
 }
 
 void destroyComponent(void *p_component) {
-    component *c =
-        dynamic_cast<component *>((Rice::Components::Component *)p_component);
+    component *c = dynamic_cast<component *>((Rice::Components::Component *)p_component);
     if (c)
         delete c;
 }
 
 byte *serializeComponent(void *p_component) {
-    component *c =
-        dynamic_cast<component *>((Rice::Components::Component *)p_component);
+    component *c = dynamic_cast<component *>((Rice::Components::Component *)p_component);
     assert(c != nullptr);
     auto data = c->toBytes();
     size_t n = strlen((const char *)data.data());
@@ -37,23 +34,13 @@ byte *serializeComponent(void *p_component) {
 }
 
 size_t deserializeComponent(byte *arr, void *&p_component) {
-    component *c =
-        dynamic_cast<component *>((Rice::Components::Component *)p_component);
+    component *c = dynamic_cast<component *>((Rice::Components::Component *)p_component);
     assert(c != nullptr);
     data_t data;
     memcpy((void *)data.data(), (void *)arr, strlen((char *)arr));
     size_t n = component_serializer<component>().from_bytes(data, c);
     p_component = static_cast<Rice::Components::Component *>(c);
     return n;
-}
-
-rapidjson::Value
-serializeComponentJson(void *p_component,
-                       rapidjson::Document::AllocatorType allocator) {
-    component *c =
-        dynamic_cast<component *>((Rice::Components::Component *)p_component);
-    assert(c != nullptr);
-    return c->toJson(allocator);
 }
 
 const char *getName() { return COMPONENT_STR; }
