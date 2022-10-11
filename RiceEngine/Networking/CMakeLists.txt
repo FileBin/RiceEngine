@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.19)
 
 project("RiceNetworking")
 
+SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fmodules)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(RICE_NETWORKING_NAME ${PROJECT_NAME} CACHE INTERNAL "")

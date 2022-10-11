@@ -3,12 +3,9 @@
 
   "editor.formatOnSave": true,
 
-  // Disable formatting and intellisense engine in Microsoft C/C++ extension (provides debugging)
-  // This way you can have the other features of the extension but use clangd for LSP
   "C_Cpp.formatting": "Disabled",
   "C_Cpp.intelliSenseEngine": "Disabled",
 
-  // Configure .clangd arguments
   "clangd.checkUpdates": true,
   "clangd.onConfigChanged": "restart",
 
