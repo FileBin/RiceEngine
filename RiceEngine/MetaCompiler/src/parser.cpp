@@ -253,10 +253,11 @@ std::string exec(const std::string &cmd) {
     std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
     if (!pipe)
         return "ERROR";
-    char buffer[128];
+    constexpr size_t buf_size = 0x100000; // 1MB buffer
+    char buffer[buf_size];
     std::string result = "";
     while (!feof(pipe.get())) {
-        if (fgets(buffer, 128, pipe.get()) != NULL)
+        if (fgets(buffer, buf_size, pipe.get()) != NULL)
             result += buffer;
     }
     return result;
