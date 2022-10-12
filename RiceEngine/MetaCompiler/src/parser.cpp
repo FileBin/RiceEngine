@@ -208,6 +208,8 @@ class Parser {
     // parse whole level
     void parseLevel(int targetLevel = 1) {
         do {
+            // get line beginning
+            auto line_begin = ss.tellg();
             // get current level
             currentLevel = getLineLevel();
 
@@ -232,6 +234,8 @@ class Parser {
                     current_struct.pop_back();
                 }
             } else {
+                // reset to line beginning before parse next or prev level
+                ss.seekg(line_begin);
                 if (currentLevel > targetLevel) {
                     parseLevel(targetLevel + 1);
                 } else {
