@@ -6,10 +6,6 @@
 #include <sstream>
 #include <string>
 
-const std::set<std::string> builtins = {"unsigned", "long",  "const", "static", "constexpr", "char",
-                                        "wchar_t",  "short", "int",   "long",   "double"};
-const std::set<std::string> ignored_names = {"__locale_struct"};
-
 std::vector<std::string> split(const std::string &target, char c) {
     std::string temp;
     std::stringstream ss{target};
@@ -70,6 +66,7 @@ class Parser {
   public:
     Parser(std::stringstream &ss) : ss(ss) {}
 
+    // get line level in the AST
     int getLineLevel() {
         using namespace std;
         int lvl = 0;
@@ -89,6 +86,7 @@ class Parser {
     }
 
     void skipAllChars(char ch) {
+        // skip all 'ch' characters
         std::stringstream::pos_type pos;
         do {
             pos = ss.tellg();
@@ -96,6 +94,7 @@ class Parser {
         ss.seekg(pos);
     }
 
+    // skip intil the chracter equals to ch
     void skipUntil(char ch) {
         char curr_ch;
         while (ss.peek() != ch && ss.peek() != -1) {
@@ -104,6 +103,7 @@ class Parser {
         ss.get();
     }
 
+    // get args from the definition (name, line, etc.)
     std::vector<std::string> extractArgs() {
         std::vector<std::string> args;
         std::string args_raw;
@@ -114,7 +114,8 @@ class Parser {
         return args;
     }
 
-    bool checkEqual(const std::string &str) {
+    // check if the stream starts with str
+    bool startsWith(const std::string &str) {
         auto pos = ss.tellg();
         for (char ch : str) {
             if (ch != ss.get()) {
@@ -122,10 +123,12 @@ class Parser {
                 return false;
             }
         }
+        // reset to start
         ss.seekg(pos);
         return true;
     }
 
+    // try to find str in stream, stop at 'end'
     bool tryFind(const std::string &str, char end = '\n') {
         char ch;
         auto str_pos = str.begin();
@@ -146,14 +149,21 @@ class Parser {
         return false;
     }
 
+    // perse one line on AST
     void parseLine(bool &is_struct_definition, std::string &location) {
         auto pos = ss.tellg();
+        // statement always starts with -
         skipAllChars('-');
-        if (checkEqual("CXXRecordDecl")) {
+        // struct or class declaration
+        if (startsWith("CXXRecordDecl")) {
+            // declaration needs to be not implicit and we only need structs and classes
             if (!tryFind("implicit") && (tryFind("struct") || tryFind("class"))) {
+                // get args
                 std::vector<std::string> args = extractArgs();
+                // we only need declarations with a definition
                 if (args.back() == "definition") {
                     args.pop_back();
+                    // type comes before 'definition' keyword
                     if (args.back() != "struct" && args.back() != "class") {
                         current_struct.push_back({current_location, args.back()});
                         location = args.back();
@@ -161,7 +171,9 @@ class Parser {
                     }
                 }
             }
-        } else if (checkEqual("FieldDecl")) {
+            // parse variable definitions
+        } else if (startsWith("FieldDecl")) {
+            // extract args
             std::vector<std::string> args = extractArgs();
             if (!current_struct.empty()) {
                 std::string type = args.back();
@@ -170,38 +182,49 @@ class Parser {
                 if (pos != std::string::npos) {
                     type = type.substr(pos + 1);
                 }
-
+                // add to last struct
                 current_struct.back().fields.push_back({args.at(args.size() - 2), type});
             }
-        } else if (checkEqual("AnnotateAttr")) {
+            // parse annotations
+        } else if (startsWith("AnnotateAttr")) {
             if (tryFind("\"reflectable\"")) {
+                // we only need to parse structs with reflectable attribute
                 current_struct.back().is_reflectable = true;
             }
-        } else if (checkEqual("NamespaceDecl")) {
+            // parse namespaces
+        } else if (startsWith("NamespaceDecl")) {
             std::vector<std::string> args = extractArgs();
+            // remove inline arg if it exists
             if (args.back() == "inline") {
                 args.pop_back();
             }
+            // get namespace name
             location = args.back();
         }
+        // skip until the end of the line
         skipUntil('\n');
     }
 
+    // parse whole level
     void parseLevel(int targetLevel = 1) {
         do {
-            // parse each line
-            auto line_begin = ss.tellg();
+            // get current level
             currentLevel = getLineLevel();
 
+            // we are on our target level
             if (currentLevel == targetLevel) {
                 bool is_struct_definition = false;
                 std::string last_location;
+                // parse each line
                 parseLine(is_struct_definition, last_location);
+                // we parsed a struct or a namespace, add to the current location
                 if (!last_location.empty()) {
                     current_location.push_back(last_location);
+                    // parse next level
                     parseLevel(targetLevel + 1);
                     current_location.pop_back();
                 }
+                // we parsed a struct, add it to the list
                 if (is_struct_definition) {
                     if (current_struct.back().is_reflectable) {
                         all_structs.push_back(current_struct.back());
@@ -209,7 +232,6 @@ class Parser {
                     current_struct.pop_back();
                 }
             } else {
-                ss.seekg(line_begin);
                 if (currentLevel > targetLevel) {
                     parseLevel(targetLevel + 1);
                 } else {
@@ -226,6 +248,7 @@ class Parser {
         }
     }
 
+    // generate code for reflectionHelper from the parsed structs
     std::string generateMetaCode() {
         std::stringstream generated_code;
         std::string type_string;
@@ -261,26 +284,6 @@ std::string exec(const std::string &cmd) {
             result += buffer;
     }
     return result;
-}
-
-bool isBuiltIn(std::string str) {
-    if (str.at(str.size() - 1) == ']') {
-        str = str.substr(0, str.find('['));
-    }
-
-    if (str.at(str.size() - 1) == '*') {
-        return true;
-    }
-
-    std::vector<std::string> tokens = split(str, ' ');
-
-    for (const auto &token : tokens) {
-        if (!builtins.contains(token)) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 int main(int argc, char *argv[]) {
