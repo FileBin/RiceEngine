@@ -1,6 +1,5 @@
 #include "SerializableComponent.hpp"
 #include "component.hpp"
-#include "fmt/xchar.h"
 //#include <boost/mp11.hpp>
 //#include <boost/mp11/algorithm.hpp>
 #include <boost/pfr/core.hpp>
@@ -21,9 +20,7 @@ typedef PFX PPCAT(moc__, COMPONENT_NAME) component_moc;
 
 #ifndef CUSTOM_SERIALIZER
 
-#include "nameof/nameof.hpp"
 #include "serialization_helper.hpp"
-#include <boost/pfr.hpp>
 
 template <> struct component_serializer<component> {
     data_t to_bytes(p_component t) {

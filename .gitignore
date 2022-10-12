@@ -10,3 +10,4 @@ CMakeSource/Makefile
 CMakeSource/cmake_install.cmake
 CMakeSource/*.a
 build
+compile_commands.json

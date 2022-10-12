@@ -18,12 +18,13 @@ namespace Meta {
 template <size_t Index = 0,                                                 // start iteration at 0 index
           typename TTuple,                                                  // the tuple type
           size_t Size = std::tuple_size_v<std::remove_reference_t<TTuple>>, // tuple size
-          typename TCallable,                                               // the callable to bo invoked for each tuple item
-          typename... TArgs                                                 // other arguments to be passed to the callable
+          typename TCallable, // the callable to bo invoked for each tuple item
+          typename... TArgs   // other arguments to be passed to the callable
           >
 void for_each(TTuple &&tuple, TCallable &&callable, TArgs &&...args) {
     if constexpr (Index < Size) {
-        if constexpr (std::is_assignable_v<bool &, std::invoke_result_t<TCallable &&, TArgs &&..., decltype(std::get<Index>(tuple))>>) {
+        if constexpr (std::is_assignable_v<
+                          bool &, std::invoke_result_t<TCallable &&, TArgs &&..., decltype(std::get<Index>(tuple))>>) {
             if (!std::invoke(callable, args..., std::get<Index>(tuple)))
                 return;
         } else {
@@ -31,7 +32,8 @@ void for_each(TTuple &&tuple, TCallable &&callable, TArgs &&...args) {
         }
 
         if constexpr (Index + 1 < Size)
-            for_each<Index + 1>(std::forward<TTuple>(tuple), std::forward<TCallable>(callable), std::forward<TArgs>(args)...);
+            for_each<Index + 1>(std::forward<TTuple>(tuple), std::forward<TCallable>(callable),
+                                std::forward<TArgs>(args)...);
     }
 }
 
@@ -93,9 +95,9 @@ template <typename T> class Type<T> {
     constexpr size_t getMembersCount() { return 0; }
 };
 
-#define BUILTIN_GEN_TYPE(b)                                                                                                                                                                                                                              \
-    template <> struct TypeOf<b> {                                                                                                                                                                                                                       \
-        Type<b> type() { return Type<b>{Types::BuiltIn}; }                                                                                                                                                                                               \
+#define BUILTIN_GEN_TYPE(b)                                                                                            \
+    template <> struct TypeOf<b> {                                                                                     \
+        Type<b> type() { return Type<b>{Types::BuiltIn}; }                                                             \
     }
 
 BUILTIN_GEN_TYPE(bool);
@@ -118,7 +120,7 @@ BUILTIN_GEN_TYPE(wchar_t);
 
 #define REFLECTABLE __attribute__((annotate("reflectable")))
 
-/*example
+/*example*/
 
 struct Foo {
     int i;
@@ -135,7 +137,9 @@ template <> struct Meta::TypeOf<Foo> {
 };
 
 template <> struct Meta::TypeOf<Bar> {
-    Type<Bar, Foo, double> type() { return Type<Bar, Foo, double>{Types::Struct, {"foo", &Bar::foo}, {"dbl", &Bar::dbl}}; }
+    Type<Bar, Foo, double> type() {
+        return Type<Bar, Foo, double>{Types::Struct, {"foo", &Bar::foo}, {"dbl", &Bar::dbl}};
+    }
 };
 
 int main() {
@@ -143,4 +147,4 @@ int main() {
     auto members = type.getMembers();
     Meta::for_each(members, [](const auto &member) { std::cout << member.getName() << "\n"; });
     return 0;
-}*/
+}
