@@ -120,7 +120,7 @@ BUILTIN_GEN_TYPE(wchar_t);
 
 #define REFLECTABLE __attribute__((annotate("reflectable")))
 
-/*example*/
+/*example
 
 struct Foo {
     int i;
@@ -147,4 +147,4 @@ int main() {
     auto members = type.getMembers();
     Meta::for_each(members, [](const auto &member) { std::cout << member.getName() << "\n"; });
     return 0;
-}
+}*/

@@ -11,16 +11,12 @@
 #include "serialization_helper.hpp"
 
 NSP_COMPONENTS_BEGIN
-template <class Derived, typename PublicT, typename PrivateT> class SerializableComponent;
+template <class Derived> class SerializableComponent;
 NSP_COMPONENTS_END
 
 NSP_COMPONENTS_BEGIN
 
-template <class Derived, typename PublicT, typename PrivateT>
-class SerializableComponent : public virtual Component,
-                              public PublicT,
-                              protected PrivateT,
-                              public virtual ISerializable {
+template <class Derived> class SerializableComponent : public virtual Component, public virtual ISerializable {
   public:
     SerializableComponent() = default;
     ~SerializableComponent() {}
@@ -28,8 +24,6 @@ class SerializableComponent : public virtual Component,
     data_t toBytes() override { return component_serializer<Derived>().to_bytes(dynamic_cast<Derived *>(this)); }
 
   protected:
-    PrivateT *getPrivate() { return static_cast<PrivateT *>(this); }
-    PublicT *getPublic() { return static_cast<PublicT *>(this); }
     template <typename T> friend struct ::component_serializer;
 };
 

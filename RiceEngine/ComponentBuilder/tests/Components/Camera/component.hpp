@@ -9,23 +9,21 @@
 
 #include "ComponentHelper.hpp"
 
-COMPONENT_BEGIN
+namespace MyComponents {
+using namespace Rice;
+using namespace Rice::Components;
 
-REGION(private_fields) { // private serialized fields
+class REFLECTABLE Camera : public virtual SerializableComponent<Camera> {
+    RICE_COMPONENT
+
+  private:
     dbl fov;
     dbl near_plane;
     dbl far_plane;
-};
 
-REGION(public_fields){}; // public serialized fields
-
-REGION(methods) {
-  public: // write public component methods as you like
+  public:
     dbl getFov();
     void setFov(dbl fov);
-
-  protected: // write protected component methods as you like
-  private:   // write private component methods as you like
 };
 
-COMPONENT_END
+} // namespace MyComponents
