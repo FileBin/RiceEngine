@@ -22,6 +22,8 @@ std::vector<std::string> split(const std::string &target, char c) {
     return result;
 }
 
+typedef std::vector<std::string> Location;
+
 struct Field {
     std::string name;
     std::string type;
@@ -29,20 +31,7 @@ struct Field {
 };
 
 std::ostream &operator<<(std::ostream &os, const Field &field) {
-    os << "Field: " << field.name << " (type: " << field.type << ")";
-    return os;
-}
-
-struct Location {
-    std::vector<std::string> vec;
-    friend std::ostream &operator<<(std::ostream &os, const Location &loc);
-};
-
-std::ostream &operator<<(std::ostream &os, const Location &loc) {
-    os << "Location:";
-    for (auto loc : loc.vec) {
-        os << " " << loc;
-    }
+    os << field.type << " " << field.name << ";";
     return os;
 }
 
@@ -50,16 +39,24 @@ struct Struct {
     Location location;
     std::string name;
     std::vector<Field> fields;
+    std::string getFullName() const {
+        std::string full_name;
+        for (auto loc : location) {
+            full_name += loc + "::";
+        }
+        return full_name + name;
+    }
     bool is_reflectable;
     friend std::ostream &operator<<(std::ostream &os, const Struct &str);
 };
 
 std::ostream &operator<<(std::ostream &os, const Struct &str) {
-    os << "Struct " << str.name << ": { " << str.location << ", { ";
+    os << str.getFullName();
+    os << " {";
     for (const auto &field : str.fields) {
-        os << field << ", ";
+        os << "\n    " << field;
     }
-    os << " } }";
+    os << "\n}";
     return os;
 }
 
@@ -68,12 +65,12 @@ class Parser {
     std::vector<Struct> current_struct;
     std::vector<Struct> all_structs;
     std::stringstream &ss;
-    int lvl = 0;
+    int currentLevel = 0;
 
   public:
     Parser(std::stringstream &ss) : ss(ss) {}
 
-    int getLvl() {
+    int getLineLevel() {
         using namespace std;
         int lvl = 0;
         char ch;
@@ -91,7 +88,7 @@ class Parser {
         return lvl / 2 + 1;
     }
 
-    void skip_all_char(char ch) {
+    void skipAllChars(char ch) {
         std::stringstream::pos_type pos;
         do {
             pos = ss.tellg();
@@ -99,12 +96,22 @@ class Parser {
         ss.seekg(pos);
     }
 
-    void skip_until(char ch) {
+    void skipUntil(char ch) {
         char curr_ch;
         while (ss.peek() != ch && ss.peek() != -1) {
             curr_ch = ss.get();
         }
         ss.get();
+    }
+
+    std::vector<std::string> extractArgs() {
+        std::vector<std::string> args;
+        std::string args_raw;
+        while (ss.peek() != '\n') {
+            args_raw += ss.get();
+        }
+        args = split(args_raw, ' ');
+        return args;
     }
 
     bool checkEqual(const std::string &str) {
@@ -139,71 +146,72 @@ class Parser {
         return false;
     }
 
-    void parseLine(bool &is_struct_definition) {
-        char ch;
+    void parseLine(bool &is_struct_definition, std::string &location) {
         auto pos = ss.tellg();
-        skip_all_char('-');
+        skipAllChars('-');
         if (checkEqual("CXXRecordDecl")) {
             if (!tryFind("implicit") && (tryFind("struct") || tryFind("class"))) {
-                std::vector<std::string> args;
-                std::string args_raw;
-                while (ss.peek() != '\n') {
-                    args_raw += ss.get();
-                }
-                args = split(args_raw, ' ');
+                std::vector<std::string> args = extractArgs();
                 if (args.back() == "definition") {
                     args.pop_back();
                     if (args.back() != "struct" && args.back() != "class") {
                         current_struct.push_back({current_location, args.back()});
+                        location = args.back();
                         is_struct_definition = true;
                     }
                 }
             }
         } else if (checkEqual("FieldDecl")) {
-            std::vector<std::string> args;
-            std::string args_raw;
-            while (ss.peek() != '\n') {
-                args_raw += ss.get();
-            }
-            args = split(args_raw, ' ');
+            std::vector<std::string> args = extractArgs();
             if (!current_struct.empty()) {
-                current_struct.back().fields.push_back({args.at(args.size() - 2), args.back()});
+                std::string type = args.back();
+                type.pop_back();
+                int pos = type.find_last_of('\'');
+                if (pos != std::string::npos) {
+                    type = type.substr(pos + 1);
+                }
+
+                current_struct.back().fields.push_back({args.at(args.size() - 2), type});
             }
         } else if (checkEqual("AnnotateAttr")) {
             if (tryFind("\"reflectable\"")) {
                 current_struct.back().is_reflectable = true;
             }
+        } else if (checkEqual("NamespaceDecl")) {
+            std::vector<std::string> args = extractArgs();
+            if (args.back() == "inline") {
+                args.pop_back();
+            }
+            location = args.back();
         }
-        skip_until('\n');
-        if (current_struct.empty() && is_struct_definition) {
-            std::cout << "fuck\n";
-        }
+        skipUntil('\n');
     }
 
-    void parse(int level = 1) {
+    void parseLevel(int targetLevel = 1) {
         do {
             // parse each line
             auto line_begin = ss.tellg();
-            lvl = getLvl();
+            currentLevel = getLineLevel();
 
-            if (lvl == level) {
+            if (currentLevel == targetLevel) {
                 bool is_struct_definition = false;
-                parseLine(is_struct_definition);
-                line_begin = ss.tellg();
+                std::string last_location;
+                parseLine(is_struct_definition, last_location);
+                if (!last_location.empty()) {
+                    current_location.push_back(last_location);
+                    parseLevel(targetLevel + 1);
+                    current_location.pop_back();
+                }
                 if (is_struct_definition) {
-                    // std::cout << last_struct << "\n";
-                    current_location.vec.push_back(current_struct.back().name);
-                    ss.seekg(line_begin);
-                    parse(level + 1);
-                    current_location.vec.pop_back();
-                    if (current_struct.back().is_reflectable)
+                    if (current_struct.back().is_reflectable) {
                         all_structs.push_back(current_struct.back());
+                    }
                     current_struct.pop_back();
                 }
             } else {
                 ss.seekg(line_begin);
-                if (lvl > level) {
-                    parse(level + 1);
+                if (currentLevel > targetLevel) {
+                    parseLevel(targetLevel + 1);
                 } else {
                     break;
                 }
@@ -216,6 +224,28 @@ class Parser {
         for (auto &s : all_structs) {
             std::cout << s << std::endl;
         }
+    }
+
+    std::string generateMetaCode() {
+        std::stringstream generated_code;
+        std::string type_string;
+        std::string field_string;
+        std::string full_name;
+        for (auto &str : all_structs) {
+            field_string.clear();
+            full_name = str.getFullName();
+            generated_code << "template <> struct Meta::TypeOf<" + full_name;
+            generated_code << "> {\n";
+            type_string = "Type<" + full_name;
+            for (auto &field : str.fields) {
+                type_string += ", " + field.type;
+                field_string += ", \n    {\"" + field.name + "\", &" + full_name + "::" + field.name + "}";
+            }
+            type_string += ">";
+            generated_code << "    " << type_string << " type() { \n    return " << type_string << "{Types::Struct"
+                           << field_string << "}; }\n};\n";
+        }
+        return generated_code.str();
     }
 };
 
@@ -328,33 +358,34 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    ofstream ast_file(headerFileName + "_ast");
+    auto start_clang = chrono::steady_clock::now();
     stringstream ss(exec("clang++" + additional_params +
                          " -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility '" + headerFile +
                          "'"));
+    auto end_clang = chrono::steady_clock::now();
+
+    ofstream ast_file(headerFileName + "_ast");
     ast_file << ss.str();
     ast_file.close();
 
-    auto start = chrono::steady_clock::now();
+    auto start_parse = chrono::steady_clock::now();
 
-    string built_component = "inline void BuildTypes(Meta::TypeMap &map) {";
     while (ss.get() != '\n') {
     };
     Parser parser(ss);
-    parser.parse();
-    parser.dump();
-    built_component += "}\n";
-
-    ofstream meta(headerFileName + "_meta.hpp");
-    meta << built_component;
-    meta.close();
+    parser.parseLevel();
 
     if (print_to_console) {
-        cout << built_component;
+        parser.dump();
     }
 
-    cout << "\nBuilt in: " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count()
-         << " ms\n";
+    ofstream meta(headerFileName + "_meta.hpp");
+    meta << parser.generateMetaCode();
+    meta.close();
+
+    cout << "\nBuilt in: "
+         << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start_parse).count() << "ms + "
+         << chrono::duration_cast<chrono::milliseconds>(end_clang - start_clang).count() << "ms clang ast generation\n";
 
     return 0;
 }
