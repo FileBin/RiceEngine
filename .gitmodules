@@ -1,0 +1,3 @@
+[submodule "RiceEngine/MetaCompiler"]
+	path = RiceEngine/MetaCompiler
+	url = https://github.com/dgudim/RiceMetaCompiler
