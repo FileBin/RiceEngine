@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <nlohmann/json_fwd.hpp>
 #include <string>
 
 #include "component.hpp"
@@ -31,6 +32,12 @@ byte *serializeComponent(void *p_component) {
     byte *arr = (byte *)calloc(n, 1);
     memcpy((void *)arr, (void *)data.data(), n);
     return arr;
+}
+
+nlohmann::json serializeComponentJson(Rice::Components::Component *p_component) {
+    component *c = dynamic_cast<component *>(p_component);
+    assert(c != nullptr);
+    return c->toJson();
 }
 
 size_t deserializeComponent(byte *arr, void *&p_component) {

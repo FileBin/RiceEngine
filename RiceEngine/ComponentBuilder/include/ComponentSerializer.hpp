@@ -1,6 +1,7 @@
 #include "SerializableComponent.hpp"
 #include "component.hpp"
 #include <MetaCompiler/ReflectionHelper.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <string>
 
 #ifdef COMPONENT_NSP
@@ -50,6 +51,25 @@ template <> struct component_serializer<component> {
         });
 
         return sum;
+    }
+
+    nlohmann::json to_json(p_component t) {
+        using namespace nlohmann;
+        json object = json::object();
+        auto type = Meta::TypeOf<component>().type();
+        object["name"] = type.getShortName();
+        auto &arr = object["members"] = json::array();
+        auto members = type.getMembers();
+        Meta::for_each(members, [&](const auto &member) {
+            std::string name = member.getName();
+            auto p = member.getMemberPointer();
+            auto &mem = t->*p;
+            arr.push_back(json::object({
+                {"name", name},
+                {"value", mem},
+            }));
+        });
+        return object;
     }
 };
 
