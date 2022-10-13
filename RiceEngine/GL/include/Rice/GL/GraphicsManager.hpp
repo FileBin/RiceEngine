@@ -43,16 +43,11 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     void cleanup() override;
 
   public:
-    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(),
-                     resizeRenderPasses = ResizeEvent::create(),
-                     resizeCommandBuffers = ResizeEvent::create(),
-                     resizeGraphicsComponents = ResizeEvent::create();
+    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(), resizeRenderPasses = ResizeEvent::create(),
+                     resizeCommandBuffers = ResizeEvent::create(), resizeGraphicsComponents = ResizeEvent::create();
     ptr<DestroyEvent> destroyCommandBuffers = DestroyEvent::create();
     ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
     ptr<DestroyEvent> destroyOneTimeBuffers = DestroyEvent::create();
-
-    void registerOneTimeBufferFunc(EventRegistration &reg,
-                                   std::function<void()> f);
 
   private:
     Util::EventRegistration resizeReg;
@@ -61,11 +56,8 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
 
     ptr<Window> window;
 
-    std::mutex oneTimeBufferMutex;
-    uptr<std::jthread> updateThread;
     void startUpdateThread();
-    static void updateThreadFunc(ptr<GraphicsManager> self,
-                                 std::stop_token token);
+    static void updateThreadFunc(ptr<GraphicsManager> self, std::stop_token token);
 
     bool is_drawing = false;
     bool is_initialized = false;

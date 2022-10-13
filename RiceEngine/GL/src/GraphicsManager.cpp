@@ -16,9 +16,7 @@ NSP_GL_BEGIN
 
 GraphicsManager::GraphicsManager() = default;
 
-ptr<GraphicsManager> GraphicsManager::create() {
-    return ptr<GraphicsManager>(new GraphicsManager());
-}
+ptr<GraphicsManager> GraphicsManager::create() { return ptr<GraphicsManager>(new GraphicsManager()); }
 
 void GraphicsManager::init(ptr<Window> _window) {
     window = _window;
@@ -28,9 +26,8 @@ void GraphicsManager::init(ptr<Window> _window) {
     is_initialized = true;
     Log::debug("Successfully initialized!");
 
-    _window->resize_event->subscribe(
-        resizeReg, // @suppress("Invalid arguments")
-        [this](ptr<Window> win) { api_data->resizing = true; });
+    _window->resize_event->subscribe(resizeReg, // @suppress("Invalid arguments")
+                                     [this](ptr<Window> win) { api_data->resizing = true; });
 }
 
 void GraphicsManager::update() {
@@ -44,7 +41,6 @@ void GraphicsManager::sync() { api_data->sync(); }
 
 void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
     api_data->executeCmd({cmd->api_data->cmd[api_data->swapchainImageIndex]});
-    startUpdateThread();
 }
 
 void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
@@ -54,30 +50,6 @@ void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
         c[i] = cmds[i]->api_data->cmd[api_data->swapchainImageIndex];
 
     api_data->executeCmd(c);
-    startUpdateThread();
-}
-
-void GraphicsManager::startUpdateThread() {
-    if (updateThread)
-        return;
-    updateThread = std::make_unique<std::jthread>(
-        [this](std::stop_token t) { updateThreadFunc(shared_from_this(), t); });
-}
-
-void GraphicsManager::updateThreadFunc(ptr<GraphicsManager> self,
-                                       std::stop_token token) {
-    while (!token.stop_requested()) {
-        self->api_data->graphicsQueue.waitIdle();
-        lock_guard lock(self->oneTimeBufferMutex);
-        self->destroyOneTimeBuffers->invoke();
-        self->destroyOneTimeBuffers->clear();
-    }
-}
-
-void GraphicsManager::registerOneTimeBufferFunc(EventRegistration &reg,
-                                                std::function<void()> f) {
-    lock_guard lock(oneTimeBufferMutex);
-    destroyOneTimeBuffers->subscribe(reg, f);
 }
 
 // FINALIZER
