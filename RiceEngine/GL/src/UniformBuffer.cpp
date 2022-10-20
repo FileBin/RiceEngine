@@ -31,7 +31,7 @@ void UniformBuffer::reset(uint size) {
     cleanup();
 
     if (size != 0) {
-        api_data->allocate(get_api_data(), size, BufferUsage::Uniform);
+        api_data->allocate(size, BufferUsage::Uniform);
     }
 }
 

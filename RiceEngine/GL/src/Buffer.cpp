@@ -33,13 +33,10 @@ Buffer::Buffer(ptr<GraphicsManager> g_mgr, BufferUsage usage, data_t initialData
 }
 
 void Buffer::build_api() {
-    api_data = std::move(
-        uptr<Buffer_API_Data>{new Buffer_API_Data(get_api_data().device, get_api_data().GPU)});
+    api_data = std::move(uptr<Buffer_API_Data>{new Buffer_API_Data(get_api_data())});
 }
 
-void Buffer::allocate(size_t size, BufferUsage usage) {
-    api_data->allocate(get_api_data(), size, usage);
-}
+void Buffer::allocate(size_t size, BufferUsage usage) { api_data->allocate(size, usage); }
 
 void Buffer::setData(void *pData, size_t nData, size_t offset) {
     // graphics_mgr->sync();

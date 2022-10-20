@@ -13,11 +13,9 @@
 
 NSP_GL_BEGIN
 
-Buffer_API_Data::Buffer_API_Data(vk::Device &dev, vk::PhysicalDevice &gpu)
-    : device(dev), GPU(gpu) {}
+Buffer_API_Data::Buffer_API_Data(GraphicsManager_API_data &api_data) : api_data(api_data) {}
 
-Buffer_API_Data &Buffer_API_Data::allocate(GraphicsManager_API_data &api_data, size_t size,
-                                           BufferUsage usage) {
+Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
     using namespace vk;
     if (!allocated) {
         buffer_size = size;
@@ -38,17 +36,17 @@ Buffer_API_Data &Buffer_API_Data::allocate(GraphicsManager_API_data &api_data, s
 
         bufferInfo.sharingMode = SharingMode::eExclusive;
 
-        buffer = device.createBuffer(bufferInfo);
+        buffer = api_data.device.createBuffer(bufferInfo);
 
-        MemoryRequirements memReq = device.getBufferMemoryRequirements(buffer);
+        MemoryRequirements memReq = api_data.device.getBufferMemoryRequirements(buffer);
 
         MemoryAllocateInfo allocInfo;
         allocInfo.allocationSize = memReq.size;
         allocInfo.memoryTypeIndex =
-            api_data.findMemoryType(memReq.memoryTypeBits, MemoryPropertyFlagBits::eHostVisible);
+            api_data.findMemoryType(memReq.memoryTypeBits, MemoryPropertyFlagBits::eDeviceLocal);
 
-        memory = device.allocateMemory(allocInfo);
-        device.bindBufferMemory(buffer, memory, 0);
+        memory = api_data.device.allocateMemory(allocInfo);
+        api_data.device.bindBufferMemory(buffer, memory, 0);
     }
     allocated = true;
 
@@ -58,26 +56,26 @@ Buffer_API_Data &Buffer_API_Data::allocate(GraphicsManager_API_data &api_data, s
 Buffer_API_Data &Buffer_API_Data::setData(void *pData, size_t nData, size_t offset) {
 
     void *mappedData;
-    mappedData = device.mapMemory(memory, offset, nData);
+    mappedData = api_data.device.mapMemory(memory, offset, nData);
     memcpy(mappedData, pData, nData);
-    device.unmapMemory(memory);
+    api_data.device.unmapMemory(memory);
 
     return *this;
 }
 
 Buffer_API_Data &Buffer_API_Data::getData(void *pData, size_t nData, size_t offset) {
     void *mappedData;
-    mappedData = device.mapMemory(memory, offset, nData);
+    mappedData = api_data.device.mapMemory(memory, offset, nData);
     memcpy(pData, mappedData, nData);
-    device.unmapMemory(memory);
+    api_data.device.unmapMemory(memory);
 
     return *this;
 }
 
 Buffer_API_Data &Buffer_API_Data::free() {
     if (allocated) {
-        device.destroy(buffer);
-        device.freeMemory(memory);
+        api_data.device.destroy(buffer);
+        api_data.device.freeMemory(memory);
     }
     allocated = false;
     return *this;
