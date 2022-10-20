@@ -18,6 +18,7 @@
 #include <Rice/Math/Math.hpp>
 
 #include <Rice/Engine/Window.hpp>
+#include <cstddef>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
@@ -635,9 +636,10 @@ void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsage
     device.bindBufferMemory(buffer, bufferMemory, 0);
 }
 
-void GraphicsManager_API_data::copyDataToBuffer(void *pData, uint nData, vk::Buffer dstBuffer,
-                                                vk::DeviceMemory mem) {
-    void *mappedData = device.mapMemory(mem, 0, nData);
+void GraphicsManager_API_data::copyDataToBuffer(void *pData, size_t nData, size_t offset,
+                                                vk::Buffer dstBuffer, vk::DeviceMemory mem) {
+    void *mappedData;
+    mappedData = device.mapMemory(mem, offset, nData);
     memcpy(mappedData, pData, (size_t)nData);
     device.unmapMemory(mem);
     // FIXME: not working
@@ -660,7 +662,8 @@ void GraphicsManager_API_data::copyDataToBuffer(void *pData, uint nData, vk::Buf
     device.free(stagingBufferMemory);*/
 }
 
-void GraphicsManager_API_data::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, uint nData) {
+void GraphicsManager_API_data::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer,
+                                          size_t nData) {
     using namespace vk;
     CommandBufferAllocateInfo allocInfo{};
     allocInfo.level = CommandBufferLevel::ePrimary;

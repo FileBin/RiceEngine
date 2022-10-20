@@ -29,7 +29,6 @@ struct Buffer_API_Data {
     Buffer_API_Data &free();
 
     Buffer_API_Data &setData(void *pSrc, size_t nData, size_t offset);
-    Buffer_API_Data &getData(void *pDst, size_t nData, size_t offset);
 
     ~Buffer_API_Data();
 };

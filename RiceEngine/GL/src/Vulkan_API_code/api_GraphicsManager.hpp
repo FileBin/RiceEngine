@@ -9,6 +9,7 @@
 
 #include "VulkanHelper.hpp"
 #include <Rice/GL/GraphicsManager.hpp>
+#include <cstddef>
 #include <sys/types.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -87,9 +88,10 @@ struct GraphicsManager_API_data {
                       vk::MemoryPropertyFlags properties, vk::Buffer &buffer,
                       vk::DeviceMemory &bufferMemory);
 
-    void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, uint nData);
+    void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, size_t nData);
 
-    void copyDataToBuffer(void *pData, uint nData, vk::Buffer dstBuffer, vk::DeviceMemory mem);
+    void copyDataToBuffer(void *pData, size_t nData, size_t offset, vk::Buffer dstBuffer,
+                          vk::DeviceMemory mem);
 
   private:
     void recreateSwapchain();

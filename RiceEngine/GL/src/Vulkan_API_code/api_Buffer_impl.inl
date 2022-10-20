@@ -45,19 +45,7 @@ Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
 
 Buffer_API_Data &Buffer_API_Data::setData(void *pData, size_t nData, size_t offset) {
 
-    void *mappedData;
-    mappedData = api_data.device.mapMemory(memory, offset, nData);
-    memcpy(mappedData, pData, nData);
-    api_data.device.unmapMemory(memory);
-
-    return *this;
-}
-
-Buffer_API_Data &Buffer_API_Data::getData(void *pData, size_t nData, size_t offset) {
-    void *mappedData;
-    mappedData = api_data.device.mapMemory(memory, offset, nData);
-    memcpy(pData, mappedData, nData);
-    api_data.device.unmapMemory(memory);
+    api_data.copyDataToBuffer(pData, nData, offset, buffer, memory);
 
     return *this;
 }
