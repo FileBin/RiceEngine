@@ -33,8 +33,7 @@ NSP_GL_BEGIN
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType,
-              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-              void *pUserData) {
+              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData) {
 
     String message = pCallbackData->pMessage;
 
@@ -86,11 +85,9 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
 
     if (!SDL_Vulkan_CreateSurface(
             mgr->window->getHandle().get(), instance,
-            (VkSurfaceKHR
-                 *)&surface)) { // @suppress("Invalid arguments") //
-                                // @suppress("Method cannot be resolved")
-        THROW_EXCEPTION(
-            "Failed to create vulkan surface! (Maybe window is not created)");
+            (VkSurfaceKHR *)&surface)) { // @suppress("Invalid arguments") //
+                                         // @suppress("Method cannot be resolved")
+        THROW_EXCEPTION("Failed to create vulkan surface! (Maybe window is not created)");
     }
 
     if (!surface)
@@ -100,18 +97,17 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     // We want a GPU that can write to the SDL surface and supports Vulkan 1.1
     vkb::PhysicalDeviceSelector selector{vkb_inst};
 
-    auto dev_result =
-        selector.set_minimum_version(1, 1)
-            .set_surface(surface)
+    auto dev_result = selector.set_minimum_version(1, 1)
+                          .set_surface(surface)
 #ifdef WIN32
-            .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
+                          .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
 #endif
-            .select();
+                          .select();
 
     if (!dev_result.has_value()) {
-        std::string str = fmt::format(
-            "Error: {}!",
-            dev_result.error().message()); // @suppress("Invalid arguments")
+        std::string str =
+            fmt::format("Error: {}!",
+                        dev_result.error().message()); // @suppress("Invalid arguments")
         THROW_EXCEPTION(str.c_str());
     }
 
@@ -126,13 +122,11 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     device = vkbDevice.device;
 
     GPU = physicalDevice.physical_device;
-    Log::log(Log::Info, "GPU INFO: {}",
-             String(GPU.getProperties().deviceName.data()));
+    Log::log(Log::Info, "GPU INFO: {}", String(GPU.getProperties().deviceName.data()));
 
     // use vkbootstrap to get a Graphics queue
     graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
-    graphicsQueueFamily =
-        vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+    graphicsQueueFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 
     init_swapchain();
     init_commands();
@@ -153,10 +147,8 @@ void GraphicsManager_API_data::init_swapchain() {
     vkb::SwapchainBuilder swapchainBuilder{GPU, device, surface};
 
     if (use_hdr) {
-        swapchainBuilder.set_desired_format(
-            (VkSurfaceFormatKHR)vk::SurfaceFormatKHR(
-                vk::Format::eR16G16B16A16Sfloat,
-                vk::ColorSpaceKHR::eHdr10HlgEXT));
+        swapchainBuilder.set_desired_format((VkSurfaceFormatKHR)vk::SurfaceFormatKHR(
+            vk::Format::eR16G16B16A16Sfloat, vk::ColorSpaceKHR::eHdr10HlgEXT));
     } else {
         swapchainBuilder.use_default_format_selection();
     }
@@ -177,8 +169,7 @@ void GraphicsManager_API_data::init_swapchain() {
         vkb::Swapchain vkbSwapchain =
             swapchainBuilder
                 .set_desired_present_mode(
-                    (VkPresentModeKHR)
-                        vk::PresentModeKHR::eFifo) // use v-sync present mode
+                    (VkPresentModeKHR)vk::PresentModeKHR::eFifo) // use v-sync present mode
                 //.set_desired_extent(windowExcent.width, windowExcent.height)
                 .set_old_swapchain((VkSwapchainKHR)old_swapchain)
                 .build()
@@ -190,8 +181,7 @@ void GraphicsManager_API_data::init_swapchain() {
         // store swapchain and its related images
         swapchain = vkbSwapchain.swapchain;
         swapchainImages = (vec<vk::Image> &)vkbSwapchain.get_images().value();
-        swapchainImageViews =
-            (vec<vk::ImageView> &)vkbSwapchain.get_image_views().value();
+        swapchainImageViews = (vec<vk::ImageView> &)vkbSwapchain.get_image_views().value();
 
         swapchainImageFormat = (vk::Format &)vkbSwapchain.image_format;
     }
@@ -202,10 +192,9 @@ void GraphicsManager_API_data::init_commands() {
     // create a command pool for commands submitted to the graphics queue.
     // we also want the pool to allow for resetting of individual command
     // buffers
-    auto commandPoolInfo =
-        vk::CommandPoolCreateInfo()
-            .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
-            .setQueueFamilyIndex(graphicsQueueFamily);
+    auto commandPoolInfo = vk::CommandPoolCreateInfo()
+                               .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
+                               .setQueueFamilyIndex(graphicsQueueFamily);
 
     commandPool = device.createCommandPool(commandPoolInfo);
 
@@ -227,10 +216,9 @@ void GraphicsManager_API_data::init_descriptor_pool() {
     descriptorPool = device.createDescriptorPool(poolInfo);
 }
 
-vk::Format
-GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &candidates,
-                                              vk::ImageTiling tiling,
-                                              vk::FormatFeatureFlags features) {
+vk::Format GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &candidates,
+                                                         vk::ImageTiling tiling,
+                                                         vk::FormatFeatureFlags features) {
     for (vk::Format format : candidates) {
         vk::FormatProperties props = GPU.getFormatProperties(format);
 
@@ -245,8 +233,7 @@ GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &candidates,
     THROW_EXCEPTION("Failed to find supported format!");
 }
 
-uint GraphicsManager_API_data::findMemoryType(
-    uint typeFilter, vk::MemoryPropertyFlags properties) {
+uint GraphicsManager_API_data::findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties) {
     using namespace vk;
     PhysicalDeviceMemoryProperties memprop = GPU.getMemoryProperties();
 
@@ -259,10 +246,11 @@ uint GraphicsManager_API_data::findMemoryType(
     return 0xffffffff;
 }
 
-void GraphicsManager_API_data::createImage(
-    uint w, uint h, vk::Format format, vk::ImageTiling tiling,
-    vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties,
-    vk::ImageLayout layout, vk::Image &image, vk::DeviceMemory &imageMemory) {
+void GraphicsManager_API_data::createImage(uint w, uint h, vk::Format format,
+                                           vk::ImageTiling tiling, vk::ImageUsageFlags usage,
+                                           vk::MemoryPropertyFlags properties,
+                                           vk::ImageLayout layout, vk::Image &image,
+                                           vk::DeviceMemory &imageMemory) {
     using namespace vk;
     ImageCreateInfo imageInfo{};
     imageInfo.imageType = ImageType::e2D;
@@ -281,13 +269,11 @@ void GraphicsManager_API_data::createImage(
     auto res = device.createImage(&imageInfo, nullptr, &image);
     THROW_VK_EX_IF_BAD(res);
 
-    MemoryRequirements memRequirements =
-        device.getImageMemoryRequirements(image);
+    MemoryRequirements memRequirements = device.getImageMemoryRequirements(image);
 
     MemoryAllocateInfo allocInfo{};
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex =
-        findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
     res = device.allocateMemory(&allocInfo, nullptr, &imageMemory);
     THROW_VK_EX_IF_BAD(res);
@@ -295,9 +281,8 @@ void GraphicsManager_API_data::createImage(
     device.bindImageMemory(image, imageMemory, 0);
 }
 
-vk::ImageView
-GraphicsManager_API_data::createImageView(vk::Image image, vk::Format format,
-                                          vk::ImageAspectFlags aspectFlags) {
+vk::ImageView GraphicsManager_API_data::createImageView(vk::Image image, vk::Format format,
+                                                        vk::ImageAspectFlags aspectFlags) {
     using namespace vk;
     ImageViewCreateInfo viewInfo{};
     viewInfo.image = image;
@@ -318,23 +303,20 @@ GraphicsManager_API_data::createImageView(vk::Image image, vk::Format format,
 void GraphicsManager_API_data::init_depth_image() {
     using namespace vk;
     // create a depth image
-    depthFormat = findSupportedFormat(
-        {Format::eD32SfloatS8Uint, Format::eD32Sfloat, Format::eD24UnormS8Uint},
-        ImageTiling::eOptimal, FormatFeatureFlagBits::eDepthStencilAttachment);
+    depthFormat =
+        findSupportedFormat({Format::eD32SfloatS8Uint, Format::eD32Sfloat, Format::eD24UnormS8Uint},
+                            ImageTiling::eOptimal, FormatFeatureFlagBits::eDepthStencilAttachment);
 
     ImageAspectFlags aspectFlags = ImageAspectFlagBits::eDepth;
 
-    if (depthFormat == vk::Format::eD16UnormS8Uint ||
-        depthFormat == vk::Format::eD24UnormS8Uint ||
+    if (depthFormat == vk::Format::eD16UnormS8Uint || depthFormat == vk::Format::eD24UnormS8Uint ||
         depthFormat == vk::Format::eD32SfloatS8Uint) {
         aspectFlags |= vk::ImageAspectFlagBits::eStencil;
     }
 
-    createImage(windowExcent.width, windowExcent.height, depthFormat,
-                ImageTiling::eOptimal,
-                ImageUsageFlagBits::eDepthStencilAttachment,
-                MemoryPropertyFlagBits::eDeviceLocal, ImageLayout::eUndefined,
-                depthImage, depthImageMemory);
+    createImage(windowExcent.width, windowExcent.height, depthFormat, ImageTiling::eOptimal,
+                ImageUsageFlagBits::eDepthStencilAttachment, MemoryPropertyFlagBits::eDeviceLocal,
+                ImageLayout::eUndefined, depthImage, depthImageMemory);
     depthImageView = createImageView(depthImage, depthFormat, aspectFlags);
 }
 
@@ -368,10 +350,8 @@ void GraphicsManager_API_data::init_def_renderpass() {
     depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
     depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eLoad;
     depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eStore;
-    depth_attachment.initialLayout =
-        vk::ImageLayout::eDepthStencilAttachmentOptimal;
-    depth_attachment.finalLayout =
-        vk::ImageLayout::eDepthStencilAttachmentOptimal;
+    depth_attachment.initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+    depth_attachment.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
     vk::AttachmentReference color_attachment_ref = {};
     // attachment number will index into the pAttachments array in the parent
@@ -393,16 +373,13 @@ void GraphicsManager_API_data::init_def_renderpass() {
     vk::SubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.dstStageMask = dependency.srcStageMask =
-        vk::PipelineStageFlagBits::eAllGraphics;
+    dependency.dstStageMask = dependency.srcStageMask = vk::PipelineStageFlagBits::eAllGraphics;
     dependency.dstAccessMask = dependency.srcAccessMask =
-        vk::AccessFlagBits::eColorAttachmentRead |
-        vk::AccessFlagBits::eColorAttachmentWrite |
+        vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite |
         vk::AccessFlagBits::eDepthStencilAttachmentRead |
         vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 
-    std::array<vk::AttachmentDescription, 2> attachments = {color_attachment,
-                                                            depth_attachment};
+    std::array<vk::AttachmentDescription, 2> attachments = {color_attachment, depth_attachment};
 
     vk::RenderPassCreateInfo render_pass_info = {};
     // connect the color attachment to the info
@@ -415,8 +392,7 @@ void GraphicsManager_API_data::init_def_renderpass() {
     render_pass_info.dependencyCount = 1;
     render_pass_info.pDependencies = &dependency;
 
-    auto res =
-        device.createRenderPass(&render_pass_info, nullptr, &def_renderPass);
+    auto res = device.createRenderPass(&render_pass_info, nullptr, &def_renderPass);
     THROW_VK_EX_IF_BAD(res);
 }
 
@@ -436,8 +412,7 @@ void GraphicsManager_API_data::init_framebuffers() {
 
     // create framebuffers for each of the swapchain image views
     for (int i = 0; i < swapchain_imagecount; i++) {
-        std::array<vk::ImageView, 2> attachments = {swapchainImageViews[i],
-                                                    depthImageView};
+        std::array<vk::ImageView, 2> attachments = {swapchainImageViews[i], depthImageView};
         fb_info.attachmentCount = attachments.size();
         fb_info.pAttachments = attachments.data();
         framebuffers[i] = device.createFramebuffer(fb_info);
@@ -480,8 +455,8 @@ void GraphicsManager_API_data::recreateSwapchain() {
 
     Vector2i window_size;
 
-    SDL_Vulkan_GetDrawableSize(graphicsManager->window->getHandle().get(),
-                               (int *)&window_size.x, (int *)&window_size.y);
+    SDL_Vulkan_GetDrawableSize(graphicsManager->window->getHandle().get(), (int *)&window_size.x,
+                               (int *)&window_size.y);
 
     graphicsManager->resizePipelines->invoke(window_size);
     init_framebuffers();
@@ -518,8 +493,7 @@ void GraphicsManager_API_data::sync() {
     // wait until the GPU has finished rendering the last frame. Timeout of 0.5
     // second (fast)
     auto res = device.waitForFences({renderFence}, true, 0.5 VK_SEC);
-    if (res == vk::Result::eTimeout &&
-        !graphicsManager->window->isMinimized()) {
+    if (res == vk::Result::eTimeout && !graphicsManager->window->isMinimized()) {
         // wait until the GPU has finished rendering the last frame. Timeout of
         // 1 second (slow)
         res = device.waitForFences({renderFence}, true, 1 VK_SEC);
@@ -535,8 +509,8 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
     device.resetFences({renderFence});
 
     // request image from the swapchain, 1 second timeout
-    auto res = device.acquireNextImageKHR(
-        swapchain, 1000000000, presentSemaphore, nullptr, &swapchainImageIndex);
+    auto res = device.acquireNextImageKHR(swapchain, 1000000000, presentSemaphore, nullptr,
+                                          &swapchainImageIndex);
     if (res == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
         return;
@@ -551,8 +525,7 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
     submit.sType = vk::StructureType::eSubmitInfo;
     submit.pNext = nullptr;
 
-    vk::PipelineStageFlags waitStage =
-        vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
     submit.pWaitDstStageMask = &waitStage;
 
@@ -572,8 +545,7 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
     if (result == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
         return;
-    } else if (result != vk::Result::eSuccess &&
-               result != vk::Result::eSuboptimalKHR) {
+    } else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
         THROW_VK_EX(result);
     }
     // this will put the image we just rendered into the visible window.
@@ -592,13 +564,12 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
 
     presentInfo.pImageIndices = &swapchainImageIndex;
     result = (vk::Result)vkQueuePresentKHR((VkQueue)graphicsQueue,
-                               (const VkPresentInfoKHR *)&presentInfo);
+                                           (const VkPresentInfoKHR *)&presentInfo);
 
     if (result == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
         return;
-    } else if (result != vk::Result::eSuccess &&
-               result != vk::Result::eSuboptimalKHR) {
+    } else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
         THROW_VK_EX(result);
     }
 
@@ -641,6 +612,85 @@ void GraphicsManager_API_data::cleanup() {
 
     instance.destroy();
     instance = nullptr;
+}
+
+void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
+                                            vk::MemoryPropertyFlags properties, vk::Buffer &buffer,
+                                            vk::DeviceMemory &bufferMemory) {
+    using namespace vk;
+    BufferCreateInfo bufferInfo{};
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+
+    buffer = device.createBuffer(bufferInfo);
+
+    auto memReq = device.getBufferMemoryRequirements(buffer);
+
+    MemoryAllocateInfo allocInfo;
+    allocInfo.allocationSize = memReq.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memReq.memoryTypeBits, properties);
+
+    bufferMemory = device.allocateMemory(allocInfo);
+    device.bindBufferMemory(buffer, bufferMemory, 0);
+}
+
+void GraphicsManager_API_data::copyDataToBuffer(void *pData, uint nData, vk::Buffer dstBuffer,
+                                                vk::DeviceMemory mem) {
+    void *mappedData = device.mapMemory(mem, 0, nData);
+    memcpy(mappedData, pData, (size_t)nData);
+    device.unmapMemory(mem);
+    // FIXME: not working
+    /*using namespace vk;
+    using vk::Buffer;
+    Buffer stagingBuffer;
+    DeviceMemory stagingBufferMemory;
+
+    createBuffer(nData, BufferUsageFlagBits::eTransferSrc,
+                 MemoryPropertyFlagBits::eHostVisible | MemoryPropertyFlagBits::eHostCoherent,
+                 stagingBuffer, stagingBufferMemory);
+
+    void *mappedData = device.mapMemory(stagingBufferMemory, 0, nData);
+    memcpy(mappedData, pData, (size_t)nData);
+    device.unmapMemory(stagingBufferMemory);
+
+    copyBuffer(stagingBuffer, dstBuffer, nData);
+
+    device.destroy(stagingBuffer);
+    device.free(stagingBufferMemory);*/
+}
+
+void GraphicsManager_API_data::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, uint nData) {
+    using namespace vk;
+    CommandBufferAllocateInfo allocInfo{};
+    allocInfo.level = CommandBufferLevel::ePrimary;
+    allocInfo.commandPool = commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    auto commandBuffer = device.allocateCommandBuffers(allocInfo)[0];
+
+    CommandBufferBeginInfo beginInfo{};
+    beginInfo.flags = CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+    commandBuffer.begin(beginInfo);
+
+    BufferCopy copyRegion{};
+    copyRegion.srcOffset = 0; // Optional
+    copyRegion.dstOffset = 0; // Optional
+    copyRegion.size = nData;
+    commandBuffer.copyBuffer(srcBuffer, dstBuffer, 1, &copyRegion);
+
+    commandBuffer.end();
+
+    SubmitInfo submitInfo{};
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    auto res = graphicsQueue.submit(1, &submitInfo, nullptr);
+    THROW_VK_EX_IF_BAD(res);
+    graphicsQueue.waitIdle();
+
+    device.freeCommandBuffers(commandPool, 1, &commandBuffer);
 }
 
 NSP_GL_END

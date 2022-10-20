@@ -17,9 +17,7 @@
 
 NSP_GL_BEGIN
 
-Buffer::Buffer(ptr<GraphicsManager> g_mgr) : GraphicsComponentBase(g_mgr) {
-    build_api();
-}
+Buffer::Buffer(ptr<GraphicsManager> g_mgr) : GraphicsComponentBase(g_mgr) { build_api(); }
 
 Buffer::Buffer(ptr<GraphicsManager> g_mgr, BufferUsage usage, size_t size)
     : GraphicsComponentBase(g_mgr) {
@@ -27,8 +25,7 @@ Buffer::Buffer(ptr<GraphicsManager> g_mgr, BufferUsage usage, size_t size)
     allocate(size, usage);
 }
 
-Buffer::Buffer(ptr<GraphicsManager> g_mgr, BufferUsage usage,
-               data_t initialData)
+Buffer::Buffer(ptr<GraphicsManager> g_mgr, BufferUsage usage, data_t initialData)
     : GraphicsComponentBase(g_mgr) {
     build_api();
     allocate(initialData.size(), usage);
@@ -36,8 +33,8 @@ Buffer::Buffer(ptr<GraphicsManager> g_mgr, BufferUsage usage,
 }
 
 void Buffer::build_api() {
-    api_data = std::move(uptr<Buffer_API_Data>{
-        new Buffer_API_Data(get_api_data().device, get_api_data().GPU)});
+    api_data = std::move(
+        uptr<Buffer_API_Data>{new Buffer_API_Data(get_api_data().device, get_api_data().GPU)});
 }
 
 void Buffer::allocate(size_t size, BufferUsage usage) {
@@ -45,13 +42,8 @@ void Buffer::allocate(size_t size, BufferUsage usage) {
 }
 
 void Buffer::setData(void *pData, size_t nData, size_t offset) {
-    graphics_mgr->sync();
+    // graphics_mgr->sync();
     api_data->setData(pData, nData, offset);
-}
-
-void Buffer::getData(void *pData, size_t nData, size_t offset) {
-    graphics_mgr->sync();
-    api_data->getData(pData, nData, offset);
 }
 
 Buffer::~Buffer() { cleanup(); }

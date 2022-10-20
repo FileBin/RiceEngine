@@ -12,5 +12,5 @@
 #define PPCAT(A, B) PPCAT_NX(A, B)
 
 #define RICE_COMPONENT                                                                                                 \
-    template <typename T> friend struct Meta::TypeOf;                                                                  \
+    template <typename T> friend struct ::Meta::TypeOf;                                                                \
     template <typename T> friend struct ::serializer;

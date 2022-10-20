@@ -13,9 +13,11 @@
 
 NSP_GL_BEGIN
 
-Buffer_API_Data::Buffer_API_Data(vk::Device &dev, vk::PhysicalDevice &gpu) : device(dev), GPU(gpu) {}
+Buffer_API_Data::Buffer_API_Data(vk::Device &dev, vk::PhysicalDevice &gpu)
+    : device(dev), GPU(gpu) {}
 
-Buffer_API_Data &Buffer_API_Data::allocate(GraphicsManager_API_data &api_data, size_t size, BufferUsage usage) {
+Buffer_API_Data &Buffer_API_Data::allocate(GraphicsManager_API_data &api_data, size_t size,
+                                           BufferUsage usage) {
     using namespace vk;
     if (!allocated) {
         buffer_size = size;
@@ -31,9 +33,6 @@ Buffer_API_Data &Buffer_API_Data::allocate(GraphicsManager_API_data &api_data, s
             break;
         case BufferUsage::Uniform:
             bufferInfo.usage = BufferUsageFlagBits::eUniformBuffer;
-            break;
-        case BufferUsage::Staging:
-            bufferInfo.usage = BufferUsageFlagBits::eTransferSrc;
             break;
         }
 
