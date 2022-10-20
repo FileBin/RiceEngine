@@ -10,6 +10,7 @@
 #include "Rice/GL/GraphicsManager.hpp"
 #include "api_Buffer.hpp"
 #include "api_GraphicsManager.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 NSP_GL_BEGIN
 
@@ -20,33 +21,22 @@ Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
     if (!allocated) {
         buffer_size = size;
 
-        BufferCreateInfo bufferInfo{};
-        bufferInfo.size = size;
+        vk::BufferUsageFlags usageFlags;
         switch (usage) {
         case BufferUsage::Index:
-            bufferInfo.usage = BufferUsageFlagBits::eIndexBuffer;
+            usageFlags = BufferUsageFlagBits::eIndexBuffer;
             break;
         case BufferUsage::Vertex:
-            bufferInfo.usage = BufferUsageFlagBits::eVertexBuffer;
+            usageFlags = BufferUsageFlagBits::eVertexBuffer;
             break;
         case BufferUsage::Uniform:
-            bufferInfo.usage = BufferUsageFlagBits::eUniformBuffer;
+            usageFlags = BufferUsageFlagBits::eUniformBuffer;
             break;
         }
+        usageFlags |= BufferUsageFlagBits::eTransferDst;
 
-        bufferInfo.sharingMode = SharingMode::eExclusive;
-
-        buffer = api_data.device.createBuffer(bufferInfo);
-
-        MemoryRequirements memReq = api_data.device.getBufferMemoryRequirements(buffer);
-
-        MemoryAllocateInfo allocInfo;
-        allocInfo.allocationSize = memReq.size;
-        allocInfo.memoryTypeIndex =
-            api_data.findMemoryType(memReq.memoryTypeBits, MemoryPropertyFlagBits::eDeviceLocal);
-
-        memory = api_data.device.allocateMemory(allocInfo);
-        api_data.device.bindBufferMemory(buffer, memory, 0);
+        api_data.createBuffer(size, usageFlags, vk::MemoryPropertyFlagBits::eHostVisible, buffer,
+                              memory);
     }
     allocated = true;
 

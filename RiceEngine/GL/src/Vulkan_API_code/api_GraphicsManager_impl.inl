@@ -621,7 +621,7 @@ void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsage
     BufferCreateInfo bufferInfo{};
     bufferInfo.size = size;
     bufferInfo.usage = usage;
-    bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+    bufferInfo.sharingMode = SharingMode::eExclusive;
 
     buffer = device.createBuffer(bufferInfo);
 
