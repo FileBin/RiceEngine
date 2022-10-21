@@ -34,15 +34,36 @@ MemoryManager::~MemoryManager() {
 void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset,
                                      vk::Buffer dstBuffer) {
     MemoryChunk::ptr_t chunk_offset;
-    if (!chunks.back()->allocateData(nData, chunk_offset)) {
-        chunks.push_back(std::make_unique<MemoryChunk>(api_data));
+    if (nData > MemoryChunk::chunk_size) {
+        //THROW_EXCEPTION("Copy chunk is too big");
+        // FIXME does not working properly
+        for (size_t offset = 0; offset < nData; offset += MemoryChunk::chunk_size) {
+            size_t rest = nData - offset;
+            rest = rest > MemoryChunk::chunk_size ? MemoryChunk::chunk_size : rest;
+            copyDataToBuffer((char *)pData + offset, rest, dstOffset + offset, dstBuffer);
+        }
+        return;
+    }
+    auto it = chunks.end() - 1;
 
-        if (!chunks.back()->allocateData(nData, chunk_offset)) {
-            THROW_EXCEPTION("Allocation is too big!");
+    if (!(*it)->allocateData(nData, chunk_offset)) {
+        bool allocated = false;
+        for (it = chunks.end() - 2; it >= chunks.begin(); it--) {
+            if ((*it)->allocateData(nData, chunk_offset)) {
+                allocated = true;
+                break;
+            }
+        }
+        if (!allocated) {
+            chunks.push_back(std::make_unique<MemoryChunk>(api_data));
+            it = chunks.end() - 1;
+            if (!(*it)->allocateData(nData, chunk_offset)) {
+                THROW_EXCEPTION("Allocation is too big!");
+            }
         }
     }
 
-    auto &chunk = *chunks.back();
+    auto &chunk = **it;
 
     void *mappedData = api_data.device.mapMemory(chunk.memory, chunk_offset, nData);
     memcpy(mappedData, pData, nData);
@@ -77,8 +98,8 @@ void MemoryManager::update() {
 
     auto res = api_data.graphicsQueue.submit(1, &submitInfo, nullptr);
 
-    auto removeQueue = vec<vec<uptr<MemoryTimer>>::iterator>{};
-    for (auto it = timers.begin(); it < timers.end(); it++) {
+    auto removeQueue = vec<std::list<uptr<MemoryTimer>>::iterator>{};
+    for (auto it = timers.begin(); it != timers.end(); it++) {
         auto &timer = **it;
         timer.framesToDestroy--;
         if (timer.framesToDestroy <= 0) {
@@ -104,9 +125,9 @@ MemoryChunk::~MemoryChunk() {
     device.free(memory);
 }
 
-bool MemoryChunk::allocateData(ptr_t nData, ptr_t &offset) {
+bool MemoryChunk::allocateData(size_t nData, ptr_t &offset) {
     // find place in the end of buffer
-    if (nData <= npos - allocEnd) {
+    if (nData <= chunk_size - allocEnd) {
         offset = allocEnd;
         allocations.insert(allocations.end(), offset);
         allocEnd += nData;

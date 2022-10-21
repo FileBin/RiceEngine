@@ -16,10 +16,10 @@ NSP_GL_BEGIN
 
 struct MemoryChunk {
     typedef uint16_t ptr_t;
-    static constexpr uint chunk_size = 0x10000; // 64KB
+    static constexpr size_t chunk_size = 0x10000; // 64KB
     static constexpr ptr_t npos = chunk_size - 1;
 
-    ptr_t allocEnd = 0;
+    size_t allocEnd = 0;
     vk::Device device;
     vk::Buffer buffer;
     vk::DeviceMemory memory;
@@ -29,7 +29,7 @@ struct MemoryChunk {
     MemoryChunk(const MemoryChunk &) = delete;
     MemoryChunk(MemoryChunk &&) = delete;
     ~MemoryChunk();
-    bool allocateData(ptr_t nData, ptr_t &offset);
+    bool allocateData(size_t nData, ptr_t &offset);
     bool freeData(ptr_t offset);
 };
 
@@ -55,7 +55,7 @@ struct MemoryManager {
   private:
     GraphicsManager_API_data &api_data;
     vec<uptr<MemoryChunk>> chunks;
-    vec<uptr<MemoryTimer>> timers;
+    std::list<uptr<MemoryTimer>> timers;
     vec<MemoryRegion> copyRegions;
     vk::CommandBuffer cmd;
     ~MemoryManager();
