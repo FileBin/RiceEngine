@@ -29,6 +29,8 @@
 
 #include "Rice/Engine/Log.hpp"
 
+#include "MemoryManager.inl"
+
 NSP_GL_BEGIN
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
@@ -136,6 +138,8 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     init_def_renderpass();
     init_framebuffers();
     init_sync_structures();
+
+    memoryManager = new MemoryManager(*this);
 }
 
 void GraphicsManager_API_data::init_swapchain() {
@@ -234,7 +238,8 @@ vk::Format GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &
     THROW_EXCEPTION("Failed to find supported format!");
 }
 
-uint GraphicsManager_API_data::findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties) {
+uint GraphicsManager_API_data::findMemoryType(uint typeFilter,
+                                              vk::MemoryPropertyFlags properties) {
     using namespace vk;
     PhysicalDeviceMemoryProperties memprop = GPU.getMemoryProperties();
 
@@ -304,20 +309,22 @@ vk::ImageView GraphicsManager_API_data::createImageView(vk::Image image, vk::For
 void GraphicsManager_API_data::init_depth_image() {
     using namespace vk;
     // create a depth image
-    depthFormat =
-        findSupportedFormat({Format::eD32SfloatS8Uint, Format::eD32Sfloat, Format::eD24UnormS8Uint},
-                            ImageTiling::eOptimal, FormatFeatureFlagBits::eDepthStencilAttachment);
+    depthFormat = findSupportedFormat(
+        {Format::eD32SfloatS8Uint, Format::eD32Sfloat, Format::eD24UnormS8Uint},
+        ImageTiling::eOptimal, FormatFeatureFlagBits::eDepthStencilAttachment);
 
     ImageAspectFlags aspectFlags = ImageAspectFlagBits::eDepth;
 
-    if (depthFormat == vk::Format::eD16UnormS8Uint || depthFormat == vk::Format::eD24UnormS8Uint ||
+    if (depthFormat == vk::Format::eD16UnormS8Uint ||
+        depthFormat == vk::Format::eD24UnormS8Uint ||
         depthFormat == vk::Format::eD32SfloatS8Uint) {
         aspectFlags |= vk::ImageAspectFlagBits::eStencil;
     }
 
     createImage(windowExcent.width, windowExcent.height, depthFormat, ImageTiling::eOptimal,
-                ImageUsageFlagBits::eDepthStencilAttachment, MemoryPropertyFlagBits::eDeviceLocal,
-                ImageLayout::eUndefined, depthImage, depthImageMemory);
+                ImageUsageFlagBits::eDepthStencilAttachment,
+                MemoryPropertyFlagBits::eDeviceLocal, ImageLayout::eUndefined, depthImage,
+                depthImageMemory);
     depthImageView = createImageView(depthImage, depthFormat, aspectFlags);
 }
 
@@ -374,13 +381,15 @@ void GraphicsManager_API_data::init_def_renderpass() {
     vk::SubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.dstStageMask = dependency.srcStageMask = vk::PipelineStageFlagBits::eAllGraphics;
+    dependency.dstStageMask = dependency.srcStageMask =
+        vk::PipelineStageFlagBits::eAllGraphics;
     dependency.dstAccessMask = dependency.srcAccessMask =
         vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite |
         vk::AccessFlagBits::eDepthStencilAttachmentRead |
         vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 
-    std::array<vk::AttachmentDescription, 2> attachments = {color_attachment, depth_attachment};
+    std::array<vk::AttachmentDescription, 2> attachments = {color_attachment,
+                                                            depth_attachment};
 
     vk::RenderPassCreateInfo render_pass_info = {};
     // connect the color attachment to the info
@@ -456,8 +465,8 @@ void GraphicsManager_API_data::recreateSwapchain() {
 
     Vector2i window_size;
 
-    SDL_Vulkan_GetDrawableSize(graphicsManager->window->getHandle().get(), (int *)&window_size.x,
-                               (int *)&window_size.y);
+    SDL_Vulkan_GetDrawableSize(graphicsManager->window->getHandle().get(),
+                               (int *)&window_size.x, (int *)&window_size.y);
 
     graphicsManager->resizePipelines->invoke(window_size);
     init_framebuffers();
@@ -502,12 +511,14 @@ void GraphicsManager_API_data::sync() {
     THROW_VK_EX_IF_BAD(res);
 }
 
-void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
+void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
     if (resizing)
         return;
     sync();
 
     device.resetFences({renderFence});
+
+    memoryManager->update();
 
     // request image from the swapchain, 1 second timeout
     auto res = device.acquireNextImageKHR(swapchain, 1000000000, presentSemaphore, nullptr,
@@ -581,6 +592,7 @@ void GraphicsManager_API_data::executeCmd(vec<vk::CommandBuffer> cmd) {
 GraphicsManager_API_data::~GraphicsManager_API_data() { cleanup(); }
 
 void GraphicsManager_API_data::cleanup() {
+    delete memoryManager;
     if (!instance)
         return;
     auto graphicsManager = g_mgr.lock();
@@ -616,7 +628,8 @@ void GraphicsManager_API_data::cleanup() {
 }
 
 void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
-                                            vk::MemoryPropertyFlags properties, vk::Buffer &buffer,
+                                            vk::MemoryPropertyFlags properties,
+                                            vk::Buffer &buffer,
                                             vk::DeviceMemory &bufferMemory) {
     using namespace vk;
     BufferCreateInfo bufferInfo{};
@@ -637,13 +650,13 @@ void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsage
 }
 
 void GraphicsManager_API_data::copyDataToBuffer(void *pData, size_t nData, size_t offset,
-                                                vk::Buffer dstBuffer, vk::DeviceMemory mem) {
-    void *mappedData;
+                                                vk::Buffer dstBuffer) {
+    /*void *mappedData;
     mappedData = device.mapMemory(mem, offset, nData);
     memcpy(mappedData, pData, (size_t)nData);
-    device.unmapMemory(mem);
+    device.unmapMemory(mem);*/
     // FIXME: not working
-    /*using namespace vk;
+    using namespace vk;
     using vk::Buffer;
     Buffer stagingBuffer;
     DeviceMemory stagingBufferMemory;
@@ -656,14 +669,14 @@ void GraphicsManager_API_data::copyDataToBuffer(void *pData, size_t nData, size_
     memcpy(mappedData, pData, (size_t)nData);
     device.unmapMemory(stagingBufferMemory);
 
-    copyBuffer(stagingBuffer, dstBuffer, nData);
+    copyBuffer(stagingBuffer, dstBuffer, BufferCopy().setDstOffset(offset).setSize(nData));
 
     device.destroy(stagingBuffer);
-    device.free(stagingBufferMemory);*/
+    device.free(stagingBufferMemory);
 }
 
 void GraphicsManager_API_data::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer,
-                                          size_t nData) {
+                                          vk::BufferCopy copyRegion) {
     using namespace vk;
     CommandBufferAllocateInfo allocInfo{};
     allocInfo.level = CommandBufferLevel::ePrimary;
@@ -677,10 +690,6 @@ void GraphicsManager_API_data::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBu
 
     commandBuffer.begin(beginInfo);
 
-    BufferCopy copyRegion{};
-    copyRegion.srcOffset = 0; // Optional
-    copyRegion.dstOffset = 0; // Optional
-    copyRegion.size = nData;
     commandBuffer.copyBuffer(srcBuffer, dstBuffer, 1, &copyRegion);
 
     commandBuffer.end();

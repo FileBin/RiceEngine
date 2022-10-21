@@ -16,7 +16,9 @@ NSP_GL_BEGIN
 
 GraphicsManager::GraphicsManager() = default;
 
-ptr<GraphicsManager> GraphicsManager::create() { return ptr<GraphicsManager>(new GraphicsManager()); }
+ptr<GraphicsManager> GraphicsManager::create() {
+    return ptr<GraphicsManager>(new GraphicsManager());
+}
 
 void GraphicsManager::init(ptr<Window> _window) {
     window = _window;
@@ -40,7 +42,7 @@ void GraphicsManager::update() {
 void GraphicsManager::sync() { api_data->sync(); }
 
 void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
-    api_data->executeCmd({cmd->api_data->cmd[api_data->swapchainImageIndex]});
+    api_data->drawFrame({cmd->api_data->cmd[api_data->swapchainImageIndex]});
 }
 
 void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
@@ -49,7 +51,7 @@ void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
     for (uint i = 0; i < n; ++i)
         c[i] = cmds[i]->api_data->cmd[api_data->swapchainImageIndex];
 
-    api_data->executeCmd(c);
+    api_data->drawFrame(c);
 }
 
 // FINALIZER

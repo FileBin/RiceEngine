@@ -16,8 +16,12 @@
 
 NSP_GL_BEGIN
 
+struct MemoryManager;
+
 struct GraphicsManager_API_data {
   public:
+    MemoryManager *memoryManager;
+
     vk::Instance instance;                      // Vulkan library handle
     vk::DebugUtilsMessengerEXT debug_messenger; // Vulkan debug output handle
     vk::PhysicalDevice GPU;                     // GPU chosen as the default device
@@ -88,10 +92,9 @@ struct GraphicsManager_API_data {
                       vk::MemoryPropertyFlags properties, vk::Buffer &buffer,
                       vk::DeviceMemory &bufferMemory);
 
-    void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, size_t nData);
+    void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::BufferCopy copyRegion);
 
-    void copyDataToBuffer(void *pData, size_t nData, size_t offset, vk::Buffer dstBuffer,
-                          vk::DeviceMemory mem);
+    void copyDataToBuffer(void *pData, size_t nData, size_t offset, vk::Buffer dstBuffer);
 
   private:
     void recreateSwapchain();
@@ -105,7 +108,7 @@ struct GraphicsManager_API_data {
 
     void cleanupSwapchain(bool destroy = true);
 
-    void executeCmd(vec<vk::CommandBuffer> cmd);
+    void drawFrame(vec<vk::CommandBuffer> cmd);
     void cleanup();
 };
 

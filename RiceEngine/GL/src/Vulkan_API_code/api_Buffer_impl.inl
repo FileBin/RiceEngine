@@ -12,6 +12,8 @@
 #include "api_GraphicsManager.hpp"
 #include <vulkan/vulkan_enums.hpp>
 
+#include "MemoryManager.hpp"
+
 NSP_GL_BEGIN
 
 Buffer_API_Data::Buffer_API_Data(GraphicsManager_API_data &api_data) : api_data(api_data) {}
@@ -35,8 +37,8 @@ Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
         }
         usageFlags |= BufferUsageFlagBits::eTransferDst;
 
-        api_data.createBuffer(size, usageFlags, vk::MemoryPropertyFlagBits::eHostVisible, buffer,
-                              memory);
+        api_data.createBuffer(size, usageFlags, vk::MemoryPropertyFlagBits::eHostVisible,
+                              buffer, memory);
     }
     allocated = true;
 
@@ -45,8 +47,8 @@ Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
 
 Buffer_API_Data &Buffer_API_Data::setData(void *pData, size_t nData, size_t offset) {
 
-    api_data.copyDataToBuffer(pData, nData, offset, buffer, memory);
-
+    // api_data.copyDataToBuffer(pData, nData, offset, buffer);
+    api_data.memoryManager->copyDataToBuffer(pData, nData, offset, buffer);
     return *this;
 }
 
