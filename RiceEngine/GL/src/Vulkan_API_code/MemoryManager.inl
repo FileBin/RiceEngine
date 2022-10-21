@@ -12,7 +12,7 @@
 
 using namespace vk;
 
-constexpr auto maxLiveFrames = 8;
+constexpr auto maxLiveFrames = 10;
 
 NSP_GL_BEGIN
 
@@ -22,14 +22,16 @@ MemoryManager::MemoryManager(GraphicsManager_API_data &api_data) : api_data(api_
 
 void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset,
                                      vk::Buffer dstBuffer) {
-    auto &chunk = *chunks.back();
     MemoryChunk::ptr_t chunk_offset;
-    if (!chunk.allocateData(nData, chunk_offset)) {
+    if (!chunks.back()->allocateData(nData, chunk_offset)) {
         chunks.push_back(std::make_unique<MemoryChunk>(api_data));
+
+        if (!chunks.back()->allocateData(nData, chunk_offset)) {
+            THROW_EXCEPTION("Allocation is too big!");
+        }
     }
-    if (!chunk.allocateData(nData, chunk_offset)) {
-        THROW_EXCEPTION("Allocation is too big!");
-    }
+
+    auto &chunk = *chunks.back();
 
     void *mappedData = api_data.device.mapMemory(chunk.memory, chunk_offset, nData);
     memcpy(mappedData, pData, nData);
