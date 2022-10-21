@@ -34,7 +34,7 @@ void IndexBuffer::reset(vec<index_t> data) {
         allocate(n * stride, BufferUsage::Index);
         is_allocated = true;
 
-        setData(data.data(), n * stride, 0);
+        setData(data.data(), n * stride);
     }
 }
 

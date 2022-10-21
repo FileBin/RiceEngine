@@ -34,16 +34,19 @@ struct MemoryChunk {
 };
 
 struct MemoryTimer {
-    int framesToDestroy;
-    GraphicsManager_API_data &api_data;
-    vk::CommandBuffer copyCmdBuffer;
-    MemoryChunk &chunk;
     MemoryChunk::ptr_t chunkOffset;
-    MemoryTimer(GraphicsManager_API_data &api_data, vk::CommandBuffer copyCmdBuffer,
-                MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset, int framesToDestroy);
+    int framesToDestroy;
+    MemoryChunk &chunk;
+    MemoryTimer(MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset, int framesToDestroy);
     MemoryTimer(const MemoryTimer &) = delete;
     MemoryTimer(MemoryTimer &&) = delete;
     ~MemoryTimer();
+};
+
+struct MemoryRegion {
+    vk::Buffer src;
+    vk::Buffer dst;
+    vk::BufferCopy copy;
 };
 
 struct MemoryManager {
@@ -53,6 +56,9 @@ struct MemoryManager {
     GraphicsManager_API_data &api_data;
     vec<uptr<MemoryChunk>> chunks;
     vec<uptr<MemoryTimer>> timers;
+    vec<MemoryRegion> copyRegions;
+    vk::CommandBuffer cmd;
+    ~MemoryManager();
 
   public:
     void copyDataToBuffer(void *pData, size_t nData, size_t dstOffset, vk::Buffer dstBuffer);

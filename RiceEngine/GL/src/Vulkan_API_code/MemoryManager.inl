@@ -18,6 +18,17 @@ NSP_GL_BEGIN
 
 MemoryManager::MemoryManager(GraphicsManager_API_data &api_data) : api_data(api_data) {
     chunks.push_back(std::make_unique<MemoryChunk>(api_data));
+
+    CommandBufferAllocateInfo allocInfo{};
+    allocInfo.level = CommandBufferLevel::ePrimary;
+    allocInfo.commandPool = api_data.commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    cmd = api_data.device.allocateCommandBuffers(allocInfo)[0];
+}
+
+MemoryManager::~MemoryManager() {
+    api_data.device.freeCommandBuffers(api_data.commandPool, 1, &cmd);
 }
 
 void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset,
@@ -37,37 +48,35 @@ void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset
     memcpy(mappedData, pData, nData);
     api_data.device.unmapMemory(chunk.memory);
 
-    CommandBufferAllocateInfo allocInfo{};
-    allocInfo.level = CommandBufferLevel::ePrimary;
-    allocInfo.commandPool = api_data.commandPool;
-    allocInfo.commandBufferCount = 1;
+    MemoryRegion region;
+    region.src = chunk.buffer;
+    region.dst = dstBuffer;
+    region.copy =
+        vk::BufferCopy().setSrcOffset(chunk_offset).setDstOffset(dstOffset).setSize(nData);
 
-    auto commandBuffer = api_data.device.allocateCommandBuffers(allocInfo)[0];
+    copyRegions.push_back(region);
 
-    CommandBufferBeginInfo beginInfo{};
-    beginInfo.flags = CommandBufferUsageFlagBits::eOneTimeSubmit;
-
-    commandBuffer.begin(beginInfo);
-
-    vk::BufferCopy copyRegion;
-    copyRegion.dstOffset = dstOffset;
-    copyRegion.srcOffset = chunk_offset;
-    copyRegion.size = nData;
-    commandBuffer.copyBuffer(chunk.buffer, dstBuffer, 1, &copyRegion);
-
-    commandBuffer.end();
-
-    SubmitInfo submitInfo{};
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    auto res = api_data.graphicsQueue.submit(1, &submitInfo, nullptr);
-
-    timers.push_back(std::make_unique<MemoryTimer>(api_data, commandBuffer, chunk,
-                                                   chunk_offset, maxLiveFrames));
+    timers.push_back(std::make_unique<MemoryTimer>(chunk, chunk_offset, maxLiveFrames));
 }
 
 void MemoryManager::update() {
+    cmd.reset();
+    CommandBufferBeginInfo beginInfo{};
+    beginInfo.flags = CommandBufferUsageFlagBits::eOneTimeSubmit;
+    cmd.begin(beginInfo);
+
+    for (auto region : copyRegions)
+        cmd.copyBuffer(region.src, region.dst, 1, &region.copy);
+    copyRegions.clear();
+
+    cmd.end();
+
+    SubmitInfo submitInfo{};
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmd;
+
+    auto res = api_data.graphicsQueue.submit(1, &submitInfo, nullptr);
+
     auto removeQueue = vec<vec<uptr<MemoryTimer>>::iterator>{};
     for (auto it = timers.begin(); it < timers.end(); it++) {
         auto &timer = **it;
@@ -81,10 +90,7 @@ void MemoryManager::update() {
     }
 }
 
-MemoryTimer::~MemoryTimer() {
-    api_data.device.freeCommandBuffers(api_data.commandPool, 1, &copyCmdBuffer);
-    chunk.freeData(chunkOffset);
-}
+MemoryTimer::~MemoryTimer() { chunk.freeData(chunkOffset); }
 
 MemoryChunk::MemoryChunk(GraphicsManager_API_data &api_data) : device(api_data.device) {
     api_data.createBuffer(chunk_size, BufferUsageFlagBits::eTransferSrc,
@@ -137,9 +143,7 @@ bool MemoryChunk::freeData(ptr_t offset) {
     return false;
 }
 
-MemoryTimer::MemoryTimer(GraphicsManager_API_data &api_data, vk::CommandBuffer copyCmdBuffer,
-                         MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset, int frames)
-    : api_data(api_data), copyCmdBuffer(copyCmdBuffer), chunk(chunk), framesToDestroy(frames),
-      chunkOffset(chunkOffset) {}
+MemoryTimer::MemoryTimer(MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset, int frames)
+    : chunk(chunk), framesToDestroy(frames), chunkOffset(chunkOffset) {}
 
 NSP_GL_END
