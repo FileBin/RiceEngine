@@ -25,8 +25,7 @@ class MultiCubePerformanceTestScene : public virtual Scene {
 
   public:
     static ptr<MultiCubePerformanceTestScene> create() {
-        return ptr<MultiCubePerformanceTestScene>(
-            new MultiCubePerformanceTestScene());
+        return ptr<MultiCubePerformanceTestScene>(new MultiCubePerformanceTestScene());
     }
 
     void init() override {
@@ -45,7 +44,7 @@ class MultiCubePerformanceTestScene : public virtual Scene {
 
         setActiveCamera(cam_comp);
         constexpr uint cx = 10;
-        constexpr uint cy = 1;
+        constexpr uint cy = 10;
         constexpr uint cz = 10;
         constexpr uint count = cx * cy * cz;
         for (uint i = 0; i < count; ++i) {
@@ -83,16 +82,13 @@ class MultiCubePerformanceTestScene : public virtual Scene {
                                                Graphics::Shader::Vertex);
                             shader->loadShader("shaders/diffuse.frag.spv",
                                                Graphics::Shader::Fragment);
-                            shader->addUniformBuffer(0,
-                                                     Graphics::Shader::Vertex);
-                            shader->addUniformBuffer(
-                                1, Graphics::Shader::Fragment);
-                            shader
-                                ->setVertexStrideAndLayout<Graphics::Vertex>();
+                            shader->addUniformBuffer(0, Graphics::Shader::Vertex);
+                            shader->addUniformBuffer(1, Graphics::Shader::Fragment);
+                            shader->setVertexStrideAndLayout<Graphics::Vertex>();
                             shader->build();
                         });
-                    auto material = new_ptr<Graphics::Material>(
-                        ren->getGraphicsManager(), shader);
+                    auto material =
+                        new_ptr<Graphics::Material>(ren->getGraphicsManager(), shader);
                     Vector4f egst;
                     Vector4f color;
                     egst.x = Math::random();
