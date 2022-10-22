@@ -592,9 +592,12 @@ void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
 GraphicsManager_API_data::~GraphicsManager_API_data() { cleanup(); }
 
 void GraphicsManager_API_data::cleanup() {
-    delete memoryManager;
     if (!instance)
         return;
+    if (memoryManager) {
+        delete memoryManager;
+        memoryManager = nullptr;
+    }
     auto graphicsManager = g_mgr.lock();
 
     device.waitIdle();

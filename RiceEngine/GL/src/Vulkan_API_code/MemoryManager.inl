@@ -12,7 +12,7 @@
 
 using namespace vk;
 
-constexpr auto maxLiveFrames = 10;
+constexpr auto maxLiveFrames = 8;
 
 NSP_GL_BEGIN
 
@@ -35,8 +35,6 @@ void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset
                                      vk::Buffer dstBuffer) {
     MemoryChunk::ptr_t chunk_offset;
     if (nData > MemoryChunk::chunk_size) {
-        //THROW_EXCEPTION("Copy chunk is too big");
-        // FIXME does not working properly
         for (size_t offset = 0; offset < nData; offset += MemoryChunk::chunk_size) {
             size_t rest = nData - offset;
             rest = rest > MemoryChunk::chunk_size ? MemoryChunk::chunk_size : rest;
