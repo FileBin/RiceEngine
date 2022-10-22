@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <list>
 #include <vector>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -33,14 +34,13 @@ struct MemoryChunk {
     bool freeData(ptr_t offset);
 };
 
-struct MemoryTimer {
+struct MemoryAllocation {
     MemoryChunk::ptr_t chunkOffset;
-    int framesToDestroy;
     MemoryChunk &chunk;
-    MemoryTimer(MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset, int framesToDestroy);
-    MemoryTimer(const MemoryTimer &) = delete;
-    MemoryTimer(MemoryTimer &&) = delete;
-    ~MemoryTimer();
+    MemoryAllocation(MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset);
+    MemoryAllocation(const MemoryAllocation &) = delete;
+    MemoryAllocation(MemoryAllocation &&) = delete;
+    ~MemoryAllocation();
 };
 
 struct MemoryRegion {
@@ -50,13 +50,16 @@ struct MemoryRegion {
 };
 
 struct MemoryManager {
+    typedef uptr<MemoryAllocation> Timer;
+    typedef std::list<Timer> Timers;
+    static constexpr auto maxLiveFrames = 8;
     friend struct GraphicsManager_API_data;
 
   private:
     GraphicsManager_API_data &api_data;
     vec<uptr<MemoryChunk>> chunks;
-    std::list<uptr<MemoryTimer>> timers;
-    vec<MemoryRegion> copyRegions;
+    uptr<Timers> timers[maxLiveFrames];
+    std::list<MemoryRegion> copyRegions;
     vk::CommandBuffer cmd;
     ~MemoryManager();
 

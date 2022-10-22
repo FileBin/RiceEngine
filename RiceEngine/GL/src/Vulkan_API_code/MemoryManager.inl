@@ -2,17 +2,17 @@
 #include "MemoryManager.hpp"
 #include "Rice/GL/namespaces.h"
 #include "Rice/Util/Exceptions/Exception.hpp"
+#include "Rice/defines.h"
 #include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <sys/types.h>
+#include <type_traits>
 #include <vector>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
 using namespace vk;
-
-constexpr auto maxLiveFrames = 8;
 
 NSP_GL_BEGIN
 
@@ -25,6 +25,10 @@ MemoryManager::MemoryManager(GraphicsManager_API_data &api_data) : api_data(api_
     allocInfo.commandBufferCount = 1;
 
     cmd = api_data.device.allocateCommandBuffers(allocInfo)[0];
+
+    for(auto i = 0;i<maxLiveFrames;i++) {
+        timers[i].reset(new Timers());
+    }
 }
 
 MemoryManager::~MemoryManager() {
@@ -75,7 +79,7 @@ void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset
 
     copyRegions.push_back(region);
 
-    timers.push_back(std::make_unique<MemoryTimer>(chunk, chunk_offset, maxLiveFrames));
+    timers[0]->insert(timers[0]->end(), std::make_unique<MemoryAllocation>(chunk, chunk_offset));
 }
 
 void MemoryManager::update() {
@@ -96,20 +100,13 @@ void MemoryManager::update() {
 
     auto res = api_data.graphicsQueue.submit(1, &submitInfo, nullptr);
 
-    auto removeQueue = vec<std::list<uptr<MemoryTimer>>::iterator>{};
-    for (auto it = timers.begin(); it != timers.end(); it++) {
-        auto &timer = **it;
-        timer.framesToDestroy--;
-        if (timer.framesToDestroy <= 0) {
-            removeQueue.push_back(it);
-        }
+    for (auto i = maxLiveFrames -1; i > 0; i--) {
+        std::swap(timers[i], timers[i-1]);
     }
-    for (auto it : removeQueue) {
-        timers.erase(it);
-    }
+    timers[0].reset(new Timers());
 }
 
-MemoryTimer::~MemoryTimer() { chunk.freeData(chunkOffset); }
+MemoryAllocation::~MemoryAllocation() { chunk.freeData(chunkOffset); }
 
 MemoryChunk::MemoryChunk(GraphicsManager_API_data &api_data) : device(api_data.device) {
     api_data.createBuffer(chunk_size, BufferUsageFlagBits::eTransferSrc,
@@ -162,7 +159,7 @@ bool MemoryChunk::freeData(ptr_t offset) {
     return false;
 }
 
-MemoryTimer::MemoryTimer(MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset, int frames)
-    : chunk(chunk), framesToDestroy(frames), chunkOffset(chunkOffset) {}
+MemoryAllocation::MemoryAllocation(MemoryChunk &chunk, MemoryChunk::ptr_t chunkOffset)
+    : chunk(chunk), chunkOffset(chunkOffset) {}
 
 NSP_GL_END
