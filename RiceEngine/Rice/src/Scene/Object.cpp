@@ -4,7 +4,6 @@
 #include "Rice/Util/ByteStream.hpp"
 #include "Rice/Util/Exceptions/ThreadInterruptException.hpp"
 #include "Rice/Util/String.hpp"
-#include "Rice/defines.h"
 #include <memory>
 #include <mutex>
 

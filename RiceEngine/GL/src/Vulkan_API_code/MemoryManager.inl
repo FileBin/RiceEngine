@@ -2,7 +2,6 @@
 #include "MemoryManager.hpp"
 #include "Rice/GL/namespaces.h"
 #include "Rice/Util/Exceptions/Exception.hpp"
-#include "Rice/defines.h"
 #include <algorithm>
 #include <cstddef>
 #include <memory>
@@ -26,7 +25,7 @@ MemoryManager::MemoryManager(GraphicsManager_API_data &api_data) : api_data(api_
 
     cmd = api_data.device.allocateCommandBuffers(allocInfo)[0];
 
-    for(auto i = 0;i<maxLiveFrames;i++) {
+    for (auto i = 0; i < maxLiveFrames; i++) {
         timers[i].reset(new Timers());
     }
 }
@@ -79,7 +78,8 @@ void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset
 
     copyRegions.push_back(region);
 
-    timers[0]->insert(timers[0]->end(), std::make_unique<MemoryAllocation>(chunk, chunk_offset));
+    timers[0]->insert(timers[0]->end(),
+                      std::make_unique<MemoryAllocation>(chunk, chunk_offset));
 }
 
 void MemoryManager::update() {
@@ -100,8 +100,8 @@ void MemoryManager::update() {
 
     auto res = api_data.graphicsQueue.submit(1, &submitInfo, nullptr);
 
-    for (auto i = maxLiveFrames -1; i > 0; i--) {
-        std::swap(timers[i], timers[i-1]);
+    for (auto i = maxLiveFrames - 1; i > 0; i--) {
+        std::swap(timers[i], timers[i - 1]);
     }
     timers[0].reset(new Timers());
 }

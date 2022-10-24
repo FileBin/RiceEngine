@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Rice/GL/namespaces.h"
-#include "Rice/defines.h"
 #include "VulkanHelper.hpp"
 #include "api_GraphicsManager.hpp"
 

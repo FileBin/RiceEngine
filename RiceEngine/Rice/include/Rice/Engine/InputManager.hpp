@@ -1,8 +1,7 @@
 ﻿#include "../stdafx.hpp"
 #include "Rice/Math/Vectors/Vector2.hpp"
 #include "Rice/Math/Vectors/Vector2i.hpp"
-#include "Rice/defines.h"
-#include "Rice/macros.h"
+#include "Rice/Util/macros.h"
 #include <shared_mutex>
 
 NSP_ENGINE_BEGIN
@@ -42,8 +41,8 @@ class InputManager {
 
     friend class Window;
     bool is_mouse_locked = false;
-    map<int,bool> keyStates;
-    map<int,bool> mouseStates;
+    map<int, bool> keyStates;
+    map<int, bool> mouseStates;
     short mouseScrollDelta = 0, mouseWheel = 0;
     Vector2 mousePos = {};
     Vector2i mouseInfinitePos = {}, mouseDelta = {};

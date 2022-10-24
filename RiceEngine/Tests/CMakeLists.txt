@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 
+project("Tests")
+
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 file(GLOB_RECURSE TESTS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 
@@ -8,20 +10,18 @@ add_subdirectory("shaders")
 foreach(FILE ${TESTS})
     get_filename_component(TEST_NAME ${FILE} NAME_WE)
 
-    project(${TEST_NAME})
-
     set(CMAKE_CXX_STANDARD 20)
 
     #file search
 
-    add_executable (${PROJECT_NAME} ${FILE} ${HEADERS})
-    target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h)
+    add_executable (${TEST_NAME} ${FILE} ${HEADERS})
+    target_precompile_headers(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h)
 
     include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
     include_directories(${PROJECT_NAME} ${LIB_INCLUDE_PATH})
     include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-    target_link_directories(${PROJECT_NAME} PUBLIC
+    target_link_directories(${TEST_NAME} PRIVATE
             ${ANY_LIB_BIN_PATH}
             ${LIB_BIN_PATH}
             ${PROJECT_BINARY_DIR}
@@ -30,11 +30,11 @@ foreach(FILE ${TESTS})
             )
 
 
-    target_link_libraries(${PROJECT_NAME}
+    target_link_libraries(${TEST_NAME}
         ${RICE_LIBS}
     )
 
-    add_dependencies(${PROJECT_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
+    add_dependencies(${TEST_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
 endforeach()
 
 if(WIN32)

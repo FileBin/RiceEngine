@@ -1,10 +1,8 @@
 ﻿#pragma once
 
-#include "Rice/Util/namespaces.h"
-NSP_UTIL_BEGIN
-NSP_UTIL_END
+#include "namespaces.h"
 
-#include "Rice/defines.h"
+#include "defines.hpp"
 
 #include "String.hpp"
 

@@ -1,4 +1,4 @@
-#include "Rice/defines.h"
+#include "defines.hpp"
 #include "stdafx.hpp"
 
 #include <cstddef>
@@ -13,8 +13,7 @@
 NSP_UTIL_BEGIN
 
 template <typename K, typename V, size_t N = 0x40, typename H = std::hash<K>,
-          typename E = std::equal_to<K>,
-          typename A = std::allocator<pair<const K, V>>>
+          typename E = std::equal_to<K>, typename A = std::allocator<pair<const K, V>>>
 class ConcurrentMap {
   public:
     typedef std::pair<K, V> elem_t;

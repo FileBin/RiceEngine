@@ -5,9 +5,9 @@
 
 #include <bits/stdc++.h>
 
+#include <filesystem>
 #include <mutex>
 #include <shared_mutex>
-#include <filesystem>
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
@@ -15,9 +15,8 @@
 #include <magic_enum/magic_enum.hpp>
 
 #include "namespaces.h"
-#include "macros.h"
 
-#include "defines.h"
+#include "Rice/Util/defines.hpp"
 
 #include "Rice/Math/Math.hpp"
 #include "Rice/Util/String.hpp"

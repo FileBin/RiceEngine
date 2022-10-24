@@ -8,9 +8,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory("lib")
 
-set(RICE_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-set(RICE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include; ${LIB_INCLUDE_PATH} CACHE INTERNAL "")
-
 add_subdirectory("Math")
 add_subdirectory("Util")
 add_subdirectory("GL")

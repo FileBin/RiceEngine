@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "bits/stdc++.h"
+#include <bits/stdc++.h>
 #include <memory>
 #include <string>
 #ifndef NDEBUG
@@ -13,7 +13,8 @@ template <typename T, typename R> using pair = std::pair<T, R>;
 
 template <typename T> using vec = std::vector<T>;
 
-template <typename K, typename V, typename C = std::less<K>, typename A = std::allocator<pair<const K, V>>>
+template <typename K, typename V, typename C = std::less<K>,
+          typename A = std::allocator<pair<const K, V>>>
 using map = std::map<K, V, C, A>;
 
 template <typename K, typename V, typename H = std::hash<K>, typename P = std::equal_to<K>,
@@ -36,4 +37,6 @@ typedef int64_t num;
 typedef double dbl;
 typedef uint32_t index_t;
 
-template <typename T, typename... Args> inline ptr<T> new_ptr(Args &&...args) { return ptr<T>(new T(args...)); }
+template <typename T, typename... Args> inline ptr<T> new_ptr(Args &&...args) {
+    return ptr<T>(new T(args...));
+}

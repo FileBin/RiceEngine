@@ -14,7 +14,6 @@
 #include "Rice/Scene/Components/Transform.hpp"
 #include "Rice/Scene/Scene.hpp"
 #include "Rice/Tests/Scripts/CameraMover.hpp"
-#include "Rice/defines.h"
 
 #pragma once
 

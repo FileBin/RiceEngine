@@ -5,7 +5,6 @@
  *      Author: FileBinsLapTop
  */
 
-#include "Rice/defines.h"
 #include "Vulkan_API_code/api_Buffer.hpp"
 #include "pch.h"
 

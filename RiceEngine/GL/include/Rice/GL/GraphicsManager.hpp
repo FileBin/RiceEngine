@@ -1,5 +1,4 @@
 ﻿#include "Rice/Util/Event.hpp"
-#include "Rice/defines.h"
 #include "stdafx.hpp"
 #include <functional>
 #include <thread>
@@ -43,8 +42,10 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     void cleanup() override;
 
   public:
-    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(), resizeRenderPasses = ResizeEvent::create(),
-                     resizeCommandBuffers = ResizeEvent::create(), resizeGraphicsComponents = ResizeEvent::create();
+    ptr<ResizeEvent> resizePipelines = ResizeEvent::create(),
+                     resizeRenderPasses = ResizeEvent::create(),
+                     resizeCommandBuffers = ResizeEvent::create(),
+                     resizeGraphicsComponents = ResizeEvent::create();
     ptr<DestroyEvent> destroyCommandBuffers = DestroyEvent::create();
     ptr<DestroyEvent> destroyEvent = DestroyEvent::create();
     ptr<DestroyEvent> destroyOneTimeBuffers = DestroyEvent::create();
