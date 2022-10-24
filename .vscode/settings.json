@@ -2,13 +2,7 @@
   "editor.tabCompletion": "on",
   "editor.formatOnSave": true,
   "cmake.debugConfig": {
-    "args": [
-      "source_file_path=/mnt/personal_misc/_Danila/_projects/Cpp_stuff/Rice/RiceEngine/RiceEngine/MetaCompiler/tests/templates.hpp",
-      "header_file_path=/mnt/personal_misc/_Danila/_projects/Cpp_stuff/Rice/RiceEngine/RiceEngine/MetaCompiler/tests/templates.hpp",
-      "compile_commands_path=/mnt/personal_misc/_Danila/_projects/Cpp_stuff/Rice/RiceEngine/compile_commands.json",
-      "--dump",
-      "--print"
-    ]
+    "args": []
   },
   "C_Cpp.formatting": "Disabled",
   "C_Cpp.intelliSenseEngine": "Disabled",
