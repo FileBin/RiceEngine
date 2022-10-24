@@ -1,21 +1,16 @@
 {
   "editor.tabCompletion": "on",
-
   "editor.formatOnSave": true,
-
-  // Disable formatting and intellisense engine in Microsoft C/C++ extension (provides debugging)
-  // This way you can have the other features of the extension but use clangd for LSP
+  "cmake.debugConfig": {
+    "args": []
+  },
   "C_Cpp.formatting": "Disabled",
   "C_Cpp.intelliSenseEngine": "Disabled",
-
-  // Configure .clangd arguments
   "clangd.checkUpdates": true,
   "clangd.onConfigChanged": "restart",
-
-  "clangd.arguments": ["-compile-commands-dir=${workspaceFolder}/build/Debug"],
-
-  "cmake.buildDirectory": "${workspaceFolder}/build/Debug",
-
+  "clangd.arguments": ["-compile-commands-dir=${workspaceFolder}"],
+  "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "files.associations": {
     "vector": "cpp",
     "thread": "cpp",
@@ -107,5 +102,6 @@
     "valarray": "cpp",
     "variant": "cpp"
   },
-  "cmake.sourceDirectory": "${workspaceFolder}/."
+  "cmake.sourceDirectory": "${workspaceFolder}/.",
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json"
 }

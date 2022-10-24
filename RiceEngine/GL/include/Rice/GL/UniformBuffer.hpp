@@ -23,27 +23,20 @@ NSP_GL_END
 NSP_GL_BEGIN
 
 class UniformBuffer : public Buffer {
-public:
-	UniformBuffer(ptr<GraphicsManager> g_mgr, uint size);
-	void reset(uint size);
+  public:
+    UniformBuffer(ptr<GraphicsManager> g_mgr, uint size);
+    void reset(uint size);
 
-	template<typename T>
-	void updateData(const T& data) {
-		Buffer::setData((void*)&data, sizeof(T));
-	}
+    template <typename T> void updateData(const T &data) {
+        Buffer::setData((void *)&data, sizeof(T));
+    }
 
-	template<typename T>
-	T getData() {
-		T data;
-		Buffer::getData((void*)&data, sizeof(T));
-		return data;
-	}
+    bool isAllocated();
 
-	bool isAllocated();
+    void cleanup() override;
 
-	void cleanup() override;
-private:
-	friend class CommandBuffer_API_data;
+  private:
+    friend class CommandBuffer_API_data;
     wptr<Shader> shader;
 };
 

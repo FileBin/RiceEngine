@@ -1,6 +1,9 @@
+#include "Rice/defines.h"
+
+#include "Rice/Util/Threads.hpp"
+
 #include "Rice/Util/namespaces.h"
 #include "SDL2/SDL_thread.h"
-#include "pch.h"
 
 #include <pthread.h>
 

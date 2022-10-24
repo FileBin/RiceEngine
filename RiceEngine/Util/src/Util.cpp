@@ -1,10 +1,5 @@
 ﻿#include "pch.h"
 
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/ostreamwrapper.h"
-#include "rapidjson/writer.h"
-
 //#include <codecvt>
 
 #include "Rice/Util/Util.hpp"
@@ -27,13 +22,11 @@ void checkPath(fs::path path) {
 data_t readFile(fs::path filename) {
     checkPath(filename);
     std::ifstream infile(filename, std::ios_base::binary);
-    auto data = data_t(std::istreambuf_iterator<char>(infile),
-                       std::istreambuf_iterator<char>());
+    auto data = data_t(std::istreambuf_iterator<char>(infile), std::istreambuf_iterator<char>());
     return data;
 }
 
-template <typename T>
-void writeToJSONT(fs::path filename, std::string key, T value) {
+/*template <typename T> void writeToJSONT(fs::path filename, std::string key, T value) {
     using namespace rapidjson;
     using namespace std;
     fstream file;
@@ -62,10 +55,9 @@ void writeToJSONT(fs::path filename, std::string key, T value) {
     d.Accept(writer); // rewrite file contents
     file.flush();
     file.close();
-}
+}*/
 
-template <typename T>
-bool getFromJsonT(std::filesystem::path filename, std::string key, T &out_val) {
+/*template <typename T> bool getFromJsonT(std::filesystem::path filename, std::string key, T &out_val) {
     using namespace rapidjson;
     using namespace std;
     fstream file(filename, fstream::in);
@@ -83,8 +75,7 @@ bool getFromJsonT(std::filesystem::path filename, std::string key, T &out_val) {
     return true;
 }
 
-bool getFromJson(std::filesystem::path filename, std::string key,
-                 std::string &out_value) {
+bool getFromJson(std::filesystem::path filename, std::string key, std::string &out_value) {
     using namespace rapidjson;
     using namespace std;
     fstream file(filename, fstream::in);
@@ -102,21 +93,18 @@ bool getFromJson(std::filesystem::path filename, std::string key,
     return true;
 }
 
-bool getFromJson(std::filesystem::path filename, std::string key,
-                 num &out_value) {
+bool getFromJson(std::filesystem::path filename, std::string key, num &out_value) {
     return getFromJsonT(filename, key, out_value);
 }
 
-bool getFromJson(std::filesystem::path filename, std::string key,
-                 UUID &out_value) {
+bool getFromJson(std::filesystem::path filename, std::string key, UUID &out_value) {
     uint64_t val;
     auto ret = getFromJsonT(filename, key, val);
     out_value = UUID(val);
     return ret;
 }
 
-void writeToJSON(std::filesystem::path filename, std::string key,
-                 std::string value) {
+void writeToJSON(std::filesystem::path filename, std::string key, std::string value) {
     using namespace rapidjson;
     using namespace std;
     fstream file;
@@ -147,13 +135,11 @@ void writeToJSON(std::filesystem::path filename, std::string key,
     file.close();
 }
 
-void writeToJSON(std::filesystem::path filename, std::string key, num value) {
-    writeToJSONT(filename, key, value);
-}
+void writeToJSON(std::filesystem::path filename, std::string key, num value) { writeToJSONT(filename, key, value); }
 
 void writeToJSON(std::filesystem::path filename, std::string key, UUID value) {
     writeToJSONT(filename, key, value.getVal());
-}
+}*/
 
 fs::path getHomeDirectory() {
 #ifdef _WIN32

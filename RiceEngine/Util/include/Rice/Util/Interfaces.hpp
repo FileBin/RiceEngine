@@ -1,5 +1,7 @@
-#include "rapidjson/document.h"
 #include "stdafx.hpp"
+
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #pragma once
 
@@ -9,9 +11,9 @@ struct ISerializable {
     virtual data_t toBytes() = 0;
     virtual ~ISerializable() {}
 };
+
 struct IJsonSerializable {
-    virtual rapidjson::Value
-    toJson(rapidjson::Document::AllocatorType allocator) = 0;
+    virtual nlohmann::json toJson() = 0;
     virtual ~IJsonSerializable() {}
 };
 

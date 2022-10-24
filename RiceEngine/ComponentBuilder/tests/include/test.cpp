@@ -1,5 +1,16 @@
-//#include <string>
+#define REFLECTABLE __attribute__((annotate("reflectable")))
+#define NOT_REFLECTABLE __attribute__((annotate("not_reflectable")))
+#define TEST __attribute__((annotate("test")))
 
-struct S {
-    int i;
+#include <string>
+
+struct REFLECTABLE struct111 {
+    TEST TEST TEST TEST int i;
+};
+
+struct REFLECTABLE struct222 {
+    REFLECTABLE double d;
+    struct REFLECTABLE struc333 {
+        REFLECTABLE std::string i;
+    };
 };

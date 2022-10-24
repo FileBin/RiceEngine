@@ -10,82 +10,57 @@
 #include "Rice/GL/GraphicsManager.hpp"
 #include "api_Buffer.hpp"
 #include "api_GraphicsManager.hpp"
+#include <vulkan/vulkan_enums.hpp>
+
+#include "MemoryManager.hpp"
 
 NSP_GL_BEGIN
 
-Buffer_API_Data::Buffer_API_Data(vk::Device& dev, vk::PhysicalDevice& gpu) : device(dev), GPU(gpu) {}
+Buffer_API_Data::Buffer_API_Data(GraphicsManager_API_data &api_data) : api_data(api_data) {}
 
-Buffer_API_Data& Buffer_API_Data::allocate(GraphicsManager_API_data& api_data, size_t size, BufferUsage usage) {
-	using namespace vk;
-	if(!allocated) {
-		buffer_size = size;
+Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
+    using namespace vk;
+    if (!allocated) {
+        buffer_size = size;
 
-		BufferCreateInfo bufferInfo {};
-		bufferInfo.size = size;
-		switch (usage) {
-		case BufferUsage::Index:
-			bufferInfo.usage = BufferUsageFlagBits::eIndexBuffer;
-			break;
-		case BufferUsage::Vertex:
-			bufferInfo.usage = BufferUsageFlagBits::eVertexBuffer;
-			break;
-		case BufferUsage::Uniform:
-			bufferInfo.usage = BufferUsageFlagBits::eUniformBuffer;
-			break;
-        case BufferUsage::Staging:
-            bufferInfo.usage = BufferUsageFlagBits::eTransferSrc;
+        vk::BufferUsageFlags usageFlags;
+        switch (usage) {
+        case BufferUsage::Index:
+            usageFlags = BufferUsageFlagBits::eIndexBuffer;
             break;
-		}
+        case BufferUsage::Vertex:
+            usageFlags = BufferUsageFlagBits::eVertexBuffer;
+            break;
+        case BufferUsage::Uniform:
+            usageFlags = BufferUsageFlagBits::eUniformBuffer;
+            break;
+        }
+        usageFlags |= BufferUsageFlagBits::eTransferDst;
 
-		bufferInfo.sharingMode = SharingMode::eExclusive;
+        api_data.createBuffer(size, usageFlags, vk::MemoryPropertyFlagBits::eHostVisible,
+                              buffer, memory);
+    }
+    allocated = true;
 
-		buffer = device.createBuffer(bufferInfo);
-
-		MemoryRequirements memReq = device.getBufferMemoryRequirements(buffer);
-
-		MemoryAllocateInfo allocInfo;
-		allocInfo.allocationSize = memReq.size;
-		allocInfo.memoryTypeIndex = api_data.findMemoryType(memReq.memoryTypeBits,
-				MemoryPropertyFlagBits::eDeviceLocal);
-
-		memory = device.allocateMemory(allocInfo);
-		device.bindBufferMemory(buffer, memory, 0);
-	}
-	allocated = true;
-
-	return *this;
+    return *this;
 }
 
-Buffer_API_Data& Buffer_API_Data::setData(void* pData, size_t nData, size_t offset) {
-    
-	void* mappedData;
-	mappedData = device.mapMemory(memory, offset, nData);
-	    memcpy(mappedData, pData, nData);
-	device.unmapMemory(memory);
+Buffer_API_Data &Buffer_API_Data::setData(void *pData, size_t nData, size_t offset) {
 
-	return *this;
+    // api_data.copyDataToBuffer(pData, nData, offset, buffer);
+    api_data.memoryManager->copyDataToBuffer(pData, nData, offset, buffer);
+    return *this;
 }
 
-Buffer_API_Data& Buffer_API_Data::getData(void* pData, size_t nData, size_t offset) {
-	void* mappedData;
-	mappedData = device.mapMemory(memory, offset, nData);
-	memcpy(pData, mappedData, nData);
-	device.unmapMemory(memory);
-
-	return *this;
+Buffer_API_Data &Buffer_API_Data::free() {
+    if (allocated) {
+        api_data.device.destroy(buffer);
+        api_data.device.freeMemory(memory);
+    }
+    allocated = false;
+    return *this;
 }
 
-Buffer_API_Data& Buffer_API_Data::free() {
-	if(allocated) {
-		device.destroy(buffer);
-		device.freeMemory(memory);
-	}
-	allocated = false;
-	return *this;
-}
-
-Buffer_API_Data::~Buffer_API_Data() {
-	free();
-}
+Buffer_API_Data::~Buffer_API_Data() { free(); }
 
 NSP_GL_END

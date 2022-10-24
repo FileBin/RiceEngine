@@ -15,54 +15,32 @@ NSP_GL_END
 
 #pragma once
 
-#include "Mesh.hpp"
 #include "Buffer.hpp"
+#include "Mesh.hpp"
 
 NSP_GL_BEGIN
 
 class VertexBuffer : public Buffer {
-public:
-	VertexBuffer(ptr<GraphicsManager> g_mgr, VertexList& initialData);
-	void reset(VertexList& initialData);
+  public:
+    VertexBuffer(ptr<GraphicsManager> g_mgr, VertexList &initialData);
+    void reset(VertexList &initialData);
 
-	template<typename Vertex>
-	void updateVertice(const Vertex& data, uint index) {
-		constexpr uint s = sizeof(Vertex);
-		if(s != stride) THROW_EXCEPTION("Incorrect vertex input!");
+    template <typename Vertex> void updateVertice(const Vertex &data, uint index) {
+        constexpr uint s = sizeof(Vertex);
+        if (s != stride)
+            THROW_EXCEPTION("Incorrect vertex input!");
 
-		setData((void*)&data, s, s*index);
-	}
-	void updateVertices(VertexList& data, uint start_index);
+        setData((void *)&data, s, s * index);
+    }
+    void updateVertices(VertexList &data, uint start_index);
 
-	template<typename Vertex>
-	Vertex getVertexData(uint index) {
-		Vertex vert;
-		constexpr uint s = sizeof(Vertex);
-		if(s != stride) THROW_EXCEPTION("Incorrect vertex type!");
+    bool isAllocated();
 
-		getData((void*)&vert, s, s * index);
-		return vert;
-	}
+    void cleanup() override;
 
-	template<typename Vertex>
-	VertexListT<Vertex> getVertexData(uint index, uint count) {
-		VertexListT<Vertex> vertices({count});
-		uint s = vertices.getStride();
-		if(s != stride) THROW_EXCEPTION("Incorrect vertex type!");
-
-		for (uint i = 0; i < count; ++i) {
-			getData(vertices.getData(i), s , s*index);
-		}
-		return vertices;
-	}
-
-	bool isAllocated();
-
-	void cleanup() override;
-private:
-
-	uint stride;
-	uint current_count;
+  private:
+    uint stride;
+    uint current_count;
 };
 
 NSP_GL_END

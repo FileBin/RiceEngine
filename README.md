@@ -24,7 +24,17 @@ This Engine uses object and components to build your game scene (like in Unity).
   
 ## Installation
 
-` git clone `
+execute this commands for install engine from sources
+
+`git clone https://github.com/FileBin/RiceEngine.git`
+
+`./build.cmd`
+
+`cd build`
+
+`make all -j4`
+
+`make install`
 
 ## Documentation
 

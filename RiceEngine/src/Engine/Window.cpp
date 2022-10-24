@@ -5,6 +5,7 @@
 #include "SDL2/SDL_video.h"
 #include <Rice/Engine/Log.hpp>
 #include <Rice/Engine/Window.hpp>
+#include <chrono>
 
 #define SDL_MAIN_HANDLED
 
@@ -50,8 +51,7 @@ void Window::grabMouse(bool grab) {
     SDL_SetRelativeMouseMode(grabbed);
 }
 
-Window::Window()
-    : inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true) {}
+Window::Window() : inputmgr(nullptr), handle(nullptr), is_exit(false), is_active(true) {}
 
 ptr<Window> Window::create(DescWindow desc) {
     ptr<Window> window = ptr<Window>(new Window());
@@ -59,15 +59,13 @@ ptr<Window> Window::create(DescWindow desc) {
     window->desc = desc;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        Log::log(Log::Error, "SDL cannot be initialized: {}\n",
-                 String(SDL_GetError()));
+        Log::log(Log::Error, "SDL cannot be initialized: {}\n", String(SDL_GetError()));
         THROW_EXCEPTION("SDL cannot be initialized!");
     }
 
     window->handle = WindowHandle{
-        SDL_CreateWindow(desc.caption.toUTF8String().c_str(), desc.posx,
-                         desc.posy, desc.width, desc.height,
-                         SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN),
+        SDL_CreateWindow(desc.caption.toUTF8String().c_str(), desc.posx, desc.posy, desc.width,
+                         desc.height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN),
         SDL_DestroyWindow};
 
     window->created = true;
@@ -78,16 +76,15 @@ ptr<Window> Window::create(DescWindow desc) {
     SDL_SetWindowMinimumSize(window->handle.get(), 64, 64);
 
     if (!window->handle) {
-        Log::log(Log::Error, "Could not create SDL window: {}\n",
-                 String(SDL_GetError()));
+        Log::log(Log::Error, "Could not create SDL window: {}\n", String(SDL_GetError()));
         THROW_NULL_PTR_EXCEPTION(window->handle.get());
     }
 
     window->updateWindowState();
 
     // start thread for window update
-    window->update_thread.reset(new std::jthread(
-        [window](std::stop_token stoken) { window->update(stoken); }));
+    window->update_thread.reset(
+        new std::jthread([window](std::stop_token stoken) { window->update(stoken); }));
 
     Log::debug("Window successfully created!");
     return window;
@@ -95,6 +92,10 @@ ptr<Window> Window::create(DescWindow desc) {
 
 void Window::update(std::stop_token stoken) {
     while (true) {
+        using namespace std::chrono;
+        using namespace std::chrono_literals;
+        auto tickStart = steady_clock::now();
+        auto tickLength = 5ms; // 200tps
         SDL_Event event;
         SDL_PollEvent(&event);
         handleEvent(event);
@@ -105,6 +106,8 @@ void Window::update(std::stop_token stoken) {
             is_exit = true;
             return;
         }
+
+        std::this_thread::sleep_until(tickStart + tickLength);
     }
 }
 
