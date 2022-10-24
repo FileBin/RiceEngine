@@ -1,4 +1,10 @@
-﻿#include "stdafx.hpp"
+﻿#pragma once
+
+#include "Rice/Util/namespaces.h"
+NSP_UTIL_BEGIN
+NSP_UTIL_END
+
+#include "Rice/defines.h"
 
 #include "String.hpp"
 
@@ -19,8 +25,6 @@
 #include <limits>
 #include <string>
 #include <type_traits>
-
-#pragma once
 
 struct UUID {
   private:
@@ -53,15 +57,11 @@ void checkPath(std::filesystem::path path);
 data_t readFile(std::filesystem::path filename);
 void writeFile(std::filesystem::path filename, data_t data);
 
-bool getFromJson(std::filesystem::path filename, std::string key,
-                 std::string &out_value);
-bool getFromJson(std::filesystem::path filename, std::string key,
-                 num &out_value);
-bool getFromJson(std::filesystem::path filename, std::string key,
-                 UUID &out_value);
+bool getFromJson(std::filesystem::path filename, std::string key, std::string &out_value);
+bool getFromJson(std::filesystem::path filename, std::string key, num &out_value);
+bool getFromJson(std::filesystem::path filename, std::string key, UUID &out_value);
 
-void writeToJSON(std::filesystem::path filename, std::string key,
-                 std::string value);
+void writeToJSON(std::filesystem::path filename, std::string key, std::string value);
 void writeToJSON(std::filesystem::path filename, std::string key, num value);
 void writeToJSON(std::filesystem::path filename, std::string key, UUID value);
 std::filesystem::path getHomeDirectory();

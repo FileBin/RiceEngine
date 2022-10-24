@@ -2,19 +2,13 @@
   "editor.tabCompletion": "on",
   "editor.formatOnSave": true,
   "cmake.debugConfig": {
-    "args": [
-      "source_file_path=/home/filebin/GitRepo/RiceEngine/dev/RiceEngine/ComponentBuilder/tests/Components/TestComponent/component.cpp",
-      "header_file_path=/home/filebin/GitRepo/RiceEngine/dev/RiceEngine/ComponentBuilder/tests/Components/TestComponent/component.hpp",
-      "compile_commands_path=/home/filebin/GitRepo/RiceEngine/dev/compile_commands.json"
-    ]
+    "args": []
   },
   "C_Cpp.formatting": "Disabled",
   "C_Cpp.intelliSenseEngine": "Disabled",
   "clangd.checkUpdates": true,
   "clangd.onConfigChanged": "restart",
-  "clangd.arguments": [
-    "-compile-commands-dir=${workspaceFolder}"
-  ],
+  "clangd.arguments": ["-compile-commands-dir=${workspaceFolder}"],
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "files.associations": {

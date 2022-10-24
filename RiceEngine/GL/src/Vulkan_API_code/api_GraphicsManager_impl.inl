@@ -174,7 +174,8 @@ void GraphicsManager_API_data::init_swapchain() {
         vkb::Swapchain vkbSwapchain =
             swapchainBuilder
                 .set_desired_present_mode(
-                    (VkPresentModeKHR)vk::PresentModeKHR::eFifo) // use v-sync present mode
+                    (VkPresentModeKHR)vk::PresentModeKHR::eImmediate) // use v-sync present
+                                                                      // mode
                 //.set_desired_extent(windowExcent.width, windowExcent.height)
                 .set_old_swapchain((VkSwapchainKHR)old_swapchain)
                 .build()
