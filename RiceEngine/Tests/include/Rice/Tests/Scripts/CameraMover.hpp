@@ -28,7 +28,7 @@ class CameraMover : public virtual Components::MonoScript {
         auto fwd = cam_rot * Vector3::forward;
 
         Vector2 pos = input->getMouseInfinitePos();
-        pos *= .3; // set sensivity
+        pos *= .1; // set sensivity
         pos.y = Math::min(Math::max(pos.y, -90.), 90.);
         pos.x = fmod(pos.x, 360);
 
@@ -76,8 +76,7 @@ class CameraMover : public virtual Components::MonoScript {
 
         cam_pos += speed * dt;
 
-        cam_rot =
-            Quaternion::fromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
+        cam_rot = Quaternion::fromAxisAngle(yrot * Vector3::right, pos.y) * yrot;
 
         cam->getTransform()->setPosition(cam_pos);
         cam->getTransform()->setRotation(cam_rot);
