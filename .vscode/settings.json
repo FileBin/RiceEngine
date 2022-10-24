@@ -8,7 +8,9 @@
   "C_Cpp.intelliSenseEngine": "Disabled",
   "clangd.checkUpdates": true,
   "clangd.onConfigChanged": "restart",
-  "clangd.arguments": ["-compile-commands-dir=${workspaceFolder}"],
+  "clangd.arguments": [
+    "-compile-commands-dir=${workspaceFolder}"
+  ],
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "files.associations": {
