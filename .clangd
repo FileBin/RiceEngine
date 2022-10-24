@@ -1,4 +1,0 @@
-CompileFlags:
- CompilationDatabase:
-    - ./build/Debug/
-    - ./build/Release/
