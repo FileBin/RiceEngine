@@ -1,3 +1,4 @@
+#include <bits/chrono.h>
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
@@ -31,6 +32,8 @@ bool test3();
 
 int main() {
 
+    using namespace std::chrono;
+
     cds::Initialize();
     {
         // Initialize Hazard Pointer singleton
@@ -49,13 +52,16 @@ int main() {
             return 2;
         }
         std::cout << "test2 passed" << std::endl;
-        for (int i = 0; i < 100; i++) {
+        auto start = std::chrono::system_clock::now();
+        for (int i = 0; i < 1000; i++) {
             if (!test3()) {
                 std::cout << "test3 failed" << std::endl;
                 return 3;
             }
         }
-        std::cout << "test3 passed" << std::endl;
+        std::cout << "test3 passed in "
+                  << duration_cast<milliseconds>(std::chrono::system_clock::now() - start)
+                  << std::endl;
 
         cds::threading::Manager::detachThread();
     }

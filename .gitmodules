@@ -2,3 +2,6 @@
 	path = RiceEngine/MetaCompiler
 	url = https://github.com/dgudim/RiceMetaCompiler
     branch = main
+[submodule "RiceEngine/ExternalLibs/libcds"]
+	path = RiceEngine/ExternalLibs/libcds
+	url = https://github.com/khizmax/libcds

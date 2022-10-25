@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+add_subdirectory("ExternalLibs")
+
 add_subdirectory("lib")
 
 add_subdirectory("Math")
