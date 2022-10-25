@@ -8,10 +8,17 @@
 #include <thread>
 #include <vector>
 
-#include <cds/container/optimistic_queue.h>
-#include <cds/gc/dhp.h>
+#include <cds/init.h>
 
-template <typename T> using Queue = cds::container::OptimisticQueue<typename cds::gc::DHP, T>;
+#include <cds/gc/hp.h>
+
+#include <cds/container/moir_queue.h>
+
+struct traits : public cds::container::msqueue::traits {
+    using item_counter = cds::atomicity::item_counter;
+};
+
+template <typename T> using Queue = cds::container::MoirQueue<cds::gc::HP, T, traits>;
 using namespace Rice::Util;
 using namespace std::chrono_literals;
 
@@ -23,24 +30,37 @@ bool test2();
 bool test3();
 
 int main() {
-    if (!test1()) {
-        std::cout << "test1 failed" << std::endl;
-        return 1;
-    }
-    std::cout << "test1 passed" << std::endl;
-    if (!test2()) {
-        std::cout << "test2 failed" << std::endl;
-        return 2;
-    }
-    std::cout << "test2 passed" << std::endl;
-    for (int i = 0; i < 100; i++) {
-        if (!test3()) {
-            std::cout << "test3 failed" << std::endl;
-            return 3;
-        }
-    }
-    std::cout << "test3 passed" << std::endl;
 
+    cds::Initialize();
+    {
+        // Initialize Hazard Pointer singleton
+        cds::gc::HP hpGC;
+        // If main thread uses lock-free containers
+        // the main thread should be attached to libcds infrastructure
+        cds::threading::Manager::attachThread();
+
+        if (!test1()) {
+            std::cout << "test1 failed" << std::endl;
+            return 1;
+        }
+        std::cout << "test1 passed" << std::endl;
+        if (!test2()) {
+            std::cout << "test2 failed" << std::endl;
+            return 2;
+        }
+        std::cout << "test2 passed" << std::endl;
+        for (int i = 0; i < 100; i++) {
+            if (!test3()) {
+                std::cout << "test3 failed" << std::endl;
+                return 3;
+            }
+        }
+        std::cout << "test3 passed" << std::endl;
+
+        cds::threading::Manager::detachThread();
+    }
+    // Terminate libcds
+    cds::Terminate();
     return 0;
 }
 
@@ -109,15 +129,21 @@ bool test3() {
 }
 
 void test3pushFunc(std::stop_token token, Queue<int> &bag) {
+    if (!cds::threading::Manager::isThreadAttached())
+        cds::threading::Manager::attachThread();
     while (!token.stop_requested()) {
         int value;
         bag.pop(value);
         // putchar(value + '0');
     }
+    cds::threading::Manager::detachThread();
 }
 
 void test3popFunc(std::stop_token token, Queue<int> &bag) {
+    if (!cds::threading::Manager::isThreadAttached())
+        cds::threading::Manager::attachThread();
     while (!token.stop_requested()) {
         bag.push(rand() % 10);
     }
+    cds::threading::Manager::detachThread();
 }

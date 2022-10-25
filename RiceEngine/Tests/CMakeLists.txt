@@ -12,9 +12,8 @@ foreach(FILE ${TESTS})
 
     set(CMAKE_CXX_STANDARD 20)
 
-    #file search
-
-    add_executable (${TEST_NAME} ${FILE} ${HEADERS})
+    # file search
+    add_executable(${TEST_NAME} ${FILE} ${HEADERS})
     target_precompile_headers(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h)
 
     include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
@@ -22,27 +21,28 @@ foreach(FILE ${TESTS})
     include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
     target_link_directories(${TEST_NAME} PRIVATE
-            ${ANY_LIB_BIN_PATH}
-            ${LIB_BIN_PATH}
-            ${PROJECT_BINARY_DIR}
-            ${DXSDK_LIB_PATH}/x64
-            ${VULKAN_LIB_PATH}
-            )
-
+        ${ANY_LIB_BIN_PATH}
+        ${LIB_BIN_PATH}
+        ${PROJECT_BINARY_DIR}
+        ${DXSDK_LIB_PATH}/x64
+        ${VULKAN_LIB_PATH}
+    )
 
     target_link_libraries(${TEST_NAME}
         ${RICE_LIBS}
     )
 
+    add_compile_options(-mcx16)
+    target_link_libraries(${TEST_NAME} /usr/local/lib64/libcds.so)
+
     add_dependencies(${TEST_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
 endforeach()
 
 if(WIN32)
-    #copy dll
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD   # Adds a post-build event to the target
+    # copy dll
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD # Adds a post-build event to the target
         COMMAND ${CMAKE_COMMAND}
-            -E copy_if_different                    # which executes "cmake - E copy_if_different..."
-            ${RICE_DLLs_x64}                        # <--this is in-file
-            ${CMAKE_BINARY_DIR})                    # <--this is out-file path
+        -E copy_if_different # which executes "cmake - E copy_if_different..."
+        ${RICE_DLLs_x64} # <--this is in-file
+        ${CMAKE_BINARY_DIR}) # <--this is out-file path
 endif(WIN32)
-
