@@ -1,4 +1,3 @@
-#include "Rice/Util/ConcurrentList.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
@@ -9,7 +8,10 @@
 #include <thread>
 #include <vector>
 
-template <typename T> using Queue = rigtorp::SPSCQueue<T>;
+#include <cds/container/optimistic_queue.h>
+#include <cds/gc/dhp.h>
+
+template <typename T> using Queue = cds::container::OptimisticQueue<typename cds::gc::DHP, T>;
 using namespace Rice::Util;
 using namespace std::chrono_literals;
 
@@ -43,7 +45,7 @@ int main() {
 }
 
 bool test1() {
-    Queue<int> queue(10);
+    Queue<int> queue;
     queue.push(1);
     queue.push(2);
     queue.push(3);
@@ -54,7 +56,7 @@ bool test1() {
 }
 
 bool test2() {
-    Queue<int> queue(10);
+    Queue<int> queue;
     queue.push(1);
     queue.push(2);
     queue.push(3);
@@ -70,14 +72,15 @@ bool test2() {
     }
     int v;
     while (!queue.empty()) {
-        std::cout << "value: " << *queue.front() << std::endl;
-        queue.pop();
+        int value;
+        queue.pop(value);
+        std::cout << "value: " << value << std::endl;
     }
     return queue.empty();
 }
 
 bool test3() {
-    Queue<int> queue(10000);
+    Queue<int> queue;
     constexpr auto numThreads = 10;
     std::vector<ptr<std::jthread>> push_threads;
     std::vector<ptr<std::jthread>> pop_threads;
@@ -99,15 +102,16 @@ bool test3() {
         t->join();
     }
     // std::cout << std::endl;
+    int val;
     while (!queue.empty())
-        queue.pop();
+        queue.pop(val);
     return queue.empty();
 }
 
 void test3pushFunc(std::stop_token token, Queue<int> &bag) {
     while (!token.stop_requested()) {
-        // int value;
-        bag.pop();
+        int value;
+        bag.pop(value);
         // putchar(value + '0');
     }
 }
