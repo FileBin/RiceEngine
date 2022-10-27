@@ -33,7 +33,7 @@ foreach(FILE ${TESTS})
     )
 
     add_compile_options(-mcx16)
-    target_link_libraries(${TEST_NAME} csd)
+    target_link_libraries(${TEST_NAME} cds)
 
     add_dependencies(${TEST_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
 endforeach()
