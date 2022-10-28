@@ -23,15 +23,14 @@ struct CommandBuffer_API_data {
 
     uint bufCount();
 
-    void build(GraphicsManager_API_data &api_data);
+    void build(GraphicsManager_API_data &api_data, bool secondary);
 
     void begin(GraphicsManager_API_data &api_data, vk::Extent2D window, uint i);
     void end(uint i);
     void reset(uint i);
 
     void doCommand(ptr<CommandBuffer::Command> command, uint i,
-                   GraphicsManager_API_data &api_data,
-                   DescriptorSetCreator &creator);
+                   GraphicsManager_API_data &api_data, DescriptorSetCreator &creator);
     void cleanup(GraphicsManager_API_data &api_data);
 };
 

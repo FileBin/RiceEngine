@@ -26,15 +26,15 @@ class QuadTest : public ICleanable {
 
   public:
     static void runTest() {
-        //test instance
+        // test instance
         QuadTest program;
         try {
-            //run test
+            // run test
             program.entrypoint();
         } catch (Util::Exception &e) {
-            //catch exception
-            Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}",
-                     e.msg(), e.file(), e.line(), e.info());
+            // catch exception
+            Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}", e.msg(),
+                     e.file(), e.line(), e.info());
         }
     }
 
@@ -51,8 +51,8 @@ class QuadTest : public ICleanable {
         g_mgr = GraphicsManager::create();
 
         // constant frame data initialization
-        const_data.renderMatrix = Matrix4x4::scale({.5, .5, .5}) *
-                                  Matrix4x4::translation({0, 0, -.5});
+        const_data.renderMatrix =
+            Matrix4x4::scale({.5, .5, .5}) * Matrix4x4::translation({0, 0, -.5});
 
         // window creation
         win = Window::create({"QuadTest"});
@@ -87,13 +87,15 @@ class QuadTest : public ICleanable {
             {Vector3f(1, -1, 0), Vector3f(0, 1, 1)},
         });
 
-        // cube index 
+        // cube index
         vec<index_t> indexes({0, 1, 2, 3, 0, 2, 2, 1, 0, 2, 0, 3});
 
         vertexBuffer = new_ptr<VertexBuffer>(g_mgr, vertices);
         indexBuffer = new_ptr<IndexBuffer>(g_mgr, indexes);
 
         cmd = new_ptr<CommandBuffer>(g_mgr);
+        cmd->beginRenderPass({0, 0, 1, 1});
+        cmd->clearRenderTarget({0.1, 0.4, 0.8}, 1);
 
         cmd->setActiveShader(test_shader);
         cmd->bindVertexBuffer(vertexBuffer);
@@ -102,6 +104,8 @@ class QuadTest : public ICleanable {
         // cmd->pushConstants<VertConstData>(const_data, test_shader);
         cmd->bindUniformBuffer(uniformBuffer, 0);
         cmd->drawIndexed(indexBuffer);
+
+        cmd->endRenderPass();
         cmd->buildAll();
 
         while (win->isOpen())
@@ -117,15 +121,11 @@ class QuadTest : public ICleanable {
         static auto startTime = high_resolution_clock::now();
 
         auto currentTime = high_resolution_clock::now();
-        double time =
-            duration<double, seconds::period>(
-                currentTime - startTime)
-                .count();
+        double time = duration<double, seconds::period>(currentTime - startTime).count();
 
         VertConstData data = {const_data.renderMatrix};
 
-        data.renderMatrix =
-            Matrix4x4::scale({sin(time), cos(time), 1}) * data.renderMatrix;
+        data.renderMatrix = Matrix4x4::scale({sin(time), cos(time), 1}) * data.renderMatrix;
 
         uniformBuffer->updateData<VertConstData>(data);
 

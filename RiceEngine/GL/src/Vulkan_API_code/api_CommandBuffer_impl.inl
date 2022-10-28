@@ -20,6 +20,7 @@
 #include "api_UniformBuffer.hpp"
 #include <array>
 #include <cstdint>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -65,13 +66,14 @@ struct DescriptorSetCreator {
     }
 };
 
-inline void CommandBuffer_API_data::build(GraphicsManager_API_data &api_data) {
+inline void CommandBuffer_API_data::build(GraphicsManager_API_data &api_data, bool secondary) {
     // allocate the default command buffer that we will use for rendering
     vk::CommandBufferAllocateInfo info = {};
 
     info.commandPool = api_data.commandPool;
     info.commandBufferCount = api_data.swapchainImages.size();
-    info.level = vk::CommandBufferLevel::ePrimary;
+    info.level =
+        secondary ? vk::CommandBufferLevel::eSecondary : vk::CommandBufferLevel::ePrimary;
 
     cmd = api_data.device.allocateCommandBuffers(info);
 }
@@ -94,6 +96,11 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
     switch (command->cmd) {
     case CommandBuffer::Command::BeginRenderPass: {
         auto rect = *(Util::Rect *)command->arg_chain->getData();
+
+        rect.x *= api_data.windowExcent.width;
+        rect.w *= api_data.windowExcent.width;
+        rect.y *= api_data.windowExcent.height;
+        rect.h *= api_data.windowExcent.height;
 
         vk::RenderPassBeginInfo rpInfo = {};
         rpInfo.renderPass = api_data.def_renderPass;
@@ -125,12 +132,12 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         rect.layerCount = 1;
 
         cmd[i].clearAttachments(clearValues.size(), clearValues.data(), 1, &rect);
-    }
+    } break;
 
     case CommandBuffer::Command::ExecuteCommandBuffer: {
         auto sub_cmd = *(ptr<CommandBuffer> *)command->arg_chain->getData();
         cmd[i].executeCommands(1, &sub_cmd->api_data->cmd[i]);
-    }
+    } break;
 
     case CommandBuffer::Command::EndRenderPass: {
         cmd[i].endRenderPass();

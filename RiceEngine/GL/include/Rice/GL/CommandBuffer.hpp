@@ -138,11 +138,12 @@ class CommandBuffer : public GraphicsComponentBase {
 
     vec<ptr<Command>> commands;
     vec<bool> need_recreate = {};
+    bool is_secondary = false;
 
     void needRecreate(bool value = true);
 
   public:
-    CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass = true);
+    CommandBuffer(ptr<GraphicsManager> g_mgr, bool secondary = false);
     ~CommandBuffer() override;
 
     void clear();
