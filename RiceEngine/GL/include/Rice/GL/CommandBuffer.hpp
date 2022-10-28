@@ -5,6 +5,7 @@
  *      Author: FileBinsLapTop
  */
 
+#include "Rice/Math/Vectors/Vector3f.hpp"
 #include "Rice/Util/Interfaces.hpp"
 #include "stdafx.hpp"
 
@@ -35,6 +36,10 @@ class CommandBuffer : public GraphicsComponentBase {
     class Command {
       public:
         enum Type {
+            BeginRenderPass,
+            ClearRenderTarget,
+            ExecuteCommandBuffer,
+            EndRenderPass,
             BindVertexBuffer,
             BindIndexBuffer,
             SetShader,
@@ -51,7 +56,7 @@ class CommandBuffer : public GraphicsComponentBase {
             virtual Arg *clone() const = 0;
             virtual ~Arg(){};
 
-        } * arg_chain;
+        } *arg_chain;
 
         ICleanable *additional_data = nullptr;
 
@@ -99,8 +104,7 @@ class CommandBuffer : public GraphicsComponentBase {
             static Arg *result() { return nullptr; };
         };
 
-        template <typename FirstT, typename... ArgsT>
-        struct __convert_args<FirstT, ArgsT...> {
+        template <typename FirstT, typename... ArgsT> struct __convert_args<FirstT, ArgsT...> {
             static Arg *result(FirstT first, ArgsT... args) {
                 TypedArg<FirstT> *t_arg = new TypedArg<FirstT>(first);
                 t_arg->next = __convert_args<ArgsT...>::result(args...);
@@ -109,8 +113,7 @@ class CommandBuffer : public GraphicsComponentBase {
         };
 
       public:
-        template <typename... ArgsT>
-        Command(Type cmd, ArgsT... args) : cmd(cmd) {
+        template <typename... ArgsT> Command(Type cmd, ArgsT... args) : cmd(cmd) {
             arg_chain = __convert_args<ArgsT...>::result(args...);
         }
 
@@ -148,16 +151,20 @@ class CommandBuffer : public GraphicsComponentBase {
     void drawIndexed(ptr<IndexBuffer> indexBuffer);
     void setActiveShader(ptr<Shader> shader);
 
+    void beginRenderPass(Util::Rect rect);
+    void clearRenderTarget(Vector3f color, float depth);
+    void executeCommandBuffer(ptr<CommandBuffer> cmd);
+    void endRenderPass();
+
     void bindVertexBuffer(ptr<Buffer> buffer);
     void bindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
     void bindIndexBuffer(ptr<IndexBuffer> indexBuffer);
     void bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding);
 
     template <typename T>
-    void pushConstants(T data, ptr<Shader> shader,
-                       Shader::Type stage = Shader::Vertex) {
-        commands.push_back(new_ref<Command>(Command::PushConstants, shader,
-                                            stage, (uint)sizeof(data), data));
+    void pushConstants(T data, ptr<Shader> shader, Shader::Type stage = Shader::Vertex) {
+        commands.push_back(
+            new_ref<Command>(Command::PushConstants, shader, stage, (uint)sizeof(data), data));
     }
 
     void cleanup() override;

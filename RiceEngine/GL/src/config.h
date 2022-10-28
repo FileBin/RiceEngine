@@ -9,7 +9,7 @@
 
 #define USE_VULKAN_API
 
-#ifdef DEBUG_MODE
+#ifndef NDEBUG
 // NOTE: uncomment this line to enable graphics debug mode
 #define GL_DEBUG_MODE
 #endif

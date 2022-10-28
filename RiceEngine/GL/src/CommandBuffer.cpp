@@ -19,8 +19,8 @@
 NSP_GL_BEGIN
 
 void _build(uint i, CommandBuffer_API_data *api_data,
-            vec<ptr<CommandBuffer::Command>> &commands,
-            GraphicsManager_API_data &data, vk::Extent2D window) {
+            vec<ptr<CommandBuffer::Command>> &commands, GraphicsManager_API_data &data,
+            vk::Extent2D window) {
     DescriptorSetCreator creator;
     data.sync();
     api_data->reset(i);
@@ -31,8 +31,7 @@ void _build(uint i, CommandBuffer_API_data *api_data,
 }
 
 CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass)
-    : GraphicsComponentBase(g_mgr, false),
-      api_data(new CommandBuffer_API_data) {
+    : GraphicsComponentBase(g_mgr, false), api_data(new CommandBuffer_API_data) {
     api_data->build(get_api_data());
 
     api_data->begin_pass = begin_pass;
@@ -44,8 +43,7 @@ CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool begin_pass)
         uint n = api_data->bufCount();
         need_recreate.resize(n);
         for (uint i = 0; i < n; ++i)
-            _build(i, api_data.get(), commands, get_api_data(),
-                   vk::Extent2D(size.x, size.y));
+            _build(i, api_data.get(), commands, get_api_data(), vk::Extent2D(size.x, size.y));
     });
     g_mgr->destroyCommandBuffers->subscribe(deleteReg, [this]() { cleanup(); });
 }
@@ -64,6 +62,26 @@ void CommandBuffer::needRecreate(bool v) {
 }
 
 using pCmd = ptr<CommandBuffer::Command>;
+
+void CommandBuffer::beginRenderPass(Util::Rect rect) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::BeginRenderPass, rect));
+}
+
+void CommandBuffer::clearRenderTarget(Vector3f color, float depth) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::ClearRenderTarget, color, depth));
+}
+
+void CommandBuffer::endRenderPass() {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::EndRenderPass));
+}
+
+void CommandBuffer::executeCommandBuffer(ptr<CommandBuffer> cmd) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::ExecuteCommandBuffer, cmd));
+}
 
 void CommandBuffer::drawVertices(uint count) {
     needRecreate();
@@ -98,11 +116,9 @@ void CommandBuffer::bindIndexBuffer(ptr<IndexBuffer> buffer) {
     commands.push_back(new_ptr<Command>(Command::BindIndexBuffer, buffer));
 }
 
-void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> uniformBuffer,
-                                      uint binding) {
+void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding) {
     needRecreate();
-    commands.push_back(
-        new_ptr<Command>(Command::BindUniformBuffer, uniformBuffer, binding));
+    commands.push_back(new_ptr<Command>(Command::BindUniformBuffer, uniformBuffer, binding));
 }
 
 void CommandBuffer::update() {

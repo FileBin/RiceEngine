@@ -11,6 +11,7 @@
 #include "Rice/GL/IndexBuffer.hpp"
 #include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexBuffer.hpp"
+#include "Rice/Math/Vectors/Vector3f.hpp"
 #include "Rice/Util/Interfaces.hpp"
 #include "api_Buffer.hpp"
 #include "api_CommandBuffer.hpp"
@@ -32,8 +33,7 @@ struct DrawAdditionData : public ICleanable {
 
     void cleanup() override;
     void createDescriptorSet(DescriptorSetCreator &creator);
-    void bindDescriptosSets(DescriptorSetCreator &creator,
-                            vk::CommandBuffer cmd);
+    void bindDescriptosSets(DescriptorSetCreator &creator, vk::CommandBuffer cmd);
 };
 
 struct DescriptorSetCreator {
@@ -82,77 +82,72 @@ inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
     vk::CommandBufferBeginInfo cmdBeginInfo;
 
     cmd[i].begin(cmdBeginInfo);
-
-    std::vector<vk::ClearAttachment> clearValues;
-    clearValues.resize(2);
-
-    clearValues[0].setAspectMask(vk::ImageAspectFlagBits::eColor);
-    clearValues[0].setClearValue(
-        vk::ClearColorValue(std::array<float, 4>{0.1f, 0.2f, 0.8f, 1.0f}));
-    clearValues[0].setColorAttachment(0);
-    clearValues[1].setAspectMask(vk::ImageAspectFlagBits::eDepth);
-    clearValues[1].setClearValue(vk::ClearDepthStencilValue(1.0f, 0));
-    clearValues[1].setColorAttachment(1);
-
-    /*clearValues[0].clearValue.color.float32[0] = .1f;
-    clearValues[0].clearValue.color.float32[1] = .2f;
-    clearValues[0].clearValue.color.float32[2] = .8f;
-    clearValues[0].clearValue.color.float32[3] = 1.f;
-
-    clearValues[1].clearValue.depthStencil.depth = 1.01f;
-    clearValues[1].clearValue.depthStencil.stencil = 0;*/
-    // start the main renderpass.
-    // We will use the clear color from above, and the framebuffer of the
-    // index the swapchain gave us
-    vk::RenderPassBeginInfo rpInfo = {};
-
-    // windowExcent.width = window->getWidth();
-    // windowExcent.height = window->getHeight();
-
-    // if (begin_pass) {
-    //     rpInfo.renderPass = api_data.begin_renderPass;
-    // } else {
-    rpInfo.renderPass = api_data.def_renderPass;
-    //}
-    rpInfo.renderArea.offset.x = 0;
-    rpInfo.renderArea.offset.y = 0;
-    rpInfo.renderArea.extent = window;
-    rpInfo.framebuffer = api_data.framebuffers[i];
-
-    vk::ClearRect rect = {};
-    rect.rect.extent = window;
-    rect.layerCount = 1;
-
-    cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
-
-    if (begin_pass) {
-        cmd[i].clearAttachments(clearValues.size(), clearValues.data(), 1,
-                                &rect);
-    }
 }
 
-inline void
-CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
-                                  GraphicsManager_API_data &api_data,
-                                  DescriptorSetCreator &creator) {
+inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
+                                              GraphicsManager_API_data &api_data,
+                                              DescriptorSetCreator &creator) {
     using namespace vk;
 
     uint n = cmd.size();
 
     switch (command->cmd) {
+    case CommandBuffer::Command::BeginRenderPass: {
+        auto rect = *(Util::Rect *)command->arg_chain->getData();
+
+        vk::RenderPassBeginInfo rpInfo = {};
+        rpInfo.renderPass = api_data.def_renderPass;
+        rpInfo.renderArea.offset.x = rect.x;
+        rpInfo.renderArea.offset.y = rect.y;
+        rpInfo.renderArea.extent = vk::Extent2D(rect.w, rect.h);
+        rpInfo.framebuffer = api_data.framebuffers[i];
+
+        cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
+    } break;
+
+    case CommandBuffer::Command::ClearRenderTarget: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto color = *(Vector3f *)(*it++).getData();
+        auto depth = *(float *)(*it++).getData();
+
+        std::array<vk::ClearAttachment, 2> clearValues;
+
+        clearValues[0].setAspectMask(vk::ImageAspectFlagBits::eColor);
+        clearValues[0].setClearValue(
+            vk::ClearColorValue(std::array<float, 4>{color.x, color.y, color.z, 1.0f}));
+        clearValues[0].setColorAttachment(0);
+        clearValues[1].setAspectMask(vk::ImageAspectFlagBits::eDepth);
+        clearValues[1].setClearValue(vk::ClearDepthStencilValue(depth, 0));
+        clearValues[1].setColorAttachment(1);
+
+        vk::ClearRect rect = {};
+        rect.rect.extent = api_data.windowExcent;
+        rect.layerCount = 1;
+
+        cmd[i].clearAttachments(clearValues.size(), clearValues.data(), 1, &rect);
+    }
+
+    case CommandBuffer::Command::ExecuteCommandBuffer: {
+        auto sub_cmd = *(ptr<CommandBuffer> *)command->arg_chain->getData();
+        cmd[i].executeCommands(1, &sub_cmd->api_data->cmd[i]);
+    }
+
+    case CommandBuffer::Command::EndRenderPass: {
+        cmd[i].endRenderPass();
+    } break;
+
     case CommandBuffer::Command::Draw: {
         CommandBuffer::Command::ArgIterator it = command->arg_chain;
         auto count = *(uint *)(it++).current->getData();
         auto instCount = *(uint *)(it++).current->getData();
         auto vert_begin = *(uint *)(it++).current->getData();
         auto inst_begin = *(uint *)(it++).current->getData();
-        
+
         if (!command->additional_data) {
             auto draw_data = new DrawAdditionData(api_data);
             command->additional_data = static_cast<ICleanable *>(draw_data);
         }
-        auto draw_data =
-            dynamic_cast<DrawAdditionData *>(command->additional_data);
+        auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
         draw_data->bindDescriptosSets(creator, cmd[i]);
 
         cmd[i].draw(count, instCount, vert_begin, inst_begin);
@@ -171,19 +166,15 @@ CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> command, uint i,
             auto draw_data = new DrawAdditionData(api_data);
             command->additional_data = static_cast<ICleanable *>(draw_data);
         }
-        auto draw_data =
-            dynamic_cast<DrawAdditionData *>(command->additional_data);
+        auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
         draw_data->bindDescriptosSets(creator, cmd[i]);
 
-        cmd[i].drawIndexed(count, instCount, index_offset, vert_begin,
-                           inst_begin);
+        cmd[i].drawIndexed(count, instCount, index_offset, vert_begin, inst_begin);
     } break;
 
     case CommandBuffer::Command::SetShader: {
-        auto &sh_api_data =
-            (*(ptr<Shader> *)command->arg_chain->getData())->api_data;
-        cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics,
-                            sh_api_data->pipeline);
+        auto &sh_api_data = (*(ptr<Shader> *)command->arg_chain->getData())->api_data;
+        cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, sh_api_data->pipeline);
         creator.layout = sh_api_data->layout;
         creator.descriptorSetLayout = sh_api_data->descriptorSetLayout;
     } break;
@@ -259,24 +250,21 @@ inline void DrawAdditionData::bindDescriptosSets(DescriptorSetCreator &creator,
             createDescriptorSet(creator);
     }
     if (descriptorSet)
-        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, creator.layout,
-                               0, 1, &descriptorSet, 0, nullptr);
+        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, creator.layout, 0, 1,
+                               &descriptorSet, 0, nullptr);
 }
 
-inline void
-DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
+inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
     using namespace vk;
     uint maxCount = creator.maxCount;
-    vec<DescriptorPoolSize> sizes = {
-        {DescriptorType::eUniformBuffer, maxCount}};
+    vec<DescriptorPoolSize> sizes = {{DescriptorType::eUniformBuffer, maxCount}};
 
     DescriptorPoolCreateInfo pool_info = {};
     pool_info.maxSets = maxCount;
     pool_info.poolSizeCount = (uint32_t)sizes.size();
     pool_info.pPoolSizes = sizes.data();
 
-    auto res = api_data.device.createDescriptorPool(&pool_info, nullptr,
-                                                    &descriptorPool);
+    auto res = api_data.device.createDescriptorPool(&pool_info, nullptr, &descriptorPool);
     THROW_VK_EX_IF_BAD(res);
 
     DescriptorSetAllocateInfo allocInfo = {};
@@ -295,8 +283,8 @@ DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
         write.dstSet = descriptorSet;
         write.pBufferInfo = &creator.bufferInfos[i];
     }
-    api_data.device.updateDescriptorSets(creator.writes.size(),
-                                         creator.writes.data(), 0, nullptr);
+    api_data.device.updateDescriptorSets(creator.writes.size(), creator.writes.data(), 0,
+                                         nullptr);
 }
 
 inline void DrawAdditionData::cleanup() {
@@ -307,17 +295,13 @@ inline void DrawAdditionData::cleanup() {
     }
 }
 
-inline void CommandBuffer_API_data::end(uint i) {
-    cmd[i].endRenderPass();
-    cmd[i].end();
-}
+inline void CommandBuffer_API_data::end(uint i) { cmd[i].end(); }
 
 inline void CommandBuffer_API_data::reset(uint i) { cmd[i].reset(); }
 
 inline uint CommandBuffer_API_data::bufCount() { return cmd.size(); }
 
-inline void
-CommandBuffer_API_data::cleanup(GraphicsManager_API_data &api_data) {
+inline void CommandBuffer_API_data::cleanup(GraphicsManager_API_data &api_data) {
     api_data.device.free(api_data.commandPool, cmd);
 }
 
