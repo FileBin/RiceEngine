@@ -138,7 +138,6 @@ class CommandBuffer : public GraphicsComponentBase {
 
     vec<ptr<Command>> commands;
     vec<bool> need_recreate = {};
-    bool is_secondary = false;
 
     void needRecreate(bool value = true);
 
@@ -152,7 +151,7 @@ class CommandBuffer : public GraphicsComponentBase {
     void drawIndexed(ptr<IndexBuffer> indexBuffer);
     void setActiveShader(ptr<Shader> shader);
 
-    void beginRenderPass(Util::Rect rect);
+    void beginRenderPass(Util::Rect rect, bool secondary = false);
     void clearRenderTarget(Vector3f color, float depth);
     void executeCommandBuffer(ptr<CommandBuffer> cmd);
     void endRenderPass();

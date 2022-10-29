@@ -13,7 +13,7 @@
 #include "Rice/Scene/Components/Transform.hpp"
 #include "Rice/Scene/Scene.hpp"
 #include "Rice/Tests/Scripts/CameraMover.hpp"
-#include "Rice/defines.h"
+#include "Rice/Util/defines.hpp"
 
 #pragma once
 
@@ -23,9 +23,7 @@ class CubeTestScene : public virtual Scene {
     CubeTestScene() = default;
 
   public:
-    static ptr<CubeTestScene> create() {
-        return ptr<CubeTestScene>(new CubeTestScene());
-    }
+    static ptr<CubeTestScene> create() { return ptr<CubeTestScene>(new CubeTestScene()); }
 
     void init() override {
         auto en = getClientEngine();
@@ -65,24 +63,20 @@ class CubeTestScene : public virtual Scene {
             cube_render->setModel(cube_model);
 
             auto cube_material = ren->getOrCreateMaterial(
-                "cube_material", 
-                [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
+                "cube_material", [](ptr<SceneRender> ren) -> ptr<Graphics::Material> {
                     auto shader = ren->getOrCreateShader(
                         "solid", [](ptr<Graphics::Shader> shader) -> void {
                             shader->loadShader("shaders/default.vert.spv",
                                                Graphics::Shader::Vertex);
                             shader->loadShader("shaders/diffuse.frag.spv",
                                                Graphics::Shader::Fragment);
-                            shader->addUniformBuffer(0,
-                                                     Graphics::Shader::Vertex);
-                            shader->addUniformBuffer(
-                                1, Graphics::Shader::Fragment);
-                            shader
-                                ->setVertexStrideAndLayout<Graphics::Vertex>();
+                            shader->addUniformBuffer(0, Graphics::Shader::Vertex);
+                            shader->addUniformBuffer(1, Graphics::Shader::Fragment);
+                            shader->setVertexStrideAndLayout<Graphics::Vertex>();
                             shader->build();
                         });
-                    auto material = new_ptr<Graphics::Material>(
-                        ren->getGraphicsManager(), shader);
+                    auto material =
+                        new_ptr<Graphics::Material>(ren->getGraphicsManager(), shader);
                     Vector4f egst = {0, 64, 1, 0};
                     Vector4f color = {1, 1, 0, 1};
                     material->initUniformBuffer(std::make_tuple(color, egst));

@@ -472,6 +472,7 @@ void GraphicsManager_API_data::recreateSwapchain() {
     graphicsManager->resizePipelines->invoke(window_size);
     init_framebuffers();
     graphicsManager->resizeGraphicsComponents->invoke(window_size);
+    graphicsManager->resizeSubCommandBuffers->invoke(window_size);
     graphicsManager->resizeCommandBuffers->invoke(window_size);
 }
 

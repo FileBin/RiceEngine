@@ -14,8 +14,8 @@
 
 NSP_GL_BEGIN
 
-RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
-                             ptr<Material> mat, ptr<Components::Transform> t) {
+RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh, ptr<Material> mat,
+                             ptr<Components::Transform> t) {
     material = mat;
     orig = mesh;
     transform = t;
@@ -25,7 +25,7 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     vertexBuffer = new_ptr<VertexBuffer>(g_mgr, mesh->vertexBuffer);
     indexBuffer = new_ptr<IndexBuffer>(g_mgr, mesh->indexBuffer);
 
-    auto cmd = new_ptr<CommandBuffer>(g_mgr, false);
+    auto cmd = new_ptr<CommandBuffer>(g_mgr, true);
 
     auto ub = material->getUniformBuffer();
 
@@ -33,7 +33,7 @@ RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh,
     cmd->bindVertexBuffer(vertexBuffer);
     cmd->bindIndexBuffer(indexBuffer);
     cmd->bindUniformBuffer(constBuffer, 0);
-    if(ub) {
+    if (ub) {
         cmd->bindUniformBuffer(ub, 1);
     }
     cmd->drawIndexed(indexBuffer);

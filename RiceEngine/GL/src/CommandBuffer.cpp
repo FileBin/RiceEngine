@@ -33,17 +33,17 @@ void _build(uint i, CommandBuffer_API_data *api_data,
 CommandBuffer::CommandBuffer(ptr<GraphicsManager> g_mgr, bool secondary)
     : GraphicsComponentBase(g_mgr, false), api_data(new CommandBuffer_API_data) {
     api_data->build(get_api_data(), secondary);
-    is_secondary = secondary;
 
     uint n = api_data->bufCount();
     need_recreate.resize(n);
 
-    g_mgr->resizeCommandBuffers->subscribe(resizeReg, [this](Vector2i size) {
-        uint n = api_data->bufCount();
-        need_recreate.resize(n);
-        for (uint i = 0; i < n; ++i)
-            _build(i, api_data.get(), commands, get_api_data(), vk::Extent2D(size.x, size.y));
-    });
+    auto e = &g_mgr->resizeCommandBuffers;
+
+    if (secondary) {
+        e = &g_mgr->resizeSubCommandBuffers;
+    }
+
+    (*e)->subscribe(resizeReg, [this](Vector2i size) { buildAll(); });
     g_mgr->destroyCommandBuffers->subscribe(deleteReg, [this]() { cleanup(); });
 }
 
@@ -62,9 +62,9 @@ void CommandBuffer::needRecreate(bool v) {
 
 using pCmd = ptr<CommandBuffer::Command>;
 
-void CommandBuffer::beginRenderPass(Util::Rect rect) {
+void CommandBuffer::beginRenderPass(Util::Rect rect, bool secondary) {
     needRecreate();
-    commands.push_back(new_ptr<Command>(Command::BeginRenderPass, rect));
+    commands.push_back(new_ptr<Command>(Command::BeginRenderPass, rect, secondary));
 }
 
 void CommandBuffer::clearRenderTarget(Vector3f color, float depth) {

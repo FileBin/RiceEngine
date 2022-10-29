@@ -19,7 +19,7 @@ struct DescriptorSetCreator;
 
 struct CommandBuffer_API_data {
     vec<vk::CommandBuffer> cmd;
-    bool begin_pass;
+    bool is_secondary;
 
     uint bufCount();
 

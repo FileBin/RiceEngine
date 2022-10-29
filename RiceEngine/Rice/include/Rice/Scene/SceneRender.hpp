@@ -29,10 +29,14 @@ class SceneRender : public enable_ptr<SceneRender> {
     wptr<ClientScene> scene;
     wptr<ClientEngine> engine;
     Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
-    ptr<Graphics::CommandBuffer> begin_cmd;
+    ptr<Graphics::CommandBuffer> main_cmd, clear_cmd;
+
+    bool need_rebuild = true;
+
+    void updateCmd();
+    void rebuildCmd();
 
     uint update(ptr<Components::Camera> camera);
-    vec<ptr<Graphics::CommandBuffer>> getCmds(uint count);
 
   public:
     SceneRender(ptr<ClientScene> scene, ptr<ClientEngine> engine);
@@ -45,12 +49,11 @@ class SceneRender : public enable_ptr<SceneRender> {
 
     ptr<Graphics::Material> getMaterial(String name);
 
-    ptr<Graphics::Shader> getOrCreateShader(
-        String name, std::function<void(ptr<Graphics::Shader>)> shader_creator);
-    ptr<Graphics::Material>
-    getOrCreateMaterial(String name,
-                        std::function<ptr<Graphics::Material>(ptr<SceneRender>)>
-                            material_factory);
+    ptr<Graphics::Shader>
+    getOrCreateShader(String name, std::function<void(ptr<Graphics::Shader>)> shader_creator);
+    ptr<Graphics::Material> getOrCreateMaterial(
+        String name,
+        std::function<ptr<Graphics::Material>(ptr<SceneRender>)> material_factory);
 
     ptr<Graphics::GraphicsManager> getGraphicsManager();
 

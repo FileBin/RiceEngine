@@ -45,6 +45,7 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
     ptr<ResizeEvent> resizePipelines = ResizeEvent::create(),
                      resizeRenderPasses = ResizeEvent::create(),
                      resizeCommandBuffers = ResizeEvent::create(),
+                     resizeSubCommandBuffers = ResizeEvent::create(),
                      resizeGraphicsComponents = ResizeEvent::create();
     ptr<DestroyEvent> destroyCommandBuffers = DestroyEvent::create();
     ptr<DestroyEvent> destroyEvent = DestroyEvent::create();

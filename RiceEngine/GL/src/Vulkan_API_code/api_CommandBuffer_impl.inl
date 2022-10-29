@@ -68,6 +68,7 @@ struct DescriptorSetCreator {
 
 inline void CommandBuffer_API_data::build(GraphicsManager_API_data &api_data, bool secondary) {
     // allocate the default command buffer that we will use for rendering
+    is_secondary = secondary;
     vk::CommandBufferAllocateInfo info = {};
 
     info.commandPool = api_data.commandPool;
@@ -81,8 +82,17 @@ inline void CommandBuffer_API_data::build(GraphicsManager_API_data &api_data, bo
 inline void CommandBuffer_API_data::begin(GraphicsManager_API_data &api_data,
                                           vk::Extent2D window, uint i) {
     uint n = cmd.size();
-    vk::CommandBufferBeginInfo cmdBeginInfo;
 
+    vk::CommandBufferInheritanceInfo info;
+    info.renderPass = api_data.def_renderPass;
+    info.framebuffer = api_data.framebuffers[i];
+
+    vk::CommandBufferBeginInfo cmdBeginInfo;
+    if (is_secondary) {
+        cmdBeginInfo.flags = vk::CommandBufferUsageFlagBits::eRenderPassContinue |
+                             vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+        cmdBeginInfo.pInheritanceInfo = &info;
+    }
     cmd[i].begin(cmdBeginInfo);
 }
 
@@ -95,7 +105,9 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
 
     switch (command->cmd) {
     case CommandBuffer::Command::BeginRenderPass: {
-        auto rect = *(Util::Rect *)command->arg_chain->getData();
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto rect = *(Util::Rect *)(*it++).getData();
+        bool secondary = *(bool *)(*it++).getData();
 
         rect.x *= api_data.windowExcent.width;
         rect.w *= api_data.windowExcent.width;
@@ -109,7 +121,9 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         rpInfo.renderArea.extent = vk::Extent2D(rect.w, rect.h);
         rpInfo.framebuffer = api_data.framebuffers[i];
 
-        cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
+        using enum vk::SubpassContents;
+
+        cmd[i].beginRenderPass(&rpInfo, secondary ? eSecondaryCommandBuffers : eInline);
     } break;
 
     case CommandBuffer::Command::ClearRenderTarget: {

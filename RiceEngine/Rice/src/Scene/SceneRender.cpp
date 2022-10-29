@@ -1,3 +1,4 @@
+#include "Rice/Util/defines.hpp"
 #include "pch.h"
 
 #include "Rice/Engine/ClientEngine.hpp"
@@ -11,24 +12,53 @@ NSP_ENGINE_BEGIN
 
 SceneRender::SceneRender(ptr<ClientScene> scene, ptr<ClientEngine> engine)
     : scene(scene), engine(engine) {
-    begin_cmd =
-        new_ptr<Graphics::CommandBuffer>(engine->getGraphicsManager(), true);
-    begin_cmd->buildAll();
+    main_cmd = new_ptr<Graphics::CommandBuffer>(engine->getGraphicsManager());
+    clear_cmd = new_ptr<Graphics::CommandBuffer>(engine->getGraphicsManager(), true);
+    clear_cmd->clearRenderTarget({0.1, 0.3, 0.7}, 1);
+    clear_cmd->buildAll();
+    updateCmd();
 }
 
 void SceneRender::registerMesh(ptr<Graphics::RenderingMesh> mesh) {
     mesh->Register(mesh_collection.registerPtr(mesh));
+    updateCmd();
 }
 
 void SceneRender::unregisterMesh(ptr<Graphics::RenderingMesh> mesh) {
     mesh_collection.unregister(mesh->Unregister());
+    updateCmd();
+}
+
+void SceneRender::updateCmd() {
+    main_cmd->clear();
+    main_cmd->beginRenderPass({0, 0, 1, 1}, true);
+    main_cmd->executeCommandBuffer(clear_cmd);
+    auto coll = mesh_collection.getCollectionWithGaps();
+    for (auto ptr : coll) {
+        if (ptr) {
+            main_cmd->executeCommandBuffer(ptr->getCmd());
+        }
+    }
+
+    main_cmd->endRenderPass();
+
+    need_rebuild = true;
+}
+
+void SceneRender::rebuildCmd() {
+    if (need_rebuild) {
+        main_cmd->buildAll();
+        need_rebuild = false;
+    }
 }
 
 void SceneRender::draw(ptr<Components::Camera> camera) {
     auto g_mgr = getEngine()->getGraphicsManager();
     g_mgr->sync();
+    need_rebuild = true;
+    rebuildCmd();
     uint count = update(camera);
-    g_mgr->executeCmds(getCmds(count));
+    g_mgr->executeCmd(main_cmd);
     // TODO add transparent queue
 }
 
@@ -46,27 +76,13 @@ uint SceneRender::update(ptr<Components::Camera> camera) {
     return count;
 }
 
-vec<ptr<Graphics::CommandBuffer>> SceneRender::getCmds(uint count) {
-    vec<ptr<Graphics::CommandBuffer>> output(count + 1);
-    uint i = 0;
-    output[i++] = begin_cmd;
-    auto coll = mesh_collection.getCollectionWithGaps();
-    for (auto ptr : coll) {
-        if (ptr) {
-            output[i++] = ptr->getCmd();
-        }
-    }
-    return output;
-}
-
 void SceneRender::cleanup() { mesh_collection.cleanup(); }
 
 ptr<Graphics::Shader> SceneRender::getShader(String name) {
     try {
         return shaders.at(name);
     } catch (std::out_of_range) {
-        THROW_EXCEPTION(
-            fmt::format("Shader {} not found!", name.toUTF8String()).c_str());
+        THROW_EXCEPTION(fmt::format("Shader {} not found!", name.toUTF8String()).c_str());
     }
 }
 
@@ -74,13 +90,13 @@ ptr<Graphics::Material> SceneRender::getMaterial(String name) {
     try {
         return materials.at(name);
     } catch (std::out_of_range) {
-        THROW_EXCEPTION(
-            fmt::format("Material {} not found!", name.toUTF8String()).c_str());
+        THROW_EXCEPTION(fmt::format("Material {} not found!", name.toUTF8String()).c_str());
     }
 }
 
-ptr<Graphics::Shader> SceneRender::getOrCreateShader(
-    String name, std::function<void(ptr<Graphics::Shader>)> shader_creator) {
+ptr<Graphics::Shader>
+SceneRender::getOrCreateShader(String name,
+                               std::function<void(ptr<Graphics::Shader>)> shader_creator) {
     auto &sh = shaders[name];
     if (!sh) {
         sh.reset(new Graphics::Shader(getGraphicsManager())); // create shader
@@ -90,8 +106,7 @@ ptr<Graphics::Shader> SceneRender::getOrCreateShader(
 }
 
 ptr<Graphics::Material> SceneRender::getOrCreateMaterial(
-    String name,
-    std::function<ptr<Graphics::Material>(ptr<SceneRender>)> material_factory) {
+    String name, std::function<ptr<Graphics::Material>(ptr<SceneRender>)> material_factory) {
     auto &m = materials[name];
     if (!m) {
         m = material_factory(shared_from_this());
