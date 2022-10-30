@@ -1,5 +1,6 @@
 #include "Rice/Util/Exceptions/ThreadInterruptException.hpp"
 #include "Rice/stdafx.hpp"
+#include <stop_token>
 
 NSP_ENGINE_BEGIN
 class CoreBase;
@@ -52,15 +53,15 @@ class CoreBase {
                 if (!Manager::isThreadAttached())
                     Manager::attachThread();
 
-                auto f_wrp = [&_Fx](ArgsT... args) {
+                auto f_wrp = [&_Fx](ArgsT... args, std::stop_token stoken) {
                     try {
-                        _Fx(args...);
+                        _Fx(args..., stoken);
                     } catch (Util::ThreadInterruptException e) {
                         Log::debug("Thread interrupted");
                     }
                 };
 
-                executeFuncAndHandleExceptions<void, Signature>(f_wrp, _Ax..., _St);
+                executeFuncAndHandleExceptions<void, Signature>(_Fx, _Ax..., _St);
                 Manager::detachThread();
             },
             func, args...));
