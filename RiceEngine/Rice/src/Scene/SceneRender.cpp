@@ -1,3 +1,4 @@
+#include "Rice/GL/GraphicsManager.hpp"
 #include "Rice/Util/defines.hpp"
 #include "pch.h"
 
@@ -19,13 +20,37 @@ SceneRender::SceneRender(ptr<ClientScene> scene, ptr<ClientEngine> engine)
     updateCmd();
 }
 
+SceneRender::ShaderQueue::ShaderQueue(ptr<Graphics::Shader> shader,
+                                      ptr<Graphics::GraphicsManager> mgr) {
+    setShader = new_ptr<Graphics::CommandBuffer>(mgr, true);
+    setShader->setActiveShader(shader);
+    setShader->buildAll();
+}
+
+SceneRender::MaterialQueue::MaterialQueue(ptr<Graphics::Material> mat,
+                                          ptr<Graphics::GraphicsManager> mgr) {
+    auto ub = mat->getUniformBuffer();
+    if (ub) {
+        setMaterial = new_ptr<Graphics::CommandBuffer>(mgr, true);
+        setMaterial->bindUniformBuffer(ub, 1);
+        setMaterial->buildAll();
+    }
+}
+
 void SceneRender::registerMesh(ptr<Graphics::RenderingMesh> mesh) {
-    mesh->Register(mesh_collection.registerPtr(mesh));
+    auto mat = mesh->getMaterial();
+    auto sq = mainQueue.at(mat->getShader());
+    auto mq = sq.materials.at(mat);
+
+    mesh->Register(mq.mesh_collection.registerPtr(mesh));
     updateCmd();
 }
 
 void SceneRender::unregisterMesh(ptr<Graphics::RenderingMesh> mesh) {
-    mesh_collection.unregister(mesh->Unregister());
+    auto mat = mesh->getMaterial();
+    auto sq = mainQueue.at(mat->getShader());
+    auto mq = sq.materials.at(mat);
+    mq.mesh_collection.unregister(mesh->Unregister());
     updateCmd();
 }
 
@@ -33,10 +58,17 @@ void SceneRender::updateCmd() {
     main_cmd->clear();
     main_cmd->beginRenderPass({0, 0, 1, 1}, true);
     main_cmd->executeCommandBuffer(clear_cmd);
-    auto coll = mesh_collection.getCollectionWithGaps();
-    for (auto ptr : coll) {
-        if (ptr) {
-            main_cmd->executeCommandBuffer(ptr->getCmd());
+    for (auto &sq : mainQueue) {
+        main_cmd->executeCommandBuffer(sq.second.setShader);
+        for (auto &mq : sq.second.materials) {
+            if (mq.second.setMaterial)
+                main_cmd->executeCommandBuffer(mq.second.setMaterial);
+            auto mesh_collection = mq.second.mesh_collection.getCollectionWithGaps();
+            for (auto ptr : mesh_collection) {
+                if (ptr) {
+                    main_cmd->executeCommandBuffer(ptr->getCmd());
+                }
+            }
         }
     }
 
@@ -64,19 +96,22 @@ void SceneRender::draw(ptr<Components::Camera> camera) {
 
 uint SceneRender::update(ptr<Components::Camera> camera) {
     uint count = 0;
-    auto coll = mesh_collection.getCollectionWithGaps();
-    for (auto ptr : coll) {
-        if (ptr) {
-            auto proj = camera->getProjectionMatrix();
-            ptr->updateConstBuffer(camera->getViewMatrix(), proj);
-            ptr->updateCmdBuffer();
-            count++;
+    for (auto &sq : mainQueue)
+        for (auto &mq : sq.second.materials) {
+            auto coll = mq.second.mesh_collection.getCollectionWithGaps();
+            for (auto ptr : coll) {
+                if (ptr) {
+                    auto proj = camera->getProjectionMatrix();
+                    ptr->updateConstBuffer(camera->getViewMatrix(), proj);
+                    ptr->updateCmdBuffer();
+                    count++;
+                }
+            }
         }
-    }
     return count;
 }
 
-void SceneRender::cleanup() { mesh_collection.cleanup(); }
+void SceneRender::cleanup() { mainQueue.clear(); }
 
 ptr<Graphics::Shader> SceneRender::getShader(String name) {
     try {
@@ -101,6 +136,8 @@ SceneRender::getOrCreateShader(String name,
     if (!sh) {
         sh.reset(new Graphics::Shader(getGraphicsManager())); // create shader
         shader_creator(sh); // call creator function to setup shader
+
+        mainQueue.insert({sh, ShaderQueue(sh, getEngine()->getGraphicsManager())});
     }
     return sh;
 }
@@ -110,6 +147,8 @@ ptr<Graphics::Material> SceneRender::getOrCreateMaterial(
     auto &m = materials[name];
     if (!m) {
         m = material_factory(shared_from_this());
+        auto shader_q = mainQueue.at(m->getShader());
+        shader_q.materials.insert({m, MaterialQueue(m, getEngine()->getGraphicsManager())});
     }
     return m;
 }

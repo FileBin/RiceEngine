@@ -12,6 +12,8 @@
 
 #include <Rice/GL/RenderingMesh.hpp>
 
+using namespace Rice::Graphics;
+
 NSP_GL_BEGIN
 
 RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh, ptr<Material> mat,

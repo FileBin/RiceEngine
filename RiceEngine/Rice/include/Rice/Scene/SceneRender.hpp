@@ -1,4 +1,5 @@
 #include "Rice/GL/Material.hpp"
+#include "Rice/GL/Shader.hpp"
 #include "Rice/stdafx.hpp"
 
 NSP_ENGINE_BEGIN
@@ -23,13 +24,28 @@ NSP_ENGINE_BEGIN
 
 class SceneRender : public enable_ptr<SceneRender> {
   private:
+    struct MaterialQueue {
+        ptr<Graphics::CommandBuffer> setMaterial;
+        Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
+
+        MaterialQueue(ptr<Graphics::Material> mat, ptr<Graphics::GraphicsManager> mgr);
+    };
+
+    struct ShaderQueue {
+        ptr<Graphics::CommandBuffer> setShader;
+        map<ptr<Graphics::Material>, MaterialQueue> materials;
+
+        ShaderQueue(ptr<Graphics::Shader> shader, ptr<Graphics::GraphicsManager> mgr);
+    };
+
     map<String, ptr<Graphics::Shader>> shaders;
     map<String, ptr<Graphics::Material>> materials;
 
     wptr<ClientScene> scene;
     wptr<ClientEngine> engine;
-    Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
     ptr<Graphics::CommandBuffer> main_cmd, clear_cmd;
+
+    map<ptr<Graphics::Shader>, ShaderQueue> mainQueue;
 
     bool need_rebuild = true;
 
