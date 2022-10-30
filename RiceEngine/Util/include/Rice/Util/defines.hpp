@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "cds/container/impl/iterable_list.h"
 #include <bits/stdc++.h>
 #include <memory>
 #include <string>
@@ -8,6 +9,11 @@
 #define _DEBUG
 #endif //_DEBUG
 #endif // NDEBUG
+
+#include <cds/container/cuckoo_map.h>
+#include <cds/container/cuckoo_set.h>
+#include <cds/container/iterable_list_hp.h>
+#include <cds/container/moir_queue.h>
 
 template <typename T, typename R> using pair = std::pair<T, R>;
 
@@ -22,8 +28,12 @@ template <typename K, typename V, typename H = std::hash<K>, typename P = std::e
 using umap = std::unordered_map<K, V, H, P, A>;
 
 template <typename T> using set = std::set<T>;
-
 template <typename T> using uset = std::unordered_set<T>;
+
+template <typename K, typename V> using concurent_map = cds::container::CuckooMap<K, V>;
+template <typename T> using concurent_set = cds::container::CuckooSet<T>;
+template <typename T> using concurent_queue = cds::container::MoirQueue<cds::gc::HP, T>;
+template <typename T> using concurent_list = cds::container::IterableList<cds::gc::HP, T>;
 
 template <typename T> using ptr = std::shared_ptr<T>;
 template <typename T> using wptr = std::weak_ptr<T>;
