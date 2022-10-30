@@ -1,3 +1,4 @@
+#include "Rice/Util/Exceptions/ThreadInterruptException.hpp"
 #include "Rice/stdafx.hpp"
 
 NSP_ENGINE_BEGIN
@@ -15,8 +16,7 @@ NSP_ENGINE_BEGIN
 class CoreBase {
   private:
     template <typename RetT, typename Signature, typename... ArgsT>
-    static RetT executeFuncAndHandleExceptions(std::function<Signature> &fn,
-                                               ArgsT... args) {
+    static RetT executeFuncAndHandleExceptions(std::function<Signature> &fn, ArgsT... args) {
 #ifdef NDEBUG
         try {
             return fn(args...);
@@ -31,8 +31,7 @@ class CoreBase {
             Log::close();
             throw e;
         } catch (std::exception &e) {
-            Log::log(Log::Error, "std::exception occured: {}",
-                     String(typeid(e).name()));
+            Log::log(Log::Error, "std::exception occured: {}", String(typeid(e).name()));
             Log::log(Log::Error, "What: {}", String(e.what()));
             Log::close();
             throw e;
@@ -44,14 +43,25 @@ class CoreBase {
 
   public:
     template <typename Signature, typename... ArgsT>
-    static ptr<std::jthread> runThread(std::function<Signature> func,
-                                       ArgsT... args) {
+    static ptr<std::jthread> runThread(std::function<Signature> func, ArgsT... args) {
         return ptr<std::jthread>(new std::jthread(
-            [](std::stop_token _St, std::function<Signature> _Fx,
-               ArgsT... _Ax) {
-                setCurrentThreadPriority(ThreadPriority::Low);
-                executeFuncAndHandleExceptions<void, Signature>(_Fx, _Ax...,
-                                                                _St);
+            [](std::stop_token _St, std::function<Signature> _Fx, ArgsT... _Ax) {
+                setCurrentThreadPriority(ThreadPriority::Normal);
+                using cds::threading::Manager;
+
+                if (!Manager::isThreadAttached())
+                    Manager::attachThread();
+
+                auto f_wrp = [&_Fx](ArgsT... args) {
+                    try {
+                        _Fx(args...);
+                    } catch (Util::ThreadInterruptException e) {
+                        Log::debug("Thread interrupted");
+                    }
+                };
+
+                executeFuncAndHandleExceptions<void, Signature>(f_wrp, _Ax..., _St);
+                Manager::detachThread();
             },
             func, args...));
     }
