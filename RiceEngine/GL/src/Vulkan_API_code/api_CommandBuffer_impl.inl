@@ -38,11 +38,15 @@ struct DrawAdditionData : public ICleanable {
 };
 
 struct DescriptorSetCreator {
-    uint maxCount = 0;
     vk::PipelineLayout layout;
     vk::DescriptorSetLayout descriptorSetLayout;
-    vec<vk::WriteDescriptorSet> writes;
-    vec<vk::DescriptorBufferInfo> bufferInfos;
+
+    struct WriteDescriptor {
+        vk::WriteDescriptorSet write;
+        vk::DescriptorBufferInfo info;
+    };
+
+    map<uint, WriteDescriptor> writes;
 
     void addWrite(ptr<UniformBuffer> buffer, uint binding) {
         using namespace vk;
@@ -53,16 +57,13 @@ struct DescriptorSetCreator {
         info.offset = 0;
         info.range = api_data->buffer_size;
 
-        bufferInfos.push_back(info);
-
         WriteDescriptorSet write;
         write.descriptorType = DescriptorType::eUniformBuffer;
         write.dstArrayElement = 0;
         write.dstBinding = binding;
         write.descriptorCount = 1;
 
-        writes.push_back(write);
-        maxCount++;
+        writes[binding] = {write, info};
     }
 };
 
@@ -171,6 +172,10 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
         draw_data->bindDescriptosSets(creator, cmd[i]);
 
+        // creator.bufferInfos.clear();
+        // creator.writes.clear();
+        // creator.maxCount = 0;
+
         cmd[i].draw(count, instCount, vert_begin, inst_begin);
     } break;
 
@@ -189,6 +194,10 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         }
         auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
         draw_data->bindDescriptosSets(creator, cmd[i]);
+
+        // creator.bufferInfos.clear();
+        // creator.writes.clear();
+        // creator.maxCount = 0;
 
         cmd[i].drawIndexed(count, instCount, index_offset, vert_begin, inst_begin);
     } break;
@@ -281,7 +290,7 @@ inline void DrawAdditionData::bindDescriptosSets(DescriptorSetCreator &creator,
 
 inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
     using namespace vk;
-    uint maxCount = creator.maxCount;
+    uint maxCount = creator.writes.size();
     vec<DescriptorPoolSize> sizes = {{DescriptorType::eUniformBuffer, maxCount}};
 
     DescriptorPoolCreateInfo pool_info = {};
@@ -302,14 +311,15 @@ inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator)
 
     res = api_data.device.allocateDescriptorSets(&allocInfo, &descriptorSet);
     THROW_VK_EX_IF_BAD(res);
-    auto n = creator.writes.size();
-    for (uint i = 0; i < n; ++i) {
-        auto &write = creator.writes[i];
+    vec<WriteDescriptorSet> writes{maxCount};
+    uint i = 0;
+    for (auto &w : creator.writes) {
+        auto write = w.second.write;
         write.dstSet = descriptorSet;
-        write.pBufferInfo = &creator.bufferInfos[i];
+        write.pBufferInfo = &w.second.info;
+        writes[i++] = write;
     }
-    api_data.device.updateDescriptorSets(creator.writes.size(), creator.writes.data(), 0,
-                                         nullptr);
+    api_data.device.updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
 }
 
 inline void DrawAdditionData::cleanup() {
