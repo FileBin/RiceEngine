@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #include "cds/container/details/cuckoo_base.h"
+#include "cds/container/impl/feldman_hashmap.h"
 #include "cds/container/impl/iterable_list.h"
+#include "cds/gc/hp.h"
 #include <bits/stdc++.h>
 #include <functional>
 #include <memory>
@@ -13,8 +15,8 @@
 #endif //_DEBUG
 #endif // NDEBUG
 
-#include <cds/container/cuckoo_map.h>
 #include <cds/container/cuckoo_set.h>
+#include <cds/container/feldman_hashmap_hp.h>
 #include <cds/container/iterable_list_hp.h>
 #include <cds/container/moir_queue.h>
 
@@ -60,7 +62,7 @@ template <typename T> using set = std::set<T>;
 template <typename T> using uset = std::unordered_set<T>;
 
 template <typename K, typename V, typename H = std::hash<K>>
-using concurent_map = cds::container::CuckooMap<K, V, detail::traits<K, H>>;
+using concurent_map = cds::container::FeldmanHashMap<cds::gc::HP, K, V>;
 template <typename T> using concurent_set = cds::container::CuckooSet<T>;
 template <typename T> using concurent_queue = cds::container::MoirQueue<cds::gc::HP, T>;
 template <typename T> using concurent_list = cds::container::IterableList<cds::gc::HP, T>;
