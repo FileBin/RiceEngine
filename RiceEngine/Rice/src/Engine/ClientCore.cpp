@@ -3,6 +3,10 @@
 #include "pch.h"
 #include <Rice/Engine/ClientCore.hpp>
 
+#include <cds/init.h>
+
+#include <cds/gc/hp.h>
+
 using namespace std::chrono;
 using namespace std::this_thread;
 
@@ -24,14 +28,22 @@ ptr<ClientEngine> ClientCore::getClientEngine() {
 // interface defined by user or default implementation
 void ClientCore::runNew(ptr<ClientCore::Loader> core_loader) {
     setCurrentThreadPriority(ThreadPriority::TimeCritical);
-    auto core = ptr<ClientCore>(new ClientCore(core_loader));
-    core->init();
-    core->run();
-    core->close();
+    cds::Initialize();
+    {
+        // Initialize Hazard Pointer singleton
+        cds::gc::HP hpGC;
+        // If main thread uses lock-free containers
+        // the main thread should be attached to libcds infrastructure
+        cds::threading::Manager::attachThread();
+        auto core = ptr<ClientCore>(new ClientCore(core_loader));
+        core->init();
+        core->run();
+        core->close();
+    }
+    cds::Terminate();
 }
 
-ClientCore::ClientCore(ptr<Loader> core_loader)
-    : CoreBase(), loader(core_loader) {}
+ClientCore::ClientCore(ptr<Loader> core_loader) : CoreBase(), loader(core_loader) {}
 
 ClientCore::~ClientCore() {
     if (activeScene) {
@@ -109,9 +121,8 @@ bool ClientCore::init() {
 void ClientCore::run() {
     if (is_init) {
         auto fixedDeltaTime = 1000. / update_rate; // calculate fixed delta time
-        num interval =
-            (num)fixedDeltaTime - 1; // calculate the interval between frames
-        auto deltaTime = fixedDeltaTime; // calculate the delta time
+        num interval = (num)fixedDeltaTime - 1;    // calculate the interval between frames
+        auto deltaTime = fixedDeltaTime;           // calculate the delta time
         auto begin_time = steady_clock::now();
         time = 0;                 // set the time to 0
         auto b = false;           // life cycle flag
@@ -126,17 +137,15 @@ void ClientCore::run() {
                        steady_clock::now() - begin_time)
                        .count(); // calculate time since frame start
             deltaTime =
-                fixedDeltaTime + .000001 * (steady_clock::now() - begin_time)
-                                               .count(); // calculate delta time
+                fixedDeltaTime +
+                .000001 * (steady_clock::now() - begin_time).count(); // calculate delta time
             begin_time =
-                steady_clock::now() +
-                milliseconds(interval); // calculate the next frame time
-            deltaTime = Math::min(
-                deltaTime,
-                300.); // limit deltaTime to 300ms to avoid physics stuttering
-            this->deltaTime = deltaTime * .001; // divide by 1000 to get seconds
-            this->fixedDeltaTime =
-                fixedDeltaTime * .001; // divide by 1000 to get seconds
+                steady_clock::now() + milliseconds(interval); // calculate the next frame time
+            deltaTime =
+                Math::min(deltaTime,
+                          300.); // limit deltaTime to 300ms to avoid physics stuttering
+            this->deltaTime = deltaTime * .001;           // divide by 1000 to get seconds
+            this->fixedDeltaTime = fixedDeltaTime * .001; // divide by 1000 to get seconds
         } while (b);
     }
 }
@@ -166,9 +175,7 @@ bool ClientCore::runFrame() {
         if (loadingScreenScene) {
             loadingScreenScene->render();
         } else {
-            Log::log(
-                Log::Warning,
-                "Can't render frame! Loading screen render is not set up!");
+            Log::log(Log::Warning, "Can't render frame! Loading screen render is not set up!");
         }
     } else {
         activeScene->update();

@@ -28,6 +28,7 @@ include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${RICE_UTIL_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${RICE_MATH_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${PROJECT_NAME} ${LIB_INCLUDE_PATH})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)

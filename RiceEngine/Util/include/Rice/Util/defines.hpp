@@ -2,6 +2,7 @@
 
 #include "cds/container/impl/iterable_list.h"
 #include <bits/stdc++.h>
+#include <functional>
 #include <memory>
 #include <string>
 #ifndef NDEBUG
@@ -12,8 +13,31 @@
 
 #include <cds/container/cuckoo_map.h>
 #include <cds/container/cuckoo_set.h>
+#include <cds/
 #include <cds/container/iterable_list_hp.h>
 #include <cds/container/moir_queue.h>
+
+namespace detail {
+
+template <typename H> struct hash1 {
+    size_t operator()(std::string const &s) const { return H()(s); }
+};
+
+template <typename H> struct hash2 : private hash1<H> {
+    size_t operator()(std::string const &s) const {
+        size_t h = ~(hash1<H>::operator()(s));
+        return ~h + 0x9e3779b9 + (h << 6) + (h >> 2); // wtf
+    }
+};
+
+template <typename T, typename H = std::hash<T>>
+struct traits : public cds::container::cuckoo::traits {
+    typedef std::equal_to<T> equal_to;
+    typedef std::tuple<hash1<H>, hash2<H>> hash;
+    static bool const store_hash = true;
+};
+
+} // namespace detail
 
 template <typename T, typename R> using pair = std::pair<T, R>;
 
@@ -30,7 +54,8 @@ using umap = std::unordered_map<K, V, H, P, A>;
 template <typename T> using set = std::set<T>;
 template <typename T> using uset = std::unordered_set<T>;
 
-template <typename K, typename V> using concurent_map = cds::container::CuckooMap<K, V>;
+template <typename K, typename V, typename H = std::hash<K>>
+using concurent_map = cds::container::CuckooMap<K, V, detail::traits<K, H>>;
 template <typename T> using concurent_set = cds::container::CuckooSet<T>;
 template <typename T> using concurent_queue = cds::container::MoirQueue<cds::gc::HP, T>;
 template <typename T> using concurent_list = cds::container::IterableList<cds::gc::HP, T>;
