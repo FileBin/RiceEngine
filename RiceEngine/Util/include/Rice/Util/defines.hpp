@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include "cds/container/details/cuckoo_base.h"
 #include "cds/container/impl/iterable_list.h"
 #include <bits/stdc++.h>
 #include <functional>
 #include <memory>
 #include <string>
+#include <tuple>
 #ifndef NDEBUG
 #ifndef _DEBUG
 #define _DEBUG
@@ -26,15 +28,19 @@ template <typename H> struct hash1 {
 template <typename H> struct hash2 : private hash1<H> {
     size_t operator()(std::string const &s) const {
         size_t h = ~(hash1<H>::operator()(s));
-        return ~h + 0x9e3779b9 + (h << 6) + (h >> 2); // wtf
+        return ~h + 0x9e3779b9 + (h << 6) + (h >> 2); // wtf ???
     }
 };
 
 template <typename T, typename H = std::hash<T>>
 struct traits : public cds::container::cuckoo::traits {
     typedef std::equal_to<T> equal_to;
-    typedef std::tuple<hash1<H>, hash2<H>> hash;
-    static bool const store_hash = true;
+
+    typedef struct hash {
+        typedef std::tuple<hash1<H>, hash2<H>> hash_tuple_type;
+        static size_t constexpr size = 2;
+    } hash;
+    static bool constexpr store_hash = true;
 };
 
 } // namespace detail
