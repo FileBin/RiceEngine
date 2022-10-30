@@ -30,14 +30,16 @@ class RenderingMesh : public IRegistrable {
     ptr<UniformBuffer> constBuffer = nullptr;
     ptr<IndexBuffer> indexBuffer = nullptr;
     ptr<VertexBuffer> vertexBuffer = nullptr;
-    ptr<CommandBuffer> cmdBuffer;
+    // ptr<CommandBuffer> cmdBuffer;
 
   public:
-    RenderingMesh(ptr<GraphicsManager> graphics_manager, ptr<Mesh> mesh, ptr<Material> material,
-                  ptr<Components::Transform> transform);
+    RenderingMesh(ptr<GraphicsManager> graphics_manager, ptr<Mesh> mesh,
+                  ptr<Material> material, ptr<Components::Transform> transform);
     ptr<Components::Transform> getTransform() { return transform; }
     ptr<Material> getMaterial() { return material; }
-    ptr<CommandBuffer> getCmd() { return cmdBuffer; }
+    // ptr<CommandBuffer> getCmd() { return cmdBuffer; }
+
+    void addCommands(ptr<Graphics::CommandBuffer> cmd);
 
     void Register(size_t i) { idx = i; }
 
@@ -50,9 +52,7 @@ class RenderingMesh : public IRegistrable {
     void updateCmdBuffer();
     void updateConstBuffer(Matrix4x4 view, Matrix4x4 projection);
 
-    bool isTransparent() {
-        return material->renderType == RenderType::Transparent;
-    }
+    bool isTransparent() { return material->renderType == RenderType::Transparent; }
 };
 
 NSP_GL_END

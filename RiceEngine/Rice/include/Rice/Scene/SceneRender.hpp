@@ -1,3 +1,4 @@
+#include "Rice/GL/GraphicsManager.hpp"
 #include "Rice/GL/Material.hpp"
 #include "Rice/GL/Shader.hpp"
 #include "Rice/stdafx.hpp"
@@ -25,17 +26,21 @@ NSP_ENGINE_BEGIN
 class SceneRender : public enable_ptr<SceneRender> {
   private:
     struct MaterialQueue {
-        ptr<Graphics::CommandBuffer> setMaterial;
+        ptr<Graphics::Material> material;
         Util::RegisterCollection<Graphics::RenderingMesh, size_t> mesh_collection;
 
-        MaterialQueue(ptr<Graphics::Material> mat, ptr<Graphics::GraphicsManager> mgr);
+        MaterialQueue(ptr<Graphics::Material> mat);
+
+        void addCommands(ptr<Graphics::CommandBuffer> cmd);
     };
 
     struct ShaderQueue {
-        ptr<Graphics::CommandBuffer> setShader;
+        ptr<Graphics::CommandBuffer> cmd;
+        ptr<Graphics::Shader> shader;
         map<ptr<Graphics::Material>, MaterialQueue> materials;
 
         ShaderQueue(ptr<Graphics::Shader> shader, ptr<Graphics::GraphicsManager> mgr);
+        void updateCmd();
     };
 
     map<String, ptr<Graphics::Shader>> shaders;

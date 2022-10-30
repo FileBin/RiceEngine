@@ -16,6 +16,7 @@ file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CUR
 add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
 
+message("include path: ${RICE_INCLUDE_PATH}")
 include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

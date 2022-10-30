@@ -6,11 +6,15 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(RICE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Rice/include; ${LIB_INCLUDE_PATH} CACHE INTERNAL "")
-
 add_subdirectory("ExternalLibs")
 
 add_subdirectory("lib")
+
+set(RICE_INCLUDE_PATH 
+${CMAKE_CURRENT_SOURCE_DIR}/Rice/include
+${EXT_INCLUDES}
+${LIB_INCLUDE_PATH}
+ CACHE INTERNAL "")
 
 add_subdirectory("Math")
 add_subdirectory("Util")

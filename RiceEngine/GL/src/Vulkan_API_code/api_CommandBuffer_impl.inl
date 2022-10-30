@@ -194,8 +194,12 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
     } break;
 
     case CommandBuffer::Command::SetShader: {
-        auto &sh_api_data = (*(ptr<Shader> *)command->arg_chain->getData())->api_data;
-        cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, sh_api_data->pipeline);
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto &sh_api_data = (*(ptr<Shader> *)(*it++).getData())->api_data;
+        bool ghost = *(bool *)(*it++).getData();
+        if (!ghost) {
+            cmd[i].bindPipeline(vk::PipelineBindPoint::eGraphics, sh_api_data->pipeline);
+        }
         creator.layout = sh_api_data->layout;
         creator.descriptorSetLayout = sh_api_data->descriptorSetLayout;
     } break;

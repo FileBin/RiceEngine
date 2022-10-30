@@ -149,7 +149,7 @@ class CommandBuffer : public GraphicsComponentBase {
 
     void drawVertices(uint count);
     void drawIndexed(ptr<IndexBuffer> indexBuffer);
-    void setActiveShader(ptr<Shader> shader);
+    void setActiveShader(ptr<Shader> shader, bool ghost = false);
 
     void beginRenderPass(Util::Rect rect, bool secondary = false);
     void clearRenderTarget(Vector3f color, float depth);

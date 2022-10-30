@@ -42,9 +42,9 @@ class MultiCubePerformanceTestScene : public virtual Scene {
         cam_obj->addComponent(cam_mover);
 
         setActiveCamera(cam_comp);
-        constexpr uint cx = 10;
-        constexpr uint cy = 10;
-        constexpr uint cz = 10;
+        constexpr uint cx = 15;
+        constexpr uint cy = 1;
+        constexpr uint cz = 15;
         constexpr uint count = cx * cy * cz;
         for (uint i = 0; i < count; ++i) {
             dbl x = i % cx;

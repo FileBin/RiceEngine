@@ -1,4 +1,5 @@
 #include "Rice/GL/GraphicsManager.hpp"
+#include "Rice/GL/Material.hpp"
 #include "Rice/Util/defines.hpp"
 #include "pch.h"
 
@@ -21,37 +22,51 @@ SceneRender::SceneRender(ptr<ClientScene> scene, ptr<ClientEngine> engine)
 }
 
 SceneRender::ShaderQueue::ShaderQueue(ptr<Graphics::Shader> shader,
-                                      ptr<Graphics::GraphicsManager> mgr) {
-    setShader = new_ptr<Graphics::CommandBuffer>(mgr, true);
-    setShader->setActiveShader(shader);
-    setShader->buildAll();
+                                      ptr<Graphics::GraphicsManager> mgr)
+    : shader(shader) {
+    cmd = new_ptr<Graphics::CommandBuffer>(mgr, true);
 }
 
-SceneRender::MaterialQueue::MaterialQueue(ptr<Graphics::Material> mat,
-                                          ptr<Graphics::GraphicsManager> mgr) {
-    auto ub = mat->getUniformBuffer();
+SceneRender::MaterialQueue::MaterialQueue(ptr<Graphics::Material> mat) : material(mat) {}
+
+void SceneRender::MaterialQueue::addCommands(ptr<Graphics::CommandBuffer> cmd) {
+    auto ub = material->getUniformBuffer();
     if (ub) {
-        setMaterial = new_ptr<Graphics::CommandBuffer>(mgr, true);
-        setMaterial->bindUniformBuffer(ub, 1);
-        setMaterial->buildAll();
+        cmd->bindUniformBuffer(ub, 1);
     }
+
+    auto mc = mesh_collection.getCollectionWithGaps();
+    for (auto ptr : mc) {
+        if (ptr) {
+            ptr->addCommands(cmd);
+        }
+    }
+}
+
+void SceneRender::ShaderQueue::updateCmd() {
+    cmd->clear();
+    cmd->setActiveShader(shader);
+    for (auto &mq : materials) {
+        mq.second.addCommands(cmd);
+    }
+    cmd->buildAll();
 }
 
 void SceneRender::registerMesh(ptr<Graphics::RenderingMesh> mesh) {
     auto mat = mesh->getMaterial();
-    auto sq = mainQueue.at(mat->getShader());
-    auto mq = sq.materials.at(mat);
+    auto &sq = mainQueue.at(mat->getShader());
+    auto &mq = sq.materials.at(mat);
 
     mesh->Register(mq.mesh_collection.registerPtr(mesh));
-    updateCmd();
+    need_rebuild = true;
 }
 
 void SceneRender::unregisterMesh(ptr<Graphics::RenderingMesh> mesh) {
     auto mat = mesh->getMaterial();
-    auto sq = mainQueue.at(mat->getShader());
-    auto mq = sq.materials.at(mat);
+    auto &sq = mainQueue.at(mat->getShader());
+    auto &mq = sq.materials.at(mat);
     mq.mesh_collection.unregister(mesh->Unregister());
-    updateCmd();
+    need_rebuild = true;
 }
 
 void SceneRender::updateCmd() {
@@ -59,17 +74,8 @@ void SceneRender::updateCmd() {
     main_cmd->beginRenderPass({0, 0, 1, 1}, true);
     main_cmd->executeCommandBuffer(clear_cmd);
     for (auto &sq : mainQueue) {
-        main_cmd->executeCommandBuffer(sq.second.setShader);
-        for (auto &mq : sq.second.materials) {
-            if (mq.second.setMaterial)
-                main_cmd->executeCommandBuffer(mq.second.setMaterial);
-            auto mesh_collection = mq.second.mesh_collection.getCollectionWithGaps();
-            for (auto ptr : mesh_collection) {
-                if (ptr) {
-                    main_cmd->executeCommandBuffer(ptr->getCmd());
-                }
-            }
-        }
+        sq.second.updateCmd();
+        main_cmd->executeCommandBuffer(sq.second.cmd);
     }
 
     main_cmd->endRenderPass();
@@ -79,6 +85,7 @@ void SceneRender::updateCmd() {
 
 void SceneRender::rebuildCmd() {
     if (need_rebuild) {
+        updateCmd();
         main_cmd->buildAll();
         need_rebuild = false;
     }
@@ -147,8 +154,8 @@ ptr<Graphics::Material> SceneRender::getOrCreateMaterial(
     auto &m = materials[name];
     if (!m) {
         m = material_factory(shared_from_this());
-        auto shader_q = mainQueue.at(m->getShader());
-        shader_q.materials.insert({m, MaterialQueue(m, getEngine()->getGraphicsManager())});
+        auto &shader_q = mainQueue.at(m->getShader());
+        shader_q.materials.insert({m, MaterialQueue(m)});
     }
     return m;
 }

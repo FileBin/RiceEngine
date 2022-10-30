@@ -94,9 +94,9 @@ void CommandBuffer::drawIndexed(ptr<IndexBuffer> indexBuffer) {
     // api_data->doCommand({ Command::Draw, count, 1, 0, 0 });
 }
 
-void CommandBuffer::setActiveShader(ptr<Shader> shader) {
+void CommandBuffer::setActiveShader(ptr<Shader> shader, bool ghost) {
     needRecreate();
-    commands.push_back(new_ptr<Command>(Command::SetShader, shader));
+    commands.push_back(new_ptr<Command>(Command::SetShader, shader, ghost));
     // api_data->doCommand({ Command::SetShader, shader->api_data->pipeline });
 }
 
