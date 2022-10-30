@@ -2,7 +2,7 @@
 
 #include "cds/container/details/cuckoo_base.h"
 #include "cds/container/impl/feldman_hashmap.h"
-#include "cds/container/impl/iterable_list.h"
+// #include "cds/container/impl/iterable_list.h"
 #include "cds/gc/hp.h"
 #include <bits/stdc++.h>
 #include <functional>
@@ -65,7 +65,7 @@ template <typename K, typename V, typename H = std::hash<K>>
 using concurent_map = cds::container::FeldmanHashMap<cds::gc::HP, K, V>;
 template <typename T> using concurent_set = cds::container::CuckooSet<T>;
 template <typename T> using concurent_queue = cds::container::MoirQueue<cds::gc::HP, T>;
-template <typename T> using concurent_list = cds::container::IterableList<cds::gc::HP, T>;
+// template <typename T> using concurent_list = cds::container::IterableList<cds::gc::HP, T>;
 
 template <typename T> using ptr = std::shared_ptr<T>;
 template <typename T> using wptr = std::weak_ptr<T>;
