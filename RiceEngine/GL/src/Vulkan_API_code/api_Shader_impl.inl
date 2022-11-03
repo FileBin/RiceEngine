@@ -1,30 +1,26 @@
 #pragma once
 #include "Rice/GL/namespaces.h"
-#include "Rice/Math/Vectors/Vector2i.hpp"
 #include "VulkanException.hpp"
 #include "api_GraphicsManager.hpp"
 #include "api_Shader.hpp"
+#include <Rice/Math/Vectors.hpp>
 #include <vulkan/vulkan_enums.hpp>
 
 NSP_GL_BEGIN
 
-void Shader_API_Data::buildDescriptorSetLayout(
-    GraphicsManager_API_data &api_data) {
+void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_data) {
     using namespace vk;
 
     if (bindings.size() == 0)
-        THROW_EXCEPTION(
-            "Cannot build descriptor set layout! Bindings are not set!");
+        THROW_EXCEPTION("Cannot build descriptor set layout! Bindings are not set!");
     vk::DescriptorSetLayoutCreateInfo layoutInfo;
     layoutInfo.bindingCount = bindings.size();
     layoutInfo.pBindings = bindings.data();
     descriptorSetLayout = api_data.device.createDescriptorSetLayout(layoutInfo);
 }
 
-void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,
-                                    Vector2i windowExcent,
-                                    VertexLayout &vertexLayout,
-                                    uint vertexStride) {
+void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
+                                    VertexLayout &vertexLayout, uint vertexStride) {
     using help = VulkanHelper;
     using namespace vk;
 
@@ -46,25 +42,21 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,
     help::PipelineBuilder pipelineBuilder;
 
     if (vertexShader)
-        pipelineBuilder.vk_shaderStages.push_back(
-            help::pipeline_shader_stage_create_info(
-                vk::ShaderStageFlagBits::eVertex, vertexShader));
+        pipelineBuilder.vk_shaderStages.push_back(help::pipeline_shader_stage_create_info(
+            vk::ShaderStageFlagBits::eVertex, vertexShader));
 
     if (fragmentShader)
-        pipelineBuilder.vk_shaderStages.push_back(
-            help::pipeline_shader_stage_create_info(
-                vk::ShaderStageFlagBits::eFragment, fragmentShader));
+        pipelineBuilder.vk_shaderStages.push_back(help::pipeline_shader_stage_create_info(
+            vk::ShaderStageFlagBits::eFragment, fragmentShader));
 
     if (geometryShader)
-        pipelineBuilder.vk_shaderStages.push_back(
-            help::pipeline_shader_stage_create_info(
-                vk::ShaderStageFlagBits::eGeometry, geometryShader));
+        pipelineBuilder.vk_shaderStages.push_back(help::pipeline_shader_stage_create_info(
+            vk::ShaderStageFlagBits::eGeometry, geometryShader));
 
-    VertexInputBindingDescription bindingDesc =
-        VertexInputBindingDescription()
-            .setBinding(0)
-            .setStride(vertexStride)
-            .setInputRate(VertexInputRate::eVertex);
+    VertexInputBindingDescription bindingDesc = VertexInputBindingDescription()
+                                                    .setBinding(0)
+                                                    .setStride(vertexStride)
+                                                    .setInputRate(VertexInputRate::eVertex);
 
     uint n = vertexLayout.size();
 
@@ -121,8 +113,7 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,
     // input assembly is the configuration for drawing triangle lists, strips,
     // or individual points. we are just going to draw triangle list
     pipelineBuilder.vk_inputAssembly =
-        PipelineInputAssemblyStateCreateInfo().setTopology(
-            PrimitiveTopology::eTriangleList);
+        PipelineInputAssemblyStateCreateInfo().setTopology(PrimitiveTopology::eTriangleList);
 
     // build viewport and scissor from the swapchain extents
     pipelineBuilder.vk_viewport.x = 0.0f;
@@ -133,8 +124,7 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,
     pipelineBuilder.vk_viewport.maxDepth = 1.0f;
 
     pipelineBuilder.vk_scissor.offset = vk::Offset2D(0, 0);
-    pipelineBuilder.vk_scissor.extent =
-        vk::Extent2D(windowExcent.x, windowExcent.y);
+    pipelineBuilder.vk_scissor.extent = vk::Extent2D(windowExcent.x, windowExcent.y);
 
     // configure the rasterizer to draw filled triangles
     pipelineBuilder.vk_rasterizer = PipelineRasterizationStateCreateInfo()
@@ -147,15 +137,13 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,
 
     // we don't use multisampling, so just run the default one
     pipelineBuilder.vk_multisampling =
-        PipelineMultisampleStateCreateInfo().setRasterizationSamples(
-            SampleCountFlagBits::e1);
+        PipelineMultisampleStateCreateInfo().setRasterizationSamples(SampleCountFlagBits::e1);
 
     // a single blend attachment with no blending and writing to RGBA
     pipelineBuilder.vk_colorBlendAttachment =
         PipelineColorBlendAttachmentState()
-            .setColorWriteMask(
-                ColorComponentFlagBits::eR | ColorComponentFlagBits::eG |
-                ColorComponentFlagBits::eB | ColorComponentFlagBits::eA)
+            .setColorWriteMask(ColorComponentFlagBits::eR | ColorComponentFlagBits::eG |
+                               ColorComponentFlagBits::eB | ColorComponentFlagBits::eA)
             .setBlendEnable(false);
 
     pipelineBuilder.vk_depthStencil = PipelineDepthStencilStateCreateInfo()
@@ -167,8 +155,7 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data,
     pipelineBuilder.vk_pipelineLayout = layout;
 
     // finally build the pipeline
-    pipeline = pipelineBuilder.build_pipeline(api_data.device,
-                                              api_data.def_renderPass);
+    pipeline = pipelineBuilder.build_pipeline(api_data.device, api_data.def_renderPass);
 }
 
 void Shader_API_Data::cleanupPipeline(GraphicsManager_API_data &api_data) {

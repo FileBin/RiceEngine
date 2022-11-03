@@ -1,10 +1,10 @@
 ﻿#include "Rice/Engine/InputManager.hpp"
-#include "Rice/Math/Vectors/Vector2i.hpp"
 #include "SDL2/SDL_hints.h"
 #include "SDL2/SDL_mouse.h"
 #include "SDL2/SDL_video.h"
 #include <Rice/Engine/Log.hpp>
 #include <Rice/Engine/Window.hpp>
+#include <Rice/Math/Vectors.hpp>
 #include <chrono>
 
 #define SDL_MAIN_HANDLED

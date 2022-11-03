@@ -11,13 +11,13 @@
 #include "Rice/GL/IndexBuffer.hpp"
 #include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexBuffer.hpp"
-#include "Rice/Math/Vectors/Vector3f.hpp"
 #include "Rice/Util/Interfaces.hpp"
 #include "api_Buffer.hpp"
 #include "api_CommandBuffer.hpp"
 #include "api_GraphicsManager.hpp"
 #include "api_Shader.hpp"
 #include "api_UniformBuffer.hpp"
+#include <Rice/Math/Vectors.hpp>
 #include <array>
 #include <cstdint>
 #include <vulkan/vulkan_enums.hpp>

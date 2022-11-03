@@ -1,6 +1,7 @@
 ﻿#include "Rice/GL/Mesh.hpp"
 #include "Rice/GL/ModelData.hpp"
 #include "Rice/GL/VertexLayout.hpp"
+#include "Rice/Math/Vectors/Vectors.hpp"
 #include "Rice/namespaces.h"
 #include "pch.h"
 
@@ -41,8 +42,7 @@ Mesh Mesh::cube() {
 inline const VertexLayout Vertex::vertexLayout({
     VertexInput("POSITION", 0, offsetof(Vertex, pos), VertexInput::float3),
     VertexInput("NORMAL", 0, offsetof(Vertex, norm), VertexInput::float3),
-    VertexInput("TEXCOORD0", 0, offsetof(Vertex, tex_coord0),
-                VertexInput::float2),
+    VertexInput("TEXCOORD0", 0, offsetof(Vertex, tex_coord0), VertexInput::float2),
 });
 
 Mesh::Mesh(VertexListT<Vertex> vertices, vec<index_t> indices, bool calcBounds)
@@ -65,7 +65,7 @@ ptr<Mesh> Mesh::clone() const {
 
 void Mesh::translate(Vector3 o) {
     Vector3f p;
-    p = o;
+    p = Vector3f(o);
     auto n = vertexBuffer.count();
     for (size_t i = 0; i < n; i++) {
         vertexBuffer.getVertex(i).pos += p;
@@ -76,18 +76,18 @@ void Mesh::rotate(Quaternion q) {
     auto n = vertexBuffer.count();
     for (size_t i = 0; i < n; i++) {
         Vector3 p;
-        p = vertexBuffer.getVertex(i).pos;
+        p = Vector3{vertexBuffer.getVertex(i).pos};
         p *= q;
-        vertexBuffer.getVertex(i).pos = p;
-        p = vertexBuffer.getVertex(i).norm;
+        vertexBuffer.getVertex(i).pos = Vector3f{p};
+        p = Vector3{vertexBuffer.getVertex(i).norm};
         p *= q;
-        vertexBuffer.getVertex(i).norm = p;
+        vertexBuffer.getVertex(i).norm = Vector3f{p};
     }
 }
 
 void Mesh::scale(Vector3 s) {
     Vector3f p;
-    p = s;
+    p = Vector3f{s};
     auto n = vertexBuffer.count();
     for (size_t i = 0; i < n; i++) {
         vertexBuffer.getVertex(i).pos.x *= p.x;
@@ -100,8 +100,7 @@ void Mesh::combine(const Mesh &other) {
     auto s = vertexBuffer.count();
     vertexBuffer.addVertices(other.vertexBuffer);
     auto n = indexBuffer.size();
-    indexBuffer.insert(indexBuffer.end(), other.indexBuffer.begin(),
-                       other.indexBuffer.end());
+    indexBuffer.insert(indexBuffer.end(), other.indexBuffer.begin(), other.indexBuffer.end());
     auto m = indexBuffer.size();
     for (size_t i = n; i < m; i++) {
         indexBuffer[i] += s;
@@ -128,7 +127,7 @@ void Mesh::recalculateNormals() {
         auto v1 = triangle[1]->pos - triangle[2]->pos;
         auto v2 = triangle[2]->pos - triangle[0]->pos;
         auto n = Vector3f::cross(v1, v2);
-        n.qnormalize();
+        n.qNormalize();
 
         triangle[0]->norm += n;
         triangle[1]->norm += n;
@@ -136,7 +135,7 @@ void Mesh::recalculateNormals() {
     }
     for (size_t i = 0; i < vertexBuffer.count(); i++) {
         auto &n = vertexBuffer.getVertex(i).norm;
-        n.qnormalize();
+        n.qNormalize();
     }
 }
 
@@ -181,21 +180,13 @@ bool Model::checkVisiblity(ModelData matrix, size_t idx) {
     return subMeshes[idx]->checkVisiblity(matrix);
 }
 
-uint Model::getSubMeshesCount() {
-    return subMeshes.size();
-}
+uint Model::getSubMeshesCount() { return subMeshes.size(); }
 
-ptr<Mesh> Model::getSubMesh(uint idx) {
-    return subMeshes[idx];
-}
+ptr<Mesh> Model::getSubMesh(uint idx) { return subMeshes[idx]; }
 
-void Model::setSubMeshesCount(uint count) {
-    subMeshes.resize(count, {});
-}
+void Model::setSubMeshesCount(uint count) { subMeshes.resize(count, {}); }
 
-void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) {
-    subMeshes[idx] = subMesh;
-}
+void Model::setSubMesh(ptr<Mesh> subMesh, uint idx) { subMeshes[idx] = subMesh; }
 
 vec<Vector3f> Mesh::Bounds::getCorners() {
     return {

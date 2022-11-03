@@ -6,9 +6,9 @@
 #include "Rice/GL/UniformBuffer.hpp"
 #include "Rice/GL/VertexLayout.hpp"
 #include "Rice/Math/Matrixes.hpp"
-#include "Rice/Math/Vectors/Vector3.hpp"
 #include "Rice/namespaces.h"
 #include "pch.h"
+#include <Rice/Math/Vectors.hpp>
 
 #include <Rice/GL/RenderingMesh.hpp>
 

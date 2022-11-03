@@ -1,45 +1,105 @@
-﻿#include "pch.h"
-#include "Rice/Math/Math.hpp"
+﻿#include "Rice/Math/Math.hpp"
+#include "pch.h"
 
 #include "Rice/Util/Util.hpp"
 
 using namespace Rice;
 
 #pragma region Constants
- 
-const Vector3 Vector3::zero = { 0,0,0 };
-const Vector3 Vector3::one = { 1,1,1 };
-const Vector3 Vector3::left = { -1,0,0 };
-const Vector3 Vector3::right = { 1,0,0 };
-const Vector3 Vector3::up = { 0,1,0 };
-const Vector3 Vector3::down = { 0,-1,0 };
-const Vector3 Vector3::forward = { 0,0,1 };
-const Vector3 Vector3::backward = { 0,0,-1 };
 
-const Vector3i Vector3i::zero = { 0,0,0 };
-const Vector3i Vector3i::one = { 1,1,1 };
-const Vector3i Vector3i::left = { -1,0,0 };
-const Vector3i Vector3i::right = { 1,0,0 };
-const Vector3i Vector3i::up = { 0,1,0 };
-const Vector3i Vector3i::down = { 0,-1,0 };
-const Vector3i Vector3i::forward = { 0,0,1 };
-const Vector3i Vector3i::backward = { 0,0,-1 };
+const Vector2 Vector2::one = {1, 1};
+const Vector2 Vector2::zero = {0, 0};
+const Vector2 Vector2::left = {-1, 0};
+const Vector2 Vector2::right = {1, 0};
+const Vector2 Vector2::up = {0, 1};
+const Vector2 Vector2::down = {0, -1};
 
-const Vector2 Vector2::one = { 1,1 };
-const Vector2 Vector2::zero = { 0,0 };
-const Vector2 Vector2::left = { -1,0 };
-const Vector2 Vector2::right = { 1,0 };
-const Vector2 Vector2::up = { 0,1 };
-const Vector2 Vector2::down = { 0,-1 };
+const Vector2i Vector2i::one = {1, 1};
+const Vector2i Vector2i::zero = {0, 0};
+const Vector2i Vector2i::left = {-1, 0};
+const Vector2i Vector2i::right = {1, 0};
+const Vector2i Vector2i::up = {0, 1};
+const Vector2i Vector2i::down = {0, -1};
 
-const Quaternion Quaternion::identity = { 0,0,0,1 };
+const Vector2f Vector2f::one = {1, 1};
+const Vector2f Vector2f::zero = {0, 0};
+const Vector2f Vector2f::left = {-1, 0};
+const Vector2f Vector2f::right = {1, 0};
+const Vector2f Vector2f::up = {0, 1};
+const Vector2f Vector2f::down = {0, -1};
+
+const Vector3 Vector3::zero = {0, 0, 0};
+const Vector3 Vector3::one = {1, 1, 1};
+const Vector3 Vector3::left = {-1, 0, 0};
+const Vector3 Vector3::right = {1, 0, 0};
+const Vector3 Vector3::up = {0, 1, 0};
+const Vector3 Vector3::down = {0, -1, 0};
+const Vector3 Vector3::forward = {0, 0, 1};
+const Vector3 Vector3::backward = {0, 0, -1};
+
+const Vector3i Vector3i::zero = {0, 0, 0};
+const Vector3i Vector3i::one = {1, 1, 1};
+const Vector3i Vector3i::left = {-1, 0, 0};
+const Vector3i Vector3i::right = {1, 0, 0};
+const Vector3i Vector3i::up = {0, 1, 0};
+const Vector3i Vector3i::down = {0, -1, 0};
+const Vector3i Vector3i::forward = {0, 0, 1};
+const Vector3i Vector3i::backward = {0, 0, -1};
+
+const Vector3f Vector3f::zero = {0, 0, 0};
+const Vector3f Vector3f::one = {1, 1, 1};
+const Vector3f Vector3f::left = {-1, 0, 0};
+const Vector3f Vector3f::right = {1, 0, 0};
+const Vector3f Vector3f::up = {0, 1, 0};
+const Vector3f Vector3f::down = {0, -1, 0};
+const Vector3f Vector3f::forward = {0, 0, 1};
+const Vector3f Vector3f::backward = {0, 0, -1};
+
+const Vector4 Vector4::zero = {0, 0, 0, 0};
+const Vector4 Vector4::one = {1, 1, 1, 1};
+const Vector4 Vector4::left = {-1, 0, 0, 0};
+const Vector4 Vector4::right = {1, 0, 0, 0};
+const Vector4 Vector4::up = {0, 1, 0, 0};
+const Vector4 Vector4::down = {0, -1, 0, 0};
+const Vector4 Vector4::forward = {0, 0, 1, 0};
+const Vector4 Vector4::backward = {0, 0, -1, 0};
+const Vector4 Vector4::higher = {0, 0, 0, 1};
+const Vector4 Vector4::deeper = {0, 0, 0, -1};
+
+const Vector4i Vector4i::zero = {0, 0, 0, 0};
+const Vector4i Vector4i::one = {1, 1, 1, 1};
+const Vector4i Vector4i::left = {-1, 0, 0, 0};
+const Vector4i Vector4i::right = {1, 0, 0, 0};
+const Vector4i Vector4i::up = {0, 1, 0, 0};
+const Vector4i Vector4i::down = {0, -1, 0, 0};
+const Vector4i Vector4i::forward = {0, 0, 1, 0};
+const Vector4i Vector4i::backward = {0, 0, -1, 0};
+const Vector4i Vector4i::higher = {0, 0, 0, 1};
+const Vector4i Vector4i::deeper = {0, 0, 0, -1};
+
+const Vector4f Vector4f::zero = {0, 0, 0, 0};
+const Vector4f Vector4f::one = {1, 1, 1, 1};
+const Vector4f Vector4f::left = {-1, 0, 0, 0};
+const Vector4f Vector4f::right = {1, 0, 0, 0};
+const Vector4f Vector4f::up = {0, 1, 0, 0};
+const Vector4f Vector4f::down = {0, -1, 0, 0};
+const Vector4f Vector4f::forward = {0, 0, 1, 0};
+const Vector4f Vector4f::backward = {0, 0, -1, 0};
+const Vector4f Vector4f::higher = {0, 0, 0, 1};
+const Vector4f Vector4f::deeper = {0, 0, 0, -1};
+
+const Quaternion Quaternion::identity = {0, 0, 0, 1};
 
 #pragma endregion
 
-#pragma region Vector2
+Vector3 operator*(Quaternion q, Vector3 v) { return v * Matrix4x4::rotation(q); }
+
+const Vector3 &operator*=(Vector3 &v, Quaternion q) { return v = v * Matrix4x4::rotation(q); }
+
+/*#pragma region Vector2
 Vector2::Vector2(const Vector2i& v){
-	x = v.x;
-	y = v.y;
+        x = v.x;
+        y = v.y;
 }
 
 dbl Vector2::Dot(Vector2 A, Vector2 b) {
@@ -599,19 +659,10 @@ Vector4f::Vector4f(float _x, float _y, float _z, float _w) {
     w = _w;
 }
 
-/*Vector4f::Vector4f(const D2D1::ColorF& color) {
-    x = color.r;
-    y = color.g;
-    z = color.b;
-    w = color.a;
-}*/
-#pragma endregion
-
+#pragma endregion*/
 
 #pragma region Quaternion
-Quaternion operator*(Quaternion A, double b) {
-    return { A.x * b, A.y * b, A.z * b, A.w * b };
-}
+Quaternion operator*(Quaternion A, double b) { return {A.x * b, A.y * b, A.z * b, A.w * b}; }
 
 Quaternion operator*(Quaternion q1, Quaternion q2) {
     return {
@@ -636,20 +687,20 @@ Quaternion Quaternion::fromAxisAngle(Vector3 axis, double angle) {
 }
 
 Quaternion Quaternion::lookAt(Vector3 sourcePoint, Vector3 destPoint) {
-    Vector3 forwardVector = (destPoint - sourcePoint).Normalized();
+    Vector3 forwardVector = (destPoint - sourcePoint).normalized();
 
-    auto dot = Vector3::Dot(Vector3::forward, forwardVector);
+    auto dot = Vector3::dot(Vector3::forward, forwardVector);
 
     if (Math::abs(dot + 1.0) < 0.000001) {
-        return { 0, 1, 0, 3.1415926535897932 };
+        return {0, 1, 0, 3.1415926535897932};
     }
     if (Math::abs(dot - 1.0) < 0.000001) {
-        return { 0,0,0,0 }/*Quaternion::identity*/;
+        return {0, 0, 0, 0} /*Quaternion::identity*/;
     }
 
     auto rotAngle = Math::acos(dot);
     Vector3 rotAxis = Vector3::cross(Vector3::forward, forwardVector);
-    rotAxis = (rotAxis).Normalized();
+    rotAxis = (rotAxis).normalized();
     return Quaternion::fromAxisAngle(rotAxis, rotAngle);
 }
 
@@ -675,27 +726,23 @@ double Quaternion::magnitude() {
     return sqrt(l);
 }
 
-Quaternion Quaternion::operator-() {
-    return { -x,-y,-z,-w };
-}
+Quaternion Quaternion::operator-() { return {-x, -y, -z, -w}; }
 
 Quaternion Quaternion::inversed() {
     auto norm = magnitude();
     if (norm > 0) {
         norm = 1 / norm;
-        return { -x * norm, -y * norm, -z * norm, -w * norm };
+        return {-x * norm, -y * norm, -z * norm, -w * norm};
     }
     return (*this);
 }
 
-Quaternion Quaternion::opposite() {
-    return fromAxisAngle(-toAxisAngle());
-}
+Quaternion Quaternion::opposite() { return fromAxisAngle(-toAxisAngle()); }
 
 Quaternion Quaternion::normalized() {
     auto l = w * w + x * x + y * y + z * z;
     l = sqrt(l);
-    return { x / l, y / l, z / l, w / l };
+    return {x / l, y / l, z / l, w / l};
 }
 
 Vector3 Quaternion::toEulerAngles() {
@@ -726,7 +773,7 @@ Vector3 Quaternion::toAxisAngle() {
     auto s = sqrt(1 - w * w);
     if (s > 0) {
         s = 1 / s;
-        Vector3 v = { x,y,z };
+        Vector3 v = {x, y, z};
         v = v * s;
         return v * angle;
     } else {

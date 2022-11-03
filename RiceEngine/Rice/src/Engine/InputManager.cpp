@@ -1,10 +1,9 @@
 ﻿#include "Rice/Engine/InputButtons.hpp"
 #include "Rice/Engine/Log.hpp"
 #include "Rice/Engine/Window.hpp"
-#include "Rice/Math/Vectors/Vector2.hpp"
-#include "Rice/Math/Vectors/Vector2i.hpp"
 #include <Rice/Engine/InputManager.hpp>
 #include <Rice/Math/Math.hpp>
+#include <Rice/Math/Vectors.hpp>
 
 NSP_ENGINE_BEGIN
 
@@ -27,16 +26,14 @@ ptr<Window> InputManager::getWindow() {
     return window_lock;
 }
 
-bool InputManager::getKey(KeyCode key) {
-    return keyStates[static_cast<int>(key)];
-}
+bool InputManager::getKey(KeyCode key) { return keyStates[static_cast<int>(key)]; }
 
 Vector2 InputManager::getMousePos() { return mousePos; }
 
 Vector2i InputManager::getMouseInfinitePos() {
     std::shared_lock lock(update_mutex);
-    //Log::debug("Mouse infinite pos: (x: {} y: {})", mouseInfinitePos.x,
-               //mouseInfinitePos.y);
+    // Log::debug("Mouse infinite pos: (x: {} y: {})", mouseInfinitePos.x,
+    // mouseInfinitePos.y);
     return mouseInfinitePos;
 }
 
@@ -64,7 +61,7 @@ void InputManager::lockMouse() {
         if (!is_mouse_locked) {
             getWindow()->grabMouse(true);
             is_mouse_locked = true;
-            //getWindow()->setCursorShow(false);
+            // getWindow()->setCursorShow(false);
         }
     }
 }
@@ -73,7 +70,7 @@ void InputManager::unlockMouse() {
     if (is_mouse_locked) {
         getWindow()->grabMouse(false);
         is_mouse_locked = false;
-        //getWindow()->setCursorShow(true);
+        // getWindow()->setCursorShow(true);
     }
 }
 

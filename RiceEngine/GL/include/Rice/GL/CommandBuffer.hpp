@@ -5,9 +5,9 @@
  *      Author: FileBinsLapTop
  */
 
-#include "Rice/Math/Vectors/Vector3f.hpp"
 #include "Rice/Util/Interfaces.hpp"
 #include "stdafx.hpp"
+#include <Rice/Math/Vectors.hpp>
 
 NSP_GL_BEGIN
 

@@ -1,7 +1,7 @@
 ﻿#include "../stdafx.hpp"
-#include "Rice/Math/Vectors/Vector2.hpp"
-#include "Rice/Math/Vectors/Vector2i.hpp"
+
 #include "Rice/Util/macros.h"
+#include <Rice/Math/Vectors.hpp>
 #include <shared_mutex>
 
 NSP_ENGINE_BEGIN
