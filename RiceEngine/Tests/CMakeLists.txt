@@ -36,13 +36,13 @@ foreach(FILE ${TESTS})
     target_link_libraries(${TEST_NAME} cds)
 
     add_dependencies(${TEST_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
-endforeach()
 
-if(WIN32)
-    # copy dll
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD # Adds a post-build event to the target
-        COMMAND ${CMAKE_COMMAND}
-        -E copy_if_different # which executes "cmake - E copy_if_different..."
-        ${RICE_DLLs_x64} # <--this is in-file
-        ${CMAKE_BINARY_DIR}) # <--this is out-file path
-endif(WIN32)
+    if(WIN32)
+        # copy dll
+        add_custom_command(TARGET ${TEST_NAME} POST_BUILD # Adds a post-build event to the target
+            COMMAND ${CMAKE_COMMAND}
+            -E copy_if_different # which executes "cmake - E copy_if_different..."
+            ${RICE_DLLs_x64} # <--this is in-file
+            ${CMAKE_BINARY_DIR}) # <--this is out-file path
+    endif(WIN32)
+endforeach()
