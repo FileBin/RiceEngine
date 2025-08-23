@@ -89,6 +89,7 @@ void InputManager::update() {
 void InputManager::eventCursor(Vector2 newpos, Vector2i delta) {
     mousePos = newpos;
     mouseDelta = delta;
+    Log::debug("Mouse delta: {}, {}", mouseDelta.x, mouseDelta.y);
 }
 
 void InputManager::eventKey(KeyCode key, bool rs_state) {

@@ -15,9 +15,8 @@ NSP_GL_BEGIN
 
 Shader::Shader(ptr<GraphicsManager> g_mgr)
     : GraphicsComponentBase(g_mgr), api_data{new Shader_API_Data()} {
-    graphics_mgr->resizePipelines->subscribe(resizeReg, [this](Vector2i win) {
-        onResize(win);
-    }); // @suppress("Invalid arguments")
+    graphics_mgr->resizePipelines->subscribe(
+        resizeReg, [this](Vector2i win) { onResize(win); }); // @suppress("Invalid arguments")
 }
 Shader::~Shader() { cleanup(); }
 
@@ -27,8 +26,7 @@ void Shader::build() {
     if (vertexLayout.size() == 0)
         THROW_EXCEPTION("Cannot build pipeline! Vertex layout is not set!");
 
-    Vector2i s = {get_api_data().windowExcent.width,
-                  get_api_data().windowExcent.height};
+    Vector2i s = {get_api_data().windowExcent.width, get_api_data().windowExcent.height};
     api_data->buildDescriptorSetLayout(get_api_data());
     api_data->buildPipeline(get_api_data(), s, vertexLayout, vertexStride);
     init = true;
@@ -43,7 +41,7 @@ void Shader::cleanup() {
 }
 
 void Shader::loadShader(String path, Type type) {
-    data_t buffer = Util::readFile(path.toUTF8String());
+    data_t buffer = Util::readFile(path);
 
     // create a new shader module, using the buffer we loaded
     vk::ShaderModuleCreateInfo createInfo = {};
@@ -54,8 +52,7 @@ void Shader::loadShader(String path, Type type) {
     createInfo.pCode = (uint *)buffer.data();
 
     // check that the creation goes well.
-    vk::ShaderModule shaderModule =
-        get_api_data().device.createShaderModule(createInfo);
+    vk::ShaderModule shaderModule = get_api_data().device.createShaderModule(createInfo);
 
     switch (type) {
     case Type::Vertex:

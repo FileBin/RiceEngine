@@ -3,7 +3,6 @@
 #include "Rice/Scene/SceneObjectBase.hpp"
 #include "Rice/Util/ByteStream.hpp"
 #include "Rice/Util/Exceptions/ThreadInterruptException.hpp"
-#include "Rice/Util/String.hpp"
 #include <memory>
 #include <mutex>
 

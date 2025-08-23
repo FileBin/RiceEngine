@@ -24,13 +24,12 @@ set(RICE_INCLUDE_PATH
 include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-add_dependencies(${PROJECT_NAME} cds)
 add_dependencies(${PROJECT_NAME} ${RICE_GL_NAME})
 add_dependencies(${PROJECT_NAME} ${RICE_MATH_NAME})
 add_dependencies(${PROJECT_NAME} ${RICE_UTIL_NAME})
 add_dependencies(${PROJECT_NAME} ${RICE_NETWORKING_NAME})
 
-target_link_libraries(${PROJECT_NAME} cds)
+target_link_libraries(${PROJECT_NAME})
 
 set(VLK_NAME "vulkan")
 
@@ -48,9 +47,9 @@ set(RICE_EXT_LIBS
 
     # "OpenAL32"
     "fmt"
-    "ogg"
-    "vorbis"
-    "vorbisfile"
+    # "ogg"
+    # "vorbis"
+    # "vorbisfile"
     "SDL2"
     "SDL2main"
     ${VLK_NAME}

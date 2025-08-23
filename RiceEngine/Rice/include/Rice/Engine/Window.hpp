@@ -38,7 +38,6 @@ class Window : public enable_ptr<Window>, public ICleanable {
     static ptr<Window> create(DescWindow desc);
     ~Window() { cleanup(); }
 
-    void join();
     void close() { cleanup(); }
     void cleanup() override;
     ptr<InputManager> getInputManager() { return inputmgr; }
@@ -46,15 +45,11 @@ class Window : public enable_ptr<Window>, public ICleanable {
     WindowHandle getHandle();
     int getLeft() const { return desc.posx; }
     int getTop() const { return desc.posy; }
-    int getWidth() const {
-        return getSize().x;
-    }
+    int getWidth() const { return getSize().x; }
 
     Vector2i getMousePos() const;
 
-    int getHeight() const {
-        return getSize().y;
-    }
+    int getHeight() const { return getSize().y; }
 
     Vector2i getSize() const;
 
@@ -68,22 +63,22 @@ class Window : public enable_ptr<Window>, public ICleanable {
     void updateWindowState();
 
     void grabMouse(bool grab);
+    void update();
 
   private:
-    void update(std::stop_token stoken);
     void handleEvent(SDL_Event &e);
     void handleWindowEvent(SDL_WindowEvent &e);
     void setCursorPosition(Vector2i pos);
 
   public:
     ptr<ResizeEvent> resize_event = ResizeEvent::create();
+
   private:
     friend class InputManager;
 
     DescWindow desc;
     WindowHandle handle;
     ptr<InputManager> inputmgr;
-    uptr<std::jthread> update_thread;
     std::shared_mutex update_mutex;
     bool is_exit = false;
     bool is_active = true;

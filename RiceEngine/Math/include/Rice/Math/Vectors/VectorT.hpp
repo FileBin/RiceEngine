@@ -6,10 +6,7 @@
 
 #pragma once
 
-#include "Rice/Util/String.hpp"
 #include "VectorData.hpp"
-
-#include <Rice/Util/String.hpp>
 
 #include <cmath>
 #include <cstddef>

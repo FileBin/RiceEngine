@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "Rice/Util/String.hpp"
 #include "VkBootstrap.h"
 #include "VulkanException.hpp"
 #include "api_GraphicsManager.hpp"
@@ -32,6 +31,20 @@
 #include "MemoryManager.inl"
 
 NSP_GL_BEGIN
+
+short deviceTypeOrder(VkPhysicalDeviceType type) {
+    switch (type) {
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+        return 0;
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+        return 1;
+    case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+    case VK_PHYSICAL_DEVICE_TYPE_CPU:
+    case VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM:
+        return 0x7fff;
+    }
+}
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -100,21 +113,24 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     // We want a GPU that can write to the SDL surface and supports Vulkan 1.1
     vkb::PhysicalDeviceSelector selector{vkb_inst};
 
-    auto dev_result = selector.set_minimum_version(1, 1)
-                          .set_surface(surface)
-#ifdef WIN32
-                          .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
-#endif
-                          .select();
+    auto dev_result = selector.set_minimum_version(1, 1).set_surface(surface).select_devices();
 
     if (!dev_result.has_value()) {
-        std::string str =
+        String str =
             fmt::format("Error: {}!",
                         dev_result.error().message()); // @suppress("Invalid arguments")
         THROW_EXCEPTION(str.c_str());
     }
 
-    vkb::PhysicalDevice physicalDevice = dev_result.value();
+    vec<vkb::PhysicalDevice> physicalDevices = dev_result.value();
+
+    std::sort(physicalDevices.begin(), physicalDevices.end(),
+              [](vkb::PhysicalDevice a, vkb::PhysicalDevice b) {
+                  return deviceTypeOrder(a.properties.deviceType) <
+                         deviceTypeOrder(b.properties.deviceType);
+              });
+
+    vkb::PhysicalDevice physicalDevice = physicalDevices.at(0);
 
     // create the final Vulkan device
     vkb::DeviceBuilder deviceBuilder{physicalDevice};

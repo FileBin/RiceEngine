@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rice/Math/Vectors/Vector2.hpp"
+#include "Rice/Math/Vectors/Vectors.hpp"
 #include "Rice/Scene/Components/MonoScript.hpp"
 
 NSP_TESTS_BEGIN
@@ -27,7 +27,7 @@ class CameraMover : public virtual Components::MonoScript {
         auto cam_rot = cam->getTransform()->getRotation();
         auto fwd = cam_rot * Vector3::forward;
 
-        Vector2 pos = input->getMouseInfinitePos();
+        Vector2 pos = Vector2(input->getMouseInfinitePos());
         pos *= .1; // set sensivity
         pos.y = Math::min(Math::max(pos.y, -90.), 90.);
         pos.x = fmod(pos.x, 360);
@@ -53,7 +53,7 @@ class CameraMover : public virtual Components::MonoScript {
             mv.y += 1;
         }
 
-        mv.Qnormalize();
+        mv.qNormalize();
 
         auto yrot = Quaternion::fromAxisAngle(Vector3::up, pos.x);
 
@@ -66,10 +66,10 @@ class CameraMover : public virtual Components::MonoScript {
         speed += mv * dt;
 
         Vector3 damp = speed;
-        damp.Qnormalize();
+        damp.qNormalize();
         damp *= 15. * dt;
 
-        if (damp.SqrLength() > speed.SqrLength()) {
+        if (damp.sqrLength() > speed.sqrLength()) {
             damp = speed;
         }
         speed -= damp;

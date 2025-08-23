@@ -19,7 +19,6 @@
 #include "Rice/Util/defines.hpp"
 
 #include "Rice/Math/Math.hpp"
-#include "Rice/Util/String.hpp"
 #include "Rice/Util/Util.hpp"
 
 NSP_ENGINE_BEGIN

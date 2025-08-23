@@ -27,8 +27,8 @@ class HelloTriangle : public ICleanable {
             program->entrypoint();
             program.release();
         } catch (::Rice::Exception &e) {
-            Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}", e.msg(), e.file(),
-                     e.line(), e.info());
+            Log::log(Log::Error, "Exception: {}\nFile: {}, Line: {} \nInfo: {}", e.msg(),
+                     e.file(), e.line(), e.info());
         }
     }
 
@@ -47,7 +47,7 @@ class HelloTriangle : public ICleanable {
 
         win.create({"Vulkan"});
         Log::debug("Window created!");
-        pGraphicsManager g_mgr_ref = pGraphicsManager(&g_mgr);
+        ptr<GraphicsManager> g_mgr_ref = pGraphicsManager(&g_mgr);
         // if(in_stack)
         // g_mgr_ref.setDestoyer(PtrDestroyerType::DontDelete);
         g_mgr.init(win_ref);
@@ -87,9 +87,8 @@ class HelloTriangle : public ICleanable {
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         double time =
-            std::chrono::duration<double, std::chrono::seconds::period>(currentTime - startTime)
-                .count();
-        float t = time * 4;
+            std::chrono::duration<double, std::chrono::seconds::period>(currentTime -
+        startTime) .count(); float t = time * 4;
 
         float threshold = sin(t * .1f) * .65f - .5f;
 
@@ -119,10 +118,10 @@ class HelloTriangle : public ICleanable {
     }
 
     Window win;
-    Graphics::pVertexBuffer vertexBuffer;
-    Graphics::pShader test_shader;
+    ptr<Graphics::VertexBuffer> vertexBuffer;
+    ptr<Graphics::Shader> test_shader;
     Graphics::GraphicsManager g_mgr;
-    Graphics::pCommandBuffer cmd;
+    ptr<Graphics::CommandBuffer> cmd;
 };
 
 NSP_TESTS_END

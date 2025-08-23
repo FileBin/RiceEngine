@@ -1,10 +1,10 @@
-﻿#include "Rice/Engine/InputManager.hpp"
+﻿#include "Rice/Engine/Window.hpp"
+#include "Rice/Engine/InputManager.hpp"
+#include "Rice/Engine/Log.hpp"
+#include "Rice/Math/Vectors.hpp"
 #include "SDL2/SDL_hints.h"
 #include "SDL2/SDL_mouse.h"
 #include "SDL2/SDL_video.h"
-#include <Rice/Engine/Log.hpp>
-#include <Rice/Engine/Window.hpp>
-#include <Rice/Math/Vectors.hpp>
 #include <chrono>
 
 #define SDL_MAIN_HANDLED
@@ -63,10 +63,10 @@ ptr<Window> Window::create(DescWindow desc) {
         THROW_EXCEPTION("SDL cannot be initialized!");
     }
 
-    window->handle = WindowHandle{
-        SDL_CreateWindow(desc.caption.toUTF8String().c_str(), desc.posx, desc.posy, desc.width,
-                         desc.height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN),
-        SDL_DestroyWindow};
+    window->handle =
+        WindowHandle{SDL_CreateWindow(desc.caption.c_str(), desc.posx, desc.posy, desc.width,
+                                      desc.height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN),
+                     SDL_DestroyWindow};
 
     window->created = true;
 
@@ -82,36 +82,18 @@ ptr<Window> Window::create(DescWindow desc) {
 
     window->updateWindowState();
 
-    // start thread for window update
-    window->update_thread.reset(
-        new std::jthread([window](std::stop_token stoken) { window->update(stoken); }));
-
     Log::debug("Window successfully created!");
     return window;
 }
 
-void Window::update(std::stop_token stoken) {
-    while (true) {
-        using namespace std::chrono;
-        using namespace std::chrono_literals;
-        auto tickStart = steady_clock::now();
-        auto tickLength = 5ms; // 200tps
-        SDL_Event event;
-        SDL_PollEvent(&event);
+void Window::update() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
         handleEvent(event);
-
-        inputmgr->update();
-
-        if (is_exit || stoken.stop_requested()) {
-            is_exit = true;
-            return;
-        }
-
-        std::this_thread::sleep_until(tickStart + tickLength);
     }
-}
 
-void Window::join() { update_thread->join(); }
+    inputmgr->update();
+}
 
 void Window::cleanup() {
     if (created) {

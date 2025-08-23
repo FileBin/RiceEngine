@@ -124,7 +124,7 @@ ptr<Graphics::Shader> SceneRender::getShader(String name) {
     try {
         return shaders.at(name);
     } catch (std::out_of_range) {
-        THROW_EXCEPTION(fmt::format("Shader {} not found!", name.toUTF8String()).c_str());
+        THROW_EXCEPTION(fmt::format("Shader {} not found!", name).c_str());
     }
 }
 
@@ -132,7 +132,7 @@ ptr<Graphics::Material> SceneRender::getMaterial(String name) {
     try {
         return materials.at(name);
     } catch (std::out_of_range) {
-        THROW_EXCEPTION(fmt::format("Material {} not found!", name.toUTF8String()).c_str());
+        THROW_EXCEPTION(fmt::format("Material {} not found!", name).c_str());
     }
 }
 

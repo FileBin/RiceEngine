@@ -4,8 +4,6 @@
 
 #include "defines.hpp"
 
-#include "String.hpp"
-
 #include "ByteStream.hpp"
 #include "Event.hpp"
 #include "Exceptions.hpp"

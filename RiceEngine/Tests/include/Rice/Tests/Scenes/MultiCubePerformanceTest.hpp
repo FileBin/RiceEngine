@@ -1,4 +1,4 @@
-#include "Rice/Math/Vectors/Vector4f.hpp"
+#include "Rice/Math/Vectors/Vectors.hpp"
 #include <tuple>
 #undef RICE_SOURCE
 

@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-//#include <codecvt>
+// #include <codecvt>
 
 #include "Rice/Util/Util.hpp"
 
@@ -15,14 +15,15 @@ NSP_UTIL_BEGIN
 
 void checkPath(fs::path path) {
     if (!std::filesystem::exists(path)) {
-        THROW_FILE_NOT_FOUND_EXCEPTION(String(path.wstring()));
+        THROW_FILE_NOT_FOUND_EXCEPTION(path.c_str());
     }
 }
 
 data_t readFile(fs::path filename) {
     checkPath(filename);
     std::ifstream infile(filename, std::ios_base::binary);
-    auto data = data_t(std::istreambuf_iterator<char>(infile), std::istreambuf_iterator<char>());
+    auto data =
+        data_t(std::istreambuf_iterator<char>(infile), std::istreambuf_iterator<char>());
     return data;
 }
 
@@ -57,10 +58,9 @@ data_t readFile(fs::path filename) {
     file.close();
 }*/
 
-/*template <typename T> bool getFromJsonT(std::filesystem::path filename, std::string key, T &out_val) {
-    using namespace rapidjson;
-    using namespace std;
-    fstream file(filename, fstream::in);
+/*template <typename T> bool getFromJsonT(std::filesystem::path filename, std::string key, T
+&out_val) { using namespace rapidjson; using namespace std; fstream file(filename,
+fstream::in);
 
     if (!file.is_open())
         return false;
@@ -135,7 +135,8 @@ void writeToJSON(std::filesystem::path filename, std::string key, std::string va
     file.close();
 }
 
-void writeToJSON(std::filesystem::path filename, std::string key, num value) { writeToJSONT(filename, key, value); }
+void writeToJSON(std::filesystem::path filename, std::string key, num value) {
+writeToJSONT(filename, key, value); }
 
 void writeToJSON(std::filesystem::path filename, std::string key, UUID value) {
     writeToJSONT(filename, key, value.getVal());

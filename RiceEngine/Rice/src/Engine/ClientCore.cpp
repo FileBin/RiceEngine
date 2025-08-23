@@ -3,10 +3,6 @@
 #include "pch.h"
 #include <Rice/Engine/ClientCore.hpp>
 
-#include <cds/init.h>
-
-#include <cds/gc/hp.h>
-
 using namespace std::chrono;
 using namespace std::this_thread;
 
@@ -28,19 +24,12 @@ ptr<ClientEngine> ClientCore::getClientEngine() {
 // interface defined by user or default implementation
 void ClientCore::runNew(ptr<ClientCore::Loader> core_loader) {
     setCurrentThreadPriority(ThreadPriority::TimeCritical);
-    cds::Initialize();
     {
-        // Initialize Hazard Pointer singleton
-        cds::gc::HP hpGC;
-        // If main thread uses lock-free containers
-        // the main thread should be attached to libcds infrastructure
-        cds::threading::Manager::attachThread();
         auto core = ptr<ClientCore>(new ClientCore(core_loader));
         core->init();
         core->run();
         core->close();
     }
-    cds::Terminate();
 }
 
 ClientCore::ClientCore(ptr<Loader> core_loader) : CoreBase(), loader(core_loader) {}
@@ -129,7 +118,7 @@ void ClientCore::run() {
         do {                      // loop until the window is not closed
             loadSceneImmediate(); // load scene if it is not loaded yet
             // loader->update();
-            // wnd->inputmgr->update(); // update input manager state
+            wnd->update();  // update input manager state
             b = runFrame(); // do frame update and draw
             // engine->postUpdate();
             sleep_until(begin_time); // limit framerate

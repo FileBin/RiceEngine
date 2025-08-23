@@ -4,8 +4,8 @@
   "cmake.debugConfig": {
     "args": []
   },
-  "C_Cpp.formatting": "Disabled",
-  "C_Cpp.intelliSenseEngine": "Disabled",
+  "C_Cpp.formatting": "disabled",
+  "C_Cpp.intelliSenseEngine": "disabled",
   "clangd.checkUpdates": true,
   "clangd.onConfigChanged": "restart",
   "clangd.arguments": [
@@ -105,5 +105,5 @@
     "variant": "cpp"
   },
   "cmake.sourceDirectory": "${workspaceFolder}/.",
-  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json"
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json",
 }

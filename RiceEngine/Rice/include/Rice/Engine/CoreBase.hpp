@@ -48,10 +48,6 @@ class CoreBase {
         return ptr<std::jthread>(new std::jthread(
             [](std::stop_token _St, std::function<Signature> _Fx, ArgsT... _Ax) {
                 setCurrentThreadPriority(ThreadPriority::Normal);
-                using cds::threading::Manager;
-
-                if (!Manager::isThreadAttached())
-                    Manager::attachThread();
 
                 auto f_wrp = [&_Fx](ArgsT... args, std::stop_token stoken) {
                     try {
@@ -62,7 +58,6 @@ class CoreBase {
                 };
 
                 executeFuncAndHandleExceptions<void, Signature>(_Fx, _Ax..., _St);
-                Manager::detachThread();
             },
             func, args...));
     }
