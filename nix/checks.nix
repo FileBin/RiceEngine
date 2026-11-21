@@ -39,8 +39,14 @@ let
   '';
 
   # selfExit: the demo closes its own window after a fixed number of frames
-  # (ChunkStreamTest), so the resize/kill part of the recipe does not apply.
-  smoke = name: { selfExit ? false }: pkgs.runCommandLocal "rice-check-${name}" {
+  # (ChunkStreamTest, ShadowTest), so the resize/kill part of the recipe does
+  # not apply.
+  #
+  # expect: a log line the demo has to print before it exits - the proof that it
+  # got through its own workload instead of dying silently. Defaults to the
+  # chunk-streaming demo's summary line; the other demos pass their own.
+  smoke = name: { selfExit ? false, expect ? "frames streamed" }:
+    pkgs.runCommandLocal "rice-check-${name}" {
     nativeBuildInputs = with pkgs; [
       # sway-unwrapped, not sway: the wrapper starts dbus-run-session, which
       # needs /etc/dbus-1/session.conf that does not exist in the sandbox, and
@@ -131,7 +137,7 @@ let
       [ "$STATUS" -eq 0 ] || fail "${name} exited with $STATUS"
       [ "$BUILDS_BEFORE" -ge 1 ] || fail "the swapchain was never built"
       # A run that dies before the workload must not pass silently.
-      grep -q "frames streamed" app.log || fail "${name} never reported its frames"
+      grep -q "${expect}" app.log || fail "${name} never reported its result (expected: ${expect})"
     else
       sleep 6
       kill -0 $APP_PID 2>/dev/null || {
@@ -209,4 +215,14 @@ in
   # Chunk streaming: object creation/destruction from onUpdate and per-frame
   # geometry replacement, for a fixed 120 frames, then it closes itself.
   smoke-chunk-stream = smoke "ChunkStreamTest" { selfExit = true; };
+  # Directional light + shadow map: renders a ground slab and four cubes with a
+  # depth-only shadow pass (2048x2048), for a fixed 60 frames, then it closes
+  # itself. The `expect` line is SceneRender's casters-pass log with the map
+  # size: a run that never recorded the pass cannot print it. The demo itself
+  # exits non-zero unless the pass had casters in it and the map really contains
+  # geometry (see Tests/src/ShadowTest.cpp).
+  smoke-shadow = smoke "ShadowTest" {
+    selfExit = true;
+    expect = "Shadow pass: 2048x2048 depth map";
+  };
 }
