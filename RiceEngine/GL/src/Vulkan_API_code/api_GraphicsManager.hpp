@@ -35,6 +35,9 @@ struct GraphicsManager_API_data {
                                                      // the windowing system
     vec<vk::Image> swapchainImages = {};             // array of images from the swapchain
     vec<vk::ImageView> swapchainImageViews = {};     // array of image-views from the swapchain
+    // Layout every swapchain image is currently in. Fresh images start Undefined
+    // and are moved explicitly instead of pretending they are in PresentSrc.
+    vec<vk::ImageLayout> swapchainLayouts = {};
     vec<vk::Framebuffer> framebuffers = {};
 
     // TODO make this three as one texture
@@ -71,6 +74,12 @@ struct GraphicsManager_API_data {
     ~GraphicsManager_API_data();
 
     vk::Framebuffer getCurrentFrambuffer() { return framebuffers[swapchainImageIndex]; }
+
+    // Records a layout transition for one swapchain image and remembers it, so
+    // the next transition knows the real source layout.
+    void transitionSwapchainImage(vk::CommandBuffer cmd, uint imageIndex,
+                                  vk::ImageLayout newLayout);
+
     friend class GraphicsManager;
 
     GraphicsManager_API_data(ptr<GraphicsManager> g_mgr);

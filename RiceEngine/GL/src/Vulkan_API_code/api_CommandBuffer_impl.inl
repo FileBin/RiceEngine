@@ -115,6 +115,11 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         rect.y *= api_data.windowExcent.height;
         rect.h *= api_data.windowExcent.height;
 
+        // The image is in PresentSrc (after a previous frame) or Undefined (fresh
+        // swapchain image); the pass expects ColorAttachmentOptimal.
+        api_data.transitionSwapchainImage(cmd[i], i,
+                                          vk::ImageLayout::eColorAttachmentOptimal);
+
         vk::RenderPassBeginInfo rpInfo = {};
         rpInfo.renderPass = api_data.def_renderPass;
         rpInfo.renderArea.offset.x = rect.x;
@@ -291,26 +296,17 @@ inline void DrawAdditionData::bindDescriptosSets(DescriptorSetCreator &creator,
 inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
     using namespace vk;
     uint maxCount = creator.writes.size();
-    vec<DescriptorPoolSize> sizes = {{DescriptorType::eUniformBuffer, maxCount}};
 
-    DescriptorPoolCreateInfo pool_info = {};
-    pool_info.maxSets = maxCount;
-    pool_info.poolSizeCount = (uint32_t)sizes.size();
-    pool_info.pPoolSizes = sizes.data();
-
-    auto res = api_data.device.createDescriptorPool(&pool_info, nullptr, &descriptorPool);
-    THROW_VK_EX_IF_BAD(res);
-
+    // Sets come from the manager-wide pool: creating a pool per draw meant a
+    // vkCreateDescriptorPool for every command on every rebuild.
     DescriptorSetAllocateInfo allocInfo = {};
-    // using the pool we just set
-    allocInfo.descriptorPool = descriptorPool;
-    // only 1 descriptor
+    allocInfo.descriptorPool = api_data.descriptorPool;
     allocInfo.descriptorSetCount = 1;
-    // using the global data layout
     allocInfo.pSetLayouts = &creator.descriptorSetLayout;
 
-    res = api_data.device.allocateDescriptorSets(&allocInfo, &descriptorSet);
+    auto res = api_data.device.allocateDescriptorSets(&allocInfo, &descriptorSet);
     THROW_VK_EX_IF_BAD(res);
+
     vec<WriteDescriptorSet> writes{maxCount};
     uint i = 0;
     for (auto &w : creator.writes) {
@@ -323,11 +319,11 @@ inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator)
 }
 
 inline void DrawAdditionData::cleanup() {
-    if (descriptorPool) {
-        api_data.device.destroyDescriptorPool(descriptorPool);
-        descriptorPool = nullptr;
+    if (descriptorSet) {
+        api_data.device.freeDescriptorSets(api_data.descriptorPool, descriptorSet);
         descriptorSet = nullptr;
     }
+    descriptorPool = nullptr;
 }
 
 inline void CommandBuffer_API_data::end(uint i) { cmd[i].end(); }

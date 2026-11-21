@@ -92,9 +92,12 @@ void SceneRender::rebuildCmd() {
 }
 
 void SceneRender::draw(ptr<Components::Camera> camera) {
+
     auto g_mgr = getEngine()->getGraphicsManager();
     g_mgr->sync();
-    need_rebuild = true;
+    // Command buffers are re-recorded only when the queue actually changed
+    // (meshes/materials registered); per-frame rebuilds re-recorded every draw
+    // command and re-allocated its descriptor set.
     rebuildCmd();
     uint count = update(camera);
     g_mgr->executeCmd(main_cmd);
@@ -145,6 +148,7 @@ SceneRender::getOrCreateShader(String name,
         shader_creator(sh); // call creator function to setup shader
 
         mainQueue.insert({sh, ShaderQueue(sh, getEngine()->getGraphicsManager())});
+        need_rebuild = true;
     }
     return sh;
 }
@@ -156,6 +160,7 @@ ptr<Graphics::Material> SceneRender::getOrCreateMaterial(
         m = material_factory(shared_from_this());
         auto &shader_q = mainQueue.at(m->getShader());
         shader_q.materials.insert({m, MaterialQueue(m)});
+        need_rebuild = true;
     }
     return m;
 }

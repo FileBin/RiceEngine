@@ -174,44 +174,108 @@ void GraphicsManager_API_data::init_swapchain() {
         swapchainBuilder.use_default_format_selection();
     }
 
-    uint w, h;
-    w = graphicsManager->window->getWidth();
-    h = graphicsManager->window->getHeight();
-
-    if (w >= 64 && h >= 64) {
-        for (size_t i = 0; i < swapchainImageViews.size(); i++) {
-            device.destroy(swapchainImageViews[i]);
-        }
-
-        auto old_swapchain = swapchain;
-
-        windowExcent.width = w;
-        windowExcent.height = h;
-        vkb::Swapchain vkbSwapchain =
-            swapchainBuilder
-                .set_desired_present_mode(
-                    (VkPresentModeKHR)vk::PresentModeKHR::eImmediate) // use v-sync present
-                                                                      // mode
-                //.set_desired_extent(windowExcent.width, windowExcent.height)
-                .set_old_swapchain((VkSwapchainKHR)old_swapchain)
-                .build()
-                .value();
-
-        if (old_swapchain)
-            device.destroy(old_swapchain);
-
-        // store swapchain and its related images
-        swapchain = vkbSwapchain.swapchain;
-        // vk-bootstrap hands out raw Vulkan handles; vulkan-hpp wraps them, so
-        // copy instead of casting the vector type.
-        const auto &vkbImages = vkbSwapchain.get_images().value();
-        swapchainImages.assign(vkbImages.begin(), vkbImages.end());
-        const auto &vkbImageViews = vkbSwapchain.get_image_views().value();
-        swapchainImageViews.assign(vkbImageViews.begin(), vkbImageViews.end());
-
-        swapchainImageFormat = static_cast<vk::Format>(vkbSwapchain.image_format);
+    // The swapchain lives in pixels, so the drawable size is what matters - not
+    // the logical window size reported by SDL_GetWindowSize (they differ on
+    // scaled displays, and that is what made the image smaller than the window).
+    int w = 0, h = 0;
+    SDL_Vulkan_GetDrawableSize(graphicsManager->window->getHandle().get(), &w, &h);
+    if (w <= 0 || h <= 0) {
+        w = graphicsManager->window->getWidth();
+        h = graphicsManager->window->getHeight();
     }
-    Log::debug("Swapchain built!");
+
+    // A zero-sized or tiny drawable (minimized window) must not produce a
+    // swapchain; keep the old one and wait for the next resize.
+    if (w < 64 || h < 64) {
+        Log::debug("Swapchain rebuild skipped, drawable is {}x{}", w, h);
+        return;
+    }
+
+    for (size_t i = 0; i < swapchainImageViews.size(); i++)
+        device.destroy(swapchainImageViews[i]);
+    swapchainImageViews.clear();
+
+    auto old_swapchain = swapchain;
+
+    vkb::Swapchain vkbSwapchain =
+        swapchainBuilder
+            .set_desired_present_mode(
+                (VkPresentModeKHR)vk::PresentModeKHR::eImmediate) // use v-sync present
+                                                                  // mode
+            .set_desired_extent((uint32_t)w, (uint32_t)h)
+            .set_old_swapchain((VkSwapchainKHR)old_swapchain)
+            .build()
+            .value();
+
+    if (old_swapchain)
+        device.destroy(old_swapchain);
+
+    // store swapchain and its related images
+    swapchain = vkbSwapchain.swapchain;
+    // vk-bootstrap hands out raw Vulkan handles; vulkan-hpp wraps them, so
+    // copy instead of casting the vector type.
+    const auto &vkbImages = vkbSwapchain.get_images().value();
+    swapchainImages.assign(vkbImages.begin(), vkbImages.end());
+    const auto &vkbImageViews = vkbSwapchain.get_image_views().value();
+    swapchainImageViews.assign(vkbImageViews.begin(), vkbImageViews.end());
+
+    swapchainImageFormat = static_cast<vk::Format>(vkbSwapchain.image_format);
+
+    // Everything that follows (depth image, framebuffers, pipelines, render
+    // areas) must use the size the driver actually gave us.
+    windowExcent = vkbSwapchain.extent;
+
+    // Fresh images are Undefined; remember that instead of assuming PresentSrc.
+    swapchainLayouts.assign(swapchainImages.size(), vk::ImageLayout::eUndefined);
+
+    Log::debug("Swapchain built! {}x{}, {} images (window {}x{}, drawable {}x{})",
+               windowExcent.width, windowExcent.height, swapchainImages.size(),
+               graphicsManager->window->getWidth(), graphicsManager->window->getHeight(), w, h);
+}
+
+void GraphicsManager_API_data::transitionSwapchainImage(vk::CommandBuffer cmd, uint imageIndex,
+                                                        vk::ImageLayout newLayout) {
+    if (imageIndex >= swapchainLayouts.size() || imageIndex >= swapchainImages.size())
+        return;
+
+    vk::ImageLayout oldLayout = swapchainLayouts[imageIndex];
+    if (oldLayout == newLayout)
+        return;
+
+    using namespace vk;
+
+    ImageMemoryBarrier barrier{};
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = swapchainImages[imageIndex];
+    barrier.subresourceRange = ImageSubresourceRange(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+
+    PipelineStageFlags srcStage = PipelineStageFlagBits::eTopOfPipe;
+    PipelineStageFlags dstStage = PipelineStageFlagBits::eColorAttachmentOutput;
+    AccessFlags srcAccess{};
+    AccessFlags dstAccess = AccessFlagBits::eColorAttachmentWrite;
+
+    if (oldLayout == ImageLayout::ePresentSrcKHR) {
+        // nothing to flush: presentation engine already finished reading it
+        srcStage = PipelineStageFlagBits::eColorAttachmentOutput;
+    } else if (oldLayout != ImageLayout::eUndefined) {
+        srcStage = PipelineStageFlagBits::eColorAttachmentOutput;
+        srcAccess = AccessFlagBits::eColorAttachmentWrite;
+    }
+
+    if (newLayout == ImageLayout::ePresentSrcKHR) {
+        dstStage = PipelineStageFlagBits::eBottomOfPipe;
+        dstAccess = AccessFlags{};
+    }
+
+    barrier.srcAccessMask = srcAccess;
+    barrier.dstAccessMask = dstAccess;
+
+    cmd.pipelineBarrier(srcStage, dstStage, DependencyFlags{}, nullptr, nullptr, barrier);
+
+    swapchainLayouts[imageIndex] = newLayout;
 }
 
 void GraphicsManager_API_data::init_commands() {
@@ -229,17 +293,21 @@ void GraphicsManager_API_data::init_commands() {
 
 void GraphicsManager_API_data::init_descriptor_pool() {
     auto n = swapchainImages.size();
+    // Every uniform buffer allocates one set per swapchain image and draws
+    // allocate their own sets too, so the pool has to be much larger than the
+    // swapchain itself - sizing it as "n descriptors" ran it dry immediately.
     vk::DescriptorPoolSize poolSize{};
     poolSize.type = vk::DescriptorType::eUniformBuffer;
-    poolSize.descriptorCount = n;
+    poolSize.descriptorCount = 0x10000;
 
     vk::DescriptorPoolCreateInfo poolInfo{};
     poolInfo.poolSizeCount = 1;
     poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = n * 0x10000;
+    poolInfo.maxSets = 0x10000;
     poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
     descriptorPool = device.createDescriptorPool(poolInfo);
+    (void)n;
 }
 
 vk::Format GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &candidates,
@@ -365,12 +433,15 @@ void GraphicsManager_API_data::init_def_renderpass() {
     color_attachment.stencilStoreOp =
         vk::AttachmentStoreOp::eDontCare; // vk::AttachmentStoreOp::eStore;
 
-    // we don't know or care about the starting layout of the attachment
-    color_attachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
+    // The colour image is moved to ColorAttachmentOptimal by an explicit barrier
+    // before every render pass (see transitionSwapchainImage), so the pass must
+    // not claim it arrives in PresentSrc - that is what validation complained
+    // about on the first frame and after every swapchain recreation.
+    color_attachment.initialLayout = vk::ImageLayout::eColorAttachmentOptimal;
 
-    // after the renderpass ends, the image has to be on a layout ready for
-    // display
-    color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+    // after the renderpass ends the image stays usable as a colour attachment;
+    // the transition to PresentSrc is recorded once, after all passes of a frame
+    color_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
 
     vk::AttachmentDescription depth_attachment{};
     depth_attachment.format = depthFormat;
@@ -379,7 +450,9 @@ void GraphicsManager_API_data::init_def_renderpass() {
     depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
     depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eLoad;
     depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eStore;
-    depth_attachment.initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+    // freshly created depth images are Undefined; contents are discarded anyway
+    // (the scene clears depth every frame)
+    depth_attachment.initialLayout = vk::ImageLayout::eUndefined;
     depth_attachment.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
     vk::AttachmentReference color_attachment_ref = {};

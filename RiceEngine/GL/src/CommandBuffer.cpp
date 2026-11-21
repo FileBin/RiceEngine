@@ -22,11 +22,16 @@ void _build(uint i, CommandBuffer_API_data *api_data,
             vec<ptr<CommandBuffer::Command>> &commands, GraphicsManager_API_data &data,
             vk::Extent2D window) {
     DescriptorSetCreator creator;
-    data.sync();
     api_data->reset(i);
     api_data->begin(data, window, i);
     for (ptr<CommandBuffer::Command> cmd : commands)
         api_data->doCommand(cmd, i, data, creator);
+
+    // Primary buffers own the whole frame for image i: after the passes the
+    // image must be handed to the presentation engine.
+    if (!api_data->is_secondary)
+        data.transitionSwapchainImage(api_data->cmd[i], i, vk::ImageLayout::ePresentSrcKHR);
+
     api_data->end(i);
 }
 
