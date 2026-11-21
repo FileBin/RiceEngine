@@ -8,6 +8,69 @@
 
 NSP_GL_BEGIN
 
+/* Vertex input state shared by the scene pipeline and the depth-only shadow
+ * pipeline: binding 0, stride = vertexStride, one attribute per VertexLayout
+ * entry with location = declaration order. */
+static vk::PipelineVertexInputStateCreateInfo
+make_vertex_input_state(VertexLayout &vertexLayout, uint vertexStride,
+                        vk::VertexInputBindingDescription &bindingDesc,
+                        vec<vk::VertexInputAttributeDescription> &attributeDescs) {
+    using namespace vk;
+
+    bindingDesc = VertexInputBindingDescription()
+                      .setBinding(0)
+                      .setStride(vertexStride)
+                      .setInputRate(VertexInputRate::eVertex);
+
+    uint n = vertexLayout.size();
+    attributeDescs.resize(n);
+
+    for (uint i = 0; i < n; ++i) {
+        auto &input = vertexLayout[i];
+        auto &desc = attributeDescs[i];
+        desc.setBinding(input.binding).setOffset(input.offset).setLocation(i);
+
+        switch (input.format) {
+
+        case VertexInput::float1:
+            desc.setFormat(Format::eR32Sfloat);
+            break;
+        case VertexInput::float2:
+            desc.setFormat(Format::eR32G32Sfloat);
+            break;
+        case VertexInput::float3:
+            desc.setFormat(Format::eR32G32B32Sfloat);
+            break;
+        case VertexInput::float4:
+            desc.setFormat(Format::eR32G32B32A32Sfloat);
+            break;
+
+        case VertexInput::int1:
+            desc.setFormat(Format::eR32Sint);
+            break;
+        case VertexInput::int2:
+            desc.setFormat(Format::eR32G32Sint);
+            break;
+        case VertexInput::int3:
+            desc.setFormat(Format::eR32G32B32Sint);
+            break;
+        case VertexInput::int4:
+            desc.setFormat(Format::eR32G32B32A32Sint);
+            break;
+
+        default:
+            THROW_EXCEPTION("Unknown vertex format!");
+            break;
+        }
+    }
+
+    return PipelineVertexInputStateCreateInfo()
+        .setVertexBindingDescriptionCount(1)
+        .setPVertexBindingDescriptions(&bindingDesc)
+        .setVertexAttributeDescriptionCount(n)
+        .setPVertexAttributeDescriptions(attributeDescs.data());
+}
+
 void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_data) {
     using namespace vk;
 
@@ -53,62 +116,11 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
         pipelineBuilder.vk_shaderStages.push_back(help::pipeline_shader_stage_create_info(
             vk::ShaderStageFlagBits::eGeometry, geometryShader));
 
-    VertexInputBindingDescription bindingDesc = VertexInputBindingDescription()
-                                                    .setBinding(0)
-                                                    .setStride(vertexStride)
-                                                    .setInputRate(VertexInputRate::eVertex);
+    VertexInputBindingDescription bindingDesc;
+    vec<VertexInputAttributeDescription> attributeDescs;
 
-    uint n = vertexLayout.size();
-
-    vec<VertexInputAttributeDescription> attributeDescs(n);
-
-    for (uint i = 0; i < n; ++i) {
-        auto &input = vertexLayout[i];
-        auto &desc = attributeDescs[i];
-        desc.setBinding(input.binding).setOffset(input.offset).setLocation(i);
-
-        switch (input.format) {
-
-        case VertexInput::float1:
-            desc.setFormat(Format::eR32Sfloat);
-            break;
-        case VertexInput::float2:
-            desc.setFormat(Format::eR32G32Sfloat);
-            break;
-        case VertexInput::float3:
-            desc.setFormat(Format::eR32G32B32Sfloat);
-            break;
-        case VertexInput::float4:
-            desc.setFormat(Format::eR32G32B32A32Sfloat);
-            break;
-
-        case VertexInput::int1:
-            desc.setFormat(Format::eR32Sint);
-            break;
-        case VertexInput::int2:
-            desc.setFormat(Format::eR32G32Sint);
-            break;
-        case VertexInput::int3:
-            desc.setFormat(Format::eR32G32B32Sint);
-            break;
-        case VertexInput::int4:
-            desc.setFormat(Format::eR32G32B32A32Sint);
-            break;
-
-        default:
-            THROW_EXCEPTION("Unknown vertex format!");
-            break;
-        }
-    }
-
-    // vertex input controls how to read vertices from vertex buffers. We aren't
-    // using it yet
     pipelineBuilder.vk_vertexInputInfo =
-        PipelineVertexInputStateCreateInfo()
-            .setVertexBindingDescriptionCount(1)
-            .setPVertexBindingDescriptions(&bindingDesc)
-            .setVertexAttributeDescriptionCount(n)
-            .setPVertexAttributeDescriptions(attributeDescs.data());
+        make_vertex_input_state(vertexLayout, vertexStride, bindingDesc, attributeDescs);
 
     // input assembly is the configuration for drawing triangle lists, strips,
     // or individual points. we are just going to draw triangle list
@@ -156,6 +168,108 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
 
     // finally build the pipeline
     pipeline = pipelineBuilder.build_pipeline(api_data.device, api_data.def_renderPass);
+}
+
+void Shader_API_Data::buildDepthOnlyPipeline(GraphicsManager_API_data &api_data,
+                                            vk::RenderPass pass, Vector2i extent,
+                                            VertexLayout &vertexLayout, uint vertexStride) {
+    using namespace vk;
+
+    if (!vertexShader)
+        THROW_EXCEPTION("Cannot build a shadow pipeline without a vertex shader!");
+
+    // Both descriptors are required: the casters pass reads the per-mesh
+    // ModelData (binding 0) and the scene LightData (binding 2), both declared
+    // through addUniformBuffer() before this call. No push constants.
+    PipelineLayoutCreateInfo plInfo{};
+    plInfo.setLayoutCount = 1;
+    plInfo.pSetLayouts = &descriptorSetLayout;
+    layout = api_data.device.createPipelineLayout(plInfo);
+
+    // Vertex stage only: no fragment work at all. The pass writes depth, which
+    // is the whole point, and a pipeline without a fragment stage is legal.
+    PipelineShaderStageCreateInfo stage = VulkanHelper::pipeline_shader_stage_create_info(
+        ShaderStageFlagBits::eVertex, vertexShader);
+
+    VertexInputBindingDescription bindingDesc;
+    vec<VertexInputAttributeDescription> attributeDescs;
+    PipelineVertexInputStateCreateInfo vertexInput =
+        make_vertex_input_state(vertexLayout, vertexStride, bindingDesc, attributeDescs);
+
+    PipelineInputAssemblyStateCreateInfo inputAssembly{};
+    inputAssembly.topology = PrimitiveTopology::eTriangleList;
+    inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+    // The viewport is the shadow map, not the window: this pipeline is never
+    // used for the swapchain.
+    Viewport viewport{};
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = (float)extent.x;
+    viewport.height = (float)extent.y;
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
+
+    Rect2D scissor{};
+    scissor.offset = Offset2D(0, 0);
+    scissor.extent = Extent2D(extent.x, extent.y);
+
+    PipelineViewportStateCreateInfo viewportState{};
+    viewportState.viewportCount = 1;
+    viewportState.pViewports = &viewport;
+    viewportState.scissorCount = 1;
+    viewportState.pScissors = &scissor;
+
+    // Both faces are casters: a closed box must not punch a hole in the map
+    // because of the winding it happens to have.
+    PipelineRasterizationStateCreateInfo rasterizer{};
+    rasterizer.polygonMode = PolygonMode::eFill;
+    rasterizer.cullMode = CullModeFlagBits::eNone;
+    rasterizer.frontFace = FrontFace::eClockwise;
+    rasterizer.lineWidth = 1.f;
+    rasterizer.depthClampEnable = VK_FALSE;
+    rasterizer.rasterizerDiscardEnable = VK_FALSE;
+    rasterizer.depthBiasEnable = VK_FALSE;
+
+    PipelineMultisampleStateCreateInfo multisampling{};
+    multisampling.rasterizationSamples = SampleCountFlagBits::e1;
+    multisampling.sampleShadingEnable = VK_FALSE;
+
+    // The depth state the scene pipeline does NOT set explicitly (it relies on
+    // the defaults, i.e. depth testing off); here it is the entire purpose.
+    PipelineDepthStencilStateCreateInfo depthStencil{};
+    depthStencil.depthTestEnable = VK_TRUE;
+    depthStencil.depthWriteEnable = VK_TRUE;
+    depthStencil.depthCompareOp = CompareOp::eLess;
+    depthStencil.depthBoundsTestEnable = VK_FALSE;
+    depthStencil.stencilTestEnable = VK_FALSE;
+
+    // The shadow render pass has no colour attachment, so there is nothing to
+    // blend into.
+    PipelineColorBlendStateCreateInfo colorBlending{};
+    colorBlending.logicOpEnable = VK_FALSE;
+    colorBlending.attachmentCount = 0;
+    colorBlending.pAttachments = nullptr;
+
+    GraphicsPipelineCreateInfo pipelineInfo{};
+    pipelineInfo.stageCount = 1;
+    pipelineInfo.pStages = &stage;
+    pipelineInfo.pVertexInputState = &vertexInput;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pDepthStencilState = &depthStencil;
+    pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.layout = layout;
+    pipelineInfo.renderPass = pass;
+    pipelineInfo.subpass = 0;
+
+    vk::Pipeline newPipeline;
+    auto res = api_data.device.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
+                                                       &newPipeline);
+    THROW_VK_EX_IF_BAD(res);
+    pipeline = newPipeline;
 }
 
 void Shader_API_Data::cleanupPipeline(GraphicsManager_API_data &api_data) {

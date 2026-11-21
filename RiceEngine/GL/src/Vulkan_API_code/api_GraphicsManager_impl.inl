@@ -152,6 +152,7 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     init_descriptor_pool();
     init_depth_image();
     init_def_renderpass();
+    init_shadow_renderpass();
     init_framebuffers();
     init_sync_structures();
 
@@ -278,13 +279,17 @@ void GraphicsManager_API_data::init_descriptor_pool() {
     // Every uniform buffer allocates one set per swapchain image and draws
     // allocate their own sets too, so the pool has to be much larger than the
     // swapchain itself - sizing it as "n descriptors" ran it dry immediately.
-    vk::DescriptorPoolSize poolSize{};
-    poolSize.type = vk::DescriptorType::eUniformBuffer;
-    poolSize.descriptorCount = 0x10000;
+    // Two descriptor types: uniform buffers (ModelData / material / light) and
+    // combined image samplers (the shadow map).
+    std::array<vk::DescriptorPoolSize, 2> poolSizes{};
+    poolSizes[0].type = vk::DescriptorType::eUniformBuffer;
+    poolSizes[0].descriptorCount = 0x10000;
+    poolSizes[1].type = vk::DescriptorType::eCombinedImageSampler;
+    poolSizes[1].descriptorCount = 0x1000;
 
     vk::DescriptorPoolCreateInfo poolInfo{};
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = poolSizes.size();
+    poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = 0x10000;
     poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
@@ -479,6 +484,65 @@ void GraphicsManager_API_data::init_def_renderpass() {
     render_pass_info.pDependencies = &dependency;
 
     auto res = device.createRenderPass(&render_pass_info, nullptr, &def_renderPass);
+    THROW_VK_EX_IF_BAD(res);
+}
+
+void GraphicsManager_API_data::init_shadow_renderpass() {
+    using namespace vk;
+
+    // One depth attachment, no colour attachment: this pass exists only to fill
+    // the shadow map. Contents are cleared to 1.0 (far) at the start of every
+    // pass and handed to the scene shaders as a read-only depth texture.
+    AttachmentDescription depth{};
+    depth.format = Format::eD32Sfloat;
+    depth.samples = SampleCountFlagBits::e1;
+    depth.loadOp = AttachmentLoadOp::eClear;
+    depth.storeOp = AttachmentStoreOp::eStore;
+    depth.stencilLoadOp = AttachmentLoadOp::eDontCare;
+    depth.stencilStoreOp = AttachmentStoreOp::eDontCare;
+    // Undefined discards the previous frame's contents (the pass clears anyway)
+    // and keeps an already recorded command buffer valid on every replay, the
+    // same trick the swapchain attachment uses.
+    depth.initialLayout = ImageLayout::eUndefined;
+    depth.finalLayout = ImageLayout::eShaderReadOnlyOptimal;
+
+    AttachmentReference depth_ref{};
+    depth_ref.attachment = 0;
+    depth_ref.layout = ImageLayout::eDepthStencilAttachmentOptimal;
+
+    SubpassDescription subpass{};
+    subpass.pipelineBindPoint = PipelineBindPoint::eGraphics;
+    subpass.colorAttachmentCount = 0;
+    subpass.pDepthStencilAttachment = &depth_ref;
+
+    // The map is written at the end of this pass and read by the fragment
+    // shaders of the main pass, in the same command buffer: the second
+    // dependency makes the depth writes available and visible to them.
+    std::array<SubpassDependency, 2> deps{};
+    deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+    deps[0].dstSubpass = 0;
+    deps[0].srcStageMask = PipelineStageFlagBits::eFragmentShader |
+                           PipelineStageFlagBits::eLateFragmentTests;
+    deps[0].srcAccessMask = AccessFlagBits::eShaderRead;
+    deps[0].dstStageMask = PipelineStageFlagBits::eEarlyFragmentTests;
+    deps[0].dstAccessMask = AccessFlagBits::eDepthStencilAttachmentWrite;
+
+    deps[1].srcSubpass = 0;
+    deps[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+    deps[1].srcStageMask = PipelineStageFlagBits::eLateFragmentTests;
+    deps[1].srcAccessMask = AccessFlagBits::eDepthStencilAttachmentWrite;
+    deps[1].dstStageMask = PipelineStageFlagBits::eFragmentShader;
+    deps[1].dstAccessMask = AccessFlagBits::eShaderRead;
+
+    RenderPassCreateInfo info{};
+    info.attachmentCount = 1;
+    info.pAttachments = &depth;
+    info.subpassCount = 1;
+    info.pSubpasses = &subpass;
+    info.dependencyCount = deps.size();
+    info.pDependencies = deps.data();
+
+    auto res = device.createRenderPass(&info, nullptr, &shadow_renderPass);
     THROW_VK_EX_IF_BAD(res);
 }
 
@@ -703,6 +767,7 @@ void GraphicsManager_API_data::cleanup() {
     cleanupSwapchain();
 
     device.destroy(def_renderPass);
+    device.destroy(shadow_renderPass);
 
     device.destroy(presentSemaphore);
     for (auto &sem : imageSemaphores)

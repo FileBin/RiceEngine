@@ -16,6 +16,7 @@
 #include "api_CommandBuffer.hpp"
 #include "api_GraphicsManager.hpp"
 #include "api_Shader.hpp"
+#include "api_ShadowMap.hpp"
 #include "api_UniformBuffer.hpp"
 #include <Rice/Math/Vectors.hpp>
 #include <array>
@@ -41,9 +42,18 @@ struct DescriptorSetCreator {
     vk::PipelineLayout layout;
     vk::DescriptorSetLayout descriptorSetLayout;
 
+    /* Binding numbers of the descriptor set layout of the shader that is
+     * currently bound. The write map below is shared by the whole command
+     * buffer, but a set may only contain the bindings its layout declares: a
+     * shader built without Shader::addLighting() must not receive the scene
+     * light block (2) or the shadow map (3), and a pipeline whose layout has no
+     * such binding rejects a write to it. Filled in by the SetShader command. */
+    std::set<uint> declared;
+
     struct WriteDescriptor {
         vk::WriteDescriptorSet write;
-        vk::DescriptorBufferInfo info;
+        vk::DescriptorBufferInfo buffer_info;
+        vk::DescriptorImageInfo image_info;
     };
 
     map<uint, WriteDescriptor> writes;
@@ -63,7 +73,27 @@ struct DescriptorSetCreator {
         write.dstBinding = binding;
         write.descriptorCount = 1;
 
-        writes[binding] = {write, info};
+        writes[binding] = {write, info, {}};
+    }
+
+    /* The shadow map as a combined image sampler. The sampler has comparison
+     * off, so the shader reads raw depth (texelFetch) and compares itself. */
+    void addWrite(ptr<ShadowMap> map, uint binding) {
+        using namespace vk;
+        auto &api_data = map->api_data;
+
+        DescriptorImageInfo info;
+        info.sampler = api_data->getSampler();
+        info.imageView = api_data->getView();
+        info.imageLayout = ImageLayout::eShaderReadOnlyOptimal;
+
+        WriteDescriptorSet write;
+        write.descriptorType = DescriptorType::eCombinedImageSampler;
+        write.dstArrayElement = 0;
+        write.dstBinding = binding;
+        write.descriptorCount = 1;
+
+        writes[binding] = {write, {}, info};
     }
 };
 
@@ -214,6 +244,9 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         }
         creator.layout = sh_api_data->layout;
         creator.descriptorSetLayout = sh_api_data->descriptorSetLayout;
+        creator.declared.clear();
+        for (auto &b : sh_api_data->bindings)
+            creator.declared.insert(b.binding);
     } break;
 
     case CommandBuffer::Command::BindVertexBuffer: {
@@ -273,6 +306,38 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         creator.addWrite(ubo, binding);
     } break;
 
+    case CommandBuffer::Command::BeginShadowPass: {
+        auto shadow_map = *(ptr<ShadowMap> *)command->arg_chain->getData();
+        auto &sdata = *shadow_map->api_data;
+
+        vk::RenderPassBeginInfo rpInfo = {};
+        rpInfo.renderPass = api_data.shadow_renderPass;
+        rpInfo.framebuffer = sdata.getFramebuffer();
+        rpInfo.renderArea.offset.x = 0;
+        rpInfo.renderArea.offset.y = 0;
+        rpInfo.renderArea.extent = vk::Extent2D(sdata.size, sdata.size);
+
+        // The pass clears the depth attachment itself; 1.0 = far = "nothing
+        // here", which is what the shader's PCF treats as fully lit.
+        vk::ClearValue clear{};
+        clear.depthStencil = vk::ClearDepthStencilValue(1.f, 0);
+        rpInfo.clearValueCount = 1;
+        rpInfo.pClearValues = &clear;
+
+        cmd[i].beginRenderPass(&rpInfo, vk::SubpassContents::eInline);
+    } break;
+
+    case CommandBuffer::Command::EndShadowPass: {
+        cmd[i].endRenderPass();
+    } break;
+
+    case CommandBuffer::Command::BindShadowMap: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto shadow_map = *(ptr<ShadowMap> *)(it++).current->getData();
+        auto binding = *(uint *)(it++).current->getData();
+        creator.addWrite(shadow_map, binding);
+    } break;
+
     default:
         THROW_EXCEPTION("Unknown command occured!");
         break;
@@ -293,7 +358,6 @@ inline void DrawAdditionData::bindDescriptosSets(DescriptorSetCreator &creator,
 
 inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {
     using namespace vk;
-    uint maxCount = creator.writes.size();
 
     // Sets come from the manager-wide pool: creating a pool per draw meant a
     // vkCreateDescriptorPool for every command on every rebuild.
@@ -305,13 +369,22 @@ inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator)
     auto res = api_data.device.allocateDescriptorSets(&allocInfo, &descriptorSet);
     THROW_VK_EX_IF_BAD(res);
 
-    vec<WriteDescriptorSet> writes{maxCount};
-    uint i = 0;
+    // Only the bindings the bound shader's layout declares may be written: the
+    // write map accumulates every BindUniformBuffer/BindShadowMap of the whole
+    // command buffer, and a set whose layout has no binding N rejects a write
+    // to N (different shaders of one frame declare different bindings).
+    vec<WriteDescriptorSet> writes;
+    writes.reserve(creator.writes.size());
     for (auto &w : creator.writes) {
+        if (!creator.declared.empty() && creator.declared.count(w.first) == 0)
+            continue;
         auto write = w.second.write;
         write.dstSet = descriptorSet;
-        write.pBufferInfo = &w.second.info;
-        writes[i++] = write;
+        if (write.descriptorType == DescriptorType::eCombinedImageSampler)
+            write.pImageInfo = &w.second.image_info;
+        else
+            write.pBufferInfo = &w.second.buffer_info;
+        writes.push_back(write);
     }
     api_data.device.updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
 }

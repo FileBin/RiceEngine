@@ -78,6 +78,21 @@ void CommandBuffer::endRenderPass() {
     commands.push_back(new_ptr<Command>(Command::EndRenderPass));
 }
 
+void CommandBuffer::beginShadowPass(ptr<ShadowMap> shadow_map) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::BeginShadowPass, shadow_map));
+}
+
+void CommandBuffer::endShadowPass() {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::EndShadowPass));
+}
+
+void CommandBuffer::bindShadowMap(ptr<ShadowMap> shadow_map, uint binding) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::BindShadowMap, shadow_map, binding));
+}
+
 void CommandBuffer::executeCommandBuffer(ptr<CommandBuffer> cmd) {
     needRecreate();
     commands.push_back(new_ptr<Command>(Command::ExecuteCommandBuffer, cmd));

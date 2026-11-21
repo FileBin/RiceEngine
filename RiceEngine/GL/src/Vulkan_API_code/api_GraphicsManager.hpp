@@ -54,6 +54,12 @@ struct GraphicsManager_API_data {
 
     vk::RenderPass def_renderPass; // the default render pass
 
+    // The depth-only pass the directional light's shadow map is rendered in: a
+    // single D32_SFLOAT attachment, no colour targets, contents cleared every
+    // frame and handed to the fragment shaders as a sampled depth texture.
+    // Size independent, so it survives swapchain re-creation.
+    vk::RenderPass shadow_renderPass;
+
     vk::Semaphore presentSemaphore; // signalled by vkAcquireNextImageKHR
     vk::Fence renderFence;
 
@@ -118,6 +124,7 @@ struct GraphicsManager_API_data {
     void init_commands();
     void init_descriptor_pool();
     void init_def_renderpass();
+    void init_shadow_renderpass();
     void init_framebuffers();
     void init_sync_structures();
     void init_depth_image();

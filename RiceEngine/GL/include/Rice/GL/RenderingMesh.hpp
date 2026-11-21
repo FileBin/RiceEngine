@@ -80,6 +80,17 @@ class RenderingMesh : public IRegistrable {
 
     void addCommands(ptr<Graphics::CommandBuffer> cmd);
 
+    /**
+     * Records this mesh into the depth-only shadow pass: vertex + index bind,
+     * the per-mesh ModelData at binding 0, the scene light block at
+     * `light_binding` (LightingBindings::kLightData, 2) and one indexed draw.
+     * The casters pipeline (Shader::buildShadowPipeline + shadow.vert)
+     * transforms by world * light_wvp, so it reuses the same buffer objects as
+     * the scene draw — no extra per-mesh allocation.
+     */
+    void addShadowCommands(ptr<Graphics::CommandBuffer> cmd, ptr<UniformBuffer> light,
+                           uint light_binding);
+
     void Register(size_t i) { idx = i; }
 
     size_t Unregister() {

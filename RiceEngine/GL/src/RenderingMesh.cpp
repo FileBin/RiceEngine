@@ -1,6 +1,7 @@
 #include "Rice/Engine/Log.hpp"
 #include "Rice/GL/CommandBuffer.hpp"
 #include "Rice/GL/GraphicsManager.hpp"
+#include "Rice/GL/LightData.hpp"
 #include "Rice/GL/Model.hpp"
 #include "Rice/GL/ModelData.hpp"
 #include "Rice/GL/UniformBuffer.hpp"
@@ -85,6 +86,17 @@ void RenderingMesh::addCommands(ptr<Graphics::CommandBuffer> cmd) {
     cmd->bindVertexBuffer(vertexBuffer);
     cmd->bindIndexBuffer(indexBuffer);
     cmd->bindUniformBuffer(constBuffer, 0);
+    cmd->drawIndexed(indexBuffer);
+}
+
+void RenderingMesh::addShadowCommands(ptr<Graphics::CommandBuffer> cmd, ptr<UniformBuffer> light,
+                                      uint light_binding) {
+    cmd->bindVertexBuffer(vertexBuffer);
+    cmd->bindIndexBuffer(indexBuffer);
+    // Same ModelData object the scene draw uses: its `world` is refreshed every
+    // frame in updateConstBuffer(), so the map follows the object for free.
+    cmd->bindUniformBuffer(constBuffer, LightingBindings::kMeshData);
+    cmd->bindUniformBuffer(light, light_binding);
     cmd->drawIndexed(indexBuffer);
 }
 
