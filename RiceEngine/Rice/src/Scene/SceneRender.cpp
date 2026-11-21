@@ -83,6 +83,14 @@ void SceneRender::updateCmd() {
     need_rebuild = true;
 }
 
+void SceneRender::collectGeometryChanges() {
+    for (auto &sq : mainQueue)
+        for (auto &mq : sq.second.materials)
+            for (auto &mesh : mq.second.mesh_collection.getCollectionWithGaps())
+                if (mesh && mesh->consumeCmdDirty())
+                    need_rebuild = true;
+}
+
 void SceneRender::rebuildCmd() {
     if (need_rebuild) {
         updateCmd();
@@ -96,8 +104,10 @@ void SceneRender::draw(ptr<Components::Camera> camera) {
     auto g_mgr = getEngine()->getGraphicsManager();
     g_mgr->sync();
     // Command buffers are re-recorded only when the queue actually changed
-    // (meshes/materials registered); per-frame rebuilds re-recorded every draw
-    // command and re-allocated its descriptor set.
+    // (meshes/materials registered, or a mesh got new geometry of a different
+    // size); per-frame rebuilds re-recorded every draw command and re-allocated
+    // its descriptor set.
+    collectGeometryChanges();
     rebuildCmd();
     uint count = update(camera);
     g_mgr->executeCmd(main_cmd);

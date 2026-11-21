@@ -54,6 +54,12 @@ Buffer_API_Data &Buffer_API_Data::setData(void *pData, size_t nData, size_t offs
 
 Buffer_API_Data &Buffer_API_Data::free() {
     if (allocated) {
+        // A staging copy for this buffer may still be queued (uploads are
+        // submitted at the next draw); recording it against a destroyed handle
+        // is invalid, so forget those copies first. The manager is already gone
+        // during shutdown cleanup, when nothing is queued anymore.
+        if (api_data.memoryManager)
+            api_data.memoryManager->forgetCopyDestination(buffer);
         api_data.device.destroy(buffer);
         api_data.device.freeMemory(memory);
     }

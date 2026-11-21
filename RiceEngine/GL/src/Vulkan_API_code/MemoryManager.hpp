@@ -65,6 +65,11 @@ struct MemoryManager {
   public:
     void copyDataToBuffer(void *pData, size_t nData, size_t dstOffset, vk::Buffer dstBuffer);
 
+    /* Drops copies that were queued for `dst` but not submitted yet. Called
+     * when a buffer is destroyed: the copy would otherwise be recorded against
+     * a destroyed handle (invalid VkBuffer) on the next draw. */
+    void forgetCopyDestination(vk::Buffer dst);
+
   private:
     MemoryManager(GraphicsManager_API_data &api_data);
     void update();

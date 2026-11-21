@@ -56,6 +56,9 @@ class SceneRender : public enable_ptr<SceneRender> {
 
     void updateCmd();
     void rebuildCmd();
+    // Consumes RenderingMesh::cmd_dirty flags: a mesh whose geometry was
+    // replaced (resetMesh) needs the DrawIndexed count recorded again.
+    void collectGeometryChanges();
 
     uint update(ptr<Components::Camera> camera);
 

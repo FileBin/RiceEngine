@@ -18,6 +18,7 @@ NSP_GL_BEGIN
 
 RenderingMesh::RenderingMesh(ptr<GraphicsManager> g_mgr, ptr<Mesh> mesh, ptr<Material> mat,
                              ptr<Components::Transform> t) {
+    graphics_manager = g_mgr;
     material = mat;
     orig = mesh;
     transform = t;
@@ -47,7 +48,31 @@ void RenderingMesh::updateCmdBuffer() {
     // cmdBuffer->update();
 }
 
-void RenderingMesh::updateConstBuffer(Matrix4x4 view, Matrix4x4 proj) {
+void RenderingMesh::resetMesh(ptr<Mesh> mesh) {
+    if (!mesh)
+        THROW_NULL_PTR_EXCEPTION(mesh.get());
+    if (mesh->vertexBuffer.count() == 0 || mesh->indexBuffer.empty())
+        THROW_EXCEPTION("RenderingMesh::resetMesh: the new mesh is empty (remove the "
+                        "submesh from the model instead)");
+
+    // The buffers are freed below, so no GPU work may still reference them:
+    // the previous frame's submission has to be complete (uploads and draws of
+    // frame N-1 are submitted before its render fence is signalled). Queued but
+    // not yet submitted staging copies are dropped by Buffer_API_Data::free().
+    graphics_manager->sync();
+
+    orig = mesh;
+    // Both resets free and re-allocate the backing buffer, so the vertex/index
+    // count may change freely. Keeps the same Buffer objects, which is what the
+    // recorded commands hold on to.
+    vertexBuffer->reset(mesh->vertexBuffer);
+    indexBuffer->reset(mesh->indexBuffer);
+    // The old DrawIndexed command still carries the old count; SceneRender
+    // re-records every command buffer on the next frame while this is set.
+    cmd_dirty = true;
+}
+
+void RenderingMesh::updateConstBuffer(const Matrix4x4 &view, const Matrix4x4 &proj) {
     ModelData data;
     auto world = transform->getTransformationMatrix();
     data.world = world;
