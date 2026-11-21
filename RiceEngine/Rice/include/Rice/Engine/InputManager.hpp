@@ -33,6 +33,7 @@ class InputManager {
     void update();
     void lockMouse();
     void unlockMouse();
+    bool isMouseLocked() const { return is_mouse_locked; }
 
   private:
     void reset();
@@ -46,6 +47,9 @@ class InputManager {
     short mouseScrollDelta = 0, mouseWheel = 0;
     Vector2 mousePos = {};
     Vector2i mouseInfinitePos = {}, mouseDelta = {};
+    // Every motion event of the current frame; `mouseDelta` used to be overwritten
+    // per event, so all but the last event of a frame were dropped.
+    Vector2i pendingDelta = {};
     wptr<Window> window;
     Util::Rect mouseRect;
     void eventKey(KeyCode key, bool rs_state);
