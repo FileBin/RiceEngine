@@ -21,20 +21,34 @@ This Engine uses object and components to build your game scene (like in Unity).
 * Serialization (almost done in dev branch)
 * Dynamic component loading system (from .so or .dll)
 * Audio System.
-  
-## Installation
 
-execute this commands for install engine from sources
+## Building
 
-`git clone https://github.com/FileBin/RiceEngine.git`
+The build is reproducible through a Nix flake: every third-party dependency
+(SDL2, fmt, Vulkan headers/loader, vk-bootstrap, magic_enum, nlohmann_json,
+libogg/libvorbis, libcds, RiceMetaCompiler) comes from the flake and is pinned in
+`flake.lock`. Nothing third-party is vendored in the repository.
 
-`./build.cmd`
+```bash
+# dev shell: cmake, ninja, gcc, glslc, vulkan-tools, all dependencies
+nix develop
 
-`cd build`
+# inside the shell
+cmake -S . -B build -G Ninja
+cmake --build build
+# samples land in build/RiceEngine/Tests (CubeTest, QuadTest, MultiCubePerformanceTest, ...)
 
-`make all -j4`
+# or build the whole thing hermetically and use the result
+nix build .#default
+ls result/bin
+```
 
-`make install`
+libcds and RiceMetaCompiler are flake inputs (pinned by `flake.lock`) instead of
+git submodules, and are built from their upstream sources on demand:
+
+```bash
+nix build .#libcds .#rice-meta-compiler
+```
 
 ## Documentation
 
