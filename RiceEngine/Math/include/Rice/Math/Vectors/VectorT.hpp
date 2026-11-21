@@ -107,7 +107,7 @@ template <typename T, size_t N> struct VectorT : public VectorData<T, N> {
     VectorT normalized() const { return (*this) / length(); }
     VectorT qNormalized() const;
 
-    static T dot(VectorT a, VectorT b) {
+    static T dot(const VectorT &a, const VectorT &b) {
         T sum = 0;
         for (size_t i = 0; i < N; ++i) {
             sum += a.dim[i] * b.dim[i];
@@ -115,14 +115,14 @@ template <typename T, size_t N> struct VectorT : public VectorData<T, N> {
         return sum;
     }
 
-    static VectorT<T, 3> cross(VectorT<T, 3> left, VectorT<T, 3> right) {
+    static VectorT<T, 3> cross(const VectorT<T, 3> &left, const VectorT<T, 3> &right) {
         return VectorT<T, 3>({left.y * right.z - left.z * right.y,
                               left.z * right.x - left.x * right.z,
                               left.x * right.y - left.y * right.x});
     }
 
-    static VectorT lerp(VectorT a, VectorT b, T t) { return a * (1 - t) + b * t; }
-    static VectorT projectOnPlane(VectorT vec, VectorT planeNormal) {
+    static VectorT lerp(const VectorT &a, const VectorT &b, T t) { return a * (1 - t) + b * t; }
+    static VectorT projectOnPlane(const VectorT &vec, const VectorT &planeNormal) {
         return vec - planeNormal * dot(vec, planeNormal);
     }
 

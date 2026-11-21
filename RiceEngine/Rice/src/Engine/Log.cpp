@@ -68,7 +68,7 @@ void Log::_init() {
         file << fmt::format("{}: {}.\n---------------------------------------\n\n",
                             llocale.log_begin, get_date());
     } else {
-        printf(llocale.log_creation_error.c_str());
+        printf("%s\n", llocale.log_creation_error.c_str());
     }
 }
 

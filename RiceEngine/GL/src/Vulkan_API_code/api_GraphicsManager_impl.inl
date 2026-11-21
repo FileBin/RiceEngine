@@ -202,10 +202,14 @@ void GraphicsManager_API_data::init_swapchain() {
 
         // store swapchain and its related images
         swapchain = vkbSwapchain.swapchain;
-        swapchainImages = (vec<vk::Image> &)vkbSwapchain.get_images().value();
-        swapchainImageViews = (vec<vk::ImageView> &)vkbSwapchain.get_image_views().value();
+        // vk-bootstrap hands out raw Vulkan handles; vulkan-hpp wraps them, so
+        // copy instead of casting the vector type.
+        const auto &vkbImages = vkbSwapchain.get_images().value();
+        swapchainImages.assign(vkbImages.begin(), vkbImages.end());
+        const auto &vkbImageViews = vkbSwapchain.get_image_views().value();
+        swapchainImageViews.assign(vkbImageViews.begin(), vkbImageViews.end());
 
-        swapchainImageFormat = (vk::Format &)vkbSwapchain.image_format;
+        swapchainImageFormat = static_cast<vk::Format>(vkbSwapchain.image_format);
     }
     Log::debug("Swapchain built!");
 }
