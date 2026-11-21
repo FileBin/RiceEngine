@@ -49,6 +49,16 @@ class SceneBase : public enable_ptr<SceneBase> {
 
     ptr<SceneObjectBase> getRegistered(UUID uuid);
 
+    /*
+     * Visits every object registered in this scene (the root included), once
+     * each, in unspecified order. Main-thread only, and only outside an update
+     * pass: it is the read-only counterpart of createEmpty()/destroy(), used by
+     * the renderer to find scene-wide resources such as the
+     * Components::DirectionalLight. Do not create, destroy or re-parent objects
+     * from the visitor - the map is being iterated.
+     */
+    void forEachObject(const std::function<void(ptr<SceneObjectBase>)> &visitor);
+
     ptr<Object> createEmpty(String name);
     ptr<Object> createEnabled(String name);
 

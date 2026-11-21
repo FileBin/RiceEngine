@@ -84,6 +84,13 @@ ptr<SceneObjectBase> SceneBase::getRegistered(UUID uuid) {
     }
 }
 
+void SceneBase::forEachObject(const std::function<void(ptr<SceneObjectBase>)> &visitor) {
+    for (auto &entry : all_objects) {
+        if (entry.second)
+            visitor(entry.second);
+    }
+}
+
 UUID SceneBase::getNextUUID() { return UUID(uuid_counter++); }
 
 NSP_ENGINE_END
