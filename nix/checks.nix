@@ -168,6 +168,8 @@ in
 
   cpu-concurrent-queue = cpuTest "ConcurrentQueueTests";
   cpu-concurrent-list = cpuTest "ConcurrentListTest";
+  # Util::RegisterCollection free-list regression (no display, no Vulkan).
+  cpu-register-collection = cpuTest "ObjectChurnTest";
 
   smoke-cube = smoke "CubeTest";
   smoke-multi-cube = smoke "MultiCubePerformanceTest";
