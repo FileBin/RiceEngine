@@ -1,24 +1,14 @@
-cmake_minimum_required(VERSION 3.19)
+file(GLOB_RECURSE SOURCES "src/*.c" "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
-project("RiceMath")
+add_library(RiceMath ${SOURCES} ${HEADERS})
+add_library(Rice::Math ALIAS RiceMath)
+rice_force_include(RiceMath "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+target_link_libraries(RiceMath PRIVATE rice_headers)
+target_include_directories(RiceMath
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../Util/include"
+)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-set(RICE_MATH_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-set(RICE_MATH_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
-
-set(CMAKE_CXX_STANDARD 20)
-
-#file search
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" )
-file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
-
-add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
-
-include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../Util/include)
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)
+install(TARGETS RiceMath DESTINATION lib)
+install(DIRECTORY include DESTINATION .)
