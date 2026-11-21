@@ -116,13 +116,25 @@ void SceneRender::draw(ptr<Components::Camera> camera) {
 
 uint SceneRender::update(ptr<Components::Camera> camera) {
     uint count = 0;
+    if (!camera)
+        return count;
+
+    // Per-frame, per-scene constants. Both used to be recomputed inside the
+    // per-mesh loop: getProjectionMatrix() queries SDL_GetWindowSize + tan(),
+    // getViewMatrix() inverts the 4x4 transformation matrix - so a scene with N
+    // meshes paid for 2N window queries and N matrix inversions per frame.
+    // Computing them once here yields the same values (the window cannot resize
+    // in the middle of a frame) and keeps resize behaviour unchanged: the next
+    // frame queries the new size again.
+    const Matrix4x4 view = camera->getViewMatrix();
+    const Matrix4x4 projection = camera->getProjectionMatrix();
+
     for (auto &sq : mainQueue)
         for (auto &mq : sq.second.materials) {
-            auto coll = mq.second.mesh_collection.getCollectionWithGaps();
-            for (auto ptr : coll) {
+            auto &coll = mq.second.mesh_collection.getCollectionWithGaps();
+            for (auto &ptr : coll) {
                 if (ptr) {
-                    auto proj = camera->getProjectionMatrix();
-                    ptr->updateConstBuffer(camera->getViewMatrix(), proj);
+                    ptr->updateConstBuffer(view, projection);
                     ptr->updateCmdBuffer();
                     count++;
                 }
