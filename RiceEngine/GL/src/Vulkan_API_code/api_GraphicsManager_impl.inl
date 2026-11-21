@@ -225,57 +225,39 @@ void GraphicsManager_API_data::init_swapchain() {
     // areas) must use the size the driver actually gave us.
     windowExcent = vkbSwapchain.extent;
 
-    // Fresh images are Undefined; remember that instead of assuming PresentSrc.
-    swapchainLayouts.assign(swapchainImages.size(), vk::ImageLayout::eUndefined);
+    // One presentation semaphore per image, recreated together with the images.
+    for (auto &sem : imageSemaphores)
+        if (sem)
+            device.destroy(sem);
+    imageSemaphores.clear();
+    vk::SemaphoreCreateInfo semInfo{};
+    for (size_t i = 0; i < swapchainImages.size(); i++)
+        imageSemaphores.push_back(device.createSemaphore(semInfo));
 
     Log::debug("Swapchain built! {}x{}, {} images (window {}x{}, drawable {}x{})",
                windowExcent.width, windowExcent.height, swapchainImages.size(),
                graphicsManager->window->getWidth(), graphicsManager->window->getHeight(), w, h);
 }
 
-void GraphicsManager_API_data::transitionSwapchainImage(vk::CommandBuffer cmd, uint imageIndex,
-                                                        vk::ImageLayout newLayout) {
-    if (imageIndex >= swapchainLayouts.size() || imageIndex >= swapchainImages.size())
-        return;
-
-    vk::ImageLayout oldLayout = swapchainLayouts[imageIndex];
-    if (oldLayout == newLayout)
+void GraphicsManager_API_data::prepareSwapchainImage(vk::CommandBuffer cmd, uint imageIndex) {
+    if (imageIndex >= swapchainImages.size())
         return;
 
     using namespace vk;
 
     ImageMemoryBarrier barrier{};
-    barrier.oldLayout = oldLayout;
-    barrier.newLayout = newLayout;
+    barrier.oldLayout = ImageLayout::eUndefined; // discard, whatever it was
+    barrier.newLayout = ImageLayout::eColorAttachmentOptimal;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = swapchainImages[imageIndex];
     barrier.subresourceRange = ImageSubresourceRange(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+    barrier.srcAccessMask = AccessFlags{};
+    barrier.dstAccessMask = AccessFlagBits::eColorAttachmentWrite;
 
-    PipelineStageFlags srcStage = PipelineStageFlagBits::eTopOfPipe;
-    PipelineStageFlags dstStage = PipelineStageFlagBits::eColorAttachmentOutput;
-    AccessFlags srcAccess{};
-    AccessFlags dstAccess = AccessFlagBits::eColorAttachmentWrite;
-
-    if (oldLayout == ImageLayout::ePresentSrcKHR) {
-        // nothing to flush: presentation engine already finished reading it
-        srcStage = PipelineStageFlagBits::eColorAttachmentOutput;
-    } else if (oldLayout != ImageLayout::eUndefined) {
-        srcStage = PipelineStageFlagBits::eColorAttachmentOutput;
-        srcAccess = AccessFlagBits::eColorAttachmentWrite;
-    }
-
-    if (newLayout == ImageLayout::ePresentSrcKHR) {
-        dstStage = PipelineStageFlagBits::eBottomOfPipe;
-        dstAccess = AccessFlags{};
-    }
-
-    barrier.srcAccessMask = srcAccess;
-    barrier.dstAccessMask = dstAccess;
-
-    cmd.pipelineBarrier(srcStage, dstStage, DependencyFlags{}, nullptr, nullptr, barrier);
-
-    swapchainLayouts[imageIndex] = newLayout;
+    cmd.pipelineBarrier(PipelineStageFlagBits::eTopOfPipe,
+                        PipelineStageFlagBits::eColorAttachmentOutput, DependencyFlags{},
+                        nullptr, nullptr, barrier);
 }
 
 void GraphicsManager_API_data::init_commands() {
@@ -423,8 +405,10 @@ void GraphicsManager_API_data::init_def_renderpass() {
     color_attachment.format = swapchainImageFormat;
     // 1 sample, we won't be doing MSAA
     color_attachment.samples = vk::SampleCountFlagBits::e1;
-    // we Clear when this attachment is loaded
-    color_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+    // Contents are discarded: the initial layout is Undefined (a LOAD would be
+    // illegal there, VUID-VkAttachmentDescription-format-06410) and the scene
+    // clears the target explicitly with ClearRenderTarget.
+    color_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
     // we keep the attachment stored when the renderpass ends
     color_attachment.storeOp = vk::AttachmentStoreOp::eStore;
     // we don't care about stencil
@@ -433,23 +417,21 @@ void GraphicsManager_API_data::init_def_renderpass() {
     color_attachment.stencilStoreOp =
         vk::AttachmentStoreOp::eDontCare; // vk::AttachmentStoreOp::eStore;
 
-    // The colour image is moved to ColorAttachmentOptimal by an explicit barrier
-    // before every render pass (see transitionSwapchainImage), so the pass must
-    // not claim it arrives in PresentSrc - that is what validation complained
-    // about on the first frame and after every swapchain recreation.
-    color_attachment.initialLayout = vk::ImageLayout::eColorAttachmentOptimal;
-
-    // after the renderpass ends the image stays usable as a colour attachment;
-    // the transition to PresentSrc is recorded once, after all passes of a frame
-    color_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+    // A fresh swapchain image is Undefined; the render pass declares that as its
+    // initial layout and hands the image to the presentation engine itself
+    // (finalLayout = PresentSrc), so the recorded command buffer stays valid on
+    // every replay instead of tracking layouts on the CPU.
+    color_attachment.initialLayout = vk::ImageLayout::eUndefined;
+    color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
     vk::AttachmentDescription depth_attachment{};
     depth_attachment.format = depthFormat;
     depth_attachment.samples = vk::SampleCountFlagBits::e1;
-    depth_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+    depth_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
     depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
-    depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eLoad;
-    depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eStore;
+    // the depth format has a stencil aspect, so stencil ops must be valid too
+    depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+    depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
     // freshly created depth images are Undefined; contents are discarded anyway
     // (the scene clears depth every frame)
     depth_attachment.initialLayout = vk::ImageLayout::eUndefined;
@@ -538,7 +520,7 @@ void GraphicsManager_API_data::init_sync_structures() {
     semaphoreCreateInfo.flags = vk::SemaphoreCreateFlags();
 
     presentSemaphore = device.createSemaphore(semaphoreCreateInfo);
-    renderSemaphore = device.createSemaphore(semaphoreCreateInfo);
+    // per-image semaphores are created together with the swapchain images
 }
 
 void GraphicsManager_API_data::recreateSwapchain() {
@@ -606,23 +588,35 @@ void GraphicsManager_API_data::sync() {
     THROW_VK_EX_IF_BAD(res);
 }
 
-void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
+bool GraphicsManager_API_data::acquireNextImage() {
     if (resizing)
-        return;
+        return false;
+
+    // wait until the GPU has finished the previous frame, so the acquire
+    // semaphore can be reused
     sync();
-
-    device.resetFences({renderFence});
-
-    memoryManager->update();
 
     // request image from the swapchain, 1 second timeout
     auto res = device.acquireNextImageKHR(swapchain, 1000000000, presentSemaphore, nullptr,
                                           &swapchainImageIndex);
     if (res == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
-        return;
+        return false;
     }
-    THROW_VK_EX_IF_BAD(res);
+    if (res != vk::Result::eSuccess && res != vk::Result::eSuboptimalKHR) {
+        THROW_VK_EX(res);
+    }
+    return true;
+}
+
+void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
+    if (resizing)
+        return;
+
+    device.resetFences({renderFence});
+
+    memoryManager->update();
+
     // prepare the submission to the queue.
     // we want to wait on the _presentSemaphore, as that semaphore is signaled
     // when the swapchain is ready we will signal the _renderSemaphore, to
@@ -639,8 +633,10 @@ void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
     submit.waitSemaphoreCount = 1;
     submit.pWaitSemaphores = &presentSemaphore;
 
+    // Signal the semaphore that belongs to this swapchain image: the previous
+    // frame may still be presenting another image with the shared one.
     submit.signalSemaphoreCount = 1;
-    submit.pSignalSemaphores = &renderSemaphore;
+    submit.pSignalSemaphores = &imageSemaphores[swapchainImageIndex];
 
     submit.commandBufferCount = cmd.size();
     submit.pCommandBuffers = cmd.data();
@@ -666,7 +662,7 @@ void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
     presentInfo.pSwapchains = &swapchain;
     presentInfo.swapchainCount = 1;
 
-    presentInfo.pWaitSemaphores = &renderSemaphore;
+    presentInfo.pWaitSemaphores = &imageSemaphores[swapchainImageIndex];
     presentInfo.waitSemaphoreCount = 1;
 
     presentInfo.pImageIndices = &swapchainImageIndex;
@@ -689,13 +685,15 @@ GraphicsManager_API_data::~GraphicsManager_API_data() { cleanup(); }
 void GraphicsManager_API_data::cleanup() {
     if (!instance)
         return;
+
+    // nothing may be in flight before any of the objects below are destroyed
+    device.waitIdle();
+
     if (memoryManager) {
         delete memoryManager;
         memoryManager = nullptr;
     }
     auto graphicsManager = g_mgr.lock();
-
-    device.waitIdle();
 
     if (graphicsManager) {
         graphicsManager->destroyCommandBuffers->invoke();
@@ -707,7 +705,10 @@ void GraphicsManager_API_data::cleanup() {
     device.destroy(def_renderPass);
 
     device.destroy(presentSemaphore);
-    device.destroy(renderSemaphore);
+    for (auto &sem : imageSemaphores)
+        if (sem)
+            device.destroy(sem);
+    imageSemaphores.clear();
     device.destroy(renderFence);
 
     device.destroy(commandPool);

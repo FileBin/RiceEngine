@@ -162,6 +162,9 @@
           } // common);
         });
 
+      # `nix flake check` — build + headless smoke tests against lavapipe.
+      checks = eachSystem (pkgs: import ./nix/checks.nix { inherit pkgs; });
+
       formatter = eachSystem (pkgs: pkgs.nixpkgs-fmt);
     };
 }

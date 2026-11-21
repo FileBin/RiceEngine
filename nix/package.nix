@@ -17,6 +17,9 @@
 , rice-meta-compiler
 , enableTests ? true
 , enableComponentBuilder ? false
+# Debug build defines !NDEBUG, which is what turns on the Vulkan validation
+# layers in GL/src/config.h (GL_DEBUG_MODE). Used by the flake checks.
+, debugBuild ? false
 }:
 
 stdenv.mkDerivation {
@@ -46,6 +49,7 @@ stdenv.mkDerivation {
   ];
 
   cmakeFlags = [
+    "-DCMAKE_BUILD_TYPE=${if debugBuild then "Debug" else "RelWithDebInfo"}"
     "-DRICE_BUILD_TESTS=${if enableTests then "ON" else "OFF"}"
     "-DRICE_BUILD_COMPONENT_BUILDER=${if enableComponentBuilder then "ON" else "OFF"}"
     "-DRICE_METACOMPILER_INCLUDE_DIR=${rice-meta-compiler}/include"

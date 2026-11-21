@@ -35,9 +35,10 @@ struct GraphicsManager_API_data {
                                                      // the windowing system
     vec<vk::Image> swapchainImages = {};             // array of images from the swapchain
     vec<vk::ImageView> swapchainImageViews = {};     // array of image-views from the swapchain
-    // Layout every swapchain image is currently in. Fresh images start Undefined
-    // and are moved explicitly instead of pretending they are in PresentSrc.
-    vec<vk::ImageLayout> swapchainLayouts = {};
+    // One binary semaphore per swapchain image: a semaphore signalled for
+    // presentation may still be in use by the presentation engine, so it cannot
+    // be reused for another image (VUID-vkQueueSubmit-pSignalSemaphores-00067).
+    vec<vk::Semaphore> imageSemaphores = {};
     vec<vk::Framebuffer> framebuffers = {};
 
     // TODO make this three as one texture
@@ -53,7 +54,7 @@ struct GraphicsManager_API_data {
 
     vk::RenderPass def_renderPass; // the default render pass
 
-    vk::Semaphore presentSemaphore, renderSemaphore;
+    vk::Semaphore presentSemaphore; // signalled by vkAcquireNextImageKHR
     vk::Fence renderFence;
 
     vk::Extent2D windowExcent;
@@ -75,10 +76,16 @@ struct GraphicsManager_API_data {
 
     vk::Framebuffer getCurrentFrambuffer() { return framebuffers[swapchainImageIndex]; }
 
-    // Records a layout transition for one swapchain image and remembers it, so
-    // the next transition knows the real source layout.
-    void transitionSwapchainImage(vk::CommandBuffer cmd, uint imageIndex,
-                                  vk::ImageLayout newLayout);
+    // Records the transition into ColorAttachmentOptimal before a render pass.
+    // The source layout is always declared Undefined: that is legal whatever the
+    // image really is, discards the previous contents (the scene clears the
+    // target anyway) and keeps an already recorded command buffer valid when it
+    // is replayed on later frames.
+    void prepareSwapchainImage(vk::CommandBuffer cmd, uint imageIndex);
+
+    // Acquires the next swapchain image and stores its index. Returns false when
+    // the swapchain is out of date (resizing is set) so nothing is submitted.
+    bool acquireNextImage();
 
     friend class GraphicsManager;
 

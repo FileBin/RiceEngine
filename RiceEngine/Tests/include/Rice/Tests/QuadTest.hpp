@@ -116,6 +116,9 @@ class QuadTest : public ICleanable {
         using namespace Graphics;
         using namespace std::chrono;
 
+        // pump SDL events, otherwise the window never reports close/resize
+        win->update();
+
         g_mgr->update();
 
         static auto startTime = high_resolution_clock::now();

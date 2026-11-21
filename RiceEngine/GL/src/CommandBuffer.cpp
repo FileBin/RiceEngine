@@ -27,10 +27,6 @@ void _build(uint i, CommandBuffer_API_data *api_data,
     for (ptr<CommandBuffer::Command> cmd : commands)
         api_data->doCommand(cmd, i, data, creator);
 
-    // Primary buffers own the whole frame for image i: after the passes the
-    // image must be handed to the presentation engine.
-    if (!api_data->is_secondary)
-        data.transitionSwapchainImage(api_data->cmd[i], i, vk::ImageLayout::ePresentSrcKHR);
 
     api_data->end(i);
 }

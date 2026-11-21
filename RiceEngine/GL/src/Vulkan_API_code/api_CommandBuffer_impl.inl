@@ -115,10 +115,8 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         rect.y *= api_data.windowExcent.height;
         rect.h *= api_data.windowExcent.height;
 
-        // The image is in PresentSrc (after a previous frame) or Undefined (fresh
-        // swapchain image); the pass expects ColorAttachmentOptimal.
-        api_data.transitionSwapchainImage(cmd[i], i,
-                                          vk::ImageLayout::eColorAttachmentOptimal);
+        // The pass expects the image in ColorAttachmentOptimal.
+        api_data.prepareSwapchainImage(cmd[i], i);
 
         vk::RenderPassBeginInfo rpInfo = {};
         rpInfo.renderPass = api_data.def_renderPass;
