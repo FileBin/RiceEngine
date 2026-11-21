@@ -1,0 +1,118 @@
+{
+  description = "Rice Engine — C++20 / Vulkan game engine";
+
+  inputs = {
+    # Single pinned nixpkgs. flake.lock freezes the exact revision, so the tree
+    # still builds years later.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+
+    # Third-party sources that nixpkgs does not carry. These replace the old
+    # git submodules: the revision is pinned in flake.lock instead of .gitmodules.
+    libcds-src = {
+      url = "github:khizmax/libcds";
+      flake = false;
+    };
+    rice-meta-compiler-src = {
+      url = "github:dgudim/RiceMetaCompiler";
+      flake = false;
+    };
+  };
+
+  outputs = { self, nixpkgs, libcds-src, rice-meta-compiler-src }:
+    let
+      inherit (nixpkgs) lib;
+
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+
+      # Dependencies that are built from upstream sources instead of vendored
+      # headers/binaries. Pinned by flake.lock.
+      depsOverlay = final: prev: {
+        libcds = prev.stdenv.mkDerivation {
+          pname = "libcds";
+          version = "2.3.3";
+          src = libcds-src;
+          nativeBuildInputs = [ prev.cmake ];
+          cmakeFlags = [
+            # libcds declares cmake_minimum_required(3.0.2); CMake 4 dropped that range.
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+            "-DLIBCDS_WITH_TESTS=OFF"
+            "-DLIBCDS_ENABLE_UNIT_TEST=OFF"
+            "-DLIBCDS_ENABLE_STRESS_TEST=OFF"
+          ];
+        };
+
+        rice-meta-compiler = prev.stdenv.mkDerivation {
+          pname = "rice-meta-compiler";
+          version = "unstable-2022-10-19";
+          src = rice-meta-compiler-src;
+          nativeBuildInputs = [ prev.cmake ];
+          buildInputs = [ prev.nlohmann_json ];
+        };
+      };
+
+      pkgsFor = system: import nixpkgs {
+        inherit system;
+        overlays = [ depsOverlay self.overlays.default ];
+      };
+
+      eachSystem = f: lib.genAttrs systems (system: f (pkgsFor system));
+    in
+    {
+      overlays.deps = depsOverlay;
+
+      overlays.default = final: prev: {
+        rice-engine = final.callPackage ./nix/package.nix { };
+      };
+
+      packages = eachSystem (pkgs: {
+        default = pkgs.rice-engine;
+        inherit (pkgs) rice-engine libcds rice-meta-compiler;
+      });
+
+      devShells = eachSystem (pkgs: {
+        default = pkgs.mkShell {
+          name = "rice-engine-dev";
+          buildInputs = with pkgs; [
+            vulkan-headers
+            vulkan-loader
+            vulkan-validation-layers
+            vk-bootstrap
+            SDL2
+            fmt
+            magic-enum
+            nlohmann_json
+            libogg
+            libvorbis
+            libcds
+            rice-meta-compiler
+          ];
+          nativeBuildInputs = with pkgs; [
+            cmake
+            ninja
+            pkg-config
+            clang-tools
+            gdb
+            shaderc
+            vulkan-tools
+          ];
+          # CMake has to find the packages above without any vendored copies.
+          shellHook = ''
+            export CMAKE_PREFIX_PATH="${pkgs.lib.concatStringsSep ":" [
+              pkgs.vulkan-loader
+              pkgs.vk-bootstrap
+              pkgs.SDL2
+              pkgs.fmt
+              pkgs.magic-enum
+              pkgs.nlohmann_json
+              pkgs.libcds
+            ]}''${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
+            export VK_LAYER_PATH="${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d"
+            export RICE_METACOMPILER_INCLUDE_DIR="${pkgs.rice-meta-compiler}/include"
+            echo "Rice Engine dev shell — cmake $(cmake --version | head -1 | cut -d' ' -f3), glslc $(glslc --version | head -1 | cut -d' ' -f3)"
+          '';
+        };
+      });
+
+      formatter = eachSystem (pkgs: pkgs.nixpkgs-fmt);
+    };
+}

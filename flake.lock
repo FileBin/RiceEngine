@@ -1,0 +1,61 @@
+{
+  "nodes": {
+    "libcds-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1646136333,
+        "narHash": "sha256-b3qmqHXr7u1ciTHXy+CTOli8MDM0S7tc7LMUyG+tdag=",
+        "owner": "khizmax",
+        "repo": "libcds",
+        "rev": "9985d2a87feaa3e92532e28f4ab762a82855a49c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "khizmax",
+        "repo": "libcds",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1795137884,
+        "narHash": "sha256-iKXCN36qYfBni+3nH4vAd98/kshoIsPB2S9mYWhma30=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ab5c18fdedfc8f9bbc9d773f10a540790e2787a7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "rice-meta-compiler-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1666632350,
+        "narHash": "sha256-muRszYSnEDcRYPEbz1jIA1WbDDbYWrCH+AaPFj0P4XE=",
+        "owner": "dgudim",
+        "repo": "RiceMetaCompiler",
+        "rev": "c1339b15f84d1c05d25fd5acb6135937eef8adde",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dgudim",
+        "repo": "RiceMetaCompiler",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "libcds-src": "libcds-src",
+        "nixpkgs": "nixpkgs",
+        "rice-meta-compiler-src": "rice-meta-compiler-src"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
