@@ -107,12 +107,18 @@ struct GraphicsManager_API_data {
 
     uint findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties);
 
+    /* Property flags of a memory type, e.g. to know whether a mapping is host
+     * coherent and therefore does not have to be flushed after a write. */
+    vk::MemoryPropertyFlags memoryTypeProperties(uint index);
+
     vk::Format findSupportedFormat(const vec<vk::Format> &candidates, vk::ImageTiling tiling,
                                    vk::FormatFeatureFlags features);
 
+    /* `memoryTypeIndex`, when given, receives the index of the memory type the
+     * buffer was bound to (findMemoryType picks the first match). */
     void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
                       vk::MemoryPropertyFlags properties, vk::Buffer &buffer,
-                      vk::DeviceMemory &bufferMemory);
+                      vk::DeviceMemory &bufferMemory, uint *memoryTypeIndex = nullptr);
 
     void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::BufferCopy copyRegion);
 

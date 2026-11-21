@@ -37,8 +37,11 @@ Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
         }
         usageFlags |= BufferUsageFlagBits::eTransferDst;
 
+        uint memory_type = 0;
         api_data.createBuffer(size, usageFlags, vk::MemoryPropertyFlagBits::eHostVisible,
-                              buffer, memory);
+                              buffer, memory, &memory_type);
+        host_coherent =
+            !!(api_data.memoryTypeProperties(memory_type) & vk::MemoryPropertyFlagBits::eHostCoherent);
     }
     allocated = true;
 

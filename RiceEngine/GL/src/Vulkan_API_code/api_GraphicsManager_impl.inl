@@ -791,10 +791,17 @@ void GraphicsManager_API_data::cleanup() {
     instance = nullptr;
 }
 
+vk::MemoryPropertyFlags GraphicsManager_API_data::memoryTypeProperties(uint index) {
+    auto memprop = GPU.getMemoryProperties();
+    if (index >= memprop.memoryTypeCount)
+        return {};
+    return memprop.memoryTypes[index].propertyFlags;
+}
+
 void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
                                             vk::MemoryPropertyFlags properties,
-                                            vk::Buffer &buffer,
-                                            vk::DeviceMemory &bufferMemory) {
+                                            vk::Buffer &buffer, vk::DeviceMemory &bufferMemory,
+                                            uint *memoryTypeIndex) {
     using namespace vk;
     BufferCreateInfo bufferInfo{};
     bufferInfo.size = size;
@@ -808,6 +815,8 @@ void GraphicsManager_API_data::createBuffer(vk::DeviceSize size, vk::BufferUsage
     MemoryAllocateInfo allocInfo;
     allocInfo.allocationSize = memReq.size;
     allocInfo.memoryTypeIndex = findMemoryType(memReq.memoryTypeBits, properties);
+    if (memoryTypeIndex != nullptr)
+        *memoryTypeIndex = allocInfo.memoryTypeIndex;
 
     bufferMemory = device.allocateMemory(allocInfo);
     device.bindBufferMemory(buffer, bufferMemory, 0);
