@@ -61,4 +61,9 @@ struct alignas(16) LightData {
     Vector4f light_dir = {0.f, -1.f, 0.f, 0.f};
 };
 
+static_assert(sizeof(LightData) == 112, "std140: mat4 + three padded vec3 slots");
+static_assert(offsetof(LightData, ambient) == 64, "std140: vec3 after mat4");
+static_assert(offsetof(LightData, diffuse) == 80, "std140: vec3 slots are 16-byte aligned");
+static_assert(offsetof(LightData, light_dir) == 96, "std140: vec3 slots are 16-byte aligned");
+
 NSP_GL_END

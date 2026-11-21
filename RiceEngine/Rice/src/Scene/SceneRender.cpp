@@ -92,6 +92,10 @@ void SceneRender::updateCmd() {
     // and outside it: it has its own render pass (a single D32_SFLOAT
     // attachment) and leaves the map in the shader-read layout the scene
     // shaders sample it in.
+    //
+    // It is recorded whenever the lighting resources exist, also when the scene
+    // currently has no light: the pass is what puts the image into that layout,
+    // and LightData then holds the neutral (unshadowed) values.
     if (shadow_map && shadow_shader && light_buffer)
         recordShadowPass();
 
