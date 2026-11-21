@@ -172,6 +172,10 @@ Matrix4x4 ShadowMap::buildLightViewProj(Vector3 light_direction, Vector3 center,
     // x, y map to [-1, 1] and z maps to [0, 1] (Vulkan clip space), so lPos.z is
     // on the same scale as the depth stored in the map and the shader can
     // compare the two directly.
+    //
+    // Matrix4x4::ortographic() is deliberately not used here: it maps z to
+    // [-1, 1] (the OpenGL/DirectX-old convention), which is exactly what the
+    // ported PCF (bias - lightSpaceZ against the stored depth) cannot work with.
     Matrix4x4 projection{
         1. / half, 0,          0, 0, //
         0,         1. / half,  0, 0, //
