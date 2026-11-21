@@ -128,7 +128,9 @@
               ms-vscode.cpptools
               ms-vscode.cmake-tools
               ms-vscode.hexeditor
-              tal7aouy.icons
+              # tal7aouy.icons was a fork of vscode-icons that stopped at 3.8.0
+              # (Dec 2023); upstream is the maintained one.
+              vscode-icons-team.vscode-icons
               jnoortheen.nix-ide
               wmaurer.change-case
               oderwat.indent-rainbow
