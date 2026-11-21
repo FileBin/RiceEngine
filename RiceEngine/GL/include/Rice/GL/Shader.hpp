@@ -29,6 +29,17 @@ public:
 	void addUniformBuffer(uint binding, Type shaderStage);
 
 	/*
+	 * Same, for one block that both stages read. A block declared twice through
+	 * the single-stage overload would put two layout bindings with the same
+	 * number into the descriptor set layout, which is invalid; declaring the
+	 * binding once with both stage flags is the fix. Used by the game's water
+	 * shader: `time` animates the surface in the vertex stage and the normals
+	 * in the fragment stage.
+	 */
+	void addUniformBuffer(uint binding, Type firstStage, Type secondStage);
+
+
+	/*
 	 * Declares the scene lighting resources for this shader, i.e. what the
 	 * scene shaders built with -DRICE_LIGHTING use (Tests/shaders/scene/
 	 * light.glsl + shadow.glsl):
@@ -68,6 +79,24 @@ public:
 	void build();
 
 	/**
+	 * Opt-in alpha blending: call before build() (and before buildShadowPipeline(),
+	 * which ignores it - the casters pass has no colour attachment).
+	 *
+	 * build() then creates the pipeline with
+	 *
+	 *   srcAlpha / one-minus-srcAlpha blending on colour and alpha,
+	 *   depth test ON with LESS (unchanged), depth write OFF.
+	 *
+	 * Drawing without depth writes is what makes blended geometry not occlude
+	 * what is behind it; the engine also keeps such meshes out of the shadow
+	 * casters pass and draws them after the opaque ones (see Material::
+	 * isTransparent and SceneRender). Blend is OFF by default, so every existing
+	 * shader keeps its opaque pipeline.
+	 */
+	void setBlendEnabled(bool enabled = true) { blend_enabled = enabled; }
+	bool isBlendEnabled() const { return blend_enabled; }
+
+	/**
 	 * Builds a depth-only casters pipeline instead of the scene pipeline: the
 	 * shadow map's render pass (single D32_SFLOAT attachment, no colour target),
 	 * depth test + write with LESS, both faces drawn, and no fragment stage —
@@ -96,6 +125,8 @@ private:
 	bool uses_depth_buffer = false;
 	// buildShadowPipeline(): depth-only pass pipeline, skip resize rebuilds.
 	bool shadow_pipeline = false;
+	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
+	bool blend_enabled = false;
 	// addLighting(): the descriptor bindings SceneRender has to fill in.
 	bool lighting = false;
 	uint light_binding = 2;

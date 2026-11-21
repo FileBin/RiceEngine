@@ -28,7 +28,7 @@ void Shader::build() {
 
     Vector2i s = {get_api_data().windowExcent.width, get_api_data().windowExcent.height};
     api_data->buildDescriptorSetLayout(get_api_data());
-    api_data->buildPipeline(get_api_data(), s, vertexLayout, vertexStride);
+    api_data->buildPipeline(get_api_data(), s, vertexLayout, vertexStride, blend_enabled);
     init = true;
 }
 
@@ -88,6 +88,31 @@ void Shader::addUniformBuffer(uint binding, Type stage) {
     api_data->bindings.push_back(uboLayoutBinding);
 }
 
+void Shader::addUniformBuffer(uint binding, Type firstStage, Type secondStage) {
+    using namespace vk;
+
+    // One descriptor set layout binding covers all stages, so the two stages are
+    // merged into a single vk::ShaderStageFlags instead of two bindings.
+    constexpr auto stageFlag = [](Type stage) {
+        switch (stage) {
+        case Type::Vertex:
+            return ShaderStageFlagBits::eVertex;
+        case Type::Fragment:
+            return ShaderStageFlagBits::eFragment;
+        default:
+            return ShaderStageFlagBits::eGeometry;
+        }
+    };
+
+    DescriptorSetLayoutBinding uboLayoutBinding;
+    uboLayoutBinding.binding = binding;
+    uboLayoutBinding.descriptorType = DescriptorType::eUniformBuffer;
+    uboLayoutBinding.descriptorCount = 1;
+    uboLayoutBinding.stageFlags = stageFlag(firstStage) | stageFlag(secondStage);
+
+    api_data->bindings.push_back(uboLayoutBinding);
+}
+
 void Shader::addLighting(uint light_binding, uint shadow_binding) {
     using namespace vk;
 
@@ -135,7 +160,7 @@ void Shader::onResize(Vector2i extent) {
         return;
 
     api_data->cleanupPipeline(get_api_data());
-    api_data->buildPipeline(get_api_data(), extent, vertexLayout, vertexStride);
+    api_data->buildPipeline(get_api_data(), extent, vertexLayout, vertexStride, blend_enabled);
 }
 
 NSP_GL_END

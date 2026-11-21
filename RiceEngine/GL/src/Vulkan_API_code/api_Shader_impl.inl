@@ -83,7 +83,8 @@ void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_dat
 }
 
 void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
-                                    VertexLayout &vertexLayout, uint vertexStride) {
+                                    VertexLayout &vertexLayout, uint vertexStride,
+                                    bool blendEnable) {
     using help = VulkanHelper;
     using namespace vk;
 
@@ -151,16 +152,33 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
     pipelineBuilder.vk_multisampling =
         PipelineMultisampleStateCreateInfo().setRasterizationSamples(SampleCountFlagBits::e1);
 
-    // a single blend attachment with no blending and writing to RGBA
-    pipelineBuilder.vk_colorBlendAttachment =
+    // A single blend attachment. Opaque by default, exactly as before;
+    // Shader::setBlendEnabled(true) switches it to straight (non-premultiplied)
+    // alpha: the fragment shader returns an opaque colour with alpha as the
+    // coverage, which is what the old water shader did.
+    vk::PipelineColorBlendAttachmentState colorBlendAttachment =
         PipelineColorBlendAttachmentState()
             .setColorWriteMask(ColorComponentFlagBits::eR | ColorComponentFlagBits::eG |
                                ColorComponentFlagBits::eB | ColorComponentFlagBits::eA)
-            .setBlendEnable(false);
+            .setBlendEnable(blendEnable);
 
+    if (blendEnable) {
+        colorBlendAttachment
+            .setSrcColorBlendFactor(BlendFactor::eSrcAlpha)
+            .setDstColorBlendFactor(BlendFactor::eOneMinusSrcAlpha)
+            .setColorBlendOp(BlendOp::eAdd)
+            .setSrcAlphaBlendFactor(BlendFactor::eOne)
+            .setDstAlphaBlendFactor(BlendFactor::eZero)
+            .setAlphaBlendOp(BlendOp::eAdd);
+    }
+    pipelineBuilder.vk_colorBlendAttachment = colorBlendAttachment;
+
+    // Depth test stays on (blended geometry is still hidden by opaque things in
+    // front of it) but depth writes are off, so a transparent surface never
+    // occludes anything drawn after it.
     pipelineBuilder.vk_depthStencil = PipelineDepthStencilStateCreateInfo()
                                           .setDepthTestEnable(true)
-                                          .setDepthWriteEnable(true)
+                                          .setDepthWriteEnable(!blendEnable)
                                           .setDepthCompareOp(CompareOp::eLess);
 
     // use the triangle layout we created

@@ -26,7 +26,7 @@ struct Shader_API_Data {
 
     void buildDescriptorSetLayout(GraphicsManager_API_data &api_data);
     void buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
-                       VertexLayout &vertexLayout, uint vertexStride);
+                       VertexLayout &vertexLayout, uint vertexStride, bool blendEnable = false);
     void buildDepthOnlyPipeline(GraphicsManager_API_data &api_data, vk::RenderPass pass,
                                 Vector2i extent, VertexLayout &vertexLayout, uint vertexStride);
     void cleanupPipeline(GraphicsManager_API_data &api_data);
