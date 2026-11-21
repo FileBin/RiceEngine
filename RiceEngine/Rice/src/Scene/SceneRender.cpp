@@ -16,6 +16,8 @@
 #include <Rice/GL/RenderingMesh.hpp>
 #include <Rice/Scene/SceneRender.hpp>
 
+#include <algorithm>
+
 NSP_ENGINE_BEGIN
 
 SceneRender::SceneRender(ptr<ClientScene> scene, ptr<ClientEngine> engine)
@@ -62,9 +64,22 @@ void SceneRender::ShaderQueue::updateCmd() {
         cmd->bindShadowMap(shadow_map, shader->getShadowBinding());
     }
 
-    for (auto &mq : materials) {
-        mq.second.addCommands(cmd);
-    }
+    // Material order inside the queue: opaque first, blended last, stable inside
+    // each group (the materials map itself is ordered by pointer, so the result
+    // is deterministic). A queue with one material - the usual case - records
+    // exactly the commands it recorded before.
+    vec<MaterialQueue *> ordered;
+    ordered.reserve(materials.size());
+    for (auto &mq : materials)
+        ordered.push_back(&mq.second);
+    std::stable_sort(ordered.begin(), ordered.end(),
+                     [](const MaterialQueue *a, const MaterialQueue *b) {
+                         return int(a->isTransparent()) < int(b->isTransparent());
+                     });
+
+    for (MaterialQueue *mq : ordered)
+        mq->addCommands(cmd);
+
     cmd->buildAll();
 }
 
@@ -101,11 +116,27 @@ void SceneRender::updateCmd() {
 
     main_cmd->beginRenderPass({0, 0, 1, 1}, true);
     main_cmd->executeCommandBuffer(clear_cmd);
-    for (auto &sq : mainQueue) {
-        sq.second.light_buffer = light_buffer;
-        sq.second.shadow_map = shadow_map;
-        sq.second.updateCmd();
-        main_cmd->executeCommandBuffer(sq.second.cmd);
+
+    // Frame order: every opaque shader queue first, then the blended ones.
+    // mainQueue is keyed by shader pointer, so iterating it directly was
+    // "whatever order the pointers happen to have": a transparent queue could
+    // land before an opaque one and blend against a not yet drawn background.
+    // A stable partition on the blend flag keeps the old relative order inside
+    // each group, so a scene with no blended shader records exactly as before.
+    vec<ShaderQueue *> queues;
+    queues.reserve(mainQueue.size());
+    for (auto &sq : mainQueue)
+        queues.push_back(&sq.second);
+    std::stable_sort(queues.begin(), queues.end(),
+                     [](const ShaderQueue *a, const ShaderQueue *b) {
+                         return int(a->isTransparent()) < int(b->isTransparent());
+                     });
+
+    for (ShaderQueue *sq : queues) {
+        sq->light_buffer = light_buffer;
+        sq->shadow_map = shadow_map;
+        sq->updateCmd();
+        main_cmd->executeCommandBuffer(sq->cmd);
     }
 
     main_cmd->endRenderPass();
@@ -120,9 +151,17 @@ void SceneRender::recordShadowPass() {
     // Every registered mesh casts, whatever its material: the pass writes depth
     // only, so it reuses the vertex/index buffers and the per-mesh ModelData of
     // the scene draws (world * light_wvp is computed in shadow.vert).
+    // Blended materials are the exception: a transparent surface must not
+    // occlude the light, so water-like meshes are skipped here and never
+    // appear in the map.
     uint casters = 0;
+    uint skipped = 0;
     for (auto &sq : mainQueue)
         for (auto &mq : sq.second.materials) {
+            if (mq.second.isTransparent()) {
+                ++skipped;
+                continue;
+            }
             for (auto &mesh : mq.second.mesh_collection.getCollectionWithGaps()) {
                 if (!mesh)
                     continue;
@@ -135,8 +174,8 @@ void SceneRender::recordShadowPass() {
     main_cmd->endShadowPass();
     shadow_map->setCasterCount(casters);
 
-    Log::log(Log::Info, "Shadow pass: {}x{} depth map, {} casters", shadow_map->getSize(),
-             shadow_map->getSize(), casters);
+    Log::log(Log::Info, "Shadow pass: {}x{} depth map, {} casters ({} transparent skipped)",
+             shadow_map->getSize(), shadow_map->getSize(), casters, skipped);
 }
 
 void SceneRender::collectGeometryChanges() {

@@ -102,7 +102,7 @@ class RenderingMesh : public IRegistrable {
     void updateCmdBuffer();
     void updateConstBuffer(const Matrix4x4 &view, const Matrix4x4 &projection);
 
-    bool isTransparent() { return material->renderType == RenderType::Transparent; }
+    bool isTransparent() { return material->isTransparent(); }
 };
 
 NSP_GL_END

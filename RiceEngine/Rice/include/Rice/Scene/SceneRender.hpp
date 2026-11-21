@@ -35,6 +35,10 @@ class SceneRender : public enable_ptr<SceneRender> {
         MaterialQueue(ptr<Graphics::Material> mat);
 
         void addCommands(ptr<Graphics::CommandBuffer> cmd);
+
+        // Blended material: drawn after the opaque ones of the same shader and
+        // never recorded into the shadow casters pass.
+        bool isTransparent() const { return material->isTransparent(); }
     };
 
     struct ShaderQueue {
@@ -52,6 +56,10 @@ class SceneRender : public enable_ptr<SceneRender> {
 
         ShaderQueue(ptr<Graphics::Shader> shader, ptr<Graphics::GraphicsManager> mgr);
         void updateCmd();
+
+        // The pipeline this queue draws with is alpha blended: the whole queue
+        // goes after the opaque ones in the frame.
+        bool isTransparent() const { return shader->isBlendEnabled(); }
     };
 
     map<String, ptr<Graphics::Shader>> shaders;
