@@ -61,6 +61,13 @@ class SceneObjectBase {
     void enable();
     void disable();
 
+    /*
+     * Marks the object for destruction; the next preUpdate pass tears it down
+     * (components disabled -> meshes unregistered, children destroyed, uuid
+     * released) and removes it from its parent's child list. A destroy() issued
+     * from onUpdate therefore takes effect at the start of the next frame and
+     * never mutates a container that is being iterated. See SceneBase.hpp.
+     */
     void destroy();
 
     ptr<SceneBase> getScene();

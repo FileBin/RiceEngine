@@ -32,8 +32,36 @@ void SceneBase::load() {
 }
 
 void SceneBase::update() {
+    struct Guard {
+        bool &flag;
+        ~Guard() { flag = false; }
+    } guard{update_running};
+
+    update_running = true;
     root->preUpdate();
     root->update();
+    // Single drain point: the update pass is over, no tree iteration is in
+    // flight and no shared lock is held, so attaching objects and pushing
+    // components is safe here.
+    update_running = false;
+    drainDeferred();
+}
+
+void SceneBase::enqueueDeferred(std::function<void()> action) {
+    deferred_actions.push_back(std::move(action));
+}
+
+void SceneBase::drainDeferred() {
+    // Actions may enqueue more actions (a create followed by addComponent is
+    // two entries); run until the queue is empty, keeping FIFO order so the
+    // object is attached before anything is added to it.
+    while (!deferred_actions.empty()) {
+        vec<std::function<void()>> batch;
+        batch.swap(deferred_actions);
+        for (auto &action : batch) {
+            if (action) action();
+        }
+    }
 }
 
 void SceneBase::close() {

@@ -33,30 +33,41 @@ void Object::onDisable() {
 }
 
 void Object::onPreUpdate() {
-    vec<vec<ptr<Components::Component>>::iterator> toRemoveComponents;
-    vec<vec<ptr<Object>>::iterator> toRemoveObjects;
     std::shared_lock<std::shared_mutex> lock(mutex);
 
-    for (auto it = components.begin(); it != components.end(); ++it) {
-        if ((*it)->flags & Flags::DESTROYED) {
-            toRemoveComponents.push_back(it);
+    for (auto &c : components) {
+        if (c->flags & Flags::DESTROYED)
             continue;
-        }
-        (*it)->preUpdate();
+        c->preUpdate();
     }
-    for (auto it = children.begin(); it != children.end(); ++it) {
-        if ((*it)->flags & Flags::DESTROYED) {
-            toRemoveObjects.push_back(it);
+    for (auto &o : children) {
+        if (o->flags & Flags::DESTROYED)
             continue;
-        }
-        (*it)->preUpdate();
+        o->preUpdate();
     }
-    for (auto it : toRemoveObjects) {
-        children.erase(it);
+    // Destroyed components/children are removed afterwards. The previous
+    // version stored iterators and erased them one by one, which invalidated
+    // every later stored iterator of the same vector; compact instead, keeping
+    // the relative order.
+    size_t w = 0;
+    for (size_t r = 0; r < components.size(); ++r) {
+        if (components[r]->flags & Flags::DESTROYED)
+            continue;
+        if (w != r)
+            components[w] = std::move(components[r]);
+        ++w;
     }
-    for (auto it : toRemoveComponents) {
-        components.erase(it);
+    components.resize(w);
+
+    w = 0;
+    for (size_t r = 0; r < children.size(); ++r) {
+        if (children[r]->flags & Flags::DESTROYED)
+            continue;
+        if (w != r)
+            children[w] = std::move(children[r]);
+        ++w;
     }
+    children.resize(w);
 }
 
 // update all components and child objects
@@ -105,14 +116,35 @@ bool Object::removeComponent(UUID uuid) {
 }
 
 ptr<Object> Object::createEmpty(String name) {
-    if (!getScene()->isLoaded())
+    auto scene = getScene();
+    if (!scene->isLoaded())
         THROW_THREAD_ITERRUPT_EXCEPTION;
+
+    if (scene->isUpdateRunning()) {
+        // Deferred attach: the update pass holds this object's mutex shared and
+        // is iterating `children`, so the object is only built and registered
+        // here and pushed into the tree at the scene's drain point.
+        ptr<Object> obj{new Object(name)};
+        scene->Register(obj);
+        obj->init(shared_from_this());
+        auto self = shared_from_this();
+        scene->enqueueDeferred([self, obj]() { self->attachChild(obj); });
+        return obj;
+    }
+
     std::unique_lock<std::shared_mutex> lock(mutex);
     ptr<Object> obj{new Object(name)};
-    getScene()->Register(obj);
+    scene->Register(obj);
     obj->init(shared_from_this());
     children.push_back(obj);
     return obj;
+}
+
+void Object::attachChild(ptr<Object> child) {
+    if (!child || (child->flags & Flags::DESTROYED))
+        return;
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    children.push_back(child);
 }
 
 ptr<Object> Object::createEnabled(String name) {
@@ -133,8 +165,18 @@ ptr<SceneObjectBase> Object::getBaseParent() {
 }
 
 void Object::addComponent(ptr<Components::Component> component) {
+    auto scene = getScene();
+    if (scene->isUpdateRunning()) {
+        // `components` may be iterated right now (this object's onUpdate, or
+        // its parent's preUpdate), so the push_back is deferred to the scene's
+        // drain point at the end of the update pass.
+        auto self = shared_from_this();
+        scene->enqueueDeferred([self, component]() { self->addComponent(component); });
+        return;
+    }
+
     components.push_back(component);
-    getScene()->Register(component);
+    scene->Register(component);
     component->init(shared_from_this());
     component->enable();
 }
