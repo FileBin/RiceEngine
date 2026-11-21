@@ -1,17 +1,18 @@
 {
     "configurations": [
         {
-            "name": "x64Debug",
+            "name": "Linux-GCC",
             "includePath": [
-                "${workspaceFolder}/CMakeSource/src/GameMain/src/",
-                "${workspaceFolder}/CMakeSource/src/RiceEngine/include/",
-                "${workspaceFolder}/../BetterCpp/CMakeSource/include/",
-                "${workspaceFolder}/CMakeSource/lib/include/"
+                "${workspaceFolder}/RiceEngine/Rice/include",
+                "${workspaceFolder}/RiceEngine/GL/include",
+                "${workspaceFolder}/RiceEngine/Math/include",
+                "${workspaceFolder}/RiceEngine/Util/include",
+                "${workspaceFolder}/RiceEngine/Networking/include"
             ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++20",
-            "intelliSenseMode": "linux-clang-x64",
+            "intelliSenseMode": "linux-gcc-x64",
             "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],

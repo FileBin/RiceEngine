@@ -53,6 +53,11 @@
       pkgsFor = system: import nixpkgs {
         inherit system;
         overlays = [ depsOverlay self.overlays.default ];
+        # vscode in nixpkgs is the proprietary binary build, and most editor
+        # extensions are marked unfree; both are only used by the `vscode` shell.
+        config.allowUnfreePredicate = pkg:
+          let name = lib.getName pkg; in
+          name == "vscode" || lib.hasPrefix "vscode-extension" name;
       };
 
       eachSystem = f: lib.genAttrs systems (system: f (pkgsFor system));
@@ -69,49 +74,91 @@
         inherit (pkgs) rice-engine libcds rice-meta-compiler;
       });
 
-      devShells = eachSystem (pkgs: {
-        default = pkgs.mkShell {
-          name = "rice-engine-dev";
-          buildInputs = with pkgs; [
-            vulkan-headers
-            vulkan-loader
-            vulkan-validation-layers
-            vk-bootstrap
-            SDL2
-            fmt
-            magic-enum
-            nlohmann_json
-            libogg
-            libvorbis
-            libcds
-            rice-meta-compiler
-          ];
-          nativeBuildInputs = with pkgs; [
-            cmake
-            ninja
-            pkg-config
-            clang-tools
-            gdb
-            shaderc
-            vulkan-tools
-          ];
-          # CMake has to find the packages above without any vendored copies.
-          shellHook = ''
-            export CMAKE_PREFIX_PATH="${pkgs.lib.concatStringsSep ":" [
-              pkgs.vulkan-loader
-              pkgs.vk-bootstrap
-              pkgs.SDL2
-              pkgs.fmt
-              pkgs.magic-enum
-              pkgs.nlohmann_json
-              pkgs.libcds
-            ]}''${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
-            export VK_LAYER_PATH="${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d"
-            export RICE_METACOMPILER_INCLUDE_DIR="${pkgs.rice-meta-compiler}/include"
-            echo "Rice Engine dev shell — cmake $(cmake --version | head -1 | cut -d' ' -f3), glslc $(glslc --version | head -1 | cut -d' ' -f3)"
-          '';
-        };
-      });
+      devShells = eachSystem (pkgs:
+        let
+          # Environment shared by every shell: toolchain + all build deps, no
+          # vendored copies anywhere.
+          common = {
+            buildInputs = with pkgs; [
+              vulkan-headers
+              vulkan-loader
+              vulkan-validation-layers
+              vk-bootstrap
+              SDL2
+              fmt
+              magic-enum
+              nlohmann_json
+              libogg
+              libvorbis
+              libcds
+              rice-meta-compiler
+            ];
+            nativeBuildInputs = with pkgs; [
+              cmake
+              ninja
+              pkg-config
+              clang-tools
+              gdb
+              shaderc
+              vulkan-tools
+            ];
+            shellHook = ''
+              export CMAKE_PREFIX_PATH="${pkgs.lib.concatStringsSep ":" [
+                pkgs.vulkan-loader
+                pkgs.vk-bootstrap
+                pkgs.SDL2
+                pkgs.fmt
+                pkgs.magic-enum
+                pkgs.nlohmann_json
+                pkgs.libcds
+              ]}''${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
+              export VK_LAYER_PATH="${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d"
+              export RICE_METACOMPILER_INCLUDE_DIR="${pkgs.rice-meta-compiler}/include"
+              # clangd reads this instead of guessing include paths.
+              export CMAKE_EXPORT_COMPILE_COMMANDS=ON
+              echo "Rice Engine dev shell — cmake $(cmake --version | head -1 | cut -d' ' -f3), glslc $(glslc --version | head -1 | cut -d' ' -f3)"
+            '';
+          };
+
+          # Same editor setup the old shell.nix carried: VS Code with clangd,
+          # C/C++, CMake tools, hex editor, Nix, GLSL/hlsl highlighting.
+          vscodeWithExtensions = pkgs.vscode-with-extensions.override {
+            vscodeExtensions = (with pkgs.vscode-extensions; [
+              llvm-vs-code-extensions.vscode-clangd
+              ms-vscode.cpptools
+              ms-vscode.cmake-tools
+              ms-vscode.hexeditor
+              tal7aouy.icons
+              jnoortheen.nix-ide
+              wmaurer.change-case
+              oderwat.indent-rainbow
+              ibm.output-colorizer
+            ]) ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+              {
+                name = "vscode-glsllint";
+                publisher = "dtoplak";
+                version = "1.9.1";
+                sha256 = "sha256-59RNmILdshkAYjpeNz+gjq+WuDKZ/IMNVdzVl8HLFaA=";
+              }
+              {
+                # hash fixed: the one kept in the old shell.nix was truncated
+                name = "shader";
+                publisher = "slevesque";
+                version = "1.1.5";
+                sha256 = "sha256-Pf37FeQMNlv74f7LMz9+CKscF6UjTZ7ZpcaZFKtX2ZM=";
+              }
+            ];
+          };
+        in
+        {
+          default = pkgs.mkShell ({ name = "rice-engine-dev"; } // common);
+
+          # `nix develop .#vscode` (or ./develop.sh) — editor + full toolchain.
+          vscode = pkgs.mkShell ({
+            name = "rice-engine-vscode";
+            packages = [ vscodeWithExtensions ];
+          } // common);
+        });
 
       formatter = eachSystem (pkgs: pkgs.nixpkgs-fmt);
     };

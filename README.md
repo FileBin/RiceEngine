@@ -33,6 +33,10 @@ libogg/libvorbis, libcds, RiceMetaCompiler) comes from the flake and is pinned i
 # dev shell: cmake, ninja, gcc, glslc, vulkan-tools, all dependencies
 nix develop
 
+# the same, plus VS Code with clangd / C++ / CMake / GLSL extensions
+nix develop .#vscode
+./develop.sh            # opens VS Code in this directory inside that shell
+
 # inside the shell
 cmake -S . -B build -G Ninja
 cmake --build build
@@ -42,6 +46,11 @@ cmake --build build
 nix build .#default
 ls result/bin
 ```
+
+`shell.nix` is kept for `nix-shell` and editor integrations: it is a thin alias
+for `nix develop .#vscode`, so both entry points give the same environment and
+the VS Code extension list that used to live in that file now lives in
+`flake.nix`.
 
 libcds and RiceMetaCompiler are flake inputs (pinned by `flake.lock`) instead of
 git submodules, and are built from their upstream sources on demand:
