@@ -115,6 +115,14 @@ public:
 	 *                                   scene it is drawn after. Also disables culling:
 	 *                                   a wireframe has no front face to cull.
 	 */
+	/*
+	 * Rasterises triangles as lines (polygon mode LINE): the cheapest way to draw an
+	 * existing mesh as a wireframe - same geometry, same buffers, no extra vertex data.
+	 * Culling is off in this mode, since the wireframe has no front face.
+	 */
+	void setWireframe(bool enabled = true) { wireframe = enabled; }
+	bool isWireframe() const { return wireframe; }
+
 	void setTopology(Topology t) { topology = t; }
 	Topology getTopology() const { return topology; }
 	void setDepthTestEnabled(bool enabled = true) { depth_test_enabled = enabled; }
@@ -152,6 +160,7 @@ private:
 	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
 	bool blend_enabled = false;
 	Topology topology = Topology::Triangles;
+	bool wireframe = false;
 	bool depth_test_enabled = true;
 	// addLighting(): the descriptor bindings SceneRender has to fill in.
 	bool lighting = false;

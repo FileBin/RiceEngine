@@ -113,7 +113,23 @@ GraphicsManager_API_data::GraphicsManager_API_data(ptr<GraphicsManager> mgr) {
     // We want a GPU that can write to the SDL surface and supports Vulkan 1.1
     vkb::PhysicalDeviceSelector selector{vkb_inst};
 
-    auto dev_result = selector.set_minimum_version(1, 1).set_surface(surface).select_devices();
+    // The wireframe pass rasterises triangles as lines, which needs the fillModeNonSolid
+    // core feature. It is requested up front because vk-bootstrap fixes the feature set
+    // during selection; if nothing offers it the engine still starts, only without the
+    // overlay.
+    VkPhysicalDeviceFeatures requiredFeatures{};
+    requiredFeatures.fillModeNonSolid = VK_TRUE;
+
+    auto dev_result = selector.set_minimum_version(1, 1)
+                          .set_surface(surface)
+                          .set_required_features(requiredFeatures)
+                          .select_devices();
+    if (!dev_result.has_value()) {
+        Log::log(Log::Warning,
+                 "No Vulkan device with fillModeNonSolid: the wireframe overlay is unavailable");
+        auto fallback = vkb::PhysicalDeviceSelector{vkb_inst};
+        dev_result = fallback.set_minimum_version(1, 1).set_surface(surface).select_devices();
+    }
 
     if (!dev_result.has_value()) {
         String str =

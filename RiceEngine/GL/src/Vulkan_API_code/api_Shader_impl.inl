@@ -84,7 +84,8 @@ void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_dat
 
 void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
                                     VertexLayout &vertexLayout, uint vertexStride,
-                                    bool blendEnable, bool lineTopology, bool depthTest) {
+                                    bool blendEnable, bool lineTopology, bool depthTest,
+                                    bool wireframe) {
     using help = VulkanHelper;
     using namespace vk;
 
@@ -144,11 +145,12 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
     // so they are drawn with culling off.
     pipelineBuilder.vk_rasterizer = PipelineRasterizationStateCreateInfo()
                                         .setLineWidth(1)
-                                        .setCullMode((lineTopology || !depthTest)
+                                        .setCullMode((lineTopology || wireframe || !depthTest)
                                                          ? CullModeFlagBits::eNone
                                                          : CullModeFlagBits::eBack)
                                         .setFrontFace(FrontFace::eClockwise)
-                                        .setPolygonMode(PolygonMode::eFill)
+                                        .setPolygonMode(wireframe ? PolygonMode::eLine
+                                                                  : PolygonMode::eFill)
                                         .setDepthClampEnable(false)
                                         .setDepthBiasEnable(false);
 
