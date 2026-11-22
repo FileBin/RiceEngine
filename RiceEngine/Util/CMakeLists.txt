@@ -1,24 +1,11 @@
-cmake_minimum_required(VERSION 3.19)
+file(GLOB_RECURSE SOURCES "src/*.c" "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
-project("RiceUtil")
+add_library(RiceUtil ${SOURCES} ${HEADERS})
+add_library(Rice::Util ALIAS RiceUtil)
+rice_force_include(RiceUtil "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+target_link_libraries(RiceUtil PRIVATE rice_headers)
+target_include_directories(RiceUtil PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-set(RICE_UTIL_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-set(RICE_UTIL_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
-
-set(CMAKE_CXX_STANDARD 20)
-
-#file search
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" )
-file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
-
-add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
-
-message("include path: ${RICE_INCLUDE_PATH}")
-include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)
+install(TARGETS RiceUtil DESTINATION lib)
+install(DIRECTORY include DESTINATION .)

@@ -83,6 +83,11 @@ void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset
 }
 
 void MemoryManager::update() {
+    // Nothing was uploaded this frame - skip the submit entirely (it used to
+    // record and submit an empty command buffer every frame).
+    if (copyRegions.empty())
+        return;
+
     cmd.reset();
     CommandBufferBeginInfo beginInfo{};
     beginInfo.flags = CommandBufferUsageFlagBits::eOneTimeSubmit;

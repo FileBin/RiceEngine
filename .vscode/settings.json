@@ -11,7 +11,7 @@
   "clangd.arguments": [
     "-compile-commands-dir=${workspaceFolder}"
   ],
-  "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
+  "cmake.buildDirectory": "${workspaceFolder}/build",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "files.associations": {
     "vector": "cpp",
@@ -105,5 +105,5 @@
     "variant": "cpp"
   },
   "cmake.sourceDirectory": "${workspaceFolder}/.",
-  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json",
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json"
 }

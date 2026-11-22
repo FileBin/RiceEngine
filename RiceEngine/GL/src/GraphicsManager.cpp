@@ -42,10 +42,17 @@ void GraphicsManager::update() {
 void GraphicsManager::sync() { api_data->sync(); }
 
 void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
+    // The image has to be acquired first: the command buffer is picked by the
+    // acquired image index, not by the index of the previous frame.
+    if (!api_data->acquireNextImage())
+        return;
     api_data->drawFrame({cmd->api_data->cmd[api_data->swapchainImageIndex]});
 }
 
 void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
+    if (!api_data->acquireNextImage())
+        return;
+
     uint n = cmds.size();
     vec<vk::CommandBuffer> c(n);
     for (uint i = 0; i < n; ++i)

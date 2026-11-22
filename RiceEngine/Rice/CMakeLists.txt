@@ -1,70 +1,29 @@
-cmake_minimum_required(VERSION 3.19)
+file(GLOB_RECURSE SOURCES "src/*.c" "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
-project("Rice")
+add_library(Rice ${SOURCES} ${HEADERS})
+add_library(Rice::Engine ALIAS Rice)
+rice_force_include(Rice "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
 
-set(CMAKE_CXX_STANDARD 20)
+# The engine library re-exports the include dirs of every module it is built
+# from, so a consumer only has to link Rice.
+target_include_directories(Rice
+    PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../GL/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Math/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Util/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Networking/include"
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
 
-set(RICE_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-# file search
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+target_link_libraries(Rice
+    PUBLIC
+        Rice::GL Rice::Math Rice::Util Rice::Networking rice_deps rice_headers
+    PRIVATE
+        ${CMAKE_DL_LIBS}
+)
 
-add_library(${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
-
-set(RICE_INCLUDE_PATH
-    ${RICE_INCLUDE_PATH}
-    ${RICE_GL_INCLUDE_PATH}
-    ${RICE_MATH_INCLUDE_PATH}
-    ${RICE_UTIL_INCLUDE_PATH}
-    ${RICE_NETWORKING_INCLUDE_PATH}
-    ${LIB_INCLUDE_PATH}
-    CACHE INTERNAL "")
-
-include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-add_dependencies(${PROJECT_NAME} ${RICE_GL_NAME})
-add_dependencies(${PROJECT_NAME} ${RICE_MATH_NAME})
-add_dependencies(${PROJECT_NAME} ${RICE_UTIL_NAME})
-add_dependencies(${PROJECT_NAME} ${RICE_NETWORKING_NAME})
-
-target_link_libraries(${PROJECT_NAME})
-
-set(VLK_NAME "vulkan")
-
-if(WIN32)
-    set(VLK_NAME "vulkan-1")
-endif(WIN32)
-
-set(OTHER_LIBS "")
-
-if(UNIX)
-    set(OTHER_LIBS "dl")
-endif(UNIX)
-
-set(RICE_EXT_LIBS
-
-    # "OpenAL32"
-    "fmt"
-    # "ogg"
-    # "vorbis"
-    # "vorbisfile"
-    "SDL2"
-    "SDL2main"
-    ${VLK_NAME}
-    "vk-bootstrap"
-    ${OTHER_LIBS}
-    CACHE INTERNAL "")
-
-set(RICE_LIBS
-    ${RICE_NAME}
-    ${RICE_GL_NAME}
-    ${RICE_MATH_NAME}
-    ${RICE_UTIL_NAME}
-    ${RICE_NETWORKING_NAME}
-    ${RICE_EXT_LIBS}
-    CACHE INTERNAL "")
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)
+install(TARGETS Rice DESTINATION lib)
+install(DIRECTORY include DESTINATION .)

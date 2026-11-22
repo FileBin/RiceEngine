@@ -174,40 +174,90 @@ void GraphicsManager_API_data::init_swapchain() {
         swapchainBuilder.use_default_format_selection();
     }
 
-    uint w, h;
-    w = graphicsManager->window->getWidth();
-    h = graphicsManager->window->getHeight();
-
-    if (w >= 64 && h >= 64) {
-        for (size_t i = 0; i < swapchainImageViews.size(); i++) {
-            device.destroy(swapchainImageViews[i]);
-        }
-
-        auto old_swapchain = swapchain;
-
-        windowExcent.width = w;
-        windowExcent.height = h;
-        vkb::Swapchain vkbSwapchain =
-            swapchainBuilder
-                .set_desired_present_mode(
-                    (VkPresentModeKHR)vk::PresentModeKHR::eImmediate) // use v-sync present
-                                                                      // mode
-                //.set_desired_extent(windowExcent.width, windowExcent.height)
-                .set_old_swapchain((VkSwapchainKHR)old_swapchain)
-                .build()
-                .value();
-
-        if (old_swapchain)
-            device.destroy(old_swapchain);
-
-        // store swapchain and its related images
-        swapchain = vkbSwapchain.swapchain;
-        swapchainImages = (vec<vk::Image> &)vkbSwapchain.get_images().value();
-        swapchainImageViews = (vec<vk::ImageView> &)vkbSwapchain.get_image_views().value();
-
-        swapchainImageFormat = (vk::Format &)vkbSwapchain.image_format;
+    // The swapchain lives in pixels, so the drawable size is what matters - not
+    // the logical window size reported by SDL_GetWindowSize (they differ on
+    // scaled displays, and that is what made the image smaller than the window).
+    int w = 0, h = 0;
+    SDL_Vulkan_GetDrawableSize(graphicsManager->window->getHandle().get(), &w, &h);
+    if (w <= 0 || h <= 0) {
+        w = graphicsManager->window->getWidth();
+        h = graphicsManager->window->getHeight();
     }
-    Log::debug("Swapchain built!");
+
+    // A zero-sized or tiny drawable (minimized window) must not produce a
+    // swapchain; keep the old one and wait for the next resize.
+    if (w < 64 || h < 64) {
+        Log::debug("Swapchain rebuild skipped, drawable is {}x{}", w, h);
+        return;
+    }
+
+    for (size_t i = 0; i < swapchainImageViews.size(); i++)
+        device.destroy(swapchainImageViews[i]);
+    swapchainImageViews.clear();
+
+    auto old_swapchain = swapchain;
+
+    vkb::Swapchain vkbSwapchain =
+        swapchainBuilder
+            .set_desired_present_mode(
+                (VkPresentModeKHR)vk::PresentModeKHR::eImmediate) // use v-sync present
+                                                                  // mode
+            .set_desired_extent((uint32_t)w, (uint32_t)h)
+            .set_old_swapchain((VkSwapchainKHR)old_swapchain)
+            .build()
+            .value();
+
+    if (old_swapchain)
+        device.destroy(old_swapchain);
+
+    // store swapchain and its related images
+    swapchain = vkbSwapchain.swapchain;
+    // vk-bootstrap hands out raw Vulkan handles; vulkan-hpp wraps them, so
+    // copy instead of casting the vector type.
+    const auto &vkbImages = vkbSwapchain.get_images().value();
+    swapchainImages.assign(vkbImages.begin(), vkbImages.end());
+    const auto &vkbImageViews = vkbSwapchain.get_image_views().value();
+    swapchainImageViews.assign(vkbImageViews.begin(), vkbImageViews.end());
+
+    swapchainImageFormat = static_cast<vk::Format>(vkbSwapchain.image_format);
+
+    // Everything that follows (depth image, framebuffers, pipelines, render
+    // areas) must use the size the driver actually gave us.
+    windowExcent = vkbSwapchain.extent;
+
+    // One presentation semaphore per image, recreated together with the images.
+    for (auto &sem : imageSemaphores)
+        if (sem)
+            device.destroy(sem);
+    imageSemaphores.clear();
+    vk::SemaphoreCreateInfo semInfo{};
+    for (size_t i = 0; i < swapchainImages.size(); i++)
+        imageSemaphores.push_back(device.createSemaphore(semInfo));
+
+    Log::debug("Swapchain built! {}x{}, {} images (window {}x{}, drawable {}x{})",
+               windowExcent.width, windowExcent.height, swapchainImages.size(),
+               graphicsManager->window->getWidth(), graphicsManager->window->getHeight(), w, h);
+}
+
+void GraphicsManager_API_data::prepareSwapchainImage(vk::CommandBuffer cmd, uint imageIndex) {
+    if (imageIndex >= swapchainImages.size())
+        return;
+
+    using namespace vk;
+
+    ImageMemoryBarrier barrier{};
+    barrier.oldLayout = ImageLayout::eUndefined; // discard, whatever it was
+    barrier.newLayout = ImageLayout::eColorAttachmentOptimal;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = swapchainImages[imageIndex];
+    barrier.subresourceRange = ImageSubresourceRange(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+    barrier.srcAccessMask = AccessFlags{};
+    barrier.dstAccessMask = AccessFlagBits::eColorAttachmentWrite;
+
+    cmd.pipelineBarrier(PipelineStageFlagBits::eTopOfPipe,
+                        PipelineStageFlagBits::eColorAttachmentOutput, DependencyFlags{},
+                        nullptr, nullptr, barrier);
 }
 
 void GraphicsManager_API_data::init_commands() {
@@ -225,17 +275,21 @@ void GraphicsManager_API_data::init_commands() {
 
 void GraphicsManager_API_data::init_descriptor_pool() {
     auto n = swapchainImages.size();
+    // Every uniform buffer allocates one set per swapchain image and draws
+    // allocate their own sets too, so the pool has to be much larger than the
+    // swapchain itself - sizing it as "n descriptors" ran it dry immediately.
     vk::DescriptorPoolSize poolSize{};
     poolSize.type = vk::DescriptorType::eUniformBuffer;
-    poolSize.descriptorCount = n;
+    poolSize.descriptorCount = 0x10000;
 
     vk::DescriptorPoolCreateInfo poolInfo{};
     poolInfo.poolSizeCount = 1;
     poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = n * 0x10000;
+    poolInfo.maxSets = 0x10000;
     poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
 
     descriptorPool = device.createDescriptorPool(poolInfo);
+    (void)n;
 }
 
 vk::Format GraphicsManager_API_data::findSupportedFormat(const vec<vk::Format> &candidates,
@@ -351,8 +405,10 @@ void GraphicsManager_API_data::init_def_renderpass() {
     color_attachment.format = swapchainImageFormat;
     // 1 sample, we won't be doing MSAA
     color_attachment.samples = vk::SampleCountFlagBits::e1;
-    // we Clear when this attachment is loaded
-    color_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+    // Contents are discarded: the initial layout is Undefined (a LOAD would be
+    // illegal there, VUID-VkAttachmentDescription-format-06410) and the scene
+    // clears the target explicitly with ClearRenderTarget.
+    color_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
     // we keep the attachment stored when the renderpass ends
     color_attachment.storeOp = vk::AttachmentStoreOp::eStore;
     // we don't care about stencil
@@ -361,21 +417,24 @@ void GraphicsManager_API_data::init_def_renderpass() {
     color_attachment.stencilStoreOp =
         vk::AttachmentStoreOp::eDontCare; // vk::AttachmentStoreOp::eStore;
 
-    // we don't know or care about the starting layout of the attachment
-    color_attachment.initialLayout = vk::ImageLayout::ePresentSrcKHR;
-
-    // after the renderpass ends, the image has to be on a layout ready for
-    // display
+    // A fresh swapchain image is Undefined; the render pass declares that as its
+    // initial layout and hands the image to the presentation engine itself
+    // (finalLayout = PresentSrc), so the recorded command buffer stays valid on
+    // every replay instead of tracking layouts on the CPU.
+    color_attachment.initialLayout = vk::ImageLayout::eUndefined;
     color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
     vk::AttachmentDescription depth_attachment{};
     depth_attachment.format = depthFormat;
     depth_attachment.samples = vk::SampleCountFlagBits::e1;
-    depth_attachment.loadOp = vk::AttachmentLoadOp::eLoad;
+    depth_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
     depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
-    depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eLoad;
-    depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eStore;
-    depth_attachment.initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+    // the depth format has a stencil aspect, so stencil ops must be valid too
+    depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+    depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+    // freshly created depth images are Undefined; contents are discarded anyway
+    // (the scene clears depth every frame)
+    depth_attachment.initialLayout = vk::ImageLayout::eUndefined;
     depth_attachment.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
     vk::AttachmentReference color_attachment_ref = {};
@@ -461,7 +520,7 @@ void GraphicsManager_API_data::init_sync_structures() {
     semaphoreCreateInfo.flags = vk::SemaphoreCreateFlags();
 
     presentSemaphore = device.createSemaphore(semaphoreCreateInfo);
-    renderSemaphore = device.createSemaphore(semaphoreCreateInfo);
+    // per-image semaphores are created together with the swapchain images
 }
 
 void GraphicsManager_API_data::recreateSwapchain() {
@@ -529,23 +588,35 @@ void GraphicsManager_API_data::sync() {
     THROW_VK_EX_IF_BAD(res);
 }
 
-void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
+bool GraphicsManager_API_data::acquireNextImage() {
     if (resizing)
-        return;
+        return false;
+
+    // wait until the GPU has finished the previous frame, so the acquire
+    // semaphore can be reused
     sync();
-
-    device.resetFences({renderFence});
-
-    memoryManager->update();
 
     // request image from the swapchain, 1 second timeout
     auto res = device.acquireNextImageKHR(swapchain, 1000000000, presentSemaphore, nullptr,
                                           &swapchainImageIndex);
     if (res == vk::Result::eErrorOutOfDateKHR) {
         resizing = true;
-        return;
+        return false;
     }
-    THROW_VK_EX_IF_BAD(res);
+    if (res != vk::Result::eSuccess && res != vk::Result::eSuboptimalKHR) {
+        THROW_VK_EX(res);
+    }
+    return true;
+}
+
+void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
+    if (resizing)
+        return;
+
+    device.resetFences({renderFence});
+
+    memoryManager->update();
+
     // prepare the submission to the queue.
     // we want to wait on the _presentSemaphore, as that semaphore is signaled
     // when the swapchain is ready we will signal the _renderSemaphore, to
@@ -562,8 +633,10 @@ void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
     submit.waitSemaphoreCount = 1;
     submit.pWaitSemaphores = &presentSemaphore;
 
+    // Signal the semaphore that belongs to this swapchain image: the previous
+    // frame may still be presenting another image with the shared one.
     submit.signalSemaphoreCount = 1;
-    submit.pSignalSemaphores = &renderSemaphore;
+    submit.pSignalSemaphores = &imageSemaphores[swapchainImageIndex];
 
     submit.commandBufferCount = cmd.size();
     submit.pCommandBuffers = cmd.data();
@@ -589,7 +662,7 @@ void GraphicsManager_API_data::drawFrame(vec<vk::CommandBuffer> cmd) {
     presentInfo.pSwapchains = &swapchain;
     presentInfo.swapchainCount = 1;
 
-    presentInfo.pWaitSemaphores = &renderSemaphore;
+    presentInfo.pWaitSemaphores = &imageSemaphores[swapchainImageIndex];
     presentInfo.waitSemaphoreCount = 1;
 
     presentInfo.pImageIndices = &swapchainImageIndex;
@@ -612,13 +685,15 @@ GraphicsManager_API_data::~GraphicsManager_API_data() { cleanup(); }
 void GraphicsManager_API_data::cleanup() {
     if (!instance)
         return;
+
+    // nothing may be in flight before any of the objects below are destroyed
+    device.waitIdle();
+
     if (memoryManager) {
         delete memoryManager;
         memoryManager = nullptr;
     }
     auto graphicsManager = g_mgr.lock();
-
-    device.waitIdle();
 
     if (graphicsManager) {
         graphicsManager->destroyCommandBuffers->invoke();
@@ -630,7 +705,10 @@ void GraphicsManager_API_data::cleanup() {
     device.destroy(def_renderPass);
 
     device.destroy(presentSemaphore);
-    device.destroy(renderSemaphore);
+    for (auto &sem : imageSemaphores)
+        if (sem)
+            device.destroy(sem);
+    imageSemaphores.clear();
     device.destroy(renderFence);
 
     device.destroy(commandPool);

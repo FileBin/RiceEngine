@@ -1,34 +1,16 @@
-cmake_minimum_required(VERSION 3.19)
+file(GLOB_RECURSE SOURCES "src/*.c" "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp" "include/*.inl")
 
-project("RiceGL")
+add_library(RiceGL ${SOURCES} ${HEADERS})
+add_library(Rice::GL ALIAS RiceGL)
+rice_force_include(RiceGL "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+target_include_directories(RiceGL PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Vulkan-Hpp lives in vulkan-headers, vk-bootstrap and fmt come from rice_deps.
+target_link_libraries(RiceGL
+    PUBLIC Rice::Math Rice::Util rice_deps rice_headers
+    PRIVATE rice_deps
+)
 
-set(RICE_GL_NAME ${PROJECT_NAME} CACHE INTERNAL "")
-set(RICE_GL_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
-
-set(CMAKE_CXX_STANDARD 20)
-
-#file search
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" )
-file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.inl" )
-
-add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
-
-set(VULKAN_LIB_PATH "$ENV{VULKAN_SDK}/lib")
-set(VULKAN_INCLUDE_PATH "$ENV{VK_SDK_PATH}/Include")
-
-set(APPEND DXSDK_LIB_PATH "$ENV{DXSDK_DIR}/Lib")
-set(APPEND DXSDK_INCLUDE_PATH "$ENV{DXSDK_DIR}/Include")
-
-include_directories(${PROJECT_NAME} ${VULKAN_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${DXSDK_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${RICE_UTIL_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${RICE_MATH_INCLUDE_PATH})
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${PROJECT_NAME} ${LIB_INCLUDE_PATH})
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION .)
+install(TARGETS RiceGL DESTINATION lib)
+install(DIRECTORY include DESTINATION .)

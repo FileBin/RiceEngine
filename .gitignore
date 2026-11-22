@@ -3,11 +3,8 @@
 obj/
 /bin/
 build/
-!build/.empty
-CMakeSource/CMakeCache.txt
-CMakeSource/CMakeFiles
-CMakeSource/Makefile
-CMakeSource/cmake_install.cmake
-CMakeSource/*.a
-build
+build-*/
+result
+result-*
+.direnv/
 compile_commands.json

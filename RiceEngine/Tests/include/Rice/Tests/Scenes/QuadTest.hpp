@@ -8,7 +8,6 @@
 #include "Rice/Scene/Components/ModelRender.hpp"
 #include "Rice/Scene/Components/Transform.hpp"
 #include "Rice/Scene/Scene.hpp"
-#include "Rice/defines.h"
 
 #pragma once
 

@@ -1,48 +1,35 @@
-cmake_minimum_required(VERSION 3.19)
-
-project("Tests")
-
-file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
-file(GLOB_RECURSE TESTS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+file(GLOB_RECURSE TEST_HEADERS "include/*.h" "include/*.hpp")
+file(GLOB_RECURSE TEST_SOURCES "src/*.cpp" "src/*.c")
 
 add_subdirectory("shaders")
 
-foreach(FILE ${TESTS})
+# Samples that no longer match the engine API. TriangleTest drives Window and
+# GraphicsManager directly through the removed new_ref()/release() API and is
+# superseded by QuadTest/CubeTest, which go through Scene + SceneRender.
+set(RICE_SKIP_TESTS TriangleTest)
+
+# Every .cpp under src/ becomes its own executable (WindowTest, QuadTest,
+# CubeTest, MultiCubePerformanceTest, CoreTest, ...).
+foreach(FILE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${FILE} NAME_WE)
 
-    set(CMAKE_CXX_STANDARD 20)
+    if(TEST_NAME IN_LIST RICE_SKIP_TESTS)
+        message(STATUS "Test ${TEST_NAME} skipped (outdated API)")
+        continue()
+    endif()
 
-    # file search
-    add_executable(${TEST_NAME} ${FILE} ${HEADERS})
-    target_precompile_headers(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h)
+    add_executable(${TEST_NAME} ${FILE} ${TEST_HEADERS})
+    rice_force_include(${TEST_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h")
+    target_include_directories(${TEST_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    target_link_libraries(${TEST_NAME} PRIVATE Rice rice_deps)
 
-    include_directories(${PROJECT_NAME} ${RICE_INCLUDE_PATH})
-    include_directories(${PROJECT_NAME} ${LIB_INCLUDE_PATH})
-    include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    # 16-byte compare-and-swap for the lock-free containers (x86-64 only).
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag("-mcx16" RICE_HAS_MCX16)
+    if(RICE_HAS_MCX16 AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
+        target_compile_options(${TEST_NAME} PRIVATE -mcx16)
+    endif()
 
-    target_link_directories(${TEST_NAME} PRIVATE
-        ${ANY_LIB_BIN_PATH}
-        ${LIB_BIN_PATH}
-        ${PROJECT_BINARY_DIR}
-        ${DXSDK_LIB_PATH}/x64
-        ${VULKAN_LIB_PATH}
-    )
-
-    target_link_libraries(${TEST_NAME}
-        ${RICE_LIBS}
-    )
-
-    add_compile_options(-mcx16)
-    target_link_libraries(${TEST_NAME})
-
-    add_dependencies(${TEST_NAME} ${RICE_NAME} ${TEST_SHADERS_TARGET})
-
-    if(WIN32)
-        # copy dll
-        add_custom_command(TARGET ${TEST_NAME} POST_BUILD # Adds a post-build event to the target
-            COMMAND ${CMAKE_COMMAND}
-            -E copy_if_different # which executes "cmake - E copy_if_different..."
-            ${RICE_DLLs_x64} # <--this is in-file
-            ${CMAKE_BINARY_DIR}) # <--this is out-file path
-    endif(WIN32)
+    add_dependencies(${TEST_NAME} ${TEST_SHADERS_TARGET})
+    install(TARGETS ${TEST_NAME} RUNTIME DESTINATION bin)
 endforeach()
