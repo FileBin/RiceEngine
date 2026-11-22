@@ -14,6 +14,16 @@ NSP_GL_END
 #include "Rice/Math/Math.hpp"
 
 NSP_GL_BEGIN
+// How blended output is combined with what is already in the framebuffer.
+//   Alpha  - srcAlpha / one-minus-srcAlpha, the usual translucent overlay;
+//   Invert - one-minus-dstColor / zero, i.e. the destination is negated where the geometry
+//            covers it. A screen-space crosshair drawn this way is always visible, on any
+//            background, without knowing what is behind it.
+enum class BlendMode {
+	Alpha = 0,
+	Invert = 1,
+};
+
 // How the vertex stream is interpreted. Triangles is everything the scene draws; Lines
 // exists for overlay wireframes (a build cursor, a debug gizmo), which the engine could
 // not express before because the topology was hard-coded in the pipeline.
@@ -103,6 +113,8 @@ public:
 	 */
 	void setBlendEnabled(bool enabled = true) { blend_enabled = enabled; }
 	bool isBlendEnabled() const { return blend_enabled; }
+	void setBlendMode(BlendMode mode) { blend_mode = mode; }
+	BlendMode getBlendMode() const { return blend_mode; }
 
 	/*
 	 * Overlay drawing: call both before build().
@@ -159,6 +171,7 @@ private:
 	bool shadow_pipeline = false;
 	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
 	bool blend_enabled = false;
+	BlendMode blend_mode = BlendMode::Alpha;
 	Topology topology = Topology::Triangles;
 	bool wireframe = false;
 	bool depth_test_enabled = true;

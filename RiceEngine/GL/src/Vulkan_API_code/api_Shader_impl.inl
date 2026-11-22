@@ -85,7 +85,7 @@ void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_dat
 void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
                                     VertexLayout &vertexLayout, uint vertexStride,
                                     bool blendEnable, bool lineTopology, bool depthTest,
-                                    bool wireframe) {
+                                    bool wireframe, bool invertBlend) {
     using help = VulkanHelper;
     using namespace vk;
 
@@ -168,7 +168,18 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
                                ColorComponentFlagBits::eB | ColorComponentFlagBits::eA)
             .setBlendEnable(blendEnable);
 
-    if (blendEnable) {
+    if (blendEnable && invertBlend) {
+        // dst' = src * (1 - dst) + dst * 0: with a white source that is exactly the
+        // negative of what was there, which is what makes an overlay readable on any
+        // background.
+        colorBlendAttachment
+            .setSrcColorBlendFactor(BlendFactor::eOneMinusDstColor)
+            .setDstColorBlendFactor(BlendFactor::eZero)
+            .setColorBlendOp(BlendOp::eAdd)
+            .setSrcAlphaBlendFactor(BlendFactor::eOneMinusDstAlpha)
+            .setDstAlphaBlendFactor(BlendFactor::eZero)
+            .setAlphaBlendOp(BlendOp::eAdd);
+    } else if (blendEnable) {
         colorBlendAttachment
             .setSrcColorBlendFactor(BlendFactor::eSrcAlpha)
             .setDstColorBlendFactor(BlendFactor::eOneMinusSrcAlpha)

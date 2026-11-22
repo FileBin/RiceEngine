@@ -30,7 +30,7 @@ void Shader::build() {
     api_data->buildDescriptorSetLayout(get_api_data());
     api_data->buildPipeline(get_api_data(), s, vertexLayout, vertexStride, blend_enabled,
                             topology == Topology::Lines, depth_test_enabled,
-                            wireframe);
+                            wireframe, blend_mode == BlendMode::Invert);
     init = true;
 }
 
@@ -164,7 +164,7 @@ void Shader::onResize(Vector2i extent) {
     api_data->cleanupPipeline(get_api_data());
     api_data->buildPipeline(get_api_data(), extent, vertexLayout, vertexStride, blend_enabled,
                             topology == Topology::Lines, depth_test_enabled,
-                            wireframe);
+                            wireframe, blend_mode == BlendMode::Invert);
 }
 
 NSP_GL_END
