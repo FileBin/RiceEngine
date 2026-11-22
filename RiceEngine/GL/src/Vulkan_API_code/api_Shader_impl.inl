@@ -146,7 +146,7 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
                                         .setLineWidth(1)
                                         .setCullMode((lineTopology || !depthTest)
                                                          ? CullModeFlagBits::eNone
-                                                         : CullFlagBits::eBack)
+                                                         : CullModeFlagBits::eBack)
                                         .setFrontFace(FrontFace::eClockwise)
                                         .setPolygonMode(PolygonMode::eFill)
                                         .setDepthClampEnable(false)
