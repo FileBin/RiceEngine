@@ -1,4 +1,5 @@
 #include "Camera.hpp"
+#include "DirectionalLight.hpp"
 #include "Transform.hpp"
 #include "ModelRender.hpp"
 #include "MonoScript.hpp"

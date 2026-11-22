@@ -82,6 +82,10 @@ void MemoryManager::copyDataToBuffer(void *pData, size_t nData, size_t dstOffset
                       std::make_unique<MemoryAllocation>(chunk, chunk_offset));
 }
 
+void MemoryManager::forgetCopyDestination(vk::Buffer dst) {
+    copyRegions.remove_if([dst](const MemoryRegion &region) { return region.dst == dst; });
+}
+
 void MemoryManager::update() {
     // Nothing was uploaded this frame - skip the submit entirely (it used to
     // record and submit an empty command buffer every frame).

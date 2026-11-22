@@ -24,6 +24,7 @@ NSP_GL_END
 #include "GraphicsManager.hpp"
 #include "IndexBuffer.hpp"
 #include "Shader.hpp"
+#include "ShadowMap.hpp"
 #include "UniformBuffer.hpp"
 #include "VertexBuffer.hpp"
 
@@ -47,6 +48,11 @@ class CommandBuffer : public GraphicsComponentBase {
             DrawIndexed,
             PushConstants,
             BindUniformBuffer,
+            // Depth-only casters pass: begin/end the shadow map's render pass
+            // and bind the map as a combined image sampler for the lit draws.
+            BeginShadowPass,
+            EndShadowPass,
+            BindShadowMap,
         } cmd;
 
         struct Arg {
@@ -155,6 +161,20 @@ class CommandBuffer : public GraphicsComponentBase {
     void clearRenderTarget(Vector3f color, float depth);
     void executeCommandBuffer(ptr<CommandBuffer> cmd);
     void endRenderPass();
+
+    /*
+     * Depth-only casters pass. `beginShadowPass` starts the shadow map's own
+     * render pass (single D32_SFLOAT attachment, cleared to 1.0, no colour
+     * target), so it has to be recorded OUTSIDE the window's render pass and
+     * before it. Every draw recorded in between goes into the map; the pass must
+     * be closed with endShadowPass() before the main pass begins, which also
+     * leaves the map in the shader-read layout the scene shaders sample it in.
+     */
+    void beginShadowPass(ptr<ShadowMap> shadow_map);
+    void endShadowPass();
+
+    /* Set 0, binding `binding`: the shadow map as a combined image sampler. */
+    void bindShadowMap(ptr<ShadowMap> shadow_map, uint binding);
 
     void bindVertexBuffer(ptr<Buffer> buffer);
     void bindVertexBuffer(ptr<VertexBuffer> vertexBuffer);

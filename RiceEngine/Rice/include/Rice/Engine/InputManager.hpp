@@ -25,6 +25,11 @@ class InputManager {
     ptr<Window> getWindow();
 
     bool getKey(KeyCode key);
+
+    // Scroll wheel delta accumulated since the last call, consumed on read: the
+    // wheel arrives as many small events per frame and SDL reports an accumulator,
+    // not a delta, so both have to be folded into one number per frame.
+    int consumeWheelDelta();
     Vector2 getMousePos();
     Vector2i getMouseInfinitePos();
     void setMousePos(Vector2 pos);
@@ -33,6 +38,7 @@ class InputManager {
     void update();
     void lockMouse();
     void unlockMouse();
+    bool isMouseLocked() const { return is_mouse_locked; }
 
   private:
     void reset();
@@ -44,8 +50,12 @@ class InputManager {
     map<int, bool> keyStates;
     map<int, bool> mouseStates;
     short mouseScrollDelta = 0, mouseWheel = 0;
+    int wheelAccum = 0;
     Vector2 mousePos = {};
     Vector2i mouseInfinitePos = {}, mouseDelta = {};
+    // Every motion event of the current frame; `mouseDelta` used to be overwritten
+    // per event, so all but the last event of a frame were dropped.
+    Vector2i pendingDelta = {};
     wptr<Window> window;
     Util::Rect mouseRect;
     void eventKey(KeyCode key, bool rs_state);

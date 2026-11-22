@@ -48,8 +48,20 @@ class Object : public SceneObjectBase, public enable_ptr<Object> {
     bool removeComponent(UUID uuid);
 
   public:
+    /*
+     * Both follow the scene's deferred-mutation rule: called from inside an
+     * update pass (SceneBase::isUpdateRunning()) the object is constructed and
+     * registered immediately but attached to the tree - and enabled - at the
+     * end of that same update pass, so it is safe to use from onUpdate and it
+     * shows up in the tree at the next frame boundary. Outside an update pass
+     * (init(), setup) the child is attached right away. See SceneBase.hpp.
+     */
     ptr<Object> createEmpty(String name);
     ptr<Object> createEnabled(String name);
+
+    /* Attaches a child created during an update pass. Called by the scene's
+     * deferred drain, not by game code. */
+    void attachChild(ptr<Object> child);
 
     void addComponent(ptr<Components::Component> component);
 

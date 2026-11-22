@@ -14,9 +14,10 @@
 #   1. the swapchain is created at the drawable size reported by the compositor
 #      (regression: the image used to be smaller than the window);
 #   2. resizing the window recreates the swapchain (regression: the render scale
-#      did not follow the window);
+#      did not follow the window) - skipped for self-exiting demos;
 #   3. the run produces no Vulkan validation errors;
-#   4. closing the window makes the engine shut down with exit code 0.
+#   4. closing the window makes the engine shut down with exit code 0 (or, for
+#      `selfExit = true`, the demo closes its own window and exits on its own).
 { pkgs ? import <nixpkgs> { } }:
 
 let
@@ -37,7 +38,15 @@ let
     export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
   '';
 
-  smoke = name: pkgs.runCommandLocal "rice-check-${name}" {
+  # selfExit: the demo closes its own window after a fixed number of frames
+  # (ChunkStreamTest, ShadowTest), so the resize/kill part of the recipe does
+  # not apply.
+  #
+  # expect: a log line the demo has to print before it exits - the proof that it
+  # got through its own workload instead of dying silently. Defaults to the
+  # chunk-streaming demo's summary line; the other demos pass their own.
+  smoke = name: { selfExit ? false, expect ? "frames streamed" }:
+    pkgs.runCommandLocal "rice-check-${name}" {
     nativeBuildInputs = with pkgs; [
       # sway-unwrapped, not sway: the wrapper starts dbus-run-session, which
       # needs /etc/dbus-1/session.conf that does not exist in the sandbox, and
@@ -57,6 +66,8 @@ let
     mkdir -p "$HOME" "$XDG_RUNTIME_DIR"
     chmod 700 "$XDG_RUNTIME_DIR"
     ${compositorEnv}
+
+    SELF_EXIT="${if selfExit then "1" else "0"}"
 
     # On failure print everything that helps debugging; on success stay quiet.
     fail() {
@@ -102,40 +113,67 @@ let
     APP_LOG="$TMPDIR/work/app.log"
     ./${name} > "$APP_LOG" 2>&1 &
     APP_PID=$!
-    sleep 6
-    kill -0 $APP_PID 2>/dev/null || {
-      echo "--- app log ---"; cat app.log
-      fail "${name} died during startup"
-    }
-    BUILDS_BEFORE=$(grep -c "Swapchain built" app.log || true)
 
-    # A resize has to recreate the swapchain; make the window floating first so
-    # the request is not overruled by tiling.
-    swaymsg -t command "[app_id=\"${name}\"] floating enable" >/dev/null 2>&1 || true
-    swaymsg -t command "[app_id=\"${name}\"] resize set 800 600" >/dev/null 2>&1 || true
-    sleep 3
-    BUILDS_AFTER=$(grep -c "Swapchain built" app.log || true)
+    if [ "$SELF_EXIT" = "1" ]; then
+      # The demo closes its own window (WINDOWEVENT_CLOSE) after its frame
+      # budget; wait for it to finish instead of resizing/killing it.
+      for _ in $(seq 1 1800); do
+        kill -0 $APP_PID 2>/dev/null || break
+        sleep 0.1
+      done
+      if kill -0 $APP_PID 2>/dev/null; then
+        kill -9 $APP_PID 2>/dev/null || true
+        cat app.log
+        fail "${name} did not finish on its own"
+      fi
+      wait $APP_PID
+      STATUS=$?
+      BUILDS_BEFORE=$(grep -c "Swapchain built" app.log || true)
+      BUILDS_AFTER=$BUILDS_BEFORE
 
-    swaymsg -t command "[app_id=\"${name}\"] kill" >/dev/null 2>&1 || true
-    for _ in $(seq 1 150); do
-      kill -0 $APP_PID 2>/dev/null || break
-      sleep 0.1
-    done
-    if kill -0 $APP_PID 2>/dev/null; then
-      kill -9 $APP_PID 2>/dev/null || true
-      cat app.log
-      fail "${name} did not exit after the window was closed"
+      echo "${name}: swapchain builds = ''${BUILDS_AFTER}, exit = ''${STATUS}"
+      grep "Swapchain built" app.log | sed 's/^/    /' || true
+
+      [ "$STATUS" -eq 0 ] || fail "${name} exited with $STATUS"
+      [ "$BUILDS_BEFORE" -ge 1 ] || fail "the swapchain was never built"
+      # A run that dies before the workload must not pass silently.
+      grep -q "${expect}" app.log || fail "${name} never reported its result (expected: ${expect})"
+    else
+      sleep 6
+      kill -0 $APP_PID 2>/dev/null || {
+        echo "--- app log ---"; cat app.log
+        fail "${name} died during startup"
+      }
+      BUILDS_BEFORE=$(grep -c "Swapchain built" app.log || true)
+
+      # A resize has to recreate the swapchain; make the window floating first so
+      # the request is not overruled by tiling.
+      swaymsg -t command "[app_id=\"${name}\"] floating enable" >/dev/null 2>&1 || true
+      swaymsg -t command "[app_id=\"${name}\"] resize set 800 600" >/dev/null 2>&1 || true
+      sleep 3
+      BUILDS_AFTER=$(grep -c "Swapchain built" app.log || true)
+
+      swaymsg -t command "[app_id=\"${name}\"] kill" >/dev/null 2>&1 || true
+      for _ in $(seq 1 150); do
+        kill -0 $APP_PID 2>/dev/null || break
+        sleep 0.1
+      done
+      if kill -0 $APP_PID 2>/dev/null; then
+        kill -9 $APP_PID 2>/dev/null || true
+        cat app.log
+        fail "${name} did not exit after the window was closed"
+      fi
+      wait $APP_PID
+      STATUS=$?
+
+      echo "${name}: swapchain builds = ''${BUILDS_AFTER}, exit = ''${STATUS}"
+      grep "Swapchain built" app.log | sed 's/^/    /'
+
+      [ "$STATUS" -eq 0 ] || fail "${name} exited with $STATUS"
+      [ "$BUILDS_BEFORE" -ge 1 ] || fail "the swapchain was never built"
+      [ "$BUILDS_AFTER" -gt "$BUILDS_BEFORE" ] \
+        || fail "resizing the window did not recreate the swapchain"
     fi
-    wait $APP_PID
-    STATUS=$?
-
-    echo "${name}: swapchain builds = ''${BUILDS_AFTER}, exit = ''${STATUS}"
-    grep "Swapchain built" app.log | sed 's/^/    /'
-
-    [ "$STATUS" -eq 0 ] || fail "${name} exited with $STATUS"
-    [ "$BUILDS_BEFORE" -ge 1 ] || fail "the swapchain was never built"
-    [ "$BUILDS_AFTER" -gt "$BUILDS_BEFORE" ] \
-      || fail "resizing the window did not recreate the swapchain"
 
     # Swapchain extent must equal the drawable extent in every build.
     MISMATCH=$(grep "Swapchain built" app.log \
@@ -168,8 +206,23 @@ in
 
   cpu-concurrent-queue = cpuTest "ConcurrentQueueTests";
   cpu-concurrent-list = cpuTest "ConcurrentListTest";
+  # Util::RegisterCollection free-list regression (no display, no Vulkan).
+  cpu-register-collection = cpuTest "ObjectChurnTest";
 
-  smoke-cube = smoke "CubeTest";
-  smoke-multi-cube = smoke "MultiCubePerformanceTest";
-  smoke-quad = smoke "QuadTest";
+  smoke-cube = smoke "CubeTest" { };
+  smoke-multi-cube = smoke "MultiCubePerformanceTest" { };
+  smoke-quad = smoke "QuadTest" { };
+  # Chunk streaming: object creation/destruction from onUpdate and per-frame
+  # geometry replacement, for a fixed 120 frames, then it closes itself.
+  smoke-chunk-stream = smoke "ChunkStreamTest" { selfExit = true; };
+  # Directional light + shadow map: renders a ground slab and four cubes with a
+  # depth-only shadow pass (2048x2048), for a fixed 60 frames, then it closes
+  # itself. The `expect` line is SceneRender's casters-pass log with the map
+  # size: a run that never recorded the pass cannot print it. The demo itself
+  # exits non-zero unless the pass had casters in it and the map really contains
+  # geometry (see Tests/src/ShadowTest.cpp).
+  smoke-shadow = smoke "ShadowTest" {
+    selfExit = true;
+    expect = "Shadow pass: 2048x2048 depth map";
+  };
 }

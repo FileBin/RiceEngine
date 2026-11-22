@@ -159,12 +159,16 @@ void Mesh::recalculateBounds() {
 }
 
 bool Mesh::checkVisiblity(ModelData matrix) {
-    auto corners = bounds.getCorners();
+    // getPoints() is the nine-entry array (bounding-box centre + eight
+    // corners) this loop was written for. It used to iterate i < 9 over
+    // getCorners(), which returns exactly eight elements, so every call read
+    // one vector element past the end.
+    auto points = bounds.getPoints();
     auto boxSize = bounds.getSize().sqrLength() * 5.;
     matrix.world.c41 = matrix.world.c42 = matrix.world.c43 = 0;
     auto temp = matrix.world_view * matrix.world;
-    for (size_t i = 0; i < 9; i++) {
-        auto proj = corners[i] * temp;
+    for (size_t i = 0; i < points.size(); i++) {
+        auto proj = points[i] * temp;
         if (proj.sqrLength() < boxSize)
             return true;
         proj = proj * matrix.projection;

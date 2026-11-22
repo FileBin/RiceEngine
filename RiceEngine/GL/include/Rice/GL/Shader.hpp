@@ -14,6 +14,24 @@ NSP_GL_END
 #include "Rice/Math/Math.hpp"
 
 NSP_GL_BEGIN
+// How blended output is combined with what is already in the framebuffer.
+//   Alpha  - srcAlpha / one-minus-srcAlpha, the usual translucent overlay;
+//   Invert - one-minus-dstColor / zero, i.e. the destination is negated where the geometry
+//            covers it. A screen-space crosshair drawn this way is always visible, on any
+//            background, without knowing what is behind it.
+enum class BlendMode {
+	Alpha = 0,
+	Invert = 1,
+};
+
+// How the vertex stream is interpreted. Triangles is everything the scene draws; Lines
+// exists for overlay wireframes (a build cursor, a debug gizmo), which the engine could
+// not express before because the topology was hard-coded in the pipeline.
+enum class Topology {
+	Triangles = 0,
+	Lines = 1,
+};
+
 class Shader : public GraphicsComponentBase {
 public:
 	enum Type {
@@ -27,6 +45,40 @@ public:
 	void loadShader(String path, Type shaderType);
 
 	void addUniformBuffer(uint binding, Type shaderStage);
+
+	/*
+	 * Same, for one block that both stages read. A block declared twice through
+	 * the single-stage overload would put two layout bindings with the same
+	 * number into the descriptor set layout, which is invalid; declaring the
+	 * binding once with both stage flags is the fix. Used by the game's water
+	 * shader: `time` animates the surface in the vertex stage and the normals
+	 * in the fragment stage.
+	 */
+	void addUniformBuffer(uint binding, Type firstStage, Type secondStage);
+
+
+	/*
+	 * Declares the scene lighting resources for this shader, i.e. what the
+	 * scene shaders built with -DRICE_LIGHTING use (Tests/shaders/scene/
+	 * light.glsl + shadow.glsl):
+	 *
+	 *   light_binding  (default 2) uniform LightData, vertex AND fragment
+	 *   shadow_binding (default 3) sampler2D shadow_map, fragment
+	 *
+	 * SceneRender binds both on every draw of a shader that declared them,
+	 * for as long as the scene has an enabled Components::DirectionalLight.
+	 * A shader without this call keeps a layout of just the bindings it
+	 * declared and is drawn exactly as before. Call before build().
+	 */
+	void addLighting(uint light_binding = 2, uint shadow_binding = 3);
+
+	/**
+	 * True when addLighting() was called: SceneRender then has to bind the
+	 * light block and the shadow map before drawing with this shader.
+	 */
+	bool usesLighting() const { return lighting; }
+	uint getLightBinding() const { return light_binding; }
+	uint getShadowBinding() const { return shadow_binding; }
 
 	void setVertexStride(uint stride) {
 		vertexStride = stride;
@@ -43,6 +95,65 @@ public:
 	}
 
 	void build();
+
+	/**
+	 * Opt-in alpha blending: call before build() (and before buildShadowPipeline(),
+	 * which ignores it - the casters pass has no colour attachment).
+	 *
+	 * build() then creates the pipeline with
+	 *
+	 *   srcAlpha / one-minus-srcAlpha blending on colour and alpha,
+	 *   depth test ON with LESS (unchanged), depth write OFF.
+	 *
+	 * Drawing without depth writes is what makes blended geometry not occlude
+	 * what is behind it; the engine also keeps such meshes out of the shadow
+	 * casters pass and draws them after the opaque ones (see Material::
+	 * isTransparent and SceneRender). Blend is OFF by default, so every existing
+	 * shader keeps its opaque pipeline.
+	 */
+	void setBlendEnabled(bool enabled = true) { blend_enabled = enabled; }
+	bool isBlendEnabled() const { return blend_enabled; }
+	void setBlendMode(BlendMode mode) { blend_mode = mode; }
+	BlendMode getBlendMode() const { return blend_mode; }
+
+	/*
+	 * Overlay drawing: call both before build().
+	 *
+	 *   setTopology(Topology::Lines)  - the pipeline rasterises LINE_LIST, so an index
+	 *                                   buffer of vertex pairs draws true lines (no
+	 *                                   quads standing in for them, no culling issues);
+	 *   setDepthTestEnabled(false)     - the depth comparison is off and nothing is
+	 *                                   written, so the geometry lands on top of the
+	 *                                   scene it is drawn after. Also disables culling:
+	 *                                   a wireframe has no front face to cull.
+	 */
+	/*
+	 * Rasterises triangles as lines (polygon mode LINE): the cheapest way to draw an
+	 * existing mesh as a wireframe - same geometry, same buffers, no extra vertex data.
+	 * Culling is off in this mode, since the wireframe has no front face.
+	 */
+	void setWireframe(bool enabled = true) { wireframe = enabled; }
+	bool isWireframe() const { return wireframe; }
+
+	void setTopology(Topology t) { topology = t; }
+	Topology getTopology() const { return topology; }
+	void setDepthTestEnabled(bool enabled = true) { depth_test_enabled = enabled; }
+	bool isDepthTestEnabled() const { return depth_test_enabled; }
+
+	/**
+	 * Builds a depth-only casters pipeline instead of the scene pipeline: the
+	 * shadow map's render pass (single D32_SFLOAT attachment, no colour target),
+	 * depth test + write with LESS, both faces drawn, and no fragment stage —
+	 * the shadow pass only needs the depth values (load the vertex shader only
+	 * and pass the per-mesh ModelData at binding 0 plus the scene LightData at
+	 * binding 2 with addUniformBuffer()). `map_size` is the ShadowMap size and
+	 * becomes the viewport, so it must match the map that is rendered into.
+	 *
+	 * Such a pipeline is not rebuilt on window resize (it does not depend on the
+	 * swapchain); use it only for ShadowMap rendering, never for the scene.
+	 */
+	void buildShadowPipeline(uint map_size);
+
 private:
 	friend struct CommandBuffer_API_data;
 	friend class UniformBuffer;
@@ -56,6 +167,18 @@ private:
 
 	bool init = false;
 	bool uses_depth_buffer = false;
+	// buildShadowPipeline(): depth-only pass pipeline, skip resize rebuilds.
+	bool shadow_pipeline = false;
+	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
+	bool blend_enabled = false;
+	BlendMode blend_mode = BlendMode::Alpha;
+	Topology topology = Topology::Triangles;
+	bool wireframe = false;
+	bool depth_test_enabled = true;
+	// addLighting(): the descriptor bindings SceneRender has to fill in.
+	bool lighting = false;
+	uint light_binding = 2;
+	uint shadow_binding = 3;
 
 	void onResize(Vector2i windowSize);
 };

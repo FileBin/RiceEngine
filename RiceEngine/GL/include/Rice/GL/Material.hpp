@@ -23,6 +23,17 @@ class Material {
 
     Material(ptr<GraphicsManager> manager, ptr<Shader> shader);
 
+    /**
+     * True when this material has to be drawn with blending, i.e. its shader
+     * was built with Shader::setBlendEnabled(true) or the material was marked
+     * RenderType::Transparent. SceneRender asks this to keep the mesh out of
+     * the shadow casters pass (a transparent surface must not occlude light)
+     * and to draw it after the opaque ones.
+     */
+    bool isTransparent() const {
+        return renderType == RenderType::Transparent || (shader && shader->isBlendEnabled());
+    }
+
     template <typename T> void initUniformBuffer(const T &init_data) {
         initUniformBuffer(sizeof(T));
         uniform_buffer->updateData<T>(init_data);

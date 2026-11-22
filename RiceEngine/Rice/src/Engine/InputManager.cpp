@@ -75,21 +75,30 @@ void InputManager::unlockMouse() {
 }
 
 void InputManager::update() {
+    std::unique_lock lock(update_mutex);
     if (is_mouse_locked) {
-        std::unique_lock lock(update_mutex);
         auto center = getCenter();
-        mouseInfinitePos += mouseDelta;
-        mouseDelta = {};
-        if (getKey(KeyCode::Escape)) {
-            unlockMouse();
-        }
+        // Consume everything the mouse reported since the last frame, so the
+        // rotation does not depend on how many events fit into one frame (and
+        // therefore not on the frame rate either).
+        mouseInfinitePos += pendingDelta;
+    }
+    // Motion gathered while the pointer was free is meaningless: drop it, or the
+    // first locked frame would jump.
+    pendingDelta = {};
+    mouseDelta = {};
+    if (is_mouse_locked && getKey(KeyCode::Escape)) {
+        unlockMouse();
     }
 }
 
 void InputManager::eventCursor(Vector2 newpos, Vector2i delta) {
+    std::unique_lock lock(update_mutex);
     mousePos = newpos;
-    mouseDelta = delta;
-    Log::debug("Mouse delta: {}, {}", mouseDelta.x, mouseDelta.y);
+    // Accumulate: a frame may receive several motion events, and SDL reports
+    // them relative to the previous event, not to the previous frame.
+    pendingDelta += delta;
+    mouseDelta += delta;
 }
 
 void InputManager::eventKey(KeyCode key, bool rs_state) {
@@ -125,8 +134,15 @@ void InputManager::reset() {
 
 // void InputManager::eventCursor(Vector2 newPos) { mousePos = newPos; }
 
+int InputManager::consumeWheelDelta() {
+    const int delta = wheelAccum;
+    wheelAccum = 0;
+    return delta;
+}
+
 void InputManager::eventMouseWheel(short value) {
     mouseScrollDelta = value - mouseWheel;
+    wheelAccum += mouseScrollDelta;
     mouseWheel = value;
 }
 

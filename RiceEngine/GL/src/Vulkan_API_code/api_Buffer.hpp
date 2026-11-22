@@ -21,6 +21,12 @@ struct Buffer_API_Data {
 
     size_t buffer_size = 0;
 
+    /* Whether the memory this buffer was bound to is host coherent. A direct
+     * host write to a non-coherent mapping has to be flushed before the GPU may
+     * read it; UniformBuffer::updateData() asks this to skip that on the (usual)
+     * coherent memory types. */
+    bool host_coherent = false;
+
     bool allocated = false;
 
     Buffer_API_Data(GraphicsManager_API_data &api_data);

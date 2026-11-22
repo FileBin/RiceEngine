@@ -54,6 +54,12 @@ struct GraphicsManager_API_data {
 
     vk::RenderPass def_renderPass; // the default render pass
 
+    // The depth-only pass the directional light's shadow map is rendered in: a
+    // single D32_SFLOAT attachment, no colour targets, contents cleared every
+    // frame and handed to the fragment shaders as a sampled depth texture.
+    // Size independent, so it survives swapchain re-creation.
+    vk::RenderPass shadow_renderPass;
+
     vk::Semaphore presentSemaphore; // signalled by vkAcquireNextImageKHR
     vk::Fence renderFence;
 
@@ -101,12 +107,18 @@ struct GraphicsManager_API_data {
 
     uint findMemoryType(uint typeFilter, vk::MemoryPropertyFlags properties);
 
+    /* Property flags of a memory type, e.g. to know whether a mapping is host
+     * coherent and therefore does not have to be flushed after a write. */
+    vk::MemoryPropertyFlags memoryTypeProperties(uint index);
+
     vk::Format findSupportedFormat(const vec<vk::Format> &candidates, vk::ImageTiling tiling,
                                    vk::FormatFeatureFlags features);
 
+    /* `memoryTypeIndex`, when given, receives the index of the memory type the
+     * buffer was bound to (findMemoryType picks the first match). */
     void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
                       vk::MemoryPropertyFlags properties, vk::Buffer &buffer,
-                      vk::DeviceMemory &bufferMemory);
+                      vk::DeviceMemory &bufferMemory, uint *memoryTypeIndex = nullptr);
 
     void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::BufferCopy copyRegion);
 
@@ -118,6 +130,7 @@ struct GraphicsManager_API_data {
     void init_commands();
     void init_descriptor_pool();
     void init_def_renderpass();
+    void init_shadow_renderpass();
     void init_framebuffers();
     void init_sync_structures();
     void init_depth_image();
