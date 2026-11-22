@@ -41,17 +41,24 @@ void GraphicsManager::update() {
 
 void GraphicsManager::sync() { api_data->sync(); }
 
-void GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
+Vector2i GraphicsManager::getFrameSize() {
+    if (!api_data)
+        return {0, 0};
+    return {(int)api_data->windowExcent.width, (int)api_data->windowExcent.height};
+}
+
+bool GraphicsManager::executeCmd(ptr<CommandBuffer> cmd) {
     // The image has to be acquired first: the command buffer is picked by the
     // acquired image index, not by the index of the previous frame.
     if (!api_data->acquireNextImage())
-        return;
+        return false;
     api_data->drawFrame({cmd->api_data->cmd[api_data->swapchainImageIndex]});
+    return !api_data->resizing;
 }
 
-void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
+bool GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
     if (!api_data->acquireNextImage())
-        return;
+        return false;
 
     uint n = cmds.size();
     vec<vk::CommandBuffer> c(n);
@@ -59,6 +66,7 @@ void GraphicsManager::executeCmds(vec<ptr<CommandBuffer>> cmds) {
         c[i] = cmds[i]->api_data->cmd[api_data->swapchainImageIndex];
 
     api_data->drawFrame(c);
+    return !api_data->resizing;
 }
 
 // FINALIZER

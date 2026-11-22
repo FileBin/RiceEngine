@@ -13,6 +13,24 @@
 
 NSP_GL_BEGIN
 
+namespace {
+// One place that maps a Shader::Type to the shader-stage flag: the descriptor
+// layouts and the compute pipeline all need it.
+vk::ShaderStageFlagBits stage_flag(Shader::Type stage) {
+    switch (stage) {
+    case Shader::Type::Vertex:
+        return vk::ShaderStageFlagBits::eVertex;
+    case Shader::Type::Fragment:
+        return vk::ShaderStageFlagBits::eFragment;
+    case Shader::Type::Geometry:
+        return vk::ShaderStageFlagBits::eGeometry;
+    case Shader::Type::Compute:
+        return vk::ShaderStageFlagBits::eCompute;
+    }
+    return vk::ShaderStageFlagBits::eVertex;
+}
+} // namespace
+
 Shader::Shader(ptr<GraphicsManager> g_mgr)
     : GraphicsComponentBase(g_mgr), api_data{new Shader_API_Data()} {
     graphics_mgr->resizePipelines->subscribe(
@@ -65,6 +83,10 @@ void Shader::loadShader(String path, Type type) {
         break;
     case Type::Geometry:
         api_data->geometryShader = shaderModule;
+        break;
+    case Type::Compute:
+        api_data->computeShader = shaderModule;
+        break;
     }
 }
 
@@ -74,20 +96,21 @@ void Shader::addUniformBuffer(uint binding, Type stage) {
     uboLayoutBinding.binding = binding;
     uboLayoutBinding.descriptorType = DescriptorType::eUniformBuffer;
     uboLayoutBinding.descriptorCount = 1;
-
-    switch (stage) {
-    case Type::Vertex:
-        uboLayoutBinding.stageFlags = ShaderStageFlagBits::eVertex;
-        break;
-    case Type::Fragment:
-        uboLayoutBinding.stageFlags = ShaderStageFlagBits::eFragment;
-        break;
-    case Type::Geometry:
-        uboLayoutBinding.stageFlags = ShaderStageFlagBits::eGeometry;
-        break;
-    }
+    uboLayoutBinding.stageFlags = stage_flag(stage);
 
     api_data->bindings.push_back(uboLayoutBinding);
+}
+
+void Shader::addStorageBuffer(uint binding, Type stage, uint count) {
+    using namespace vk;
+
+    DescriptorSetLayoutBinding ssboLayoutBinding;
+    ssboLayoutBinding.binding = binding;
+    ssboLayoutBinding.descriptorType = DescriptorType::eStorageBuffer;
+    ssboLayoutBinding.descriptorCount = count;
+    ssboLayoutBinding.stageFlags = stage_flag(stage);
+
+    api_data->bindings.push_back(ssboLayoutBinding);
 }
 
 void Shader::addUniformBuffer(uint binding, Type firstStage, Type secondStage) {
@@ -95,22 +118,11 @@ void Shader::addUniformBuffer(uint binding, Type firstStage, Type secondStage) {
 
     // One descriptor set layout binding covers all stages, so the two stages are
     // merged into a single vk::ShaderStageFlags instead of two bindings.
-    constexpr auto stageFlag = [](Type stage) {
-        switch (stage) {
-        case Type::Vertex:
-            return ShaderStageFlagBits::eVertex;
-        case Type::Fragment:
-            return ShaderStageFlagBits::eFragment;
-        default:
-            return ShaderStageFlagBits::eGeometry;
-        }
-    };
-
     DescriptorSetLayoutBinding uboLayoutBinding;
     uboLayoutBinding.binding = binding;
     uboLayoutBinding.descriptorType = DescriptorType::eUniformBuffer;
     uboLayoutBinding.descriptorCount = 1;
-    uboLayoutBinding.stageFlags = stageFlag(firstStage) | stageFlag(secondStage);
+    uboLayoutBinding.stageFlags = stage_flag(firstStage) | stage_flag(secondStage);
 
     api_data->bindings.push_back(uboLayoutBinding);
 }
@@ -141,6 +153,18 @@ void Shader::addLighting(uint light_binding, uint shadow_binding) {
     this->shadow_binding = shadow_binding;
 }
 
+void Shader::buildComputePipeline() {
+    if (!api_data->computeShader)
+        THROW_EXCEPTION("Cannot build compute pipeline! No shader was loaded with Shader::Compute.");
+    if (api_data->bindings.size() == 0)
+        THROW_EXCEPTION("Cannot build compute pipeline! Bindings are not set!");
+
+    api_data->buildDescriptorSetLayout(get_api_data());
+    api_data->buildComputePipeline(get_api_data());
+    compute_pipeline = true;
+    init = true;
+}
+
 void Shader::buildShadowPipeline(uint map_size) {
     if (vertexStride == 0)
         THROW_EXCEPTION("Cannot build shadow pipeline! Vertex stride is not set!");
@@ -157,8 +181,9 @@ void Shader::buildShadowPipeline(uint map_size) {
 }
 
 void Shader::onResize(Vector2i extent) {
-    // A depth-only (shadow) pipeline is not tied to the swapchain extent.
-    if (shadow_pipeline)
+    // Neither a depth-only (shadow) nor a compute pipeline is tied to the
+    // swapchain extent.
+    if (shadow_pipeline || compute_pipeline)
         return;
 
     api_data->cleanupPipeline(get_api_data());

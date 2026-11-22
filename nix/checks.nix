@@ -225,4 +225,13 @@ in
     selfExit = true;
     expect = "Shadow pass: 2048x2048 depth map";
   };
+  # Engine milestone M3 of docs/tetrahedral-mesh.md: a compute pipeline + SSBO
+  # readback, a compute->vertex/indirect barrier, and an indirect draw whose
+  # record was written by the dispatch, compared against the equivalent direct
+  # draw. The demo exits on its own after six PASS lines, and exits non-zero if
+  # any of them fails, so the `expect` line is the whole summary.
+  smoke-compute-indirect = smoke "ComputeIndirectTest" {
+    selfExit = true;
+    expect = "ComputeIndirectTest: SUMMARY pass=6 fail=0";
+  };
 }

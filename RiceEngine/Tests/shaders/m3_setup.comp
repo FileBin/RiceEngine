@@ -1,0 +1,64 @@
+#version 450
+// M3 self-test, compute stage: fills the four buffers the indirect draw then
+// consumes. Nothing here is the mesher - this is the trivial shader the engine's
+// compute path (SSBO, dispatch, barrier, indirect draw) is proved on
+// (docs/tetrahedral-mesh.md section 6, milestone M3).
+//
+//   binding 0  marker  64 uints, values[i] = i * 3 + 7   (pure SSBO readback)
+//   binding 1  verts   6 vec2 positions: a small decoy triangle at 0..2 and the
+//                      real one at 3..5
+//   binding 2  indices 6 uints: 0,1,2 and 3,4,5
+//   binding 3  draws   one VkDrawIndexedIndirectCommand: the real triangle,
+//                      i.e. count 3, instanceCount 1, firstIndex 3
+//
+// firstIndex is 3 on purpose: a draw that ignored it would rasterise the decoy
+// triangle instead, which has a different area, and the readback says so.
+
+layout(local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer Marker {
+    uint values[64];
+} marker;
+
+layout(std430, binding = 1) writeonly buffer Vertices {
+    vec2 positions[];
+} verts;
+
+layout(std430, binding = 2) writeonly buffer Indices {
+    uint indices[];
+} idx;
+
+layout(std430, binding = 3) writeonly buffer Draws {
+    uint record[5]; // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+} draws;
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i < 64u)
+        marker.values[i] = i * 3u + 7u;
+
+    if (i != 0u)
+        return;
+
+    // Decoy: a triangle roughly 1/150th of the area of the real one.
+    verts.positions[0] = vec2(-0.95, -0.95);
+    verts.positions[1] = vec2(-0.85, -0.95);
+    verts.positions[2] = vec2(-0.90, -0.85);
+
+    verts.positions[3] = vec2(-0.60, -0.60);
+    verts.positions[4] = vec2(0.60, -0.60);
+    verts.positions[5] = vec2(0.00, 0.70);
+
+    idx.indices[0] = 0u;
+    idx.indices[1] = 1u;
+    idx.indices[2] = 2u;
+    idx.indices[3] = 3u;
+    idx.indices[4] = 4u;
+    idx.indices[5] = 5u;
+
+    draws.record[0] = 3u; // indexCount
+    draws.record[1] = 1u; // instanceCount
+    draws.record[2] = 3u; // firstIndex -> the real triangle
+    draws.record[3] = 0u; // vertexOffset
+    draws.record[4] = 0u; // firstInstance
+}

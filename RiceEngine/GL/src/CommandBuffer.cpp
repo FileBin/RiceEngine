@@ -121,14 +121,42 @@ void CommandBuffer::bindVertexBuffer(ptr<Buffer> buffer) {
     commands.push_back(new_ptr<Command>(Command::BindVertexBuffer, buffer));
 }
 
-void CommandBuffer::bindVertexBuffer(ptr<VertexBuffer> buffer) {
-    needRecreate();
-    commands.push_back(new_ptr<Command>(Command::BindVertexBuffer, buffer));
-}
-
-void CommandBuffer::bindIndexBuffer(ptr<IndexBuffer> buffer) {
+void CommandBuffer::bindIndexBuffer(ptr<Buffer> buffer) {
     needRecreate();
     commands.push_back(new_ptr<Command>(Command::BindIndexBuffer, buffer));
+}
+
+void CommandBuffer::bindStorageBuffer(ptr<StorageBuffer> buffer, uint binding) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::BindStorageBuffer, buffer, binding));
+}
+
+void CommandBuffer::dispatch(ptr<Shader> shader, uint x, uint y, uint z) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::Dispatch, shader, x, y, z));
+}
+
+void CommandBuffer::memoryBarrier(BarrierStage srcStage, BarrierAccess srcAccess,
+                                  BarrierStage dstStage, BarrierAccess dstAccess) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::PipelineBarrier, srcStage, srcAccess, dstStage,
+                                        dstAccess));
+}
+
+void CommandBuffer::drawIndexedIndirect(ptr<Buffer> draws, uint firstDraw, uint drawCount) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::DrawIndexedIndirect, draws, firstDraw, drawCount));
+}
+
+void CommandBuffer::drawIndexed(uint indexCount, uint firstIndex, int32_t vertexOffset) {
+    needRecreate();
+    commands.push_back(
+        new_ptr<Command>(Command::DrawIndexedRange, indexCount, firstIndex, vertexOffset));
+}
+
+void CommandBuffer::captureColor(ptr<Buffer> dst) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::CaptureColor, dst));
 }
 
 void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding) {

@@ -27,6 +27,55 @@
 
 NSP_GL_BEGIN
 
+/* BarrierStage / BarrierAccess (engine enums) -> vk stage and access masks. */
+inline vk::PipelineStageFlags to_vk_stage(BarrierStage stage) {
+    using namespace vk;
+    const uint bits = static_cast<uint>(stage);
+    PipelineStageFlags flags;
+
+    if (bits & static_cast<uint>(BarrierStage::TopOfPipe))
+        flags |= PipelineStageFlagBits::eTopOfPipe;
+    if (bits & static_cast<uint>(BarrierStage::ComputeShader))
+        flags |= PipelineStageFlagBits::eComputeShader;
+    if (bits & static_cast<uint>(BarrierStage::VertexInput))
+        flags |= PipelineStageFlagBits::eVertexInput;
+    if (bits & static_cast<uint>(BarrierStage::DrawIndirect))
+        flags |= PipelineStageFlagBits::eDrawIndirect;
+    if (bits & static_cast<uint>(BarrierStage::Transfer))
+        flags |= PipelineStageFlagBits::eTransfer;
+    if (bits & static_cast<uint>(BarrierStage::FragmentShader))
+        flags |= PipelineStageFlagBits::eFragmentShader;
+    if (bits & static_cast<uint>(BarrierStage::AllGraphics))
+        flags |= PipelineStageFlagBits::eAllGraphics;
+    if (bits & static_cast<uint>(BarrierStage::AllCommands))
+        flags |= PipelineStageFlagBits::eAllCommands;
+
+    return flags;
+}
+
+inline vk::AccessFlags to_vk_access(BarrierAccess access) {
+    using namespace vk;
+    const uint bits = static_cast<uint>(access);
+    AccessFlags flags;
+
+    if (bits & static_cast<uint>(BarrierAccess::ShaderWrite))
+        flags |= AccessFlagBits::eShaderWrite;
+    if (bits & static_cast<uint>(BarrierAccess::ShaderRead))
+        flags |= AccessFlagBits::eShaderRead;
+    if (bits & static_cast<uint>(BarrierAccess::VertexAttributeRead))
+        flags |= AccessFlagBits::eVertexAttributeRead;
+    if (bits & static_cast<uint>(BarrierAccess::IndexRead))
+        flags |= AccessFlagBits::eIndexRead;
+    if (bits & static_cast<uint>(BarrierAccess::IndirectCommandRead))
+        flags |= AccessFlagBits::eIndirectCommandRead;
+    if (bits & static_cast<uint>(BarrierAccess::TransferRead))
+        flags |= AccessFlagBits::eTransferRead;
+    if (bits & static_cast<uint>(BarrierAccess::TransferWrite))
+        flags |= AccessFlagBits::eTransferWrite;
+
+    return flags;
+}
+
 struct DrawAdditionData : public ICleanable {
     vk::DescriptorSet descriptorSet;
     vk::DescriptorPool descriptorPool;
@@ -35,7 +84,8 @@ struct DrawAdditionData : public ICleanable {
 
     void cleanup() override;
     void createDescriptorSet(DescriptorSetCreator &creator);
-    void bindDescriptosSets(DescriptorSetCreator &creator, vk::CommandBuffer cmd);
+    void bindDescriptosSets(DescriptorSetCreator &creator, vk::CommandBuffer cmd,
+                            vk::PipelineBindPoint bindPoint = vk::PipelineBindPoint::eGraphics);
 };
 
 struct DescriptorSetCreator {
@@ -69,6 +119,28 @@ struct DescriptorSetCreator {
 
         WriteDescriptorSet write;
         write.descriptorType = DescriptorType::eUniformBuffer;
+        write.dstArrayElement = 0;
+        write.dstBinding = binding;
+        write.descriptorCount = 1;
+
+        writes[binding] = {write, info, {}};
+    }
+
+    /* A shader storage buffer (SSBO): the set 0 binding a compute pass writes
+     * its output through, and the buffer a draw may also consume as vertex or
+     * index data. Same DescriptorBufferInfo path as a uniform buffer, only the
+     * descriptor type differs. */
+    void addWrite(ptr<StorageBuffer> buffer, uint binding) {
+        using namespace vk;
+        auto &api_data = buffer->api_data;
+
+        DescriptorBufferInfo info;
+        info.buffer = api_data->buffer;
+        info.offset = 0;
+        info.range = api_data->buffer_size;
+
+        WriteDescriptorSet write;
+        write.descriptorType = DescriptorType::eStorageBuffer;
         write.dstArrayElement = 0;
         write.dstBinding = binding;
         write.descriptorCount = 1;
@@ -250,7 +322,9 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
     } break;
 
     case CommandBuffer::Command::BindVertexBuffer: {
-        auto buf = *(ptr<VertexBuffer> *)command->arg_chain->getData();
+        // Any Buffer: a VertexBuffer's storage or a StorageBuffer that compute
+        // wrote and the vertex fetch now reads (§6.3).
+        auto buf = *(ptr<Buffer> *)command->arg_chain->getData();
         vk::Buffer vk_buf = buf->api_data->buffer;
         DeviceSize offset = 0;
         cmd[i].bindVertexBuffers(0, 1, &vk_buf,
@@ -258,8 +332,7 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
     } break;
 
     case CommandBuffer::Command::BindIndexBuffer: {
-        CommandBuffer::Command::ArgIterator it = command->arg_chain;
-        auto buf = *(ptr<IndexBuffer> *)(it++).current->getData();
+        auto buf = *(ptr<Buffer> *)command->arg_chain->getData();
         IndexType idx_ty;
 
         if (sizeof(index_t) == sizeof(uint16_t))
@@ -295,6 +368,9 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
 
         else if (stage == Shader::Geometry)
             flags = vk::ShaderStageFlagBits::eGeometry;
+
+        else
+            flags = vk::ShaderStageFlagBits::eCompute;
 
         cmd[i].pushConstants(shader->api_data->layout, flags, 0, nData, pData);
     } break;
@@ -338,6 +414,142 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
         creator.addWrite(shadow_map, binding);
     } break;
 
+    case CommandBuffer::Command::BindStorageBuffer: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto ssbo = *(ptr<StorageBuffer> *)(it++).current->getData();
+        auto binding = *(uint *)(it++).current->getData();
+        creator.addWrite(ssbo, binding);
+    } break;
+
+    case CommandBuffer::Command::Dispatch: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto shader = *(ptr<Shader> *)(it++).current->getData();
+        auto x = *(uint *)(it++).current->getData();
+        auto y = *(uint *)(it++).current->getData();
+        auto z = *(uint *)(it++).current->getData();
+
+        auto &sh = *shader->api_data;
+        cmd[i].bindPipeline(PipelineBindPoint::eCompute, sh.pipeline);
+
+        // The compute pass has its own set 0: rebuilt from the SSBOs bound since
+        // the last draw/dispatch, and only published to the bindings this
+        // shader declared - the same rule DrawAdditionData applies to graphics.
+        creator.layout = sh.layout;
+        creator.descriptorSetLayout = sh.descriptorSetLayout;
+        creator.declared.clear();
+        for (auto &b : sh.bindings)
+            creator.declared.insert(b.binding);
+
+        if (!command->additional_data)
+            command->additional_data = new DrawAdditionData(api_data);
+        auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
+        draw_data->bindDescriptosSets(creator, cmd[i], PipelineBindPoint::eCompute);
+
+        cmd[i].dispatch(x, y, z);
+    } break;
+
+    case CommandBuffer::Command::PipelineBarrier: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto src_stage = *(BarrierStage *)(it++).current->getData();
+        auto src_access = *(BarrierAccess *)(it++).current->getData();
+        auto dst_stage = *(BarrierStage *)(it++).current->getData();
+        auto dst_access = *(BarrierAccess *)(it++).current->getData();
+
+        vk::MemoryBarrier barrier{};
+        barrier.srcAccessMask = to_vk_access(src_access);
+        barrier.dstAccessMask = to_vk_access(dst_access);
+
+        cmd[i].pipelineBarrier(to_vk_stage(src_stage), to_vk_stage(dst_stage),
+                               vk::DependencyFlags{}, 1, &barrier, 0, nullptr, 0, nullptr);
+    } break;
+
+    case CommandBuffer::Command::DrawIndexedIndirect: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto draws = *(ptr<Buffer> *)(it++).current->getData();
+        auto first_draw = *(uint *)(it++).current->getData();
+        auto draw_count = *(uint *)(it++).current->getData();
+
+        if (!command->additional_data)
+            command->additional_data = new DrawAdditionData(api_data);
+        auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
+        draw_data->bindDescriptosSets(creator, cmd[i]);
+
+        const DeviceSize stride = sizeof(vk::DrawIndexedIndirectCommand);
+        cmd[i].drawIndexedIndirect(draws->api_data->buffer, first_draw * stride, draw_count,
+                                   stride);
+    } break;
+
+    case CommandBuffer::Command::DrawIndexedRange: {
+        CommandBuffer::Command::ArgIterator it = command->arg_chain;
+        auto count = *(uint *)(it++).current->getData();
+        auto first_index = *(uint *)(it++).current->getData();
+        auto vertex_offset = *(int32_t *)(it++).current->getData();
+
+        if (!command->additional_data)
+            command->additional_data = new DrawAdditionData(api_data);
+        auto draw_data = dynamic_cast<DrawAdditionData *>(command->additional_data);
+        draw_data->bindDescriptosSets(creator, cmd[i]);
+
+        cmd[i].drawIndexed(count, 1, first_index, vertex_offset, 0);
+    } break;
+
+    case CommandBuffer::Command::CaptureColor: {
+        auto dst = *(ptr<Buffer> *)command->arg_chain->getData();
+        if (i >= api_data.swapchainImages.size())
+            break;
+
+        const vk::Image image = api_data.swapchainImages[i];
+        const vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+
+        const vk::DeviceSize needed = vk::DeviceSize(api_data.windowExcent.width) *
+                                      api_data.windowExcent.height * 4;
+        if (dst->api_data->buffer_size < needed)
+            // A resize after the buffer was sized: skip rather than record an
+            // out-of-bounds copy. The test that wanted the pixels then sees an
+            // empty image and fails, which is the loud outcome.
+            break;
+
+        // The render pass hands the image over in PresentSrcKHR. Take it to
+        // TransferSrcOptimal, copy, and hand it back: the last layout of the
+        // command buffer is the one the presentation engine expects.
+        vk::ImageMemoryBarrier to_src{};
+        to_src.oldLayout = vk::ImageLayout::ePresentSrcKHR;
+        to_src.newLayout = vk::ImageLayout::eTransferSrcOptimal;
+        to_src.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        to_src.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        to_src.image = image;
+        to_src.subresourceRange = range;
+        to_src.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+        to_src.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+
+        cmd[i].pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                               vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags{}, 0,
+                               nullptr, 0, nullptr, 1, &to_src);
+
+        vk::BufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource =
+            vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+        region.imageOffset = vk::Offset3D(0, 0, 0);
+        region.imageExtent =
+            vk::Extent3D(api_data.windowExcent.width, api_data.windowExcent.height, 1);
+
+        cmd[i].copyImageToBuffer(image, vk::ImageLayout::eTransferSrcOptimal,
+                                 dst->api_data->buffer, 1, &region);
+
+        vk::ImageMemoryBarrier back = to_src;
+        back.oldLayout = vk::ImageLayout::eTransferSrcOptimal;
+        back.newLayout = vk::ImageLayout::ePresentSrcKHR;
+        back.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+        back.dstAccessMask = vk::AccessFlags{};
+
+        cmd[i].pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                               vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags{},
+                               0, nullptr, 0, nullptr, 1, &back);
+    } break;
+
     default:
         THROW_EXCEPTION("Unknown command occured!");
         break;
@@ -346,14 +558,14 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
 
 // NEEDIMPROVE
 inline void DrawAdditionData::bindDescriptosSets(DescriptorSetCreator &creator,
-                                                 vk::CommandBuffer cmd) {
+                                                 vk::CommandBuffer cmd,
+                                                 vk::PipelineBindPoint bindPoint) {
     if (!creator.writes.empty()) {
         if (!descriptorSet)
             createDescriptorSet(creator);
     }
     if (descriptorSet)
-        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, creator.layout, 0, 1,
-                               &descriptorSet, 0, nullptr);
+        cmd.bindDescriptorSets(bindPoint, creator.layout, 0, 1, &descriptorSet, 0, nullptr);
 }
 
 inline void DrawAdditionData::createDescriptorSet(DescriptorSetCreator &creator) {

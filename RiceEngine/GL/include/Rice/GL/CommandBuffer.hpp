@@ -25,10 +25,47 @@ NSP_GL_END
 #include "IndexBuffer.hpp"
 #include "Shader.hpp"
 #include "ShadowMap.hpp"
+#include "StorageBuffer.hpp"
 #include "UniformBuffer.hpp"
 #include "VertexBuffer.hpp"
 
 NSP_GL_BEGIN
+
+/*
+ * Stages a CommandBuffer::memoryBarrier() can name, as a bit mask (they are
+ * combined with operator|). The set the GPU mesher needs is small on purpose
+ * (docs/tetrahedral-mesh.md §6.4): a compute pass writes buffers, and the
+ * vertex fetch, the indirect draw and the next dispatch read them.
+ */
+enum class BarrierStage : uint {
+    None = 0,
+    TopOfPipe = 1 << 0,
+    ComputeShader = 1 << 1,
+    VertexInput = 1 << 2,
+    DrawIndirect = 1 << 3,
+    Transfer = 1 << 4,
+    FragmentShader = 1 << 5,
+    AllGraphics = 1 << 6,
+    AllCommands = 1 << 7,
+};
+inline BarrierStage operator|(BarrierStage a, BarrierStage b) {
+    return BarrierStage(uint(a) | uint(b));
+}
+
+/* Memory accesses the barrier makes available/visible, as a bit mask. */
+enum class BarrierAccess : uint {
+    None = 0,
+    ShaderWrite = 1 << 0,
+    ShaderRead = 1 << 1,
+    VertexAttributeRead = 1 << 2,
+    IndexRead = 1 << 3,
+    IndirectCommandRead = 1 << 4,
+    TransferRead = 1 << 5,
+    TransferWrite = 1 << 6,
+};
+inline BarrierAccess operator|(BarrierAccess a, BarrierAccess b) {
+    return BarrierAccess(uint(a) | uint(b));
+}
 
 class CommandBuffer : public GraphicsComponentBase {
   public:
@@ -53,6 +90,17 @@ class CommandBuffer : public GraphicsComponentBase {
             BeginShadowPass,
             EndShadowPass,
             BindShadowMap,
+            // Compute: an SSBO binding for the set, a dispatch, and a global
+            // memory barrier between a compute write and the read that follows.
+            BindStorageBuffer,
+            Dispatch,
+            PipelineBarrier,
+            // Game-owned geometry: an indirect draw whose records live in a
+            // buffer (written by compute, §6.3), and an explicit-range draw.
+            DrawIndexedIndirect,
+            DrawIndexedRange,
+            // Copy the frame's colour image into a host-visible buffer.
+            CaptureColor,
         } cmd;
 
         struct Arg {
@@ -177,9 +225,72 @@ class CommandBuffer : public GraphicsComponentBase {
     void bindShadowMap(ptr<ShadowMap> shadow_map, uint binding);
 
     void bindVertexBuffer(ptr<Buffer> buffer);
-    void bindVertexBuffer(ptr<VertexBuffer> vertexBuffer);
-    void bindIndexBuffer(ptr<IndexBuffer> indexBuffer);
+    void bindIndexBuffer(ptr<Buffer> buffer);
     void bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding);
+
+    /*
+     * Set 0, binding `binding`: a storage buffer (SSBO) for the draw or
+     * dispatch that follows. The buffer must have been created with
+     * StorageBuffer, and the shader must have declared the binding through
+     * Shader::addStorageBuffer() with the same stage.
+     */
+    void bindStorageBuffer(ptr<StorageBuffer> buffer, uint binding);
+
+    /*
+     * Runs a compute pipeline: binds it, fills set 0 from the storage buffers
+     * bound above and dispatches ceil(work / local_size) groups. `shader` must
+     * have been built with Shader::buildComputePipeline().
+     *
+     * A dispatch cannot be recorded inside a render pass; record it before
+     * beginRenderPass() and put a memoryBarrier() between it and the draw that
+     * reads what it wrote.
+     */
+    void dispatch(ptr<Shader> shader, uint groupCountX, uint groupCountY = 1,
+                  uint groupCountZ = 1);
+
+    /*
+     * One global memory barrier: everything the stages in `srcStage` wrote with
+     * one of `srcAccess` becomes available, and visible to `dstStage` reading
+     * it with `dstAccess`. The compute-write -> vertex/index/indirect-read
+     * pattern of docs/tetrahedral-mesh.md §6.4:
+     *
+     *   memoryBarrier(BarrierStage::ComputeShader, BarrierAccess::ShaderWrite,
+     *                 BarrierStage::VertexInput | BarrierStage::DrawIndirect,
+     *                 BarrierAccess::VertexAttributeRead | BarrierAccess::IndexRead |
+     *                     BarrierAccess::IndirectCommandRead);
+     *
+     * Submission order alone does not make that safe - without the barrier the
+     * draw is free to fetch the buffer before the dispatch that fills it.
+     */
+    void memoryBarrier(BarrierStage srcStage, BarrierAccess srcAccess, BarrierStage dstStage,
+                       BarrierAccess dstAccess);
+
+    /*
+     * Indexed draw whose VkDrawIndexedIndirectCommand records are read from
+     * `draws` (a StorageBuffer created with StorageUsage::Indirect), starting
+     * at record `firstDraw`. The counts and the first index are whatever the
+     * buffer holds - the CPU does not need to know them, which is what lets a
+     * compute pass decide how much geometry there is (§6.3).
+     */
+    void drawIndexedIndirect(ptr<Buffer> draws, uint firstDraw = 0, uint drawCount = 1);
+
+    /*
+     * Indexed draw of an explicit range of the bound index/vertex buffers -
+     * the direct counterpart of drawIndexedIndirect(), for comparison and for
+     * a fallback when the counts are known on the CPU.
+     */
+    void drawIndexed(uint indexCount, uint firstIndex, int32_t vertexOffset = 0);
+
+    /*
+     * Test/diagnostic: copies the frame's colour image into `dst`, which must
+     * be host visible and hold at least width * height * 4 bytes
+     * (GraphicsManager::getFrameSize()). Record it after endRenderPass(): the
+     * image is transitioned PresentSrc -> TransferSrcOptimal -> PresentSrc
+     * inside the frame, so the presentation engine never sees it in an
+     * intermediate layout. GraphicsManager::sync() then makes the bytes
+     * readable with StorageBuffer::read().
+     */
+    void captureColor(ptr<Buffer> dst);
 
     template <typename T>
     void pushConstants(T data, ptr<Shader> shader, Shader::Type stage = Shader::Vertex) {

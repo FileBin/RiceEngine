@@ -219,6 +219,10 @@ void GraphicsManager_API_data::init_swapchain() {
             .set_desired_present_mode(
                 (VkPresentModeKHR)vk::PresentModeKHR::eImmediate) // use v-sync present
                                                                   // mode
+            // Copying a frame back to host memory (CommandBuffer::captureColor,
+            // the tests' pixel readback) needs the swapchain image as a transfer
+            // source; without it vkCmdCopyImageToBuffer is invalid.
+            .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
             .set_desired_extent((uint32_t)w, (uint32_t)h)
             .set_old_swapchain((VkSwapchainKHR)old_swapchain)
             .build()
@@ -296,12 +300,15 @@ void GraphicsManager_API_data::init_descriptor_pool() {
     // allocate their own sets too, so the pool has to be much larger than the
     // swapchain itself - sizing it as "n descriptors" ran it dry immediately.
     // Two descriptor types: uniform buffers (ModelData / material / light) and
-    // combined image samplers (the shadow map).
-    std::array<vk::DescriptorPoolSize, 2> poolSizes{};
+    // combined image samplers (the shadow map). Compute adds storage buffers
+    // (the GPU mesher's field and page buffers, §6.2-6.3).
+    std::array<vk::DescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = vk::DescriptorType::eUniformBuffer;
     poolSizes[0].descriptorCount = 0x10000;
     poolSizes[1].type = vk::DescriptorType::eCombinedImageSampler;
     poolSizes[1].descriptorCount = 0x1000;
+    poolSizes[2].type = vk::DescriptorType::eStorageBuffer;
+    poolSizes[2].descriptorCount = 0x1000;
 
     vk::DescriptorPoolCreateInfo poolInfo{};
     poolInfo.poolSizeCount = poolSizes.size();

@@ -5,6 +5,7 @@ file(MAKE_DIRECTORY "${SHADER_OUT}")
 
 file(GLOB_RECURSE VERT_SHADER_FILES "*.vert")
 file(GLOB_RECURSE FRAG_SHADER_FILES "*.frag")
+file(GLOB_RECURSE COMP_SHADER_FILES "*.comp")
 
 set(TEST_SHADERS_TARGET TestShaders)
 set(TEST_SHADER_SPV "")
@@ -35,6 +36,24 @@ foreach(FILE ${FRAG_SHADER_FILES})
         VERBATIM)
     add_custom_target(${FILE_WE}_frag_spv DEPENDS ${OUT})
     add_dependencies(${TEST_SHADERS_TARGET} ${FILE_WE}_frag_spv)
+    list(APPEND TEST_SHADER_SPV ${OUT})
+endforeach()
+
+# Compute shaders (the M3 engine test; the GPU mesher's mesh.comp lands here in
+# M4). glslc accepts .comp directly, so no stage flag is needed, but it is
+# passed anyway so a misnamed file fails loudly instead of silently compiling as
+# compute.
+foreach(FILE ${COMP_SHADER_FILES})
+    get_filename_component(FILE_WE ${FILE} NAME_WE)
+    set(OUT "${SHADER_OUT}/${FILE_WE}.comp.spv")
+    add_custom_command(
+        OUTPUT ${OUT}
+        COMMAND ${GLSLC} ${FILE} -o ${OUT} -fshader-stage=comp
+        DEPENDS ${FILE}
+        COMMENT "COMP COMPILATION ${FILE}"
+        VERBATIM)
+    add_custom_target(${FILE_WE}_comp_spv DEPENDS ${OUT})
+    add_dependencies(${TEST_SHADERS_TARGET} ${FILE_WE}_comp_spv)
     list(APPEND TEST_SHADER_SPV ${OUT})
 endforeach()
 

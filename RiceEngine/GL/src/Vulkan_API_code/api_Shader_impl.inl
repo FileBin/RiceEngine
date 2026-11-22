@@ -307,6 +307,35 @@ void Shader_API_Data::buildDepthOnlyPipeline(GraphicsManager_API_data &api_data,
     pipeline = newPipeline;
 }
 
+void Shader_API_Data::buildComputePipeline(GraphicsManager_API_data &api_data) {
+    using namespace vk;
+
+    if (!computeShader)
+        THROW_EXCEPTION("Cannot build a compute pipeline without a compute shader!");
+
+    // No push constants: a compute pass parameterises its work through the
+    // descriptor set (the mesher reads its cell list from an SSBO, §6.4).
+    PipelineLayoutCreateInfo plInfo{};
+    plInfo.setLayoutCount = 1;
+    plInfo.pSetLayouts = &descriptorSetLayout;
+    layout = api_data.device.createPipelineLayout(plInfo);
+
+    PipelineShaderStageCreateInfo stage = VulkanHelper::pipeline_shader_stage_create_info(
+        ShaderStageFlagBits::eCompute, computeShader);
+
+    ComputePipelineCreateInfo info{};
+    info.stage = stage;
+    info.layout = layout;
+    info.basePipelineHandle = nullptr;
+    info.basePipelineIndex = -1;
+
+    vk::Pipeline newPipeline;
+    auto res =
+        api_data.device.createComputePipelines(VK_NULL_HANDLE, 1, &info, nullptr, &newPipeline);
+    THROW_VK_EX_IF_BAD(res);
+    pipeline = newPipeline;
+}
+
 void Shader_API_Data::cleanupPipeline(GraphicsManager_API_data &api_data) {
     if (pipeline)
         api_data.device.destroy(pipeline);
@@ -321,6 +350,8 @@ void Shader_API_Data::cleanup(GraphicsManager_API_data &api_data) {
         api_data.device.destroy(fragmentShader);
     if (geometryShader)
         api_data.device.destroy(geometryShader);
+    if (computeShader)
+        api_data.device.destroy(computeShader);
 
     if (descriptorSetLayout)
         api_data.device.destroy(descriptorSetLayout);

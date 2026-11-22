@@ -20,26 +20,37 @@ Buffer_API_Data::Buffer_API_Data(GraphicsManager_API_data &api_data) : api_data(
 
 Buffer_API_Data &Buffer_API_Data::allocate(size_t size, BufferUsage usage) {
     using namespace vk;
+    vk::BufferUsageFlags usageFlags;
+    switch (usage) {
+    case BufferUsage::Index:
+        usageFlags = BufferUsageFlagBits::eIndexBuffer;
+        break;
+    case BufferUsage::Vertex:
+        usageFlags = BufferUsageFlagBits::eVertexBuffer;
+        break;
+    case BufferUsage::Uniform:
+        usageFlags = BufferUsageFlagBits::eUniformBuffer;
+        break;
+    case BufferUsage::Storage:
+        usageFlags = BufferUsageFlagBits::eStorageBuffer;
+        break;
+    }
+
+    return allocate(size, usageFlags, MemoryPropertyFlagBits::eHostVisible);
+}
+
+Buffer_API_Data &Buffer_API_Data::allocate(size_t size, vk::BufferUsageFlags usageFlags,
+                                           vk::MemoryPropertyFlags properties) {
+    using namespace vk;
     if (!allocated) {
         buffer_size = size;
 
-        vk::BufferUsageFlags usageFlags;
-        switch (usage) {
-        case BufferUsage::Index:
-            usageFlags = BufferUsageFlagBits::eIndexBuffer;
-            break;
-        case BufferUsage::Vertex:
-            usageFlags = BufferUsageFlagBits::eVertexBuffer;
-            break;
-        case BufferUsage::Uniform:
-            usageFlags = BufferUsageFlagBits::eUniformBuffer;
-            break;
-        }
+        // Every buffer this engine allocates is written from the host at least
+        // once (initial geometry, a uniform block, a compute input).
         usageFlags |= BufferUsageFlagBits::eTransferDst;
 
         uint memory_type = 0;
-        api_data.createBuffer(size, usageFlags, vk::MemoryPropertyFlagBits::eHostVisible,
-                              buffer, memory, &memory_type);
+        api_data.createBuffer(size, usageFlags, properties, buffer, memory, &memory_type);
         host_coherent =
             !!(api_data.memoryTypeProperties(memory_type) & vk::MemoryPropertyFlagBits::eHostCoherent);
     }

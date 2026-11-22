@@ -37,8 +37,15 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
 
     void sync();
 
-    void executeCmd(ptr<CommandBuffer> cmd);
-    void executeCmds(vec<ptr<CommandBuffer>> cmds);
+    /* Pixel size of the swapchain images: the size a CommandBuffer::captureColor()
+     * destination buffer has to hold (width * height * 4 bytes). */
+    Vector2i getFrameSize();
+
+    /* Submits `cmd` (and presents). Returns false when no frame was submitted
+     * because the swapchain was out of date - a test that has to know whether a
+     * frame really happened cannot tell otherwise. */
+    bool executeCmd(ptr<CommandBuffer> cmd);
+    bool executeCmds(vec<ptr<CommandBuffer>> cmds);
     void cleanup() override;
 
   public:

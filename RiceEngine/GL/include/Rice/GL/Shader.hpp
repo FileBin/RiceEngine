@@ -36,6 +36,11 @@ class Shader : public GraphicsComponentBase {
 public:
 	enum Type {
 		Vertex, Geometry, Fragment,
+		/* A compute stage: no render pass, no vertex input, no viewport, and
+		 * dispatched with CommandBuffer::dispatch() instead of drawn. Built by
+		 * buildComputePipeline(), never by build(), and not rebuilt on resize
+		 * (it does not depend on the swapchain extent). */
+		Compute,
 	};
 	Shader(ptr<GraphicsManager> g_mgr);
 	~Shader() override;
@@ -93,6 +98,32 @@ public:
 		vertexStride = sizeof(VertT);
 		vertexLayout = VertT::vertexLayout;
 	}
+
+	/*
+	 * Storage-buffer binding: an SSBO the shader reads or writes, at set 0,
+	 * `binding`. Declared before build()/buildComputePipeline(), together with
+	 * the uniform bindings of the same set; CommandBuffer::bindStorageBuffer()
+	 * fills it before the draw/dispatch.
+	 *
+	 * `stage` is the stage that accesses the buffer. A compute shader uses
+	 * Shader::Compute; a vertex or fragment stage that writes the same SSBO is
+	 * not possible on every device (fragmentStoresAndAtomics is optional), so
+	 * compute is the portable place to write one.
+	 */
+	void addStorageBuffer(uint binding, Type shaderStage, uint count = 1);
+
+	/**
+	 * Builds a compute pipeline instead of a graphics one: descriptor set
+	 * layout + pipeline layout, vkCreateComputePipelines, no render pass, no
+	 * vertex input, no viewport. The shader must have been loaded with
+	 * Shader::Compute; dispatch it with
+	 * CommandBuffer::dispatch(shader, groupsX, groupsY, groupsZ).
+	 *
+	 * Call addStorageBuffer() first for every SSBO the shader declares. The
+	 * pipeline does not depend on the swapchain, so it is not rebuilt on
+	 * resize, exactly like buildShadowPipeline().
+	 */
+	void buildComputePipeline();
 
 	void build();
 
@@ -169,6 +200,8 @@ private:
 	bool uses_depth_buffer = false;
 	// buildShadowPipeline(): depth-only pass pipeline, skip resize rebuilds.
 	bool shadow_pipeline = false;
+	// buildComputePipeline(): compute pipeline, also independent of the extent.
+	bool compute_pipeline = false;
 	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
 	bool blend_enabled = false;
 	BlendMode blend_mode = BlendMode::Alpha;

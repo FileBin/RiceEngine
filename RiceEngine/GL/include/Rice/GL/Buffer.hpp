@@ -11,7 +11,26 @@ NSP_GL_BEGIN
 
 class Buffer;
 
-enum class BufferUsage { Vertex, Index, Uniform };
+enum class BufferUsage { Vertex, Index, Uniform, Storage };
+
+/*
+ * Extra usages a StorageBuffer asks for on top of eStorageBuffer.
+ *
+ * A compute-written buffer is usually more than an SSBO: the GPU mesher writes
+ * vertex and index data that the same frame then draws, and it writes the
+ * VkDrawIndexedIndirectCommand records it is drawn with
+ * (docs/tetrahedral-mesh.md §6.3), so a single buffer has to carry several
+ * fixed-function roles at once. `VertexIndex` and `VertexIndexIndirect` are
+ * those combinations; plain Storage is the SSBO a compute shader only reads.
+ */
+enum class StorageUsage {
+    Storage = 0,
+    Vertex = 1,
+    Index = 2,
+    Indirect = 4,
+    VertexIndex = 3,
+    VertexIndexIndirect = 7,
+};
 
 enum class IndexBufferType { UInt16, UInt32 };
 

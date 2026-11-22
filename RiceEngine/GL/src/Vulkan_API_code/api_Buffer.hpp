@@ -32,6 +32,8 @@ struct Buffer_API_Data {
     Buffer_API_Data(GraphicsManager_API_data &api_data);
 
     Buffer_API_Data &allocate(size_t size, BufferUsage usage);
+    Buffer_API_Data &allocate(size_t size, vk::BufferUsageFlags usageFlags,
+                              vk::MemoryPropertyFlags properties);
     Buffer_API_Data &free();
 
     Buffer_API_Data &setData(void *pSrc, size_t nData, size_t offset);

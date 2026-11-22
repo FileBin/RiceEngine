@@ -17,7 +17,7 @@
 NSP_GL_BEGIN
 
 struct Shader_API_Data {
-    vk::ShaderModule vertexShader, fragmentShader, geometryShader;
+    vk::ShaderModule vertexShader, fragmentShader, geometryShader, computeShader;
     vk::Pipeline pipeline;
     vk::PipelineLayout layout;
     vk::DescriptorSetLayout descriptorSetLayout;
@@ -31,6 +31,9 @@ struct Shader_API_Data {
                        bool invertBlend = false);
     void buildDepthOnlyPipeline(GraphicsManager_API_data &api_data, vk::RenderPass pass,
                                 Vector2i extent, VertexLayout &vertexLayout, uint vertexStride);
+    /* Compute pipeline: pipeline layout (the set layout only, no push constants,
+     * no render pass, no vertex input, no viewport) + vkCreateComputePipelines. */
+    void buildComputePipeline(GraphicsManager_API_data &api_data);
     void cleanupPipeline(GraphicsManager_API_data &api_data);
     void cleanup(GraphicsManager_API_data &api_data);
 };
