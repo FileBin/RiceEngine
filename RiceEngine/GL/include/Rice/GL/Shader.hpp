@@ -14,6 +14,14 @@ NSP_GL_END
 #include "Rice/Math/Math.hpp"
 
 NSP_GL_BEGIN
+// How the vertex stream is interpreted. Triangles is everything the scene draws; Lines
+// exists for overlay wireframes (a build cursor, a debug gizmo), which the engine could
+// not express before because the topology was hard-coded in the pipeline.
+enum class Topology {
+	Triangles = 0,
+	Lines = 1,
+};
+
 class Shader : public GraphicsComponentBase {
 public:
 	enum Type {
@@ -96,6 +104,22 @@ public:
 	void setBlendEnabled(bool enabled = true) { blend_enabled = enabled; }
 	bool isBlendEnabled() const { return blend_enabled; }
 
+	/*
+	 * Overlay drawing: call both before build().
+	 *
+	 *   setTopology(Topology::Lines)  - the pipeline rasterises LINE_LIST, so an index
+	 *                                   buffer of vertex pairs draws true lines (no
+	 *                                   quads standing in for them, no culling issues);
+	 *   setDepthTestEnabled(false)     - the depth comparison is off and nothing is
+	 *                                   written, so the geometry lands on top of the
+	 *                                   scene it is drawn after. Also disables culling:
+	 *                                   a wireframe has no front face to cull.
+	 */
+	void setTopology(Topology t) { topology = t; }
+	Topology getTopology() const { return topology; }
+	void setDepthTestEnabled(bool enabled = true) { depth_test_enabled = enabled; }
+	bool isDepthTestEnabled() const { return depth_test_enabled; }
+
 	/**
 	 * Builds a depth-only casters pipeline instead of the scene pipeline: the
 	 * shadow map's render pass (single D32_SFLOAT attachment, no colour target),
@@ -127,6 +151,8 @@ private:
 	bool shadow_pipeline = false;
 	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
 	bool blend_enabled = false;
+	Topology topology = Topology::Triangles;
+	bool depth_test_enabled = true;
 	// addLighting(): the descriptor bindings SceneRender has to fill in.
 	bool lighting = false;
 	uint light_binding = 2;

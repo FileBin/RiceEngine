@@ -28,7 +28,8 @@ void Shader::build() {
 
     Vector2i s = {get_api_data().windowExcent.width, get_api_data().windowExcent.height};
     api_data->buildDescriptorSetLayout(get_api_data());
-    api_data->buildPipeline(get_api_data(), s, vertexLayout, vertexStride, blend_enabled);
+    api_data->buildPipeline(get_api_data(), s, vertexLayout, vertexStride, blend_enabled,
+                            topology == Topology::Lines, depth_test_enabled);
     init = true;
 }
 
@@ -160,7 +161,8 @@ void Shader::onResize(Vector2i extent) {
         return;
 
     api_data->cleanupPipeline(get_api_data());
-    api_data->buildPipeline(get_api_data(), extent, vertexLayout, vertexStride, blend_enabled);
+    api_data->buildPipeline(get_api_data(), extent, vertexLayout, vertexStride, blend_enabled,
+                            topology == Topology::Lines, depth_test_enabled);
 }
 
 NSP_GL_END

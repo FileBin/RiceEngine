@@ -84,7 +84,7 @@ void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_dat
 
 void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
                                     VertexLayout &vertexLayout, uint vertexStride,
-                                    bool blendEnable) {
+                                    bool blendEnable, bool lineTopology, bool depthTest) {
     using help = VulkanHelper;
     using namespace vk;
 
@@ -125,8 +125,8 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
 
     // input assembly is the configuration for drawing triangle lists, strips,
     // or individual points. we are just going to draw triangle list
-    pipelineBuilder.vk_inputAssembly =
-        PipelineInputAssemblyStateCreateInfo().setTopology(PrimitiveTopology::eTriangleList);
+    pipelineBuilder.vk_inputAssembly = PipelineInputAssemblyStateCreateInfo().setTopology(
+        lineTopology ? PrimitiveTopology::eLineList : PrimitiveTopology::eTriangleList);
 
     // build viewport and scissor from the swapchain extents
     pipelineBuilder.vk_viewport.x = 0.0f;
@@ -140,9 +140,13 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
     pipelineBuilder.vk_scissor.extent = vk::Extent2D(windowExcent.x, windowExcent.y);
 
     // configure the rasterizer to draw filled triangles
+    // Overlay wireframes have no front face and no depth relationship with the scene,
+    // so they are drawn with culling off.
     pipelineBuilder.vk_rasterizer = PipelineRasterizationStateCreateInfo()
                                         .setLineWidth(1)
-                                        .setCullMode(CullModeFlagBits::eBack)
+                                        .setCullMode((lineTopology || !depthTest)
+                                                         ? CullModeFlagBits::eNone
+                                                         : CullFlagBits::eBack)
                                         .setFrontFace(FrontFace::eClockwise)
                                         .setPolygonMode(PolygonMode::eFill)
                                         .setDepthClampEnable(false)
@@ -177,8 +181,8 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
     // front of it) but depth writes are off, so a transparent surface never
     // occludes anything drawn after it.
     pipelineBuilder.vk_depthStencil = PipelineDepthStencilStateCreateInfo()
-                                          .setDepthTestEnable(true)
-                                          .setDepthWriteEnable(!blendEnable)
+                                          .setDepthTestEnable(depthTest)
+                                          .setDepthWriteEnable(depthTest && !blendEnable)
                                           .setDepthCompareOp(CompareOp::eLess);
 
     // use the triangle layout we created
