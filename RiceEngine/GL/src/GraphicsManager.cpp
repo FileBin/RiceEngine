@@ -41,6 +41,12 @@ void GraphicsManager::update() {
 
 void GraphicsManager::sync() { api_data->sync(); }
 
+bool GraphicsManager::pollSync() {
+    if (!api_data)
+        return true;
+    return api_data->frameComplete();
+}
+
 Vector2i GraphicsManager::getFrameSize() {
     if (!api_data)
         return {0, 0};

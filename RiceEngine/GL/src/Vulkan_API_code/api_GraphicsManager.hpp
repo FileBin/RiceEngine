@@ -97,6 +97,9 @@ struct GraphicsManager_API_data {
 
     GraphicsManager_API_data(ptr<GraphicsManager> g_mgr);
     void sync();
+    // Non-blocking form of sync(): reports whether the fence the last submitted
+    // frame was signalled on is signalled, without waiting for it.
+    bool frameComplete();
 
     void createImage(uint w, uint h, vk::Format format, vk::ImageTiling tiling,
                      vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties,

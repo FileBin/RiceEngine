@@ -675,6 +675,14 @@ void GraphicsManager_API_data::sync() {
     THROW_VK_EX_IF_BAD(res);
 }
 
+bool GraphicsManager_API_data::frameComplete() {
+    // vkGetFenceStatus, not vkWaitForFences: the caller polls once per frame and
+    // keeps drawing when the GPU is still busy (see GraphicsManager::pollSync).
+    const auto res = device.getFenceStatus(renderFence);
+    THROW_VK_EX_IF_BAD(res);
+    return res == vk::Result::eSuccess;
+}
+
 bool GraphicsManager_API_data::acquireNextImage() {
     if (resizing)
         return false;

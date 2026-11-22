@@ -37,6 +37,14 @@ class GraphicsManager : public enable_ptr<GraphicsManager>, public ICleanable {
 
     void sync();
 
+    /* Non-blocking form of sync(): true when the fence the last submitted frame
+     * was signalled on is already signalled, false while the GPU is still
+     * working on it. Never waits, so a consumer that only needs to know whether
+     * a submission has completed (a page swap, a readback) can defer instead of
+     * stalling the frame. Monotonic: a signalled fence proves every earlier
+     * submission has completed too. */
+    bool pollSync();
+
     /* Pixel size of the swapchain images: the size a CommandBuffer::captureColor()
      * destination buffer has to hold (width * height * 4 bytes). */
     Vector2i getFrameSize();
