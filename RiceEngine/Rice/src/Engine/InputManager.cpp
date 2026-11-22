@@ -134,8 +134,15 @@ void InputManager::reset() {
 
 // void InputManager::eventCursor(Vector2 newPos) { mousePos = newPos; }
 
+int InputManager::consumeWheelDelta() {
+    const int delta = wheelAccum;
+    wheelAccum = 0;
+    return delta;
+}
+
 void InputManager::eventMouseWheel(short value) {
     mouseScrollDelta = value - mouseWheel;
+    wheelAccum += mouseScrollDelta;
     mouseWheel = value;
 }
 
