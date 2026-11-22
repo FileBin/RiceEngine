@@ -148,6 +148,16 @@ public:
 	BlendMode getBlendMode() const { return blend_mode; }
 
 	/*
+	 * Back-face culling is ON for every scene pipeline (the winding of the
+	 * geometry decides what is visible). A surface that has no guaranteed winding
+	 * and is meant to be seen from both sides - the GPU mesher's water pass, whose
+	 * triangles are oriented against the field gradient with no reversal - turns it
+	 * off here. Call before build().
+	 */
+	void setCullEnabled(bool enabled = true) { cull_enabled = enabled; }
+	bool isCullEnabled() const { return cull_enabled; }
+
+	/*
 	 * Overlay drawing: call both before build().
 	 *
 	 *   setTopology(Topology::Lines)  - the pipeline rasterises LINE_LIST, so an index
@@ -204,6 +214,8 @@ private:
 	bool compute_pipeline = false;
 	// setBlendEnabled(): alpha blended scene pipeline with depth writes off.
 	bool blend_enabled = false;
+	// setCullEnabled(): back-face culling for the scene pipeline.
+	bool cull_enabled = true;
 	BlendMode blend_mode = BlendMode::Alpha;
 	Topology topology = Topology::Triangles;
 	bool wireframe = false;

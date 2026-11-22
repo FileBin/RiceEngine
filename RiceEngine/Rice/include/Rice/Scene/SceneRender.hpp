@@ -20,6 +20,8 @@ NSP_COMPONENTS_END
 #include "Rice/Engine/ClientEngine.hpp"
 #include "Rice/GL/RenderingMesh.hpp"
 
+#include <functional>
+
 NSP_GL_BEGIN
 class RenderingMesh;
 NSP_GL_END
@@ -83,6 +85,12 @@ class SceneRender : public enable_ptr<SceneRender> {
     ptr<Graphics::UniformBuffer> light_buffer;
     bool warned_missing_light = false;
 
+    /* Game-owned draws (§M6 of docs/tetrahedral-mesh.md in the game repo): the
+     * GPU mesher's vertex/index buffers and indirect records are not a
+     * RenderingMesh, so the scene records them here, inside its own render pass
+     * and with its own material/lighting bindings. The state is at the end of the
+     * class, after GameDraw is defined. */
+
     bool need_rebuild = true;
 
     void updateCmd();
@@ -133,6 +141,67 @@ class SceneRender : public enable_ptr<SceneRender> {
 
     ptr<ClientEngine> getEngine();
     ptr<ClientScene> getScene();
+
+    /* ---------------------------------------------------------------------
+     * Game-owned geometry (docs/tetrahedral-mesh.md §6.1's injection point,
+     * §6.3's buffers). A draw whose vertex/index/indirect buffers the game owns
+     * - the GPU mesher's pages - is not a `Graphics::RenderingMesh`: there is no
+     * CPU-side Mesh to upload and no per-mesh index count to bake. Instead the
+     * game hands the scene:
+     *
+     *   material  the pipeline (its shader) and the per-material block at
+     *             binding 1 - the same materials the CPU chunks used;
+     *   mesh_data the per-draw ModelData at binding 0 (the camera matrices, the
+     *             same block a RenderingMesh keeps);
+     *   record    a callback that binds the game's buffers and issues the
+     *             draw(s), e.g. `cmd->drawIndexedIndirect(page.draws, range, 1)`.
+     *
+     * The scene records them in its frame: inside the main render pass, after
+     * the opaque scene queues (`transparent == false`) or after the blended ones
+     * (`transparent == true`), with the scene light block and shadow map bound
+     * when the material's shader declares them. `cast_shadow` also records the
+     * draw into the depth-only casters pass with the engine's shadow pipeline.
+     *
+     * setGameDraws() forces one frame re-record; call it only when a buffer
+     * handle changed, not per frame (the recorded draws read the buffers live,
+     * so new contents do not need a re-record).
+     * ------------------------------------------------------------------- */
+    struct GameDraw {
+        ptr<Graphics::Material> material;
+        ptr<Graphics::UniformBuffer> mesh_data;
+        std::function<void(ptr<Graphics::CommandBuffer>)> record;
+        bool transparent = false;
+        bool cast_shadow = false;
+    };
+    void setGameDraws(vec<GameDraw> draws);
+
+    /* Compute work that has to run before the frame's render passes: a dispatch
+     * cannot be recorded inside one, and the GPU mesher has to fill the vertex,
+     * index and indirect buffers before the draws that read them. Called at the
+     * top of the frame's command buffer, before the shadow pass, and only on the
+     * frames that are re-recorded - call markFrameDirty() on a frame that has
+     * new cells to dispatch. Record dispatch()/memoryBarrier() here. */
+    void setPreFrameRecorder(std::function<void(ptr<Graphics::CommandBuffer>)> record);
+
+    /* Copies the next recorded frame's colour image into `dst` (a StorageBuffer
+     * of at least width * height * 4 bytes) after the main pass: the pixel
+     * coverage check of the headless self-test. The bytes are readable after the
+     * following GraphicsManager::sync(). One-shot: cleared once recorded. */
+    void captureFrame(ptr<Graphics::Buffer> dst);
+
+    /* Re-records the next frame (pre-frame dispatches, game draws, capture).
+     * Cheap to over-call - it only sets the flag updateCmd() already consumes. */
+    void markFrameDirty() { need_rebuild = true; }
+
+  private:
+    // Game-owned draw state; declared after GameDraw for the vector's element type.
+    vec<GameDraw> game_draws;
+    ptr<Graphics::CommandBuffer> game_opaque_cmd, game_transparent_cmd;
+    bool game_has_opaque = false, game_has_transparent = false;
+    std::function<void(ptr<Graphics::CommandBuffer>)> pre_frame;
+    ptr<Graphics::Buffer> capture_dst;
+    // Records the two game sub-passes from game_draws and the lighting resources.
+    void updateGameCmd();
 };
 
 NSP_ENGINE_END

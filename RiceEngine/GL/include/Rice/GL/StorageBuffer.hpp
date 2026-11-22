@@ -46,8 +46,16 @@ class StorageBuffer : public Buffer {
     void unmap();
 
     /* Host -> GPU: memcpy `bytes` at `offset` into the mapping (+ flush when
-     * the memory is not host coherent). Truncated at the buffer end. */
-    void write(const void *src, size_t bytes, size_t offset = 0);
+     * the memory is not host coherent). Truncated at the buffer end.
+     *
+     * `flush == false` skips the flush, for a caller that writes many small pieces
+     * of one buffer in a frame (the renderer's per-brick field upload, §6.5) and
+     * calls flushAll() once instead of paying a whole-buffer flush per piece. */
+    void write(const void *src, size_t bytes, size_t offset = 0, bool flush = true);
+
+    /* Makes every write() of this buffer visible to the GPU (no-op when the
+     * memory is host coherent). */
+    void flushAll();
 
     /* GPU -> host: memcpy `bytes` at `offset` out of the mapping. Only valid
      * after GraphicsManager::sync() has waited for the frame that wrote it. */

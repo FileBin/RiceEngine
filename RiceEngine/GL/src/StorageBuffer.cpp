@@ -62,11 +62,20 @@ void StorageBuffer::unmap() {
     if (mapped == nullptr)
         return;
 
+    // The manager may already have torn the device down (its destroyEvent calls
+    // cleanup() on every live buffer, and a buffer that outlives the device - a
+    // script's readback target, say - is destroyed again afterwards). The mapping
+    // died with the device, so there is nothing to unmap and no device to call.
+    if (!api_data || !api_data->api_data.device) {
+        mapped = nullptr;
+        return;
+    }
+
     get_api_data().device.unmapMemory(api_data->memory);
     mapped = nullptr;
 }
 
-void StorageBuffer::write(const void *src, size_t bytes, size_t offset) {
+void StorageBuffer::write(const void *src, size_t bytes, size_t offset, bool flush) {
     if (src == nullptr || bytes == 0)
         return;
 
@@ -85,13 +94,28 @@ void StorageBuffer::write(const void *src, size_t bytes, size_t offset) {
     // eHostVisible does not imply eHostCoherent: without the flush the write is
     // not guaranteed to be visible to the GPU. Coherent memory (what desktop
     // drivers hand out) skips it, like UniformBuffer::updateData does.
-    if (!api_data->host_coherent) {
+    if (flush && !api_data->host_coherent) {
         vk::MappedMemoryRange range;
         range.memory = api_data->memory;
         range.offset = 0;
         range.size = VK_WHOLE_SIZE;
         get_api_data().device.flushMappedMemoryRanges(1, &range);
     }
+}
+
+void StorageBuffer::flushAll() {
+    if (!api_data || api_data->host_coherent)
+        return;
+
+    // The mapping has to exist for a flush to mean anything.
+    if (map() == nullptr)
+        return;
+
+    vk::MappedMemoryRange range;
+    range.memory = api_data->memory;
+    range.offset = 0;
+    range.size = VK_WHOLE_SIZE;
+    get_api_data().device.flushMappedMemoryRanges(1, &range);
 }
 
 void StorageBuffer::read(void *dst, size_t bytes, size_t offset) {

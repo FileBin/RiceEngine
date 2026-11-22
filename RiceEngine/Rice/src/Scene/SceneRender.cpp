@@ -100,8 +100,87 @@ void SceneRender::unregisterMesh(ptr<Graphics::RenderingMesh> mesh) {
     need_rebuild = true;
 }
 
+void SceneRender::setGameDraws(vec<GameDraw> draws) {
+    game_draws = std::move(draws);
+
+    // Secondary command buffers, because the frame's main pass is begun with
+    // VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS: draws cannot be recorded
+    // inline into it, only executed sub-passes can.
+    if (!game_opaque_cmd) {
+        auto mgr = getGraphicsManager();
+        game_opaque_cmd = new_ptr<Graphics::CommandBuffer>(mgr, true);
+        game_transparent_cmd = new_ptr<Graphics::CommandBuffer>(mgr, true);
+    }
+    need_rebuild = true;
+}
+
+void SceneRender::setPreFrameRecorder(std::function<void(ptr<Graphics::CommandBuffer>)> record) {
+    pre_frame = std::move(record);
+    need_rebuild = true;
+}
+
+void SceneRender::captureFrame(ptr<Graphics::Buffer> dst) {
+    capture_dst = std::move(dst);
+    need_rebuild = true;
+}
+
+/*
+ * One secondary command buffer per group (opaque, blended). Each draw binds the
+ * pipeline, the per-draw ModelData (binding 0), the per-material block (binding
+ * 1) and - when the shader declared them - the scene light block and shadow map,
+ * then hands the rest to the game's recorder: vertex buffer, index buffer and
+ * `drawIndexedIndirect`. This is the same binding order RenderingMesh::
+ * addCommands produces for the CPU chunks, so the shaders cannot tell the two
+ * apart (docs/tetrahedral-mesh.md §6.6: "the same material pipeline").
+ */
+void SceneRender::updateGameCmd() {
+    if (!game_opaque_cmd) {
+        auto mgr = getGraphicsManager();
+        game_opaque_cmd = new_ptr<Graphics::CommandBuffer>(mgr, true);
+        game_transparent_cmd = new_ptr<Graphics::CommandBuffer>(mgr, true);
+    }
+
+    for (int pass = 0; pass < 2; ++pass) {
+        const bool transparent = pass == 1;
+        auto cmd = transparent ? game_transparent_cmd : game_opaque_cmd;
+        cmd->clear();
+
+        bool any = false;
+        for (auto &draw : game_draws) {
+            if (draw.transparent != transparent || !draw.material || !draw.record)
+                continue;
+            auto shader = draw.material->getShader();
+            if (!shader)
+                continue;
+
+            cmd->setActiveShader(shader);
+            if (draw.mesh_data)
+                cmd->bindUniformBuffer(draw.mesh_data, Graphics::LightingBindings::kMeshData);
+            if (auto ub = draw.material->getUniformBuffer())
+                cmd->bindUniformBuffer(ub, 1);
+            if (shader->usesLighting() && light_buffer && shadow_map) {
+                cmd->bindUniformBuffer(light_buffer, shader->getLightBinding());
+                cmd->bindShadowMap(shadow_map, shader->getShadowBinding());
+            }
+            draw.record(cmd);
+            any = true;
+        }
+
+        cmd->buildAll();
+        (transparent ? game_has_transparent : game_has_opaque) = any;
+    }
+}
+
 void SceneRender::updateCmd() {
     main_cmd->clear();
+
+    // A compute dispatch cannot be recorded inside a render pass, and the game's
+    // mesher has to fill the buffers the draws below read. It goes first, before
+    // the shadow pass (which also draws game geometry), and is only recorded on
+    // frames SceneRender rebuilds - the game calls markFrameDirty() when it has
+    // new cells (docs/tetrahedral-mesh.md §6.4).
+    if (pre_frame)
+        pre_frame(main_cmd);
 
     // The depth-only casters pass is recorded BEFORE the window's render pass
     // and outside it: it has its own render pass (a single D32_SFLOAT
@@ -133,13 +212,39 @@ void SceneRender::updateCmd() {
                      });
 
     for (ShaderQueue *sq : queues) {
+        if (sq->isTransparent())
+            continue;
         sq->light_buffer = light_buffer;
         sq->shadow_map = shadow_map;
         sq->updateCmd();
         main_cmd->executeCommandBuffer(sq->cmd);
     }
 
+    // Game-owned opaque draws (the GPU meshed world): after the opaque scene
+    // queues, so the depth buffer is complete before the blended pass below.
+    updateGameCmd();
+    if (game_has_opaque)
+        main_cmd->executeCommandBuffer(game_opaque_cmd);
+
+    for (ShaderQueue *sq : queues) {
+        if (!sq->isTransparent())
+            continue;
+        sq->light_buffer = light_buffer;
+        sq->shadow_map = shadow_map;
+        sq->updateCmd();
+        main_cmd->executeCommandBuffer(sq->cmd);
+    }
+
+    // Blended game draws (the water pass) go last, after every opaque surface.
+    if (game_has_transparent)
+        main_cmd->executeCommandBuffer(game_transparent_cmd);
+
     main_cmd->endRenderPass();
+
+    if (capture_dst) {
+        main_cmd->captureColor(capture_dst);
+        capture_dst.reset();
+    }
 
     need_rebuild = true;
 }
@@ -170,6 +275,24 @@ void SceneRender::recordShadowPass() {
                 ++casters;
             }
         }
+
+    // Game-owned casters: the GPU meshed world is not a RenderingMesh, so it is
+    // recorded here with the same depth-only pipeline (the shadow.vert stage reads
+    // ModelData at binding 0 and the scene LightData at binding 2, and the mesh
+    // vertices carry the same 32-byte layout), and counted so the headless
+    // self-test's "the sun renders a shadow map with casters" stays meaningful.
+    for (auto &draw : game_draws) {
+        if (!draw.cast_shadow || draw.transparent || !draw.record || !draw.material)
+            continue;
+        auto shader = draw.material->getShader();
+        if (!shader || !shader->usesLighting())
+            continue;
+        if (draw.mesh_data)
+            main_cmd->bindUniformBuffer(draw.mesh_data, Graphics::LightingBindings::kMeshData);
+        main_cmd->bindUniformBuffer(light_buffer, Graphics::LightingBindings::kLightData);
+        draw.record(main_cmd);
+        ++casters;
+    }
 
     main_cmd->endShadowPass();
     shadow_map->setCasterCount(casters);
@@ -365,6 +488,14 @@ void SceneRender::cleanup() {
     shadow_shader.reset();
     shadow_map.reset();
     light_buffer.reset();
+    // Game-owned state: the capture target and the draw records are buffers the
+    // game owns, and cleanup() runs while the device is still alive
+    // (ClientScene::close), which is the last chance to release them.
+    game_draws.clear();
+    game_opaque_cmd.reset();
+    game_transparent_cmd.reset();
+    pre_frame = nullptr;
+    capture_dst.reset();
 }
 
 ptr<Graphics::Shader> SceneRender::getShader(String name) {

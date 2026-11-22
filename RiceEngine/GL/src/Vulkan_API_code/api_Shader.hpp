@@ -28,7 +28,7 @@ struct Shader_API_Data {
     void buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
                        VertexLayout &vertexLayout, uint vertexStride, bool blendEnable = false,
                        bool lineTopology = false, bool depthTest = true, bool wireframe = false,
-                       bool invertBlend = false);
+                       bool invertBlend = false, bool cullEnable = true);
     void buildDepthOnlyPipeline(GraphicsManager_API_data &api_data, vk::RenderPass pass,
                                 Vector2i extent, VertexLayout &vertexLayout, uint vertexStride);
     /* Compute pipeline: pipeline layout (the set layout only, no push constants,

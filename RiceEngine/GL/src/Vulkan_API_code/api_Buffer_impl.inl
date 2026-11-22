@@ -67,7 +67,10 @@ Buffer_API_Data &Buffer_API_Data::setData(void *pData, size_t nData, size_t offs
 }
 
 Buffer_API_Data &Buffer_API_Data::free() {
-    if (allocated) {
+    // A buffer may outlive the device: the manager's cleanup drops the handle
+    // before the scene objects that still hold their buffers are destroyed, and
+    // destroying a buffer on a destroyed device would call a null dispatcher.
+    if (allocated && api_data.device) {
         // A staging copy for this buffer may still be queued (uploads are
         // submitted at the next draw); recording it against a destroyed handle
         // is invalid, so forget those copies first. The manager is already gone

@@ -85,7 +85,7 @@ void Shader_API_Data::buildDescriptorSetLayout(GraphicsManager_API_data &api_dat
 void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i windowExcent,
                                     VertexLayout &vertexLayout, uint vertexStride,
                                     bool blendEnable, bool lineTopology, bool depthTest,
-                                    bool wireframe, bool invertBlend) {
+                                    bool wireframe, bool invertBlend, bool cullEnable) {
     using help = VulkanHelper;
     using namespace vk;
 
@@ -142,10 +142,13 @@ void Shader_API_Data::buildPipeline(GraphicsManager_API_data &api_data, Vector2i
 
     // configure the rasterizer to draw filled triangles
     // Overlay wireframes have no front face and no depth relationship with the scene,
-    // so they are drawn with culling off.
+    // so they are drawn with culling off. Shader::setCullEnabled(false) does the same
+    // for a surface that is drawn from both sides (the game's water pass: its geometry
+    // has no guaranteed winding).
     pipelineBuilder.vk_rasterizer = PipelineRasterizationStateCreateInfo()
                                         .setLineWidth(1)
-                                        .setCullMode((lineTopology || wireframe || !depthTest)
+                                        .setCullMode((lineTopology || wireframe || !depthTest ||
+                                                      !cullEnable)
                                                          ? CullModeFlagBits::eNone
                                                          : CullModeFlagBits::eBack)
                                         .setFrontFace(FrontFace::eClockwise)
