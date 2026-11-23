@@ -550,6 +550,35 @@ inline void CommandBuffer_API_data::doCommand(ptr<CommandBuffer::Command> comman
                                0, nullptr, 0, nullptr, 1, &back);
     } break;
 
+    case CommandBuffer::Command::CopyBuffer: {
+        const auto &copy = *(CommandBuffer::BufferCopy *)command->arg_chain->getData();
+        auto src = copy.src;
+        auto dst = copy.dst;
+        auto src_offset = copy.srcOffset;
+        auto dst_offset = copy.dstOffset;
+        auto size = copy.size;
+
+        if (!src || !dst || size == 0)
+            break;
+
+        // Clamp to both buffers: a region that no longer fits (a page was
+        // reserved smaller than the one it is copied from) is skipped rather
+        // than recorded as an out-of-bounds copy.
+        const vk::DeviceSize src_size = src->api_data->buffer_size;
+        const vk::DeviceSize dst_size = dst->api_data->buffer_size;
+        const vk::DeviceSize src_left = src_size > src_offset ? src_size - src_offset : 0;
+        const vk::DeviceSize dst_left = dst_size > dst_offset ? dst_size - dst_offset : 0;
+        const vk::DeviceSize n = std::min<vk::DeviceSize>(size, std::min(src_left, dst_left));
+        if (n == 0)
+            break;
+
+        vk::BufferCopy region{};
+        region.srcOffset = src_offset;
+        region.dstOffset = dst_offset;
+        region.size = n;
+        cmd[i].copyBuffer(src->api_data->buffer, dst->api_data->buffer, 1, &region);
+    } break;
+
     default:
         THROW_EXCEPTION("Unknown command occured!");
         break;

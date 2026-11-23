@@ -159,6 +159,11 @@ void CommandBuffer::captureColor(ptr<Buffer> dst) {
     commands.push_back(new_ptr<Command>(Command::CaptureColor, dst));
 }
 
+void CommandBuffer::copyBuffer(const BufferCopy &copy) {
+    needRecreate();
+    commands.push_back(new_ptr<Command>(Command::CopyBuffer, copy));
+}
+
 void CommandBuffer::bindUniformBuffer(ptr<UniformBuffer> uniformBuffer, uint binding) {
     needRecreate();
     commands.push_back(new_ptr<Command>(Command::BindUniformBuffer, uniformBuffer, binding));

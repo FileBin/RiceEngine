@@ -101,6 +101,10 @@ class CommandBuffer : public GraphicsComponentBase {
             DrawIndexedRange,
             // Copy the frame's colour image into a host-visible buffer.
             CaptureColor,
+            // GPU-side buffer -> buffer copy (the double-buffered page publish
+            // uses it: a page it can no longer write is brought up to date with
+            // one recorded command instead of a host memcpy of the arena).
+            CopyBuffer,
         } cmd;
 
         struct Arg {
@@ -291,6 +295,31 @@ class CommandBuffer : public GraphicsComponentBase {
      * readable with StorageBuffer::read().
      */
     void captureColor(ptr<Buffer> dst);
+
+    /*
+     * GPU-side copy: one vkCmdCopyBuffer of `size` bytes from `src` to `dst`.
+     * Both buffers are created with eTransferSrc | eTransferDst (see
+     * StorageBuffer), so any two storage/vertex/index buffers pair. The bytes
+     * move on the GPU and the host never maps either buffer, so the cost is a
+     * single command however large the region is. Clamped to both buffers (a
+     * region that no longer fits is skipped rather than recorded out of
+     * bounds).
+     *
+     * It is a Transfer-stage command, so a memoryBarrier() pairs it with the
+     * stage that wrote `src` (ShaderWrite -> TransferWrite/TransferRead) and
+     * with the dispatch that later writes `dst` (TransferWrite -> ShaderWrite).
+     *
+     * One struct rather than five parameters: a page publish records hundreds of
+     * these, and every command argument is its own allocation.
+     */
+    struct BufferCopy {
+        ptr<Buffer> src;
+        ptr<Buffer> dst;
+        std::uint64_t srcOffset = 0;
+        std::uint64_t dstOffset = 0;
+        std::uint64_t size = 0;
+    };
+    void copyBuffer(const BufferCopy &copy);
 
     template <typename T>
     void pushConstants(T data, ptr<Shader> shader, Shader::Type stage = Shader::Vertex) {
